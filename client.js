@@ -4,13 +4,14 @@ import { getDatabase, ref, push, onChildAdded, serverTimestamp } from 'https://w
 
 // ⚠️ استبدل هذه البيانات ببيانات مشروعك من Firebase Console ⚠️
 const firebaseConfig = {
-    apiKey: "AIzaSyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-    authDomain: "your-project-id.firebaseapp.com",
-    databaseURL: "https://your-project-id-default-rtdb.firebaseio.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "123456789000",
-    appId: "1:123456789000:web:aaaaaaaaaaaaaaaaaaaaaa"
+  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+  projectId: "mychat-2d881",
+  storageBucket: "mychat-2d881.firebasestorage.app",
+  messagingSenderId: "532385733649",
+  appId: "1:532385733649:web:7bb6cce9add057acf1e5b0",
+  measurementId: "G-2702K5S2V1"
 };
 
 // تهيئة Firebase
