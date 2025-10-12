@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>دردشة حية - GitHub Pages</title>
+  
+  <!-- Firebase SDK -->
+  <script type="module" src="client.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: white;
+    }
+
+    #message-container {
+      padding: 10px;
+      height: 85vh;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin: 5px 0;
+      padding: 8px;
+      text-align: left;
+      direction: ltr;
+      border-bottom: 1px solid #eee;
+    }
+
+    .user-name {
+      font-weight: bold;
+      margin-right: 5px;
+      color: #2c3e50;
+    }
+
+    .message.self .user-name {
+      color: #e74c3c;
+    }
+
+    .message.other .user-name {
+      color: #3498db;
+    }
+
+    .message.system {
+      background: #fff3cd;
+      color: #856404;
+      text-align: center;
+      font-style: italic;
+      border-radius: 5px;
+    }
+
+    #send-container {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #f8f9fa;
+      padding: 15px;
+      display: flex;
+      border-top: 1px solid #dee2e6;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 12px;
+      margin-right: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #send-button {
+      padding: 12px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #send-button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="message-container"></div>
+  
+  <form id="send-container">
+    <input type="text" id="message-input" placeholder="اكتب رسالتك...">
+    <button type="submit" id="send-button">إرسال</button>
+  </form>
+</body>
+</html>
