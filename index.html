@@ -1,425 +1,305 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>دردشة حية مع ميكروفون - GitHub Pages</title>
-  
-  <!-- Firebase SDK -->
-  <script type="module" src="client.js"></script>
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>دردشة حية - نظام مايكات</title>
+    <script type="module" src="client.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
-      direction: ltr;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background: #36393f;
+            color: white;
+            direction: ltr;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* تحكم الميكروفون */
-    .mic-controls {
-      background: white;
-      padding: 15px;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
+        /* الهيدر */
+        .header {
+            background: #2f3136;
+            padding: 15px 20px;
+            border-bottom: 1px solid #202225;
+            text-align: center;
+        }
 
-    .mic-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .header h1 {
+            color: #ffffff;
+            font-size: 1.5em;
+        }
 
-    .mic-btn.record {
-      background: #e74c3c;
-      color: white;
-    }
+        /* منطقة المايكات */
+        .mic-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: #2f3136;
+            border-bottom: 1px solid #202225;
+        }
 
-    .mic-btn.stop {
-      background: #95a5a6;
-      color: white;
-    }
+        .mic-user {
+            background: #40444b;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
 
-    .mic-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
+        .mic-user.active {
+            border-color: #43b581;
+            background: #3a3f47;
+        }
 
-    .mic-status {
-      font-size: 14px;
-      color: #7f8c8d;
-    }
+        .mic-user.speaking {
+            border-color: #faa61a;
+            animation: pulse 1.5s infinite;
+        }
 
-    .mic-visualizer {
-      flex: 1;
-      height: 20px;
-      background: #ecf0f1;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
+        .mic-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #8e9297;
+        }
 
-    .mic-level {
-      height: 100%;
-      background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
-      width: 0%;
-      transition: width 0.1s ease;
-    }
+        .mic-user.active .mic-name {
+            color: #43b581;
+        }
 
-    /* إعدادات الجودة */
-    .quality-settings {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+        .mic-user.speaking .mic-name {
+            color: #faa61a;
+        }
 
-    .quality-select {
-      padding: 5px 10px;
-      border: 1px solid #bdc3c7;
-      border-radius: 5px;
-      background: white;
-    }
+        .mic-status {
+            font-size: 0.8em;
+            color: #72767d;
+        }
 
-    /* منطقة الرسائل */
-    #message-container {
-      padding: 15px;
-      height: 65vh;
-      overflow-y: auto;
-      background: white;
-    }
+        .mic-btn {
+            margin-top: 8px;
+            padding: 5px 10px;
+            background: #7289da;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
 
-    .message {
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 10px;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
+        .mic-btn:hover {
+            background: #677bc4;
+        }
 
-    .message.self {
-      background: #3498db;
-      color: white;
-      margin-left: auto;
-    }
+        .mic-btn.mute {
+            background: #f04747;
+        }
 
-    .message.other {
-      background: #ecf0f1;
-      color: #2c3e50;
-      margin-right: auto;
-    }
+        .mic-btn.mute:hover {
+            background: #d84040;
+        }
 
-    .message.audio {
-      background: #9b59b6;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        /* منطقة الرسائل */
+        #message-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #36393f;
+        }
 
-    .message.system {
-      background: #fff3cd;
-      color: #856404;
-      text-align: center;
-      font-style: italic;
-      max-width: 100%;
-    }
+        .message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #40444b;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
 
-    .user-name {
-      font-weight: bold;
-      font-size: 0.9em;
-      margin-bottom: 5px;
-      display: block;
-    }
+        .user-name {
+            font-weight: bold;
+            color: #7289da;
+            min-width: 100px;
+            text-align: left;
+        }
 
-    .audio-player {
-      flex: 1;
-    }
+        .message-text {
+            color: #dcddde;
+            flex: 1;
+        }
 
-    .audio-duration {
-      font-size: 0.8em;
-      opacity: 0.8;
-    }
+        .message-time {
+            font-size: 0.7em;
+            color: #72767d;
+            margin-top: 2px;
+        }
 
-    /* منطقة الإرسال */
-    #send-container {
-      background: white;
-      padding: 15px;
-      display: flex;
-      gap: 10px;
-      border-top: 1px solid #ddd;
-    }
+        /* منطقة الإرسال الثابتة */
+        #send-container {
+            background: #40444b;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #202225;
+            position: sticky;
+            bottom: 0;
+        }
 
-    #message-input {
-      flex: 1;
-      padding: 12px 15px;
-      border: 1px solid #bdc3c7;
-      border-radius: 25px;
-      font-size: 16px;
-      outline: none;
-    }
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            background: #484c52;
+            border: 1px solid #1e1f22;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
 
-    #message-input:focus {
-      border-color: #3498db;
-    }
+        #message-input:focus {
+            outline: none;
+            border-color: #7289da;
+        }
 
-    #send-button {
-      padding: 12px 25px;
-      background: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+        #message-input::placeholder {
+            color: #8e9297;
+        }
 
-    #send-button:hover {
-      background: #27ae60;
-    }
+        #send-button {
+            padding: 12px 25px;
+            background: #7289da;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    /* مؤشر التسجيل */
-    .recording-indicator {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      color: #e74c3c;
-      font-weight: bold;
-    }
+        #send-button:hover {
+            background: #677bc4;
+        }
 
-    .pulse {
-      width: 12px;
-      height: 12px;
-      background: #e74c3c;
-      border-radius: 50%;
-      animation: pulse 1s infinite;
-    }
+        /* تأثيرات */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
+        @keyframes pulse {
+            0% { border-color: #faa61a; }
+            50% { border-color: transparent; }
+            100% { border-color: #faa61a; }
+        }
 
-    /* تحكم حجم الصوت */
-    .volume-control {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        /* شريط التمرير */
+        #message-container::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .volume-slider {
-      width: 100px;
-    }
-  </style>
+        #message-container::-webkit-scrollbar-track {
+            background: #2f3136;
+        }
+
+        #message-container::-webkit-scrollbar-thumb {
+            background: #202225;
+            border-radius: 4px;
+        }
+
+        #message-container::-webkit-scrollbar-thumb:hover {
+            background: #1a1c20;
+        }
+    </style>
 </head>
 <body>
-  <!-- تحكم الميكروفون -->
-  <div class="mic-controls">
-    <button class="mic-btn record" onclick="startRecording()">
-      🎤 تسجيل صوتي
-    </button>
-    
-    <button class="mic-btn stop" onclick="stopRecording()" style="display: none;">
-      ⏹ إيقاف
-    </button>
-    
-    <div class="recording-indicator">
-      <div class="pulse"></div>
-      <span>جاري التسجيل...</span>
+    <!-- الهيدر -->
+    <div class="header">
+        <h1>🎤 دردشة الصوت الحية</h1>
     </div>
-    
-    <div class="mic-visualizer">
-      <div class="mic-level" id="micLevel"></div>
+
+    <!-- منطقة المايكات -->
+    <div class="mic-container" id="mic-container">
+        <!-- سيتم إضافة المايكات ديناميكياً -->
     </div>
-    
-    <div class="quality-settings">
-      <select class="quality-select" id="audioQuality">
-        <option value="low">جودة منخفضة</option>
-        <option value="medium" selected>جودة متوسطة</option>
-        <option value="high">جودة عالية</option>
-      </select>
-      
-      <div class="volume-control">
-        <span>🔊</span>
-        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="80">
-      </div>
-    </div>
-  </div>
 
-  <!-- منطقة الرسائل -->
-  <div id="message-container"></div>
-  
-  <!-- إرسال الرسائل النصية -->
-  <form id="send-container">
-    <input type="text" id="message-input" placeholder="اكتب رسالتك النصية...">
-    <button type="submit" id="send-button">إرسال</button>
-  </form>
+    <!-- منطقة الرسائل -->
+    <div id="message-container"></div>
 
-  <script>
-    // متغيرات الميكروفون
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
-    let audioContext;
-    let analyser;
-    let microphone;
-    let javascriptNode;
+    <!-- منطقة الإرسال الثابتة -->
+    <form id="send-container">
+        <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
+        <button type="submit" id="send-button">إرسال</button>
+    </form>
 
-    // جودة الصوت
-    const audioQualities = {
-      low: { audioBitsPerSecond: 32000 },
-      medium: { audioBitsPerSecond: 64000 },
-      high: { audioBitsPerSecond: 128000 }
-    };
+    <script>
+        // إدارة المايكات
+        const micUsers = [
+            { id: 1, name: "مايك 1", active: false, speaking: false },
+            { id: 2, name: "مايك 2", active: false, speaking: false },
+            { id: 3, name: "مايك 3", active: false, speaking: false },
+            { id: 4, name: "مايك 4", active: false, speaking: false }
+        ];
 
-    // بدء التسجيل
-    async function startRecording() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          audio: {
-            channelCount: 1,
-            sampleRate: 44100,
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          } 
-        });
-
-        // إعداد المرئيات
-        setupAudioVisualizer(stream);
-
-        // إعداد المسجل
-        const quality = document.getElementById('audioQuality').value;
-        mediaRecorder = new MediaRecorder(stream, audioQualities[quality]);
-        
-        audioChunks = [];
-        
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          sendAudioMessage(audioBlob);
-        };
-        
-        mediaRecorder.start();
-        isRecording = true;
-        
-        // تحديث الواجهة
-        document.querySelector('.mic-btn.record').style.display = 'none';
-        document.querySelector('.mic-btn.stop').style.display = 'flex';
-        document.querySelector('.recording-indicator').style.display = 'flex';
-        
-      } catch (error) {
-        console.error('Error accessing microphone:', error);
-        alert('تعذر الوصول للميكروفون. يرجى التحقق من الصلاحيات.');
-      }
-    }
-
-    // إيقاف التسجيل
-    function stopRecording() {
-      if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        
-        // إيقاف جميع المسارات
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        
-        // تحديث الواجهة
-        document.querySelector('.mic-btn.record').style.display = 'flex';
-        document.querySelector('.mic-btn.stop').style.display = 'none';
-        document.querySelector('.recording-indicator').style.display = 'none';
-        document.getElementById('micLevel').style.width = '0%';
-      }
-    }
-
-    // إعداد المرئيات
-    function setupAudioVisualizer(stream) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioContext.createAnalyser();
-      microphone = audioContext.createMediaStreamSource(stream);
-      javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-      analyser.smoothingTimeConstant = 0.8;
-      analyser.fftSize = 1024;
-
-      microphone.connect(analyser);
-      analyser.connect(javascriptNode);
-      javascriptNode.connect(audioContext.destination);
-
-      javascriptNode.onaudioprocess = () => {
-        const array = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(array);
-        
-        let values = 0;
-        for (let i = 0; i < array.length; i++) {
-          values += array[i];
+        function renderMics() {
+            const container = document.getElementById('mic-container');
+            container.innerHTML = micUsers.map(user => `
+                <div class="mic-user ${user.active ? 'active' : ''} ${user.speaking ? 'speaking' : ''}">
+                    <div class="mic-name">${user.name}</div>
+                    <div class="mic-status">${user.active ? 'نشط' : 'غير نشط'}</div>
+                    <button class="mic-btn ${user.active ? 'mute' : ''}" 
+                            onclick="toggleMic(${user.id})">
+                        ${user.active ? 'إيقاف' : 'تفعيل'}
+                    </button>
+                </div>
+            `).join('');
         }
-        
-        const average = values / array.length;
-        const level = Math.min(average * 2, 100);
-        
-        document.getElementById('micLevel').style.width = level + '%';
-      };
-    }
 
-    // إرسال الرسالة الصوتية
-    function sendAudioMessage(audioBlob) {
-      const audioURL = URL.createObjectURL(audioBlob);
-      appendAudioMessage(audioURL, 'self', userName);
-      
-      // هنا يمكنك رفع audioBlob لـ Firebase Storage وإرسال الرابط
-      console.log('Audio message ready:', audioBlob);
-      
-      // لمحة تقنية: يمكنك استخدام Firebase Storage لتخزين الملفات الصوتية
-      // ثم إرسال رابط الملف عبر Realtime Database
-    }
+        function toggleMic(micId) {
+            const user = micUsers.find(u => u.id === micId);
+            if (user) {
+                user.active = !user.active;
+                if (user.active) {
+                    // محاكاة التحدث العشوائي
+                    simulateSpeaking(user);
+                } else {
+                    user.speaking = false;
+                }
+                renderMics();
+            }
+        }
 
-    // إضافة رسالة صوتية للشاشة
-    function appendAudioMessage(audioURL, type, userName) {
-      const messageElement = document.createElement('div');
-      messageElement.className = `message audio ${type}`;
-      
-      const audio = new Audio(audioURL);
-      
-      messageElement.innerHTML = `
-        <span class="user-name">${userName} (صوت):</span>
-        <audio class="audio-player" controls src="${audioURL}"></audio>
-        <span class="audio-duration">${getAudioDuration(audio)}</span>
-      `;
-      
-      document.getElementById('message-container').appendChild(messageElement);
-      document.getElementById('message-container').scrollTop = document.getElementById('message-container').scrollHeight;
-    }
+        function simulateSpeaking(user) {
+            if (user.active) {
+                // تحدث عشوائي كل 3-10 ثواني
+                const speakInterval = setInterval(() => {
+                    if (!user.active) {
+                        clearInterval(speakInterval);
+                        return;
+                    }
+                    user.speaking = true;
+                    renderMics();
+                    
+                    setTimeout(() => {
+                        user.speaking = false;
+                        renderMics();
+                    }, 2000);
+                    
+                }, Math.random() * 7000 + 3000);
+            }
+        }
 
-    // حساب مدة الصوت
-    function getAudioDuration(audio) {
-      return '--:--'; // سيتم تحديثه عندما يتم تحميل الملف
-    }
+        // جعل الدوال متاحة عالمياً
+        window.toggleMic = toggleMic;
 
-    // تحكم في حجم الصوت العالمي
-    document.getElementById('volumeSlider').addEventListener('input', (e) => {
-      const volume = e.target.value / 100;
-      // يمكن تطبيق هذا على جميع مشغلات الصوت
-      document.querySelectorAll('audio').forEach(audio => {
-        audio.volume = volume;
-      });
-    });
-  </script>
+        // تهيئة الواجهة
+        renderMics();
+    </script>
 </body>
 </html>
