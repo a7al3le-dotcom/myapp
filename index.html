@@ -1,979 +1,487 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>غرفة دردشة صوتية</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      direction: rtl;
-    }
-
-    #login-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      color: white;
-      text-align: center;
-    }
-
-    #login-page h2 {
-      margin-bottom: 20px;
-    }
-
-    #login-page input {
-      padding: 12px;
-      font-size: 16px;
-      width: 250px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    #login-page button {
-      padding: 12px 25px;
-      font-size: 16px;
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    #login-page button:hover {
-      background-color: #27ae60;
-    }
-
-    #chat-page {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    #audio-controls {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      background: #fff;
-      border-bottom: 1px solid #ccc;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .audio-btn {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    #mute-btn {
-      background-color: #e74c3c;
-      color: white;
-    }
-
-    #unmute-btn {
-      background-color: #2ecc71;
-      color: white;
-    }
-
-    #call-controls {
-      display: flex;
-      gap: 10px;
-    }
-
-    #start-call {
-      background-color: #3498db;
-      color: white;
-    }
-
-    #end-call {
-      background-color: #e74c3c;
-      color: white;
-    }
-
-    #mic-status {
-      padding: 8px 15px;
-      background-color: #3498db;
-      color: white;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    #mic-area {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      background: #fff;
-      border-bottom: 1px solid #ccc;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .mic-slot {
-      border: 1px solid #ccc;
-      padding: 8px;
-      border-radius: 6px;
-      min-width: 120px;
-      text-align: center;
-      background: #f0f0f0;
-      margin-bottom: 10px;
-      transition: all 0.3s;
-    }
-
-    .mic-slot.active {
-      background: #e1f5fe;
-      border-color: #4fc3f7;
-    }
-
-    .mic-slot.talking {
-      background: #d4edda;
-      border-color: #28a745;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    .mic-slot button {
-      margin: 3px;
-      padding: 5px 8px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background-color: #fff;
-      max-height: 60vh;
-    }
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 15px;
-    }
-
-    .message.mine {
-      align-items: flex-end;
-    }
-
-    .message-header {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .message-user {
-      font-weight: bold;
-      color: #2c3e50;
-      min-width: 100px;
-    }
-
-    .message-time {
-      font-size: 10px;
-      color: #999;
-    }
-
-    .message-text {
-      color: #34495e;
-      background-color: #ecf0f1;
-      padding: 10px;
-      border-radius: 6px;
-      max-width: 80%;
-      word-wrap: break-word;
-      margin-top: 4px;
-    }
-
-    .message.mine .message-text {
-      background-color: #d4edda;
-    }
-
-    .system-message {
-      text-align: center;
-      font-style: italic;
-      color: #7f8c8d;
-      margin-bottom: 10px;
-    }
-
-    #message-form {
-      display: flex;
-      padding: 10px;
-      background-color: #eee;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    #send-btn {
-      padding: 12px 20px;
-      font-size: 16px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    #send-btn:hover {
-      background-color: #2980b9;
-    }
-
-    #online-count {
-      font-size: 13px;
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    #online-list {
-      display: none;
-      position: absolute;
-      bottom: 60px;
-      right: 20px;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 10;
-      font-size: 14px;
-      min-width: 200px;
-    }
-
-    #private-chat {
-      display: none;
-      position: absolute;
-      bottom: 60px;
-      right: 20px;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 10;
-      font-size: 14px;
-      width: 300px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    #private-header {
-      background: #eee;
-      padding: 10px;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #private-form {
-      display: flex;
-      padding: 10px;
-      background: #eee;
-      gap: 10px;
-    }
-
-    #private-input {
-      flex: 1;
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    #private-send {
-      padding: 10px 16px;
-      background: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .user-audio {
-      margin: 5px 0;
-      padding: 5px;
-      background: #f8f9fa;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 600px) {
-      #mic-area {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .mic-slot {
-        min-width: 100%;
-        margin-bottom: 10px;
-      }
-
-      #messages, #private-chat {
-        max-height: 50vh;
-      }
-
-      #audio-controls {
-        flex-direction: column;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اتصال صوتي بين جهازين</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            direction: rtl;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            font-size: 16px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .users {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .user-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            width: 45%;
+        }
+        .audio-indicator {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .audio-level {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .instructions {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🔊 اتصال صوتي بين جهازين</h1>
+        
+        <div class="instructions">
+            <h3>📋 تعليمات التشغيل:</h3>
+            <ol>
+                <li>افتح هذه الصفحة في <strong>جهازين مختلفين</strong> (كمبيوتر + هاتف، أو متصفحين مختلفين)</li>
+                <li>في الجهاز الأول: اضغط "إنشاء غرفة"</li>
+                <li>في الجهاز الثاني: اضغط "انضم للغرفة"</li>
+                <li>في كلا الجهازين: اضغط "تشغيل المايك"</li>
+                <li>تحدث في أحد الجهازين واستمع من الآخر</li>
+            </ol>
+        </div>
 
-<!-- واجهة الدخول -->
-<div id="login-page">
-  <h2>أدخل اسمك المستعار للدخول</h2>
-  <input type="text" id="login-name" placeholder="زائر123" />
-  <button onclick="enterChat()">دخول</button>
-</div>
+        <div class="status" id="status">⏳ جاري التحضير...</div>
+        
+        <div class="users">
+            <div class="user-box">
+                <h3>👤 أنا</h3>
+                <div class="audio-indicator">
+                    <div class="audio-level" id="myAudioLevel"></div>
+                </div>
+                <div id="myStatus">غير متصل</div>
+            </div>
+            
+            <div class="user-box">
+                <h3>👥 المستخدم الآخر</h3>
+                <div class="audio-indicator">
+                    <div class="audio-level" id="remoteAudioLevel"></div>
+                </div>
+                <div id="remoteStatus">غير متصل</div>
+                <audio id="remoteAudio" autoplay style="display:none"></audio>
+            </div>
+        </div>
 
-<!-- واجهة الدردشة -->
-<div id="chat-page">
-  <div id="audio-controls">
-    <div id="call-controls">
-      <button id="start-call" class="audio-btn">📞 بدء المكالمة</button>
-      <button id="end-call" class="audio-btn" style="display:none;">📞 إنهاء المكالمة</button>
+        <div>
+            <button onclick="createRoom()" id="createBtn">🏠 إنشاء غرفة</button>
+            <button onclick="joinRoom()" id="joinBtn">🚪 انضم للغرفة</button>
+            <button onclick="enableMic()" id="micBtn">🎤 تشغيل المايك</button>
+            <button onclick="disableMic()" id="disableMicBtn" disabled>🔇 إيقاف المايك</button>
+            <button onclick="hangUp()" id="hangupBtn" disabled>📞 إنهاء المكالمة</button>
+        </div>
+
+        <div id="roomInfo" style="margin-top: 20px;"></div>
+        <div id="connectionInfo" style="margin-top: 10px;"></div>
     </div>
-    <button id="mute-btn" class="audio-btn">🔇 كتم المايك</button>
-    <button id="unmute-btn" class="audio-btn">🎤 تشغيل المايك</button>
-    <div id="mic-status">حالة المايك: جاهز</div>
-  </div>
-  
-  <div id="mic-area"></div>
-  <div id="audio-players"></div>
-  <div id="messages"></div>
-  <form id="message-form">
-    <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." required />
-    <button type="submit" id="send-btn">إرسال</button>
-    <button id="online-count" type="button">المتصلين: 0</button>
-    <div id="online-list"></div>
-  </form>
 
-  <!-- نافذة الرسائل الخاصة -->
-  <div id="private-chat">
-    <div id="private-header">
-      <span>محادثة خاصة مع: <span id="private-name"></span></span>
-      <button onclick="closePrivateChat()">❌</button>
-    </div>
-    <div id="private-messages"></div>
-    <form id="private-form">
-      <input type="text" id="private-input" placeholder="اكتب رسالة خاصة..." required />
-      <button type="submit" id="private-send">إرسال</button>
-    </form>
-  </div>
-</div>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script>
-  // تهيئة Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-    authDomain: "mychat-2d881.firebaseapp.com",
-    projectId: "mychat-2d881",
-    storageBucket: "mychat-2d881.appspot.com",
-    messagingSenderId: "532385733649",
-    appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
-  };
+    <script>
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+            authDomain: "mychat-2d881.firebaseapp.com",
+            projectId: "mychat-2d881",
+            storageBucket: "mychat-2d881.appspot.com",
+            messagingSenderId: "532385733649",
+            appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+        };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-  // المتغيرات العامة
-  const roomId = "room1";
-  let username = "";
-  const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-  let localStream = null;
-  let isMuted = false;
-  let currentPrivateTarget = null;
-  let isInCall = false;
-  let peerConnections = {};
-  let audioContext = null;
+        // المتغيرات العامة
+        let localStream = null;
+        let remoteStream = null;
+        let peerConnection = null;
+        let roomId = null;
+        let isInitiator = false;
+        let isMicEnabled = false;
 
-  // عناصر DOM
-  const messagesDiv = document.getElementById('messages');
-  const micArea = document.getElementById('mic-area');
-  const audioPlayers = document.getElementById('audio-players');
-  const form = document.getElementById('message-form');
-  const input = document.getElementById('message-input');
-  const onlineCountBtn = document.getElementById('online-count');
-  const onlineListDiv = document.getElementById('online-list');
-  const muteBtn = document.getElementById('mute-btn');
-  const unmuteBtn = document.getElementById('unmute-btn');
-  const micStatus = document.getElementById('mic-status');
-  const startCallBtn = document.getElementById('start-call');
-  const endCallBtn = document.getElementById('end-call');
+        // عناصر DOM
+        const statusEl = document.getElementById('status');
+        const myAudioLevel = document.getElementById('myAudioLevel');
+        const remoteAudioLevel = document.getElementById('remoteAudioLevel');
+        const myStatus = document.getElementById('myStatus');
+        const remoteStatus = document.getElementById('remoteStatus');
+        const remoteAudio = document.getElementById('remoteAudio');
+        const roomInfo = document.getElementById('roomInfo');
+        const connectionInfo = document.getElementById('connectionInfo');
 
-  const privateChat = document.getElementById('private-chat');
-  const privateName = document.getElementById('private-name');
-  const privateMessages = document.getElementById('private-messages');
-  const privateInput = document.getElementById('private-input');
-  const privateForm = document.getElementById('private-form');
-
-  // الدخول إلى الدردشة
-  function enterChat() {
-    const inputName = document.getElementById("login-name").value.trim();
-    username = inputName || "زائر" + Math.floor(Math.random() * 1000);
-
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("chat-page").style.display = "flex";
-
-    setupMessaging();
-    setupMicSystem();
-    setupOnlineList();
-    setupAudioControls();
-    activateMic();
-  }
-
-  // تفعيل المايك
-  async function activateMic() {
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
-      
-      micStatus.textContent = "حالة المايك: نشط";
-      console.log("تم تفعيل المايك بنجاح");
-      
-    } catch (err) {
-      console.error("فشل تفعيل الصوت:", err);
-      micStatus.textContent = "حالة المايك: معطل";
-      alert("يرجى السماح بالوصول إلى المايك من إعدادات المتصفح");
-    }
-  }
-
-  // بدء مكالمة جماعية
-  async function startGroupCall() {
-    if (!localStream) {
-      alert("المايك غير مفعل. يرجى السماح بالوصول إلى المايك أولاً.");
-      return;
-    }
-
-    isInCall = true;
-    startCallBtn.style.display = 'none';
-    endCallBtn.style.display = 'inline-block';
-    
-    // إنشاء غرفة المكالمة في Firebase
-    await db.collection('voiceRooms').doc(roomId).set({
-      active: true,
-      participants: firebase.firestore.FieldValue.arrayUnion(userId)
-    }, { merge: true });
-
-    // الاستماع للمستخدمين الجدد
-    db.collection('voiceRooms').doc(roomId).onSnapshot(async (doc) => {
-      const data = doc.data();
-      if (data && data.participants) {
-        // الاتصال بجميع المشاركين
-        data.participants.forEach(participantId => {
-          if (participantId !== userId && !peerConnections[participantId]) {
-            createPeerConnection(participantId);
-          }
-        });
-      }
-    });
-
-    // إضافة رسالة نظام
-    db.collection("rooms").doc(roomId).collection("messages").add({
-      username: "النظام",
-      text: `${username} انضم إلى المكالمة الصوتية`,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      userId: "system"
-    });
-  }
-
-  // إنشاء اتصال WebRTC
-  function createPeerConnection(targetUserId) {
-    const peerConnection = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    });
-
-    // إضافة المسارات المحلية
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream);
-    });
-
-    // معالجة الصوت الوارد
-    peerConnection.ontrack = (event) => {
-      const remoteStream = event.streams[0];
-      createAudioElement(targetUserId, remoteStream);
-    };
-
-    // إنشاء عرض اتصال
-    peerConnection.createOffer()
-      .then(offer => peerConnection.setLocalDescription(offer))
-      .then(() => {
-        // حفظ العرض في Firebase
-        db.collection('voiceCalls').doc(`${userId}_${targetUserId}`).set({
-          offer: {
-            type: peerConnection.localDescription.type,
-            sdp: peerConnection.localDescription.sdp
-          },
-          from: userId,
-          to: targetUserId
-        });
-      });
-
-    // الاستماع للإجابات
-    db.collection('voiceCalls').doc(`${targetUserId}_${userId}`)
-      .onSnapshot(async (doc) => {
-        const data = doc.data();
-        if (data && data.answer && peerConnection.signalingState === 'have-local-offer') {
-          const answer = new RTCSessionDescription(data.answer);
-          await peerConnection.setRemoteDescription(answer);
-        }
-      });
-
-    // الاستماع للمرشحين ICE
-    db.collection('voiceCandidates').where('callId', 'in', 
-      [`${userId}_${targetUserId}`, `${targetUserId}_${userId}`])
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach(async (change) => {
-          if (change.type === 'added') {
-            const candidate = new RTCIceCandidate(change.doc.data().candidate);
-            await peerConnection.addIceCandidate(candidate);
-          }
-        });
-      });
-
-    peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        db.collection('voiceCandidates').add({
-          callId: `${userId}_${targetUserId}`,
-          candidate: event.candidate.toJSON()
-        });
-      }
-    };
-
-    peerConnections[targetUserId] = peerConnection;
-  }
-
-  // معالجة العروض الواردة
-  db.collection('voiceCalls').where('to', '==', userId)
-    .onSnapshot(async (snapshot) => {
-      snapshot.docChanges().forEach(async (change) => {
-        if (change.type === 'added' && isInCall) {
-          const data = change.doc.data();
-          const fromUserId = data.from;
-          
-          if (!peerConnections[fromUserId]) {
-            const peerConnection = new RTCPeerConnection({
-              iceServers: [
+        // إعداد خوادم STUN البسيطة
+        const configuration = {
+            iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-              ]
-            });
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+        };
+
+        // إنشاء غرفة جديدة
+        async function createRoom() {
+            try {
+                statusEl.textContent = '🏠 جاري إنشاء الغرفة...';
+                roomId = 'room_' + Math.random().toString(36).substr(2, 9);
+                isInitiator = true;
+
+                // إنشاء وثيقة الغرفة في Firebase
+                await db.collection('voiceRooms').doc(roomId).set({
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    initiator: true
+                });
+
+                roomInfo.innerHTML = `🆔 رقم الغرفة: <strong>${roomId}</strong>`;
+                statusEl.textContent = '✅ تم إنشاء الغرفة! شارك رقم الغرفة مع الآخرين';
+                
+                document.getElementById('createBtn').disabled = true;
+                document.getElementById('joinBtn').disabled = true;
+                document.getElementById('hangupBtn').disabled = false;
+
+                // الاستماع للإجابات
+                listenForAnswers();
+
+            } catch (error) {
+                console.error('خطأ في إنشاء الغرفة:', error);
+                statusEl.textContent = '❌ فشل في إنشاء الغرفة';
+            }
+        }
+
+        // الانضمام لغرفة موجودة
+        async function joinRoom() {
+            try {
+                const inputRoomId = prompt('أدخل رقم الغرفة:');
+                if (!inputRoomId) return;
+
+                roomId = inputRoomId;
+                isInitiator = false;
+
+                // التحقق من وجود الغرفة
+                const roomDoc = await db.collection('voiceRooms').doc(roomId).get();
+                if (!roomDoc.exists) {
+                    alert('❌ الغرفة غير موجودة');
+                    return;
+                }
+
+                statusEl.textContent = '🚪 جاري الانضمام للغرفة...';
+                roomInfo.innerHTML = `🆔 رقم الغرفة: <strong>${roomId}</strong>`;
+                
+                document.getElementById('createBtn').disabled = true;
+                document.getElementById('joinBtn').disabled = true;
+                document.getElementById('hangupBtn').disabled = false;
+
+                // الاستماع للعروض
+                listenForOffers();
+
+            } catch (error) {
+                console.error('خطأ في الانضمام للغرفة:', error);
+                statusEl.textContent = '❌ فشل في الانضمام للغرفة';
+            }
+        }
+
+        // تشغيل المايك
+        async function enableMic() {
+            try {
+                statusEl.textContent = '🎤 جاري تشغيل المايك...';
+                
+                // طلب إذن المايك
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+
+                isMicEnabled = true;
+                myStatus.textContent = '✅ المايك نشط';
+                statusEl.textContent = '✅ تم تشغيل المايك!';
+                
+                document.getElementById('micBtn').disabled = true;
+                document.getElementById('disableMicBtn').disabled = false;
+
+                // إنشاء اتصال WebRTC
+                createPeerConnection();
+
+                // إذا كان منشئ الغرفة، إنشاء عرض
+                if (isInitiator) {
+                    await createOffer();
+                }
+
+                // بدء مراقبة مستوى الصوت
+                monitorAudioLevel();
+
+            } catch (error) {
+                console.error('خطأ في تشغيل المايك:', error);
+                statusEl.textContent = '❌ فشل في تشغيل المايك';
+                alert('يرجى السماح بالوصول إلى المايك');
+            }
+        }
+
+        // إيقاف المايك
+        function disableMic() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            isMicEnabled = false;
+            myStatus.textContent = '❌ المايك متوقف';
+            myAudioLevel.style.width = '0%';
+            
+            document.getElementById('micBtn').disabled = false;
+            document.getElementById('disableMicBtn').disabled = true;
+        }
+
+        // إنشاء اتصال WebRTC
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(configuration);
 
             // إضافة المسارات المحلية
             localStream.getTracks().forEach(track => {
-              peerConnection.addTrack(track, localStream);
+                peerConnection.addTrack(track, localStream);
             });
 
             // معالجة الصوت الوارد
             peerConnection.ontrack = (event) => {
-              const remoteStream = event.streams[0];
-              createAudioElement(fromUserId, remoteStream);
+                remoteStream = event.streams[0];
+                remoteAudio.srcObject = remoteStream;
+                remoteStatus.textContent = '✅ متصل';
+                statusEl.textContent = '✅ الاتصال نشط! يمكنك التحدث الآن';
+                connectionInfo.innerHTML = '🟢 الاتصال نشط - يمكنك التحدث والاستماع';
             };
 
-            // معالجة العرض الوارد
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-
-            // حفظ الإجابة
-            db.collection('voiceCalls').doc(`${fromUserId}_${userId}`).set({
-              answer: {
-                type: answer.type,
-                sdp: answer.sdp
-              }
-            }, { merge: true });
-
-            // الاستماع للمرشحين ICE
+            // معالجة مرشحي ICE
             peerConnection.onicecandidate = (event) => {
-              if (event.candidate) {
-                db.collection('voiceCandidates').add({
-                  callId: `${fromUserId}_${userId}`,
-                  candidate: event.candidate.toJSON()
-                });
-              }
+                if (event.candidate) {
+                    // حفظ المرشح في Firebase
+                    db.collection('voiceCandidates').add({
+                        roomId: roomId,
+                        candidate: event.candidate.toJSON(),
+                        fromInitiator: isInitiator
+                    });
+                }
             };
 
-            peerConnections[fromUserId] = peerConnection;
-          }
+            // مراقبة حالة الاتصال
+            peerConnection.onconnectionstatechange = () => {
+                connectionInfo.innerHTML = `حالة الاتصال: ${peerConnection.connectionState}`;
+            };
         }
-      });
-    });
 
-  // إنشاء عنصر صوت للمستخدم
-  function createAudioElement(userId, stream) {
-    const existingAudio = document.getElementById(`audio-${userId}`);
-    if (existingAudio) {
-      existingAudio.srcObject = stream;
-      return;
-    }
+        // إنشاء عرض اتصال
+        async function createOffer() {
+            try {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
 
-    const audioElement = document.createElement('audio');
-    audioElement.id = `audio-${userId}`;
-    audioElement.srcObject = stream;
-    audioElement.autoplay = true;
-    audioElement.controls = false;
-    audioElement.style.display = 'none';
-    
-    const container = document.createElement('div');
-    container.className = 'user-audio';
-    container.innerHTML = `
-      <div>🔊 ${getUsernameById(userId)} يتحدث</div>
-    `;
-    container.appendChild(audioElement);
-    
-    audioPlayers.appendChild(container);
-  }
+                // حفظ العرض في Firebase
+                await db.collection('voiceOffers').doc(roomId).set({
+                    offer: offer,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-  // الحصول على اسم المستخدم من ID
-  function getUsernameById(userId) {
-    // هذه دالة مساعدة - تحتاج لتطبيق حقيقي
-    return "مستخدم";
-  }
-
-  // إنهاء المكالمة
-  function endGroupCall() {
-    isInCall = false;
-    startCallBtn.style.display = 'inline-block';
-    endCallBtn.style.display = 'none';
-
-    // إغلاق جميع الاتصالات
-    Object.values(peerConnections).forEach(pc => pc.close());
-    peerConnections = {};
-
-    // مسح عناصر الصوت
-    audioPlayers.innerHTML = '';
-
-    // تحديث Firebase
-    db.collection('voiceRooms').doc(roomId).update({
-      participants: firebase.firestore.FieldValue.arrayRemove(userId)
-    });
-
-    // إضافة رسالة نظام
-    db.collection("rooms").doc(roomId).collection("messages").add({
-      username: "النظام",
-      text: `${username} غادر المكالمة الصوتية`,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      userId: "system"
-    });
-  }
-
-  // إعداد عناصر التحكم بالصوت
-  function setupAudioControls() {
-    muteBtn.addEventListener('click', () => {
-      if (localStream) {
-        localStream.getAudioTracks().forEach(track => {
-          track.enabled = false;
-        });
-        isMuted = true;
-        micStatus.textContent = "حالة المايك: مكتوم";
-      }
-    });
-
-    unmuteBtn.addEventListener('click', () => {
-      if (localStream) {
-        localStream.getAudioTracks().forEach(track => {
-          track.enabled = true;
-        });
-        isMuted = false;
-        micStatus.textContent = "حالة المايك: نشط";
-      }
-    });
-
-    startCallBtn.addEventListener('click', startGroupCall);
-    endCallBtn.addEventListener('click', endGroupCall);
-  }
-
-  // باقي الدوال تبقى كما هي (setupMessaging, setupMicSystem, setupOnlineList, etc.)
-  // ... [الكود السابق للدردشة والرسائل الخاصة]
-
-  // إعداد نظام المراسلة
-  function setupMessaging() {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
-
-      await db.collection("rooms").doc(roomId).collection("messages").add({
-        username,
-        text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: userId
-      });
-
-      input.value = "";
-    });
-
-    db.collection("rooms").doc(roomId).collection("messages")
-      .orderBy("timestamp", "asc")
-      .onSnapshot(snapshot => {
-        messagesDiv.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement("div");
-          div.className = `message ${data.userId === userId ? 'mine' : ''}`;
-          div.innerHTML = `
-            <div class="message-header">
-              <div class="message-user">${data.username} ${data.userId === userId ? '(أنا)' : ''}</div>
-              <div class="message-time">${formatTime(data.timestamp)}</div>
-            </div>
-            <div class="message-text">${data.text}</div>
-          `;
-          messagesDiv.appendChild(div);
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
-  }
-
-  // تنسيق الوقت
-  function formatTime(timestamp) {
-    if (!timestamp) return "";
-    const date = timestamp.toDate();
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // إعداد نظام المايك
-  function setupMicSystem() {
-    db.collection("rooms").doc(roomId).onSnapshot(doc => {
-      const data = doc.data();
-      renderMicSlots(Array.isArray(data.micSlots) ? data.micSlots : [null, null, null, null, null]);
-    });
-
-    db.collection("rooms").doc(roomId).get().then(doc => {
-      if (!doc.exists) {
-        db.collection("rooms").doc(roomId).set({
-          micSlots: [null, null, null, null, null]
-        });
-      }
-    });
-  }
-
-  // عرض فتحات المايك
-  function renderMicSlots(micSlots) {
-    micArea.innerHTML = "";
-    micSlots.forEach((user, index) => {
-      const slot = document.createElement("div");
-      slot.className = `mic-slot ${user === username ? 'active' : ''}`;
-
-      if (user) {
-        slot.innerHTML = `
-          🎤 ${user}<br>
-          <button onclick="muteUser('${user}')">🔇 كتم</button>
-          <button onclick="removeMic(${index})">❌ إزالة</button>
-        `;
-      } else {
-        slot.innerHTML = `<button onclick="takeMic(${index})">🎤 الحصول على المايك</button>`;
-      }
-
-      micArea.appendChild(slot);
-    });
-  }
-
-  // الحصول على المايك
-  function takeMic(index) {
-    const roomRef = db.collection("rooms").doc(roomId);
-    roomRef.get().then(doc => {
-      const data = doc.data();
-      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      if (micSlots.includes(username)) {
-        alert("أنت بالفعل تمتلك مايك!");
-        return;
-      }
-      if (!micSlots[index]) {
-        micSlots[index] = username;
-        roomRef.update({ micSlots });
-        
-        // إضافة رسالة نظام
-        db.collection("rooms").doc(roomId).collection("messages").add({
-          username: "النظام",
-          text: `${username} حصل على المايك`,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          userId: "system"
-        });
-      }
-    });
-  }
-
-  // إزالة المايك
-  function removeMic(index) {
-    const roomRef = db.collection("rooms").doc(roomId);
-    roomRef.get().then(doc => {
-      const data = doc.data();
-      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      const user = micSlots[index];
-      micSlots[index] = null;
-      roomRef.update({ micSlots });
-      
-      // إضافة رسالة نظام
-      if (user) {
-        db.collection("rooms").doc(roomId).collection("messages").add({
-          username: "النظام",
-          text: `${user} ترك المايك`,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          userId: "system"
-        });
-      }
-    });
-  }
-
-  // كتم مستخدم
-  function muteUser(user) {
-    const div = document.createElement("div");
-    div.className = "system-message";
-    div.textContent = `${user} تم كتمه مؤقتًا`;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
-
-  // إعداد قائمة المتصلين
-  function setupOnlineList() {
-    // تسجيل المستخدم كمتصل
-    db.collection("online").doc(userId).set({
-      username,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // حذف المستخدم عند مغادرة الصفحة
-    window.addEventListener("beforeunload", () => {
-      db.collection("online").doc(userId).delete();
-      if (isInCall) {
-        endGroupCall();
-      }
-      
-      // إزالة المستخدم من المايك إذا كان مشغولاً
-      const roomRef = db.collection("rooms").doc(roomId);
-      roomRef.get().then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-          const updated = micSlots.map(slot => slot === username ? null : slot);
-          roomRef.update({ micSlots: updated });
+            } catch (error) {
+                console.error('خطأ في إنشاء العرض:', error);
+            }
         }
-      });
-    });
 
-    // تحديث عدد المتصلين
-    db.collection("online").onSnapshot(snapshot => {
-      const count = snapshot.size;
-      onlineCountBtn.textContent = `المتصلين: ${count}`;
-    });
+        // الاستماع للعروض (للمنضمين)
+        function listenForOffers() {
+            db.collection('voiceOffers').doc(roomId).onSnapshot(async (doc) => {
+                if (doc.exists && !isInitiator) {
+                    const data = doc.data();
+                    const offer = data.offer;
 
-    // عرض قائمة المتصلين
-    onlineCountBtn.addEventListener("click", () => {
-      if (onlineListDiv.style.display === "none" || onlineListDiv.style.display === "") {
-        db.collection("online").get().then(snapshot => {
-          let html = "<strong>المتصلون الآن:</strong><br>";
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            html += `<button style="display:block; margin:5px 0;" onclick="openPrivateChat('${doc.id}', '${data.username}')">• ${data.username} ${doc.id === userId ? '(أنا)' : ''}</button>`;
-          });
-          onlineListDiv.innerHTML = html;
-          onlineListDiv.style.display = "block";
-        });
-      } else {
-        onlineListDiv.style.display = "none";
-      }
-    });
-  }
+                    if (peerConnection && peerConnection.signalingState === 'stable') {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                        
+                        // إنشاء إجابة
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
 
-  // فتح نافذة الدردشة الخاصة
-  function openPrivateChat(targetId, targetName) {
-    currentPrivateTarget = targetId;
-    privateName.textContent = targetName;
-    privateChat.style.display = "block";
-    onlineListDiv.style.display = "none";
+                        // حفظ الإجابة في Firebase
+                        await db.collection('voiceAnswers').doc(roomId).set({
+                            answer: answer,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            });
+        }
 
-    // مسح الرسائل القديمة
-    privateMessages.innerHTML = "";
+        // الاستماع للإجابات (للمنشئين)
+        function listenForAnswers() {
+            db.collection('voiceAnswers').doc(roomId).onSnapshot(async (doc) => {
+                if (doc.exists && isInitiator) {
+                    const data = doc.data();
+                    const answer = data.answer;
 
-    // الاستماع للرسائل الخاصة
-    db.collection("privateMessages")
-      .where("from", "in", [userId, targetId])
-      .where("to", "in", [userId, targetId])
-      .orderBy("timestamp", "asc")
-      .onSnapshot(snapshot => {
-        privateMessages.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement("div");
-          div.className = `message ${data.from === userId ? 'mine' : ''}`;
-          div.innerHTML = `
-            <div class="message-header">
-              <div class="message-user">${data.from === userId ? "أنا" : privateName.textContent}</div>
-              <div class="message-time">${formatTime(data.timestamp)}</div>
-            </div>
-            <div class="message-text">${data.text}</div>
-          `;
-          privateMessages.appendChild(div);
-        });
-        privateMessages.scrollTop = privateMessages.scrollHeight;
-      });
-  }
+                    if (peerConnection && peerConnection.signalingState === 'have-local-offer') {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    }
+                }
+            });
+        }
 
-  // إرسال رسالة خاصة
-  function sendPrivateMessage(e) {
-    e.preventDefault();
-    const text = privateInput.value.trim();
-    if (!text || !currentPrivateTarget) return;
+        // الاستماع لمرشحي ICE
+        function listenForCandidates() {
+            db.collection('voiceCandidates')
+                .where('roomId', '==', roomId)
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            // تجنب معالجة المرشحات الخاصة بنا
+                            if (data.fromInitiator !== isInitiator) {
+                                const candidate = new RTCIceCandidate(data.candidate);
+                                await peerConnection.addIceCandidate(candidate);
+                            }
+                        }
+                    });
+                });
+        }
 
-    db.collection("privateMessages").add({
-      from: userId,
-      to: currentPrivateTarget,
-      text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+        // مراقبة مستوى الصوت
+        function monitorAudioLevel() {
+            if (!localStream) return;
 
-    privateInput.value = "";
-  }
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(localStream);
+            source.connect(analyser);
 
-  // إغلاق نافذة الدردشة الخاصة
-  function closePrivateChat() {
-    privateChat.style.display = "none";
-    currentPrivateTarget = null;
-  }
+            analyser.fftSize = 256;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-  // إعداد نموذج الرسائل الخاصة
-  privateForm.addEventListener('submit', sendPrivateMessage);
-</script>
+            function updateLevel() {
+                if (!isMicEnabled) return;
+
+                analyser.getByteFrequencyData(dataArray);
+                
+                // حساب متوسط مستوى الصوت
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / dataArray.length;
+                
+                // تحديث المؤشر (0-100%)
+                const level = Math.min(100, (average / 128) * 100);
+                myAudioLevel.style.width = level + '%';
+                
+                // تغيير اللون بناء على مستوى الصوت
+                if (level > 70) {
+                    myAudioLevel.style.background = '#ff4444';
+                } else if (level > 30) {
+                    myAudioLevel.style.background = '#ffaa00';
+                } else {
+                    myAudioLevel.style.background = '#4CAF50';
+                }
+
+                requestAnimationFrame(updateLevel);
+            }
+
+            updateLevel();
+        }
+
+        // إنهاء المكالمة
+        function hangUp() {
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // تنظيف Firebase
+            if (roomId) {
+                db.collection('voiceRooms').doc(roomId).delete();
+                db.collection('voiceOffers').doc(roomId).delete();
+                db.collection('voiceAnswers').doc(roomId).delete();
+                
+                // حذف المرشحات
+                db.collection('voiceCandidates')
+                    .where('roomId', '==', roomId)
+                    .get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => doc.ref.delete());
+                    });
+            }
+
+            statusEl.textContent = '📞 تم إنهاء المكالمة';
+            myStatus.textContent = 'غير متصل';
+            remoteStatus.textContent = 'غير متصل';
+            myAudioLevel.style.width = '0%';
+            remoteAudioLevel.style.width = '0%';
+            roomInfo.innerHTML = '';
+            connectionInfo.innerHTML = '';
+            
+            document.getElementById('createBtn').disabled = false;
+            document.getElementById('joinBtn').disabled = false;
+            document.getElementById('micBtn').disabled = false;
+            document.getElementById('disableMicBtn').disabled = true;
+            document.getElementById('hangupBtn').disabled = true;
+        }
+
+        // بدء الاستماع للمرشحات عند تحميل الصفحة
+        listenForCandidates();
+    </script>
 </body>
 </html>
