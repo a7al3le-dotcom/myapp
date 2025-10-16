@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>غرفة دردشة</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      direction: ltr;
+    }
+
+    #login-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    #chat-page {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #mic-area {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .mic-slot {
+      border: 1px solid #ccc;
+      padding: 8px;
+      border-radius: 6px;
+      min-width: 120px;
+      text-align: center;
+      background: #f0f0f0;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background-color: #fff;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .message-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .message-user {
+      font-weight: bold;
+      color: #2c3e50;
+      min-width: 100px;
+    }
+
+    .message-time {
+      font-size: 10px;
+      color: #999;
+    }
+
+    .message-text {
+      color: #34495e;
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 80%;
+      word-wrap: break-word;
+      margin-top: 4px;
+    }
+
+    .system-message {
+      text-align: center;
+      font-style: italic;
+      color: #7f8c8d;
+      margin-bottom: 10px;
+    }
+
+    #message-form {
+      display: flex;
+      flex-direction: row-reverse;
+      padding: 10px;
+      background-color: #eee;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #send-btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #send-btn:hover {
+      background-color: #2980b9;
+    }
+
+    #online-count {
+      font-size: 13px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    #online-list {
+      display: none;
+      position: absolute;
+      bottom: 60px;
+      left: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 10;
+      font-size: 14px;
+      min-width: 200px;
+    }
+
+    #private-chat {
+      display: none;
+      position: absolute;
+      bottom: 60px;
+      left: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 10;
+      font-size: 14px;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    #private-header {
+      background: #eee;
+      padding: 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #private-form {
+      display: flex;
+      padding: 10px;
+      background: #eee;
+      gap: 10px;
+    }
+
+    #private-input {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #private-send {
+      padding: 10px 16px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- واجهة الدخول -->
+  <div id="login-page">
+    <h2>أدخل اسمك المستعار للدخول</h2>
+    <input type="text" id="login-name" placeholder="زائر123" style="padding:10px; font-size:16px; width:200px; margin-bottom:10px;" />
+    <button onclick="enterChat()" style="padding:10px 20px; font-size:16px;">دخول</button>
+  </div>
+
+  <!-- واجهة الدردشة -->
+  <div id="chat-page">
+    <div id="mic-area"></div>
+    <div id="messages"></div>
+    <form id="message-form">
+      <button type="submit" id="send-btn">إرسال</button>
+      <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." required />
+      <button id="online-count" type="button">المتصلين: 0</button>
+      <div id="online-list"></div>
+    </form>
+
+    <!-- نافذة الرسائل الخاصة -->
+    <div id="private-chat">
+      <div id="private-header">
+        محادثة خاصة مع: <span id="private-name"></span>
+        <button onclick="closePrivateChat()" style="float:right;">❌</button>
+      </div>
+      <div id="private-messages"></div>
+      <form id="private-form" onsubmit="sendPrivateMessage(event)">
+        <input type="text" id="private-input" placeholder="اكتب رسالة خاصة..." required />
+        <button type="submit" id="private-send">إرسال</button>
+      </form>
+    </div>
+  </div>
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+    authDomain: "mychat-2d881.firebaseapp.com",
+    projectId: "mychat-2d881",
+    storageBucket: "mychat-2d881.appspot.com",
+    messagingSenderId: "532385733649",
+    appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const roomId = "room1";
+  let username = "";
+  const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  const messagesDiv = document.getElementById('messages');
+  const micArea = document.getElementById('mic-area');
+  const form = document.getElementById('message-form');
+  const input = document.getElementById('message-input');
+  const onlineCountBtn = document.getElementById('online-count');
+  const onlineListDiv = document.getElementById('online-list');
+
+  const privateChat = document.getElementById('private-chat');
+  const privateName = document.getElementById('private-name');
+  const privateMessages = document.getElementById('private-messages');
+  const privateInput = document.getElementById('private-input');
+  let currentPrivateTarget = null;
+
+  function enterChat() {
+    const inputName = document.getElementById("login-name").value.trim();
+    username = inputName || "زائر" + Math.floor(Math.random() * 1000);
+
+    document.getElementById("login-page").style.display = "none";
+    document.getElementById("chat-page").style.display = "flex";
+
+    startChat();
+  }
+
+  function formatTime(timestamp) {
+    if (!timestamp) return "";
+    const date = timestamp.toDate();
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function startChat() {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      await db.collection("rooms").doc(roomId).collection("messages").add({
+        username,
+        text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      input.value = "";
+    });
+
+    db.collection("rooms").doc(roomId).collection("messages")
+      .orderBy("timestamp", "desc")
+      .limit(20)
+      .onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        const docs = snapshot.docs.reverse();
+        docs.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `
+            <div class="message-header">
+              <div class="message-user">${data.username}</div>
+              <div class="message-time">${formatTime(data.timestamp)}</div>
+            </div>
+            <div class="message-text">${data.text}</div>
+          `;
+          messagesDiv.appendChild(div);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+
+    db.collection("rooms").doc(roomId).onSnapshot(doc => {
+      const data = doc.data();
+      renderMicSlots(Array.isArray(data.micSlots) ? data.micSlots : [null, null, null, null, null]);
+    });
+
+    db.collection("rooms").doc(roomId).get().then(doc => {
+      if (!doc.exists) {
+        db.collection("rooms").doc(roomId).set({
+          micSlots: [null, null, null, null, null]
+        });
+      }
+    });
+
+    db.collection("online").doc(userId).set({
+      username,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    window.addEventListener("beforeunload", () => {
+      db.collection("online").doc(userId).delete();
+    });
+
+    db.collection("online").onSnapshot(snapshot => {
+      const count = snapshot.size;
+      onlineCountBtn.textContent = `المتصلين: ${count}`;
+    });
+
+    onlineCountBtn.addEventListener("click", () => {
+      if (onlineListDiv.style.display === "none") {
+        db.collection("online").get().then(snapshot => {
+          let html = "<strong>المتصلون الآن:</strong><br>";
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            html += `<button style="display:block; margin:5px 0;" onclick="openPrivateChat('${doc.id}', '${data.username}')">• ${data.username}</button>`;
+          });
+          onlineListDiv.innerHTML = html;
+          onlineListDiv.style.display = "block";
+        });
+      } else {
+        onlineListDiv.style.display = "none";
+      }
+    });
+  }
+
+  function openPrivateChat(targetId, targetName) {
+    currentPrivateTarget = targetId;
+    privateName.textContent = targetName;
+    privateChat.style.display = "block";
+    loadPrivateMessages(targetId);
+  }
+
+  function closePrivateChat() {
+    privateChat.style.display = "none";
+    currentPrivateTarget = null;
+  }
+
+  function loadPrivateMessages(targetId) {
+    const chatId = [userId, targetId].sort().join("_");
+    db.collection("privateMessages").doc(chatId).collection("messages")
+      .orderBy("timestamp")
+      .onSnapshot(snapshot => {
+        privateMessages.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `
+            <div class="message-header">
+              <div class="message-user">${data.from === userId ? "أنا" : data.fromName}</div>
+              <div class="message-time">${formatTime(data.timestamp)}</div>
+            </div>
+            <div class="message-text">${data.text}</div>
+          `;
+          privateMessages.appendChild(div);
+        });
+        privateMessages.scrollTop = privateMessages.scrollHeight;
+      });
+  }
+
+  function sendPrivateMessage(e) {
+    e.preventDefault();
+    const text = privateInput.value.trim();
+    if (!text || !currentPrivateTarget) return;
+
+    const chatId = [userId, currentPrivateTarget].sort().join("_");
+    db.collection("privateMessages").doc(chatId).collection("messages").add({
+      from: userId,
+      fromName: username,
+      to: currentPrivateTarget,
+      text,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    privateInput.value = "";
+  }
+
+  function renderMicSlots(micSlots) {
+    micArea.innerHTML = "";
+    micSlots.forEach((user, index) => {
+      const slot = document.createElement("div");
+      slot.className = "mic-slot";
+
+      if (user) {
+        slot.innerHTML = `
+          🎤 ${user}<br>
+          <button onclick="muteUser('${user}')">🔇 كتم</button>
+          <button onclick="removeMic(${index})">❌ إزالة</button>
+        `;
+      } else {
+        slot.innerHTML = `<button onclick="takeMic(${index})">🎤 الحصول على المايك</button>`;
+      }
+
+      micArea.appendChild(slot);
+    });
+  }
+
+  function takeMic(index) {
+    const roomRef = db.collection("rooms").doc(roomId);
+    roomRef.get().then(doc => {
+      const data = doc.data();
+      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
+      if (micSlots.includes(username)) return;
+      if (!micSlots[index]) {
+        micSlots[index] = username;
+        roomRef.update({ micSlots });
+      }
+    });
+  }
+
+  function removeMic(index) {
+    const roomRef = db.collection("rooms").doc(roomId);
+    roomRef.get().then(doc => {
+      const data = doc.data();
+      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
+      micSlots[index] = null;
+      roomRef.update({ micSlots });
+    });
+  }
+
+  function muteUser(user) {
+    const div = document.createElement("div");
+    div.className = "system-message";
+    div.textContent = `${user} تم كتمه مؤقتًا`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+</script>
+</body>
+</html>
