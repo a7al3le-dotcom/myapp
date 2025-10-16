@@ -11,7 +11,8 @@
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f8f8f8;
-      direction: ltr;
+      /* تم تغيير هذا إلى rtl إذا كان المحتوى الأساسي عربي */
+      direction: rtl; 
     }
 
     #login-page {
@@ -55,12 +56,14 @@
       padding: 20px;
       background-color: #fff;
       max-height: 60vh;
+      /* لتحديد اتجاه النص داخل مربع الرسائل */
+      direction: rtl; 
     }
 
     .message {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: flex-start; /* لتبدأ الرسائل من اليمين في RTL */
       margin-bottom: 15px;
     }
 
@@ -89,6 +92,7 @@
       max-width: 80%;
       word-wrap: break-word;
       margin-top: 4px;
+      text-align: right; /* لتحديد اتجاه نص الرسالة */
     }
 
     .system-message {
@@ -100,7 +104,7 @@
 
     #message-form {
       display: flex;
-      flex-direction: row-reverse;
+      flex-direction: row-reverse; /* لعكس ترتيب العناصر (الزر لليمين) */
       padding: 10px;
       background-color: #eee;
       align-items: center;
@@ -114,6 +118,7 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      text-align: right; /* ليكون مربع الإدخال من اليمين لليسار */
     }
 
     #send-btn {
@@ -143,8 +148,10 @@
     #online-list {
       display: none;
       position: absolute;
+      /* تعديل لل RTL */
       bottom: 60px;
-      left: 20px;
+      right: 20px; 
+      left: auto; 
       background: #fff;
       border: 1px solid #ccc;
       padding: 10px;
@@ -153,13 +160,31 @@
       z-index: 10;
       font-size: 14px;
       min-width: 200px;
+      direction: rtl; /* اتجاه القائمة */
+      text-align: right;
+    }
+    #online-list button {
+        width: 100%;
+        text-align: right;
+        display: block;
+        margin: 5px 0;
+        padding: 8px 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    #online-list button:hover {
+        background-color: #e0e0e0;
     }
 
     #private-chat {
       display: none;
       position: absolute;
+      /* تعديل لل RTL */
       bottom: 60px;
-      left: 20px;
+      right: 20px;
+      left: auto;
       background: #fff;
       border: 1px solid #ccc;
       padding: 10px;
@@ -170,6 +195,7 @@
       width: 300px;
       max-height: 400px;
       overflow-y: auto;
+      direction: rtl; /* اتجاه نافذة الدردشة الخاصة */
     }
 
     #private-header {
@@ -177,10 +203,17 @@
       padding: 10px;
       font-weight: bold;
       border-bottom: 1px solid #ccc;
+      text-align: right;
+    }
+
+    #private-header button {
+        float: left; /* زر الإغلاق لليسار في RTL */
     }
 
     #private-form {
       display: flex;
+      /* عكس ليكون زر الإرسال لليمين */
+      flex-direction: row-reverse; 
       padding: 10px;
       background: #eee;
       gap: 10px;
@@ -192,6 +225,7 @@
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      text-align: right; /* مربع الإدخال لليسار في RTL */
     }
 
     #private-send {
@@ -202,6 +236,17 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    /* تعديل لرسائل الدردشة الخاصة لتكون متناسبة مع RTL */
+    #private-messages .message {
+        align-items: flex-start; /* لتبدأ رسائلك من اليمين */
+    }
+    #private-messages .message-user {
+        text-align: right;
+    }
+    #private-messages .message-text {
+        text-align: right;
+    }
+
   </style>
 </head>
 <body>
@@ -209,7 +254,7 @@
   <!-- واجهة الدخول -->
   <div id="login-page">
     <h2>أدخل اسمك المستعار للدخول</h2>
-    <input type="text" id="login-name" placeholder="زائر123" style="padding:10px; font-size:16px; width:200px; margin-bottom:10px;" />
+    <input type="text" id="login-name" placeholder="زائر123" style="padding:10px; font-size:16px; width:200px; margin-bottom:10px; text-align: right;" />
     <button onclick="enterChat()" style="padding:10px 20px; font-size:16px;">دخول</button>
   </div>
 
@@ -227,8 +272,8 @@
     <!-- نافذة الرسائل الخاصة -->
     <div id="private-chat">
       <div id="private-header">
+        <button onclick="closePrivateChat()" style="float:left; background: none; border: none; font-size: 18px; cursor: pointer;">❌</button>
         محادثة خاصة مع: <span id="private-name"></span>
-        <button onclick="closePrivateChat()" style="float:right;">❌</button>
       </div>
       <div id="private-messages"></div>
       <form id="private-form" onsubmit="sendPrivateMessage(event)">
@@ -252,7 +297,8 @@
 
   const roomId = "room1";
   let username = "";
-  const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  // يفضل استخدام Firebase Authentication للحصول على userId ثابت
+  const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
   const messagesDiv = document.getElementById('messages');
   const micArea = document.getElementById('mic-area');
   const form = document.getElementById('message-form');
@@ -264,7 +310,8 @@
   const privateName = document.getElementById('private-name');
   const privateMessages = document.getElementById('private-messages');
   const privateInput = document.getElementById('private-input');
-  let currentPrivateTarget = null;
+  let currentPrivateTarget = null; // userId للطرف الآخر في الدردشة الخاصة
+  let currentPrivateTargetName = null; // اسم الطرف الآخر في الدردشة الخاصة
 
   function enterChat() {
     const inputName = document.getElementById("login-name").value.trim();
@@ -278,10 +325,12 @@
       .then(stream => {
         console.log("✅ تم تفعيل المايك");
         window.localAudioStream = stream;
+        // هنا يمكن بدء إرسال تيار الصوت إذا كنت تستخدم WebRTC
       })
       .catch(err => {
         console.error("❌ فشل الوصول للمايك:", err);
-        alert("يرجى السماح بالوصول إلى المايك من إعدادات المتصفح");
+        // رسالة أكثر لطفًا للمستخدم بدلاً من alert
+        displaySystemMessage("يرجى السماح بالوصول إلى المايك من إعدادات المتصفح للاستمتاع بالمحادثات الصوتية.");
       });
 
     startChat();
@@ -291,6 +340,15 @@
     if (!timestamp) return "";
     const date = timestamp.toDate();
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // دالة لعرض رسائل النظام
+  function displaySystemMessage(message) {
+      const div = document.createElement("div");
+      div.className = "system-message";
+      div.textContent = message;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
   function startChat() {
@@ -335,11 +393,12 @@
       renderMicSlots(Array.isArray(data.micSlots) ? data.micSlots : [null, null, null, null, null]);
     });
 
+    // تهيئة micSlots إذا لم تكن موجودة
     db.collection("rooms").doc(roomId).get().then(doc => {
-      if (!doc.exists) {
+      if (!doc.exists || !doc.data().micSlots) {
         db.collection("rooms").doc(roomId).set({
           micSlots: [null, null, null, null, null]
-        });
+        }, { merge: true }); // استخدام merge لتجنب حذف البيانات الأخرى إذا كانت موجودة
       }
     });
 
@@ -349,7 +408,19 @@
     });
 
     window.addEventListener("beforeunload", () => {
+      // حذف المستخدم من قائمة المتصلين عند إغلاق أو تحديث الصفحة
       db.collection("online").doc(userId).delete();
+      // إزالة المايك الخاص بالمستخدم إذا كان ممسوكًا
+      const roomRef = db.collection("rooms").doc(roomId);
+      roomRef.get().then(doc => {
+        const data = doc.data();
+        const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [];
+        const index = micSlots.indexOf(username);
+        if (index !== -1) {
+          micSlots[index] = null;
+          roomRef.update({ micSlots });
+        }
+      });
     });
 
     db.collection("online").onSnapshot(snapshot => {
@@ -363,7 +434,10 @@
           let html = "<strong>المتصلون الآن:</strong><br>";
           snapshot.forEach(doc => {
             const data = doc.data();
-            html += `<button style="display:block; margin:5px 0;" onclick="openPrivateChat('${doc.id}', '${data.username}')">• ${data.username}</button>`;
+            // لا تعرض اسم المستخدم الحالي في قائمة المتصلين للدردشة الخاصة مع نفسه
+            if (doc.id !== userId) { 
+                html += `<button onclick="openPrivateChat('${doc.id}', '${data.username}')">• ${data.username}</button>`;
+            }
           });
           onlineListDiv.innerHTML = html;
           onlineListDiv.style.display = "block";
@@ -376,14 +450,18 @@
 
   function openPrivateChat(targetId, targetName) {
     currentPrivateTarget = targetId;
+    currentPrivateTargetName = targetName; // تخزين اسم المستلم
     privateName.textContent = targetName;
     privateChat.style.display = "block";
+    onlineListDiv.style.display = "none"; // ✅ إخفاء قائمة المتصلين عند فتح الخاص
     loadPrivateMessages(targetId);
   }
 
   function closePrivateChat() {
     privateChat.style.display = "none";
     currentPrivateTarget = null;
+    currentPrivateTargetName = null;
+    privateMessages.innerHTML = ""; // مسح الرسائل عند إغلاق الخاص
   }
 
   function loadPrivateMessages(targetId) {
@@ -396,9 +474,11 @@
           const data = doc.data();
           const div = document.createElement("div");
           div.className = "message";
+          // تحديد من هو المرسل بشكل أوضح
+          const senderName = data.from === userId ? "أنا" : data.fromName;
           div.innerHTML = `
             <div class="message-header">
-              <div class="message-user">${data.from === userId ? "أنا" : data.fromName}</div>
+              <div class="message-user">${senderName}</div>
               <div class="message-time">${formatTime(data.timestamp)}</div>
             </div>
             <div class="message-text">${data.text}</div>
@@ -409,16 +489,27 @@
       });
   }
 
-  function sendPrivateMessage(e) {
+  async function sendPrivateMessage(e) {
     e.preventDefault();
     const text = privateInput.value.trim();
-    if (!text || !currentPrivateTarget) return;
+    if (!text || !currentPrivateTarget || !currentPrivateTargetName) return; // التأكد من وجود اسم المستلم
 
     const chatId = [userId, currentPrivateTarget].sort().join("_");
-    db.collection("privateMessages").doc(chatId).collection("messages").add({
+    
+    // لإضافة معلومات المستخدمين إلى وثيقة privateMessages الرئيسية للمساعدة في قواعد الأمان
+    await db.collection("privateMessages").doc(chatId).set({
+        user1Id: userId,
+        user1Name: username,
+        user2Id: currentPrivateTarget,
+        user2Name: currentPrivateTargetName,
+        lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    await db.collection("privateMessages").doc(chatId).collection("messages").add({
       from: userId,
       fromName: username,
       to: currentPrivateTarget,
+      toName: currentPrivateTargetName, // ✅ إضافة اسم المستلم هنا
       text,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -433,10 +524,16 @@
       slot.className = "mic-slot";
 
       if (user) {
+        let buttonsHtml = '';
+        if (user === username) { // ✅ فقط إذا كان المايك خاص بالمستخدم الحالي
+          buttonsHtml = `<button onclick="removeMic(${index})">❌ إزالة المايك</button>`;
+        } else {
+          // يمكن لأي شخص كتم الآخر (هذا مجرد رسالة نظامية، لا يوجد كتم فعلي للصوت هنا)
+          buttonsHtml = `<button onclick="displaySystemMessage('${user} تم كتمه مؤقتًا.');">🔇 كتم</button>`; 
+        }
         slot.innerHTML = `
           🎤 ${user}<br>
-          <button onclick="muteUser('${user}')">🔇 كتم</button>
-          <button onclick="removeMic(${index})">❌ إزالة</button>
+          ${buttonsHtml}
         `;
       } else {
         slot.innerHTML = `<button onclick="takeMic(${index})">🎤 الحصول على المايك</button>`;
@@ -451,7 +548,13 @@
     roomRef.get().then(doc => {
       const data = doc.data();
       const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      if (micSlots.includes(username)) return;
+      
+      // ✅ تحقق إذا كان المستخدم يمتلك مايك بالفعل
+      if (micSlots.includes(username)) {
+        displaySystemMessage("أنت تملك مايك بالفعل. يرجى إزالة المايك الحالي أولاً.");
+        return;
+      }
+
       if (!micSlots[index]) {
         micSlots[index] = username;
         roomRef.update({ micSlots });
@@ -464,19 +567,21 @@
     roomRef.get().then(doc => {
       const data = doc.data();
       const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      micSlots[index] = null;
-      roomRef.update({ micSlots });
+      
+      // ✅ تحقق أن المستخدم يزيل المايك الخاص به
+      if (micSlots[index] === username) {
+        micSlots[index] = null;
+        roomRef.update({ micSlots });
+      } else {
+        displaySystemMessage("لا يمكنك إزالة مايك لا تملكه.");
+      }
     });
   }
 
-  function muteUser(user) {
-    const div = document.createElement("div");
-    div.className = "system-message";
-    div.textContent = `${user} تم كتمه مؤقتًا`;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
+  // دالة muteUser الأصلية تم استبدالها بدالة displaySystemMessage في renderMicSlots
+  // function muteUser(user) {
+  //   displaySystemMessage(`${user} تم كتمه مؤقتًا`);
+  // }
 </script>
 </body>
 </html>
-
