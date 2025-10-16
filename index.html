@@ -67,6 +67,7 @@
       background: #fff;
       border-bottom: 1px solid #ccc;
       justify-content: center;
+      align-items: center;
     }
 
     .audio-btn {
@@ -85,6 +86,14 @@
     #unmute-btn {
       background-color: #2ecc71;
       color: white;
+    }
+
+    #mic-status {
+      padding: 8px 15px;
+      background-color: #3498db;
+      color: white;
+      border-radius: 6px;
+      font-size: 14px;
     }
 
     #mic-area {
@@ -286,8 +295,25 @@
       cursor: pointer;
     }
 
-    #remote-audio {
-      display: none;
+    #audio-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .audio-level {
+      width: 20px;
+      height: 5px;
+      background-color: #ddd;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .audio-level-fill {
+      height: 100%;
+      background-color: #2ecc71;
+      width: 0%;
+      transition: width 0.1s;
     }
 
     @media (max-width: 600px) {
@@ -320,6 +346,13 @@
   <div id="audio-controls">
     <button id="mute-btn" class="audio-btn">🔇 كتم المايك</button>
     <button id="unmute-btn" class="audio-btn">🎤 تشغيل المايك</button>
+    <div id="mic-status">حالة المايك: جاهز</div>
+    <div id="audio-indicator">
+      <span>مستوى الصوت:</span>
+      <div class="audio-level">
+        <div class="audio-level-fill" id="audio-level-fill"></div>
+      </div>
+    </div>
   </div>
   
   <div id="mic-area"></div>
@@ -343,9 +376,6 @@
       <button type="submit" id="private-send">إرسال</button>
     </form>
   </div>
-
-  <!-- الصوت للطرف الآخر -->
-  <audio id="remote-audio" autoplay></audio>
 </div>
 
 <script>
@@ -369,6 +399,10 @@
   let localStream = null;
   let isMuted = false;
   let currentPrivateTarget = null;
+  let audioContext = null;
+  let analyser = null;
+  let microphone = null;
+  let javascriptNode = null;
 
   // عناصر DOM
   const messagesDiv = document.getElementById('messages');
@@ -377,9 +411,10 @@
   const input = document.getElementById('message-input');
   const onlineCountBtn = document.getElementById('online-count');
   const onlineListDiv = document.getElementById('online-list');
-  const remoteAudio = document.getElementById('remote-audio');
   const muteBtn = document.getElementById('mute-btn');
   const unmuteBtn = document.getElementById('unmute-btn');
+  const micStatus = document.getElementById('mic-status');
+  const audioLevelFill = document.getElementById('audio-level-fill');
 
   const privateChat = document.getElementById('private-chat');
   const privateName = document.getElementById('private-name');
@@ -402,9 +437,10 @@
     activateMic();
   }
 
-  // تفعيل المايك
+  // تفعيل المايك مع تحليل الصوت
   async function activateMic() {
     try {
+      // طلب إذن استخدام المايك
       localStream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -413,11 +449,74 @@
         } 
       });
       
+      // إعداد تحليل الصوت
+      setupAudioAnalysis();
+      
+      micStatus.textContent = "حالة المايك: نشط";
       console.log("تم تفعيل المايك بنجاح");
       
     } catch (err) {
       console.error("فشل تفعيل الصوت:", err);
+      micStatus.textContent = "حالة المايك: معطل";
       alert("يرجى السماح بالوصول إلى المايك من إعدادات المتصفح");
+    }
+  }
+
+  // إعداد تحليل الصوت
+  function setupAudioAnalysis() {
+    try {
+      // إنشاء سياق الصوت
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      microphone = audioContext.createMediaStreamSource(localStream);
+      
+      // ربط المايك بالمحلل
+      microphone.connect(analyser);
+      
+      // إعداد المحلل
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      
+      // إنشاء عقدة لمعالجة البيانات
+      javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+      
+      // ربط المحلل بالعقدة
+      analyser.connect(javascriptNode);
+      javascriptNode.connect(audioContext.destination);
+      
+      // معالجة بيانات الصوت
+      javascriptNode.onaudioprocess = function() {
+        if (!isMuted) {
+          analyser.getByteFrequencyData(dataArray);
+          
+          // حساب متوسط مستوى الصوت
+          let values = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            values += dataArray[i];
+          }
+          
+          const average = values / bufferLength;
+          
+          // تحديث مؤشر مستوى الصوت
+          const level = Math.min(100, average * 100 / 128);
+          audioLevelFill.style.width = level + '%';
+          
+          // تغيير اللون بناءً على مستوى الصوت
+          if (level > 70) {
+            audioLevelFill.style.backgroundColor = '#e74c3c';
+          } else if (level > 30) {
+            audioLevelFill.style.backgroundColor = '#f39c12';
+          } else {
+            audioLevelFill.style.backgroundColor = '#2ecc71';
+          }
+        } else {
+          audioLevelFill.style.width = '0%';
+        }
+      };
+      
+    } catch (e) {
+      console.error("خطأ في تحليل الصوت:", e);
     }
   }
 
@@ -429,6 +528,7 @@
           track.enabled = false;
         });
         isMuted = true;
+        micStatus.textContent = "حالة المايك: مكتوم";
         console.log("تم كتم المايك");
       }
     });
@@ -439,6 +539,7 @@
           track.enabled = true;
         });
         isMuted = false;
+        micStatus.textContent = "حالة المايك: نشط";
         console.log("تم إلغاء كتم المايك");
       }
     });
@@ -539,6 +640,14 @@
       if (!micSlots[index]) {
         micSlots[index] = username;
         roomRef.update({ micSlots });
+        
+        // إضافة رسالة نظام
+        db.collection("rooms").doc(roomId).collection("messages").add({
+          username: "النظام",
+          text: `${username} حصل على المايك`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          userId: "system"
+        });
       }
     });
   }
@@ -549,8 +658,19 @@
     roomRef.get().then(doc => {
       const data = doc.data();
       const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
+      const user = micSlots[index];
       micSlots[index] = null;
       roomRef.update({ micSlots });
+      
+      // إضافة رسالة نظام
+      if (user) {
+        db.collection("rooms").doc(roomId).collection("messages").add({
+          username: "النظام",
+          text: `${user} ترك المايك`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          userId: "system"
+        });
+      }
     });
   }
 
