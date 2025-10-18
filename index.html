@@ -1,587 +1,326 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>غرفة دردشة</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>دردشة فورية بسيطة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- خط Tajawal -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      /* تم تغيير هذا إلى rtl إذا كان المحتوى الأساسي عربي */
-      direction: rtl; 
-    }
-
-    #login-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f0f0f0;
-    }
-
-    #chat-page {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    #mic-area {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
+      font-family: 'Tajawal', sans-serif;
       background: #fff;
-      border-bottom: 1px solid #ccc;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .mic-slot {
-      border: 1px solid #ccc;
-      padding: 8px;
-      border-radius: 6px;
-      min-width: 120px;
-      text-align: center;
-      background: #f0f0f0;
-      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative;
     }
 
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
-      background-color: #fff;
-      max-height: 60vh;
-      /* لتحديد اتجاه النص داخل مربع الرسائل */
-      direction: rtl; 
+      padding: 10px;
+      background: #fff;
     }
 
-    .message {
+    .msg {
+      margin: 6px 0;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start; /* لتبدأ الرسائل من اليمين في RTL */
-      margin-bottom: 15px;
-    }
-
-    .message-header {
-      display: flex;
+      justify-content: flex-start;
       gap: 10px;
       align-items: center;
+      direction: ltr;
+      text-align: left;
+      font-size: 15px;
+      font-family: 'Tajawal', sans-serif;
     }
 
-    .message-user {
-      font-weight: bold;
-      color: #2c3e50;
-      min-width: 100px;
-    }
-
-    .message-time {
-      font-size: 10px;
-      color: #999;
-    }
-
-    .message-text {
-      color: #34495e;
-      background-color: #ecf0f1;
-      padding: 10px;
-      border-radius: 6px;
-      max-width: 80%;
-      word-wrap: break-word;
-      margin-top: 4px;
-      text-align: right; /* لتحديد اتجاه نص الرسالة */
-    }
-
-    .system-message {
+    .sys {
       text-align: center;
-      font-style: italic;
-      color: #7f8c8d;
-      margin-bottom: 10px;
+      color: gray;
+      font-size: 12px;
+      margin: 5px 0;
     }
 
-    #message-form {
-      display: flex;
-      flex-direction: row-reverse; /* لعكس ترتيب العناصر (الزر لليمين) */
-      padding: 10px;
-      background-color: #eee;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      text-align: right; /* ليكون مربع الإدخال من اليمين لليسار */
-    }
-
-    #send-btn {
-      padding: 12px 20px;
-      font-size: 16px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    #send-btn:hover {
-      background-color: #2980b9;
-    }
-
-    #online-count {
-      font-size: 13px;
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    #online-list {
-      display: none;
-      position: absolute;
-      /* تعديل لل RTL */
-      bottom: 60px;
-      right: 20px; 
-      left: auto; 
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 10;
-      font-size: 14px;
-      min-width: 200px;
-      direction: rtl; /* اتجاه القائمة */
-      text-align: right;
-    }
-    #online-list button {
-        width: 100%;
-        text-align: right;
-        display: block;
-        margin: 5px 0;
-        padding: 8px 10px;
-        background-color: #f9f9f9;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    #online-list button:hover {
-        background-color: #e0e0e0;
-    }
-
-    #private-chat {
-      display: none;
-      position: absolute;
-      /* تعديل لل RTL */
-      bottom: 60px;
-      right: 20px;
-      left: auto;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 10;
-      font-size: 14px;
-      width: 300px;
-      max-height: 400px;
-      overflow-y: auto;
-      direction: rtl; /* اتجاه نافذة الدردشة الخاصة */
-    }
-
-    #private-header {
-      background: #eee;
-      padding: 10px;
+    .user {
       font-weight: bold;
-      border-bottom: 1px solid #ccc;
-      text-align: right;
+      color: #3366cc;
     }
 
-    #private-header button {
-        float: left; /* زر الإغلاق لليسار في RTL */
+    .time {
+      font-size: 11px;
+      color: gray;
     }
 
-    #private-form {
-      display: flex;
-      /* عكس ليكون زر الإرسال لليمين */
-      flex-direction: row-reverse; 
-      padding: 10px;
-      background: #eee;
-      gap: 10px;
-    }
+    #inputArea {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #ddd;
+  padding: 6px;
+}
 
-    #private-input {
+    #messageInput {
       flex: 1;
-      padding: 10px;
-      font-size: 14px;
+      font-size: 16px;
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      text-align: right; /* مربع الإدخال لليسار في RTL */
+      font-family: 'Tajawal', sans-serif;
     }
 
-    #private-send {
-      padding: 10px 16px;
-      background: #2ecc71;
-      color: white;
-      border: none;
+    #sendBtn {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
       border-radius: 6px;
+      background: #f9f9f9;
       cursor: pointer;
-    }
-    /* تعديل لرسائل الدردشة الخاصة لتكون متناسبة مع RTL */
-    #private-messages .message {
-        align-items: flex-start; /* لتبدأ رسائلك من اليمين */
-    }
-    #private-messages .message-user {
-        text-align: right;
-    }
-    #private-messages .message-text {
-        text-align: right;
+      font-family: 'Tajawal', sans-serif;
     }
 
+    #onlineList {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      border: 1px solid #ccc;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    #onlineList:hover {
+      background: #f5f5f5;
+    }
+
+    #usersBox {
+      position: fixed;
+      top: 50px;
+      right: 10px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 999;
+      min-width: 150px;
+      max-width: 200px;
+      display: none;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    #usersBox h4 {
+      margin: 0 0 8px 0;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    #usersList {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .user-item {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .user-item:last-child {
+      border-bottom: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      z-index: 998;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <!-- واجهة الدخول -->
-  <div id="login-page">
-    <h2>أدخل اسمك المستعار للدخول</h2>
-    <input type="text" id="login-name" placeholder="زائر123" style="padding:10px; font-size:16px; width:200px; margin-bottom:10px; text-align: right;" />
-    <button onclick="enterChat()" style="padding:10px 20px; font-size:16px;">دخول</button>
+  <div id="onlineList">👥 <span id="count">0</span> متصل</div>
+  <div id="usersBox">
+    <h4>المتصلين الآن</h4>
+    <div id="usersList"></div>
+  </div>
+  <div id="overlay"></div>
+
+  <div id="messages"></div>
+
+  <div id="inputArea">
+    <button id="sendBtn">إرسال</button>
+    <input type="text" id="messageInput" placeholder="اكتب رسالتك..." />
   </div>
 
-  <!-- واجهة الدردشة -->
-  <div id="chat-page">
-    <div id="mic-area"></div>
-    <div id="messages"></div>
-    <form id="message-form">
-      <button type="submit" id="send-btn">إرسال</button>
-      <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." required />
-      <button id="online-count" type="button">المتصلين: 0</button>
-      <div id="online-list"></div>
-    </form>
-
-    <!-- نافذة الرسائل الخاصة -->
-    <div id="private-chat">
-      <div id="private-header">
-        <button onclick="closePrivateChat()" style="float:left; background: none; border: none; font-size: 18px; cursor: pointer;">❌</button>
-        محادثة خاصة مع: <span id="private-name"></span>
-      </div>
-      <div id="private-messages"></div>
-      <form id="private-form" onsubmit="sendPrivateMessage(event)">
-        <input type="text" id="private-input" placeholder="اكتب رسالة خاصة..." required />
-        <button type="submit" id="private-send">إرسال</button>
-      </form>
-    </div>
-  </div>
   <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-    authDomain: "mychat-2d881.firebaseapp.com",
-    projectId: "mychat-2d881",
-    storageBucket: "mychat-2d881.appspot.com",
-    messagingSenderId: "532385733649",
-    appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+      authDomain: "mychat-2d881.firebaseapp.com",
+      databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+      projectId: "mychat-2d881",
+      storageBucket: "mychat-2d881.appspot.com",
+      messagingSenderId: "532385733649",
+      appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+    const username = "مستخدم_" + Math.floor(Math.random() * 1000);
+    const userRef = db.ref("online/" + username);
+    userRef.set(true);
+    userRef.onDisconnect().remove();
 
-  const roomId = "room1";
-  let username = "";
-  // يفضل استخدام Firebase Authentication للحصول على userId ثابت
-  const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
-  const messagesDiv = document.getElementById('messages');
-  const micArea = document.getElementById('mic-area');
-  const form = document.getElementById('message-form');
-  const input = document.getElementById('message-input');
-  const onlineCountBtn = document.getElementById('online-count');
-  const onlineListDiv = document.getElementById('online-list');
+    const onlineList = document.getElementById("onlineList");
+    const usersBox = document.getElementById("usersBox");
+    const usersList = document.getElementById("usersList");
+    const overlay = document.getElementById("overlay");
+    const count = document.getElementById("count");
+    const messagesDiv = document.getElementById("messages");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
 
-  const privateChat = document.getElementById('private-chat');
-  const privateName = document.getElementById('private-name');
-  const privateMessages = document.getElementById('private-messages');
-  const privateInput = document.getElementById('private-input');
-  let currentPrivateTarget = null; // userId للطرف الآخر في الدردشة الخاصة
-  let currentPrivateTargetName = null; // اسم الطرف الآخر في الدردشة الخاصة
+    onlineList.onclick = function(e) {
+      e.stopPropagation();
+      toggleUsersBox();
+    };
 
-  function enterChat() {
-    const inputName = document.getElementById("login-name").value.trim();
-    username = inputName || "زائر" + Math.floor(Math.random() * 1000);
+    overlay.onclick = closeUsersBox;
+    document.addEventListener('click', function(e) {
+      if (!usersBox.contains(e.target) && e.target !== onlineList) {
+        closeUsersBox();
+      }
+    });
 
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("chat-page").style.display = "flex";
+    function toggleUsersBox() {
+      if (usersBox.style.display === 'block') {
+        closeUsersBox();
+      } else {
+        openUsersBox();
+      }
+    }
 
-    // ✅ طلب صلاحية المايك بعد الدخول
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        console.log("✅ تم تفعيل المايك");
-        window.localAudioStream = stream;
-        // هنا يمكن بدء إرسال تيار الصوت إذا كنت تستخدم WebRTC
-      })
-      .catch(err => {
-        console.error("❌ فشل الوصول للمايك:", err);
-        // رسالة أكثر لطفًا للمستخدم بدلاً من alert
-        displaySystemMessage("يرجى السماح بالوصول إلى المايك من إعدادات المتصفح للاستمتاع بالمحادثات الصوتية.");
+    function openUsersBox() {
+      usersBox.style.display = 'block';
+      overlay.style.display = 'block';
+    }
+
+    function closeUsersBox() {
+      usersBox.style.display = 'none';
+      overlay.style.display = 'none';
+    }
+
+    db.ref("online").on("child_added", snap => {
+      const user = snap.key;
+      showSystemMsg(`📥 ${user} دخل الدردشة`);
+      updateUsersList();
+    });
+
+    db.ref("online").on("child_removed", snap => {
+      const user = snap.key;
+      showSystemMsg(`📤 ${user} غادر الدردشة`);
+      updateUsersList();
+    });
+
+    function updateUsersList() {
+      db.ref("online").once("value", snap => {
+        const users = snap.val() ? Object.keys(snap.val()) : [];
+        usersList.innerHTML = '';
+        users.forEach(user => {
+          const userItem = document.createElement("div");
+          userItem.className = "user-item";
+          userItem.textContent = user;
+          usersList.appendChild(userItem);
+        });
       });
+    }
 
-    startChat();
-  }
+    db.ref("online").on("value", snap => {
+      const users = snap.val() ? Object.keys(snap.val()) : [];
+      count.textContent = users.length;
+    });
 
-  function formatTime(timestamp) {
-    if (!timestamp) return "";
-    const date = timestamp.toDate();
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+    sendBtn.onclick = sendMessage;
+    messageInput.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
 
-  // دالة لعرض رسائل النظام
-  function displaySystemMessage(message) {
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const ref = db.ref("messages").push();
+      ref.set({ user: username, text, time });
+      messageInput.value = "";
+      closeUsersBox();
+    }
+
+    // استقبال آخر 20 رسالة فقط
+    const messagesRef = db.ref("messages").limitToLast(20);
+    messagesRef.on("child_added", snap => {
+      const msg = snap.val();
+      addMessage(msg.user, msg.text, msg.time);
+    });
+
+    // حذف الرسائل القديمة (أكثر من 20)
+    db.ref("messages").on("value", snap => {
+      const all = snap.val();
+      if (!all) return;
+      const keys = Object.keys(all);
+      if (keys.length > 20) {
+        const excess = keys.slice(0, keys.length - 20);
+        excess.forEach(k => db.ref("messages/" + k).remove());
+      }
+    });
+
+    function addMessage(user, text, time) {
       const div = document.createElement("div");
-      div.className = "system-message";
-      div.textContent = message;
+      div.className = "msg";
+
+      const userSpan = document.createElement("span");
+      userSpan.className = "user";
+      userSpan.textContent = user;
+
+      const textSpan = document.createElement("span");
+      textSpan.textContent = text;
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "time";
+      timeSpan.textContent = time;
+
+      div.appendChild(userSpan);
+      div.appendChild(textSpan);
+      div.appendChild(timeSpan);
+
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
+    }
 
-  function startChat() {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
+    function showSystemMsg(text) {
+      const div = document.createElement("div");
+      div.className = "sys";
+      div.textContent = text;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
 
-      await db.collection("rooms").doc(roomId).collection("messages").add({
-        username,
-        text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      input.value = "";
-    });
-
-    db.collection("rooms").doc(roomId).collection("messages")
-      .orderBy("timestamp", "desc")
-      .limit(20)
-      .onSnapshot(snapshot => {
-        messagesDiv.innerHTML = "";
-        const docs = snapshot.docs.reverse();
-        docs.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement("div");
-          div.className = "message";
-          div.innerHTML = `
-            <div class="message-header">
-              <div class="message-user">${data.username}</div>
-              <div class="message-time">${formatTime(data.timestamp)}</div>
-            </div>
-            <div class="message-text">${data.text}</div>
-          `;
-          messagesDiv.appendChild(div);
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
-
-    db.collection("rooms").doc(roomId).onSnapshot(doc => {
-      const data = doc.data();
-      renderMicSlots(Array.isArray(data.micSlots) ? data.micSlots : [null, null, null, null, null]);
-    });
-
-    // تهيئة micSlots إذا لم تكن موجودة
-    db.collection("rooms").doc(roomId).get().then(doc => {
-      if (!doc.exists || !doc.data().micSlots) {
-        db.collection("rooms").doc(roomId).set({
-          micSlots: [null, null, null, null, null]
-        }, { merge: true }); // استخدام merge لتجنب حذف البيانات الأخرى إذا كانت موجودة
-      }
-    });
-
-    db.collection("online").doc(userId).set({
-      username,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    window.addEventListener("beforeunload", () => {
-      // حذف المستخدم من قائمة المتصلين عند إغلاق أو تحديث الصفحة
-      db.collection("online").doc(userId).delete();
-      // إزالة المايك الخاص بالمستخدم إذا كان ممسوكًا
-      const roomRef = db.collection("rooms").doc(roomId);
-      roomRef.get().then(doc => {
-        const data = doc.data();
-        const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [];
-        const index = micSlots.indexOf(username);
-        if (index !== -1) {
-          micSlots[index] = null;
-          roomRef.update({ micSlots });
-        }
-      });
-    });
-
-    db.collection("online").onSnapshot(snapshot => {
-      const count = snapshot.size;
-      onlineCountBtn.textContent = `المتصلين: ${count}`;
-    });
-
-    onlineCountBtn.addEventListener("click", () => {
-      if (onlineListDiv.style.display === "none") {
-        db.collection("online").get().then(snapshot => {
-          let html = "<strong>المتصلون الآن:</strong><br>";
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            // لا تعرض اسم المستخدم الحالي في قائمة المتصلين للدردشة الخاصة مع نفسه
-            if (doc.id !== userId) { 
-                html += `<button onclick="openPrivateChat('${doc.id}', '${data.username}')">• ${data.username}</button>`;
-            }
-          });
-          onlineListDiv.innerHTML = html;
-          onlineListDiv.style.display = "block";
-        });
-      } else {
-        onlineListDiv.style.display = "none";
-      }
-    });
-  }
-
-  function openPrivateChat(targetId, targetName) {
-    currentPrivateTarget = targetId;
-    currentPrivateTargetName = targetName; // تخزين اسم المستلم
-    privateName.textContent = targetName;
-    privateChat.style.display = "block";
-    onlineListDiv.style.display = "none"; // ✅ إخفاء قائمة المتصلين عند فتح الخاص
-    loadPrivateMessages(targetId);
-  }
-
-  function closePrivateChat() {
-    privateChat.style.display = "none";
-    currentPrivateTarget = null;
-    currentPrivateTargetName = null;
-    privateMessages.innerHTML = ""; // مسح الرسائل عند إغلاق الخاص
-  }
-
-  function loadPrivateMessages(targetId) {
-    const chatId = [userId, targetId].sort().join("_");
-    db.collection("privateMessages").doc(chatId).collection("messages")
-      .orderBy("timestamp")
-      .onSnapshot(snapshot => {
-        privateMessages.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement("div");
-          div.className = "message";
-          // تحديد من هو المرسل بشكل أوضح
-          const senderName = data.from === userId ? "أنا" : data.fromName;
-          div.innerHTML = `
-            <div class="message-header">
-              <div class="message-user">${senderName}</div>
-              <div class="message-time">${formatTime(data.timestamp)}</div>
-            </div>
-            <div class="message-text">${data.text}</div>
-          `;
-          privateMessages.appendChild(div);
-        });
-        privateMessages.scrollTop = privateMessages.scrollHeight;
-      });
-  }
-
-  async function sendPrivateMessage(e) {
-    e.preventDefault();
-    const text = privateInput.value.trim();
-    if (!text || !currentPrivateTarget || !currentPrivateTargetName) return; // التأكد من وجود اسم المستلم
-
-    const chatId = [userId, currentPrivateTarget].sort().join("_");
-    
-    // لإضافة معلومات المستخدمين إلى وثيقة privateMessages الرئيسية للمساعدة في قواعد الأمان
-    await db.collection("privateMessages").doc(chatId).set({
-        user1Id: userId,
-        user1Name: username,
-        user2Id: currentPrivateTarget,
-        user2Name: currentPrivateTargetName,
-        lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
-    await db.collection("privateMessages").doc(chatId).collection("messages").add({
-      from: userId,
-      fromName: username,
-      to: currentPrivateTarget,
-      toName: currentPrivateTargetName, // ✅ إضافة اسم المستلم هنا
-      text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    privateInput.value = "";
-  }
-
-  function renderMicSlots(micSlots) {
-    micArea.innerHTML = "";
-    micSlots.forEach((user, index) => {
-      const slot = document.createElement("div");
-      slot.className = "mic-slot";
-
-      if (user) {
-        let buttonsHtml = '';
-        if (user === username) { // ✅ فقط إذا كان المايك خاص بالمستخدم الحالي
-          buttonsHtml = `<button onclick="removeMic(${index})">❌ إزالة المايك</button>`;
-        } else {
-          // يمكن لأي شخص كتم الآخر (هذا مجرد رسالة نظامية، لا يوجد كتم فعلي للصوت هنا)
-          buttonsHtml = `<button onclick="displaySystemMessage('${user} تم كتمه مؤقتًا.');">🔇 كتم</button>`; 
-        }
-        slot.innerHTML = `
-          🎤 ${user}<br>
-          ${buttonsHtml}
-        `;
-      } else {
-        slot.innerHTML = `<button onclick="takeMic(${index})">🎤 الحصول على المايك</button>`;
-      }
-
-      micArea.appendChild(slot);
-    });
-  }
-
-  function takeMic(index) {
-    const roomRef = db.collection("rooms").doc(roomId);
-    roomRef.get().then(doc => {
-      const data = doc.data();
-      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      
-      // ✅ تحقق إذا كان المستخدم يمتلك مايك بالفعل
-      if (micSlots.includes(username)) {
-        displaySystemMessage("أنت تملك مايك بالفعل. يرجى إزالة المايك الحالي أولاً.");
-        return;
-      }
-
-      if (!micSlots[index]) {
-        micSlots[index] = username;
-        roomRef.update({ micSlots });
-      }
-    });
-  }
-
-  function removeMic(index) {
-    const roomRef = db.collection("rooms").doc(roomId);
-    roomRef.get().then(doc => {
-      const data = doc.data();
-      const micSlots = Array.isArray(data.micSlots) ? [...data.micSlots] : [null, null, null, null, null];
-      
-      // ✅ تحقق أن المستخدم يزيل المايك الخاص به
-      if (micSlots[index] === username) {
-        micSlots[index] = null;
-        roomRef.update({ micSlots });
-      } else {
-        displaySystemMessage("لا يمكنك إزالة مايك لا تملكه.");
-      }
-    });
-  }
-
-  // دالة muteUser الأصلية تم استبدالها بدالة displaySystemMessage في renderMicSlots
-  // function muteUser(user) {
-  //   displaySystemMessage(`${user} تم كتمه مؤقتًا`);
-  // }
-</script>
+    updateUsersList();
+  </script>
 </body>
 </html>
