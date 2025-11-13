@@ -5,24 +5,61 @@
   <title>دردشة متكاملة</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
-    /* ... (CSS لم يتغير) ... */
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
     body { font-family: 'Tajawal', sans-serif; background: #f4f7f9; display: flex; flex-direction: column; position: relative; }
     #chat-container { display: flex; flex-direction: column; height: 100%; }
-    #messages { flex: 1; overflow-y: auto; padding: 15px; background: #fff; }
-    .msg { margin: 8px 0; display: flex; gap: 10px; align-items: center; direction: ltr; text-align: left; position: relative; font-size: 15px; line-height: 1.4; }
-    .msg:hover .delete-btn { opacity: 1; transform: scale(1); }
+    #messages { flex: 1; overflow-y: auto; padding: 0; background: #fff; }
+
+    /* تعديل تصميم الرسائل لاستخدام Flexbox */
+    .msg {
+      display: flex;
+      justify-content: space-between; /* يدفع العناصر إلى الأطراف */
+      align-items: baseline; /* محاذاة على خط الأساس للنص */
+      padding: 10px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      direction: rtl;
+      text-align: right;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    
+    .msg-content {
+      flex-grow: 1; /* يسمح لمحتوى الرسالة بأخذ المساحة المتاحة */
+    }
+
+    /* تصميم خاص لرسائل المستخدم الحالي */
+    .msg.own-message {
+      background-color: #f0f8ff;
+    }
+
+    /* زر الحذف الجديد (نص) */
+    .delete-btn-text {
+      color: #e74c3c;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 10px; /* مسافة بين زر الحذف والوقت */
+      opacity: 0; /* إخفاء الزر افتراضياً */
+      transition: opacity 0.2s ease-in-out;
+    }
+    
+    .delete-btn-text:hover {
+      text-decoration: underline;
+    }
+
+    /* إظهار زر الحذف عند تمرير الفأرة فوق الرسالة الخاصة بالمستخدم */
+    .msg.own-message:hover .delete-btn-text {
+      opacity: 1;
+    }
+    
     .sys { text-align: center; color: #888; font-size: 12px; margin: 10px auto; font-style: italic; background-color: #f0f0f0; padding: 4px 10px; border-radius: 12px; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 1; transform: translateY(0); }
     .sys.fade-out { opacity: 0; transform: translateY(-20px); }
-    .user { font-weight: bold; color: #005c97; }
-    .time { font-size: 11px; color: #999; }
-    .delete-btn { cursor: pointer; color: white; background-color: #e74c3c; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 10px; opacity: 0; transform: scale(0.8); transition: opacity 0.2s, transform 0.2s; }
-    .delete-btn:hover { background-color: #c0392b; }
+    .user { font-weight: bold; color: #005c97; margin-left: 5px; }
+    .time { font-size: 11px; color: #999; white-space: nowrap; /* لمنع الوقت من النزول لسطر جديد */ }
+    
     #typing-indicator { height: 20px; padding: 0 15px; font-size: 13px; color: #888; font-style: italic; transition: opacity 0.3s; }
     #inputArea { display: flex; flex-direction: row; align-items: center; gap: 8px; border-top: 1px solid #ddd; padding: 8px; background: #fdfdfd; }
     #messageInput { flex: 1; font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 20px; font-family: 'Tajawal', sans-serif; transition: border-color 0.2s; }
@@ -62,30 +99,25 @@
       const username = "زائر_" + Math.floor(Math.random() * 1000);
       const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
       
-      // استعادة تعريف العناصر المحذوفة
+      const messagesDiv = document.getElementById("messages");
+      const onlineRef = db.ref("online");
+      const messagesRef = db.ref("messages");
+      const userRef = db.ref("online/" + username);
+      const messageInput = document.getElementById("messageInput");
+      const inputAreaForm = document.getElementById("inputArea");
       const onlineList = document.getElementById("onlineList");
       const usersBox = document.getElementById("usersBox");
       const usersList = document.getElementById("usersList");
       const count = document.getElementById("count");
-      const messagesDiv = document.getElementById("messages");
       const typingIndicator = document.getElementById("typing-indicator");
-      
-      const userRef = db.ref("online/" + username);
-      const messagesRef = db.ref("messages");
-      const onlineRef = db.ref("online");
-      const messageInput = document.getElementById("messageInput");
-      const inputAreaForm = document.getElementById("inputArea");
-      
+
       let typingTimer, serverTimeOffset = 0;
 
-      // تسجيل الدخول وإعداد حالة الكتابة
       userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping: false });
       userRef.onDisconnect().remove();
 
-      // مزامنة وقت السيرفر
       db.ref('.info/serverTimeOffset').on('value', snap => { serverTimeOffset = snap.val() || 0; });
       
-      // نظام الحضور والمغادرة والتنظيف
       setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
       setInterval(() => {
         const now = Date.now() + serverTimeOffset; const STALE_THRESHOLD = 90 * 1000;
@@ -95,12 +127,10 @@
         });
       }, 60000);
 
-      // استعادة وظائف زر المتصلين
       onlineList.onclick = e => { e.stopPropagation(); usersBox.classList.toggle('visible'); };
       document.onclick = () => { if (usersBox.classList.contains('visible')) usersBox.classList.remove('visible'); };
       usersBox.onclick = e => e.stopPropagation();
 
-      // المستمع الرئيسي للمستخدمين المتصلين
       onlineRef.on("value", snap => {
         const onlineUsers = snap.val() || {};
         count.textContent = snap.numChildren();
@@ -108,7 +138,6 @@
         updateTypingIndicator(onlineUsers);
       });
 
-      // استعادة إشعارات الدخول والخروج
       onlineRef.on("child_added", snap => { if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); });
       onlineRef.on("child_removed", snap => { showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); });
       
@@ -123,7 +152,7 @@
         clearTimeout(typingTimer);
         userRef.update({ isTyping: false });
         const text = messageInput.value.trim(); if (!text) return;
-        const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+        const time = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
         messagesRef.push().set({ user: username, text, time, uid: sessionUid });
         messageInput.value = "";
         cleanupOldMessages();
@@ -137,7 +166,6 @@
         else typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
       }
       
-      // استعادة دالة عرض قائمة المستخدمين كاملة
       function renderUsersList(onlineUsersData) {
         usersList.innerHTML = ''; const now = Date.now() + serverTimeOffset; const twoMinutesAgo = now - (2 * 60 * 1000);
         Object.keys(onlineUsersData).forEach(user => {
@@ -152,17 +180,39 @@
       messagesRef.limitToLast(50).on("child_added", snap => { addMessage(snap.key, snap.val()); });
       messagesRef.on('child_removed', snap => { const el = document.getElementById('msg-' + snap.key); if (el) el.remove(); });
       
+      /**
+       * ===================================================================
+       *  تعديل دالة إضافة الرسائل لتطبيق الحذف بالنقر على زر نصي
+       * ===================================================================
+       */
       function addMessage(key, { user, text, time, uid }) {
-        const div = document.createElement("div"); div.className = "msg"; div.id = 'msg-' + key;
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.id = 'msg-' + key;
+        
         let deleteBtnHtml = '';
-        if (uid === sessionUid) { deleteBtnHtml = `<i class="delete-btn fa fa-times" onclick="deleteMessage('${key}')" title="حذف الرسالة"></i>`; }
-        div.innerHTML = `<span class="user">${escapeHtml(user)}</span><span>${escapeHtml(text)}</span><span class="time">${escapeHtml(time)}</span>${deleteBtnHtml}`;
-        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+        // التحقق إذا كانت الرسالة من المستخدم الحالي لإضافة زر الحذف
+        if (uid === sessionUid) {
+          div.classList.add('own-message');
+          deleteBtnHtml = `<span class="delete-btn-text" onclick="deleteMessage('${key}')">حذف</span>`;
+        }
+
+        // بناء محتوى الرسالة
+        // تم تقسيمها إلى جزئين ليسهل التحكم بالمسافات عبر flexbox
+        const messageContent = `<div class="msg-content"><span class="user">${escapeHtml(user)}:</span> <span>${escapeHtml(text)}</span></div>`;
+        const messageMeta = `<div>${deleteBtnHtml}<span class="time">(${escapeHtml(time)})</span></div>`;
+
+        div.innerHTML = messageContent + messageMeta;
+        
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
       
-      window.deleteMessage = function(messageKey) { messagesRef.child(messageKey).remove().catch(error => console.error("Error deleting:", error)); }
+      window.deleteMessage = function(messageKey) {
+        messagesRef.child(messageKey).remove().catch(error => console.error("Error deleting:", error));
+      }
       
-      // استعادة الدوال المساعدة كاملة
       function cleanupOldMessages() {
         messagesRef.once('value', snapshot => {
           if (snapshot.numChildren() > 50) {
@@ -172,6 +222,7 @@
           }
         });
       }
+
       function showSystemMsg(text, isTemporary) {
         const div = document.createElement("div"); div.className = "sys"; div.textContent = text;
         messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -182,7 +233,10 @@
           }, 4000);
         }
       }
-      function escapeHtml(unsafe) { return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+      
+      function escapeHtml(unsafe) {
+        return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      }
     });
   </script>
 </body>
