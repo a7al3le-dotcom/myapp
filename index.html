@@ -4,295 +4,74 @@
   <meta charset="UTF-8">
   <title>غرفة الدردشة</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- مكتبات خارجية -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
- <style>
+
+  <!-- CSS مطابق -->
+  <style>
     body {
-      margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background-color: #f9f9f9; display: flex; flex-direction: column;
-      height: 100vh; overflow: hidden;
+      margin: 0;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #f9f9f9;
+      height: 100vh;
+      overflow: hidden;
     }
 
+    /* شاشة الدخول */
     #login-screen {
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #545E6B; z-index: 100;
+      position: absolute; inset: 0; background-color: #545E6B; z-index: 100;
     }
-    .login-box { background-color: #fff; padding: 30px; text-align: center; width: 300px; }
-    .login-box h2 { margin-top: 0; margin-bottom: 20px; color: #333; }
-    #username-input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; box-sizing: border-box; font-size: 15px; }
-    #login-btn { width: 100%; padding: 10px; border: none; background-color: #545E6B; color: white; font-size: 16px; cursor: pointer; }
-    #login-error { color: red; margin-top: 10px; display: none; }
+    .login-box {
+      background-color: #fff; padding: 30px; text-align: center; width: 300px;
+      border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .login-box h2 { margin: 0 0 20px; color: #333; }
+    #username-input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; font-size: 15px; }
+    #login-btn { width: 100%; padding: 10px; border: none; background-color: #545E6B; color: #fff; font-size: 16px; cursor: pointer; }
+    #login-error { color: #c0392b; margin-top: 10px; display: none; }
 
-    #chat-container { display: none; flex-direction: column; height: 100%; }
+    /* واجهة الدردشة */
+    #chat-container { display: none; height: 100%; display: flex; flex-direction: column; }
+    .messages { flex: 1; overflow-y: auto; background: #fff; }
 
-    .messages { flex: 1; overflow-y: auto; padding: 0; background: #fff; }
-    .uzr {
-      display: flex; width: 100%; border-bottom: 1px solid lavender;
-      margin: 0; padding: 4px 2px; background: #fff;
+    /* الرسائل */
+    .uzr { display: flex; border-bottom: 1px solid lavender; padding: 6px; background: #fff; }
+    .u-pic { min-width: 40px; width: 40px; height: 40px; background-size: cover; background-position: center; border-radius: 50%; margin-right: 8px; border: 1px solid #ddd; }
+    .msg-body { flex: 1; }
+    .msg-top { display: flex; justify-content: space-between; align-items: center; }
+    .user-wrapper { display: flex; align-items: center; gap: 6px; }
+    .u-topic { font-size: 14px; font-weight: bold; color: #222; }
+    .minix { font-size: 12px; color: #777; }
+    .u-msg { font-size: 14px; margin-top: 4px; word-wrap: break-word; text-align: left; color: #000; }
+
+    /* صندوق الإدخال */
+    .tablebox.footer { display: flex; align-items: center; background: #fff; padding: 6px; border-top: 1px solid #eee; }
+    .tbox { flex: 1; height: 36px; border: 1px solid #ccc; padding: 6px; font-size: 14px; border-radius: 3px; }
+    .btn.btn-primary { height: 36px; padding: 6px 10px; font-size: 14px; background-color: #545E6B; border: none; }
+
+    /* شريط الأزرار */
+    .actions-footer { display: flex; background-color: #545E6B; padding: 4px; gap: 4px; border-top: 1px solid #4A5361; }
+    .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 14px; color: #fff; background-color: #545E6B; border: 1px solid #000; cursor: pointer; border-radius: 2px; }
+    #busers, #bwall { background: #4A5361; padding: 2px 6px; border-radius: 10px; font-size: 12px; }
+
+    /* لوحة المتواجدين */
+    .users-panel {
+      position: fixed; top: 0; right: -260px; width: 260px; height: 100%;
+      background: #fafafa; border-left: 1px solid #ddd; box-shadow: -2px 0 6px rgba(0,0,0,0.15);
+      transition: right 0.3s ease; padding: 15px; overflow-y: auto; z-index: 200;
     }
-    .u-pic {
-      min-width: 52px; width: 52px; height: 46px; background-color: #f3f3f3;
-      background-size: cover; background-position: center; border: 1px solid #ddd; cursor: pointer;
+    .users-panel.active { right: 0; }
+    .users-panel h3 {
+      font-size: 15px; color: #333; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;
     }
-    .msg-body {
-      flex: 1; padding-left: 5px; padding-top: 1px; display: flex;
-      flex-direction: column; overflow: hidden;
-    }
-    .msg-top {
-      display: flex; justify-content: space-between; height: 21px;
-      align-items: center; width: 100%;
-    }
-    .user-wrapper { display: flex; align-items: center; }
-    .u-ico { min-height: 14px; height: 14px; margin-right: 2px; }
-    
-    .u-topic {
-      padding: 1px 4px; margin-left: 4px; border-radius: 0;
-      color: #000; background-color: transparent; border: none;
-      font-size: 15px;
-      font-weight: bold;
-    }
-    .minix { font-size: 13px !important; color: grey; margin-right: 5px; }
-    .u-msg {
-      padding: 1px 1px 1px 5px; width: 100%; color: #000;
-      font-size: 15px;
-      word-wrap: break-word; text-align: left;
-    }
-    
-    .tablebox.footer {
-      width: 100%; padding: 2px; background: #fff; 
-      display: flex; align-items: center;
-    }
-    .tablebox.footer img.emobox { padding: 5px; width: 34px; height: 34px; cursor: pointer; }
-    .tablebox.footer .tbox {
-      flex: 1; height: 34px; resize: none; border: 1px solid #ccc;
-      padding: 5px; margin: 0; border-radius: 0;
-      font-size: 15px;
-    }
-    .tablebox.footer .tbox:focus { outline: none; border-color: #ccc; box-shadow: none; }
-    
-    .tablebox.footer .btn {
-      height: 34px; margin: 0; border-radius: 0; width: auto; padding: 6px 8px;
-      font-size: 15px;
-    }
-    .tablebox.footer .btn .fa { margin-left: 0; }
-    
-    .btn.btn-primary {
-        background-color: #545E6B;
-        border-color: #4A5361; 
-    }
-    .btn.btn-primary:hover, .btn.btn-primary:focus {
-        background-color: #4A5361;
-        border-color: #4A5361;
-    }
-    
-    .actions-footer {
-      display: flex; width: 100%; background-color: #545E6B;
-      padding: 2px; justify-content: flex-start; gap: 3px;
-    }
-    
-    .action-btn {
-      width: 80px; height: 31.58px; display: flex;
-      justify-content: center; align-items: center;
-      border: 1px solid #000; padding: 0 5px;
-      border-radius: 0;
-      font-size: 15px;
-      color: white;
-      background-color: #545E6B; cursor: pointer;
-      white-space: nowrap; flex-shrink: 0;
-    }
-    
-    .action-btn.fa::before { margin-left: 4px; }
-    .action-btn span { padding: 1px 4px; }
+    #usersCount { font-size: 13px; color: #666; }
+    #usersList .user-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #444; }
+    #usersList .user-item:last-child { border-bottom: none; }
+    .user-dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; }
   </style>
-
-  <!-- الاستايل الإضافي الذي طلبته -->
-  <style> 
-      * {
-      font-family: serif;
-      font-weight: bold;
-      text-shadow: none!important;
-      font-size: 15.2px !important;line-height: 1.4!important;  font-weight:700!important;text-shadow:none!important;
-  } 
-  .u-msg{line-height: 1.5!important;}
-      .ae { 
-        border: 1px solid black!important; 
-        border-radius: 2px!important; 
-        float: left;
-        text-align: center;width: 20%; max-width: 80px;
-        padding: 4px 0px;
-        margin: 1px;margin-bottom: 2px;
-      }
-      .pmsgc {
-        background-color: rgba(0, 77, 255, 0.08)!important; 
-      }
-      .ppmsgc {
-        background-color: #f1f1ff!important;
-      }
-      .hmsg {
-        background-color: linen!important;
-      }
-      .label-primary,
-      .btn-primary,
-      .bg-primary,
-      .label-primary:hover,
-      .btn-primary:hover,
-      .btn-primary:focus {
-        background-color: #438ac7;
-        background-image: none;
-      } 
-      .bg {
-        background-color: #5D636E;
-      } 
-      .bgg {
-        background-color: lightslategray;
-      } 
-      .pophead {
-        background-color: slategrey;
-      }
-      
-      .light {
-        background-color: #FAFAFA;
-      }
-      .label,.btn{
-        border-radius: 1px;
-      }
-      .label-primary,.btn-primary{  
-        background-color: #545E6B!important;
-      }
-      .hid {
-        display: none;
-      }
-      #mic .mic,#muteall{
-        background-color: #545E6B;
-      }
-      .typingIndicatorBubbleDot {
-    width: 4px;
-    height: 4px;
-    margin-right: 4px;
-    background-color: #57585a;
-    border-radius: 50%;
-    animation-name: bounce;
-    animation-duration: 1.3s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-  }
-  .mic{
-    width:53px;height:50px;margin:1px;border-radius:4px;background-image: url(imgs/mic.png);background-size: cover;background-repeat: no-repeat;background-position: center;
-  }
-  .typingIndicatorBubbleDot:first-of-type {
-    margin: 0px 4px;
-  }
-  
-  .typingIndicatorBubbleDot:nth-of-type(2) {
-    animation-delay: 0.15s;
-  }
-  
-  .typingIndicatorBubbleDot:nth-of-type(3) {
-    animation-delay: 0.3s;
-  }
-  .flex-grow-1 {
-    flex-grow: 1 !important;
-  }
-  .c-flex {
-    display: flex;
-      flex-direction: column;
-  }
-  .d-flex{
-    display: flex; 
-  }
-  .flex-fill {
-    flex: 1 1 auto !important;
-  }
-  @supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-    .bgf {
-      background-color: rgba(0, 0, 0, .5);
-    }
-  }
-  .nav-pills li a{border-radius: 0px!important;}
-      @keyframes bounce {
-    0%,
-    60%,
-    100% {
-      transform: translateY(0);
-    }
-    30% {
-      transform: translateY(-4px);
-    }
-  } 
-  td {
-    border: 1px solid grey;
-    font-weight: bold;
-  }  
-  th {
-    background-color: cornflowerblue;
-    color: white;
-    padding: 5px;
-  }
-  .tab-pane{
-    padding: 0px;
-    width: 100%;
-  }
-   .pgr{
-    -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-   }
-  html {
-      overflow: hidden;
-  } 
-  .tc{
-    border-radius: 3px!important;
-  } 
- 
-.bgf{
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-@supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-  .bgf {
-    background-color: rgba(0, 0, 0, .5);
-  }
-}td{overflow-y: hidden!important;}
-.uzr .fitimg {
-    background-size: cover;
-}
-.room .fitimg {
-    background-size: cover;
-}
-.uhtml{
-  text-align:left;width:100%;margin:0px!important;border-bottom:1px solid lavender;padding-right:1px;background-color: #fafafa;
-}
-.uhtml .u-pic{
-  min-width:52px;width:52px;min-height:48px;max-height:62px; background-color:#f3f3f3;margin-top:1px;
-}
-.uhtml .co.ico{
-  width:18px;height:18px;border-radius:1px;margin-top: -2px;margin-left:1px;
-}
-   
-   .users-panel {
-  position: fixed;
-  top: 0;
-  right: -250px;
-  width: 250px;
-  height: 100%;
-  background: #fafafa;
-  border-left: 1px solid #ddd;
-  transition: right 0.3s ease;
-  padding: 15px;
-  overflow-y: auto;
-}
-.users-panel.active {
-  right: 0;
-}
-.users-panel h3 {
-  font-size: 14px;
-  color: #40404f;
-  margin-top: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
-}
-</style>
 </head>
 <body>
   <!-- شاشة الدخول -->
@@ -301,30 +80,25 @@
       <h2>دخول الدردشة</h2>
       <input type="text" id="username-input" placeholder="اكتب اسمك هنا">
       <button id="login-btn">دخول</button>
-      <p id="login-error" style="display:none;">الرجاء إدخال اسم.</p>
+      <p id="login-error">الرجاء إدخال اسم.</p>
     </div>
   </div>
 
   <!-- واجهة الدردشة -->
-  <div id="chat-container" style="display:none; flex-direction: column; height:100vh;">
-    <div id="messages" class="messages" style="flex:1; overflow-y:auto;"></div>
+  <div id="chat-container">
+    <div id="messages" class="messages"></div>
 
-    <!-- صندوق الرسائل -->
     <div class="tablebox footer">
-      <img class="emobox" src="https://l7b.net/imgs/emoii.gif">
-      <textarea id="message-input" placeholder="اكتب رسالتك هنا" class="tbox" style="text-align:left;"></textarea>
+      <textarea id="message-input" placeholder="اكتب رسالتك هنا" class="tbox"></textarea>
       <button id="send-btn" class="btn btn-primary"><i class="fa fa-send"></i> ارسال</button>
     </div>
 
-    <!-- أزرار التحكم -->
     <div id="d0" class="actions-footer">
-      <button id="btn-users" title="المتواجدين" class="action-btn fa fa-user">
-        <span id="busers">0</span>
-      </button>
-      <button id="btn-chats" title="المحادثات الخاصه" class="action-btn fa fa-comment"><span></span> خاص</button>
-      <button id="btn-rooms" title="غرف الدردشه" class="action-btn fa fa-users"><span></span> الغرف</button>
+      <button id="btn-users" title="المتواجدين" class="action-btn fa fa-user"><span id="busers">0</span></button>
+      <button id="btn-chats" title="المحادثات الخاصه" class="action-btn fa fa-comment"> خاص</button>
+      <button id="btn-rooms" title="غرف الدردشه" class="action-btn fa fa-users"> الغرف</button>
       <button id="btn-wall" title="الحائط" class="action-btn fa fa-commenting"><span id="bwall">0</span> الحائط</button>
-      <button id="btn-settings" title="الإعدادات" class="action-btn fa fa-gear"><span></span> الضبط</button>
+      <button id="btn-settings" title="الإعدادات" class="action-btn fa fa-gear"> الضبط</button>
     </div>
   </div>
 
@@ -333,13 +107,13 @@
     <h3>المتواجدون الآن <span id="usersCount">(0)</span></h3>
     <div id="usersList"></div>
   </div>
-
-  <!-- سكربت Firebase -->
+    <!-- سكربت Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, onChildAdded, push, set, remove, onValue } 
+    import { getDatabase, ref, onChildAdded, push, set, remove, onValue }
       from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
       authDomain: "mychat-2d881.firebaseapp.com",
@@ -352,7 +126,13 @@
     const usersRef = ref(db, "onlineUsers");
 
     let currentUsername = null;
-    const uid = Date.now().toString();
+
+    // uid ثابت لمنع تكرار الاسم عند التحديث
+    let uid = localStorage.getItem("chat_uid");
+    if (!uid) {
+      uid = Date.now().toString();
+      localStorage.setItem("chat_uid", uid);
+    }
 
     const loginScreen = document.getElementById("login-screen");
     const chatContainer = document.getElementById("chat-container");
@@ -371,15 +151,14 @@
       chatContainer.style.display = "flex";
 
       // تسجيل المستخدم كمتصل
-      set(ref(db, "onlineUsers/" + uid), {
-        name: username,
-        time: Date.now()
-      });
+      set(ref(db, "onlineUsers/" + uid), { name: username, time: Date.now() });
+
+      // إزالة الاسم عند الخروج
       window.addEventListener("beforeunload", () => {
         remove(ref(db, "onlineUsers/" + uid));
       });
 
-      // عرض الرسائل
+      // جلب الرسائل فورًا وبشكل لحظي
       onChildAdded(messagesRef, (snapshot) => {
         displayMessage(snapshot.val());
       });
@@ -387,11 +166,8 @@
 
     loginButton.addEventListener("click", () => {
       const username = usernameInput.value.trim();
-      if (username) {
-        enterChat(username);
-      } else {
-        loginError.style.display = "block";
-      }
+      if (username) enterChat(username);
+      else loginError.style.display = "block";
     });
 
     usernameInput.addEventListener("keypress", (e) => {
@@ -401,17 +177,18 @@
     const savedUsername = localStorage.getItem("chat_username");
     if (savedUsername) enterChat(savedUsername);
 
-    // عرض الرسائل
+    // تنسيق الوقت
     function formatAgo(timestamp) {
       const diff = Date.now() - timestamp;
       const minutes = Math.floor(diff / 60000);
       if (minutes < 1) return "الآن";
-      return `د${minutes-1}`;
+      return `منذ ${minutes} دقيقة`;
     }
 
+    // عرض عنصر الرسالة
     function displayMessage(data) {
       const msgDiv = document.createElement("div");
-      msgDiv.className = "uzr";  
+      msgDiv.className = "uzr";
 
       const spanAgo = document.createElement("span");
       spanAgo.className = "minix tago";
@@ -419,11 +196,10 @@
       spanAgo.textContent = formatAgo(data.time);
 
       msgDiv.innerHTML = `
-        <div class="u-pic" style="background-image: url('https://l7b.net/pic/default.png');"></div>
+        <div class="u-pic" style="background-image:url('https://l7b.net/pic/default.png')"></div>
         <div class="msg-body">
           <div class="msg-top">
             <div class="user-wrapper">
-              <img class="u-ico" src="https://l7b.net/sico/z1g351o4em1018XOCi04iHr0.gif">  
               <span class="u-topic">${data.user}</span>
             </div>
           </div>
@@ -435,36 +211,32 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    function sendMessage(){
+    // إرسال الرسائل
+    function sendMessage() {
       const text = messageInput.value.trim();
-      if(text && currentUsername){
-        const now = new Date();
-        push(messagesRef, {
-          user: currentUsername,
-          text: text,
-          time: now.getTime()
-        });
+      if (text && currentUsername) {
+        const now = Date.now();
+        push(messagesRef, { user: currentUsername, text, time: now });
         messageInput.value = "";
       }
     }
-
     sendButton.addEventListener("click", sendMessage);
-    messageInput.addEventListener("keypress", e => {
-      if(e.key === "Enter" && !e.shiftKey){
+    messageInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
 
-    // تحديث الوقت ديناميكياً
+    // تحديث الوقت بشكل دوري
     setInterval(() => {
-      document.querySelectorAll(".tago").forEach(span => {
-        const ts = parseInt(span.getAttribute("data-time"));
+      document.querySelectorAll(".tago").forEach((span) => {
+        const ts = parseInt(span.getAttribute("data-time"), 10);
         span.textContent = formatAgo(ts);
       });
     }, 60000);
 
-    // المتواجدين
+    // المتواجدون الآن
     const btnUsers = document.getElementById("btn-users");
     const usersPanel = document.getElementById("users-panel");
     const usersList = document.getElementById("usersList");
@@ -477,10 +249,12 @@
     onValue(usersRef, (snapshot) => {
       usersList.innerHTML = "";
       let count = 0;
-      snapshot.forEach(child => {
-        const div = document.createElement("div");
-        div.textContent = child.val().name;
-        usersList.appendChild(div);
+      snapshot.forEach((child) => {
+        const { name } = child.val();
+        const row = document.createElement("div");
+        row.className = "user-item";
+        row.innerHTML = `<span class="user-dot"></span><span>${name}</span>`;
+        usersList.appendChild(row);
         count++;
       });
       document.getElementById("busers").textContent = count;
