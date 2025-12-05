@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>شات خاص</title>
+  <title>شات خاص - مشغل Netflix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
   <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     * {
       margin: 0;
@@ -24,208 +24,25 @@
       margin: 0; 
       padding: 0; 
       overflow: hidden; 
-      background: #0f0f0f;
+      background: #000;
     }
     
     body { 
-      font-family: 'Tajawal', sans-serif; 
-      background: #0f0f0f;
-      color: #ffffff;
+      font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+      background: #000;
+      color: #fff;
       display: flex; 
       flex-direction: column; 
     }
     
-    #chat-container { 
-      display: flex; 
-      flex-direction: column; 
-      height: 100%; 
-    }
-    
-    #messages { 
-      flex: 1; 
-      overflow-y: auto; 
-      padding: 15px; 
-      background: #0f0f0f;
-      scroll-behavior: smooth; 
-    }
-    
-    .msg { 
-      margin: 8px 0; 
-      display: flex; 
-      gap: 10px; 
-      align-items: center; 
-      direction: ltr; 
-      text-align: left; 
-      font-size: 15px; 
-      line-height: 1.4; 
-    }
-    
-    .sys { 
-      text-align: center; 
-      color: #aaa;
-      font-size: 12px; 
-      margin: 10px auto; 
-      font-style: italic; 
-      background-color: #272727;
-      padding: 4px 10px; 
-      border-radius: 12px; 
-      transition: opacity 0.5s; 
-    }
-    
-    .user { 
-      font-weight: bold; 
-      color: #3ea6ff;
-    }
-    
-    .time { 
-      font-size: 11px; 
-      color: #888; 
-      min-width: 40px; 
-    }
-    
-    #inputArea {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      padding: 10px;
-      background: #0f0f0f;
-      border-top: 1px solid #272727;
-    }
-
-    #messageInput { 
-      flex: 1; 
-      font-size: 16px; 
-      height: 45px;
-      padding: 0 15px;
-      border: 1px solid #303030;
-      border-radius: 25px; 
-      font-family: 'Tajawal', sans-serif; 
-      background: #272727;
-      color: #ffffff;
-      box-sizing: border-box;
-    }
-    
-    #messageInput:focus { 
-      border-color: #3ea6ff;
-      outline: none; 
-    }
-    
-    #messageInput::placeholder {
-      color: #888;
-    }
-    
-    #sendBtn { 
-      height: 45px;
-      padding: 0 25px; 
-      border: none; 
-      border-radius: 25px; 
-      background: #3ea6ff;
-      color: white; 
-      cursor: pointer; 
-      font-family: 'Tajawal', sans-serif;
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      box-sizing: border-box;
-      font-weight: 500;
-    }
-
-    #sendBtn:hover { 
-      background: #2d8ad9;
-    }
-    
-    #topButtons { 
-      position: fixed; 
-      top: 10px; 
-      right: 10px; 
-      display: flex; 
-      gap: 8px; 
-      z-index: 1000; 
-    }
-    
-    .btn { 
-      padding: 6px 10px; 
-      background: #272727;
-      border: 1px solid #303030;
-      border-radius: 20px; 
-      cursor: pointer; 
-      font-size: 16px; 
-      line-height: 1; 
-      display: flex; 
-      align-items: center; 
-      color: #ffffff;
-    }
-    
-    .btn .count-text { 
-      font-size: 14px; 
-      margin-right: 4px; 
-    }
-    
-    #onlineList { 
-      position: fixed; 
-      top: 10px; 
-      right: 10px; 
-      border: 1px solid #303030;
-      background: #272727;
-      padding: 8px 14px; 
-      border-radius: 20px; 
-      font-size: 14px; 
-      cursor: pointer; 
-      z-index: 1000; 
-      display: flex; 
-      align-items: center; 
-      gap: 5px; 
-      color: #ffffff;
-    }
-    
-    #usersBox, #setVideoModal { 
-      position: fixed; 
-      top: 50%; 
-      left: 50%; 
-      transform: translate(-50%, -50%); 
-      background: #272727;
-      padding: 20px; 
-      border-radius: 12px; 
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
-      z-index: 1003; 
-      display: none; 
-      color: #ffffff;
-      border: 1px solid #303030;
-      min-width: 300px;
-    }
-    
-    #usersList { 
-      max-height: 200px; 
-      overflow-y: auto; 
-    }
-    
-    .user-item { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      padding: 8px 4px; 
-      border-bottom: 1px solid #303030;
-      font-size: 14px; 
-    }
-    
-    .status-indicator { 
-      width: 8px; 
-      height: 8px; 
-      border-radius: 50%; 
-    }
-    
-    .status-green { background-color: #3ea6ff; } 
-    .status-yellow { background-color: #ffd600; } 
-    .status-gray { background-color: #606060; }
-    
+    /* شاشة تسجيل الدخول */
     #loginScreen { 
       position: fixed; 
       top: 0; 
       left: 0; 
       width: 100%; 
       height: 100%; 
-      background: rgba(15, 15, 15, 0.98);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.8) 100%);
       display: flex; 
       justify-content: center; 
       align-items: center; 
@@ -233,113 +50,291 @@
     }
     
     #loginBox { 
-      background: #272727;
-      padding: 30px; 
-      border-radius: 12px; 
-      text-align: center; 
-      min-width: 320px; 
-      color: #ffffff;
-      border: 1px solid #303030;
+      background: rgba(0,0,0,0.85);
+      padding: 40px;
+      border-radius: 4px;
+      text-align: center;
+      width: 100%;
+      max-width: 450px;
+      color: #fff;
+      border: 1px solid #333;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    
+    #loginBox h2 {
+      color: #fff;
+      margin-bottom: 28px;
+      font-size: 32px;
+      font-weight: 500;
+      text-align: center;
     }
     
     #usernameInput { 
       width: 100%; 
-      padding: 12px; 
+      padding: 16px; 
       margin: 10px 0; 
-      border: 1px solid #303030;
-      border-radius: 8px; 
+      border: 1px solid #333;
+      border-radius: 4px; 
       font-size: 16px; 
-      text-align: center; 
-      box-sizing: border-box; 
-      font-family: 'Tajawal', sans-serif;
-      background: #0f0f0f;
-      color: #ffffff;
+      background: #333;
+      color: #fff;
+      font-family: 'Netflix Sans', sans-serif;
     }
     
-    #usernameInput::placeholder {
-      color: #888;
+    #usernameInput:focus { 
+      border-color: #fff;
+      outline: none; 
     }
     
     #loginBtn { 
-      background: #3ea6ff;
+      width: 100%;
+      background: #e50914;
       color: white; 
       border: none; 
-      padding: 12px 30px; 
-      border-radius: 8px; 
+      padding: 16px; 
+      border-radius: 4px; 
       font-size: 16px; 
       cursor: pointer; 
-      font-family: 'Tajawal', sans-serif; 
-      margin-top: 10px; 
+      font-family: 'Netflix Sans', sans-serif; 
+      margin-top: 24px; 
       font-weight: 500;
+      transition: background 0.2s ease;
     }
     
     #loginBtn:hover {
-      background: #2d8ad9;
+      background: #f40612;
     }
     
-    #overlay { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: rgba(0,0,0,0.7);
-      z-index: 1001; 
-      display: none; 
-    }
-    
-    /* مشغل الفيديو بشكل يوتيوب */
-    #pinnedVideoPlayer { 
-      position: fixed; 
-      top: 50px; 
-      left: 50px; 
-      width: clamp(320px, 90vw, 854px); 
-      background: #000; 
-      border-radius: 12px; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-      z-index: 998; 
-      display: none; 
-      flex-direction: column; 
-      overflow: hidden; 
-      font-family: 'Tajawal', sans-serif;
-    }
-    
-    .video-header { 
-      background: #0f0f0f;
-      color: #ffffff;
-      padding: 12px 16px; 
-      cursor: move; 
+    /* شاشة الدردشة */
+    #chat-container { 
       display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      flex-shrink: 0; 
-      touch-action: none; 
+      flex-direction: column; 
+      height: 100%; 
+      background: #141414;
+    }
+    
+    /* Header مشابه لـ Netflix */
+    .netflix-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7) 10%, transparent);
+      display: flex;
+      align-items: center;
+      padding: 0 60px;
+      z-index: 1000;
+      transition: background 0.3s ease;
+    }
+    
+    .netflix-header.scrolled {
+      background: rgba(0,0,0,0.9);
+    }
+    
+    .netflix-logo {
+      font-size: 28px;
+      color: #e50914;
+      font-weight: bold;
+      text-decoration: none;
+      margin-right: 40px;
+    }
+    
+    .top-nav {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .top-nav-item {
+      color: #e5e5e5;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      transition: color 0.3s ease;
+    }
+    
+    .top-nav-item:hover {
+      color: #b3b3b3;
+    }
+    
+    /* منطقة الدردشة */
+    #messages { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 80px 60px 20px;
+      background: #141414;
+      scroll-behavior: smooth; 
+    }
+    
+    .msg { 
+      margin: 12px 0; 
+      display: flex; 
+      gap: 12px; 
+      align-items: flex-start; 
+      direction: ltr; 
+      text-align: left; 
       font-size: 14px; 
-      border-bottom: 1px solid #272727;
+      line-height: 1.5; 
     }
     
-    .video-body { 
-      width: 100%; 
-      background: #000; 
-      flex-grow: 1; 
+    .sys { 
+      text-align: center; 
+      color: #808080;
+      font-size: 13px; 
+      margin: 16px auto; 
+      background-color: #2a2a2a;
+      padding: 6px 16px; 
+      border-radius: 4px; 
+      display: inline-block;
+    }
+    
+    .user { 
+      font-weight: 600; 
+      color: #e50914;
+      min-width: 80px;
+    }
+    
+    .time { 
+      font-size: 12px; 
+      color: #808080; 
+      min-width: 40px;
+      margin-left: auto;
+    }
+    
+    /* إدخال الرسالة */
+    #inputArea {
+      display: flex;
+      gap: 12px;
+      padding: 20px 60px;
+      background: #141414;
+      border-top: 1px solid #2a2a2a;
       position: relative;
-      min-height: 180px;
+    }
+
+    #messageInput { 
+      flex: 1; 
+      font-size: 14px; 
+      height: 48px;
+      padding: 0 20px;
+      border: 1px solid #333;
+      border-radius: 4px; 
+      background: #2a2a2a;
+      color: #fff;
+      font-family: 'Netflix Sans', sans-serif;
     }
     
-    .video-js {
-      width: 100%;
-      height: 100%;
+    #messageInput:focus { 
+      border-color: #e50914;
+      outline: none; 
+      background: #333;
     }
     
-    .close-pinned-video { 
-      background: #606060;
+    #sendBtn { 
+      height: 48px;
+      padding: 0 32px; 
       border: none; 
+      border-radius: 4px; 
+      background: #e50914;
       color: white; 
-      border-radius: 50%; 
-      width: 32px; 
-      height: 32px; 
+      cursor: pointer; 
+      font-family: 'Netflix Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background 0.2s ease;
+    }
+
+    #sendBtn:hover { 
+      background: #f40612;
+    }
+    
+    /* أزرار الأعلى */
+    #topButtons { 
+      position: fixed; 
+      top: 20px; 
+      right: 60px; 
+      display: flex; 
+      gap: 12px; 
+      z-index: 1001; 
+    }
+    
+    .btn { 
+      padding: 8px 16px; 
+      background: rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px; 
       cursor: pointer; 
       font-size: 14px; 
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.4);
+    }
+    
+    .count-text { 
+      font-size: 12px; 
+      color: #e50914;
+      font-weight: 600;
+    }
+    
+    /* مشغل الفيديو Netflix Style */
+    #pinnedVideoPlayer {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      background: #000;
+      border-radius: 8px;
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Netflix Sans', sans-serif;
+    }
+    
+    .video-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .video-header.show {
+      opacity: 1;
+    }
+    
+    .video-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .close-pinned-video {
+      background: rgba(42,42,42,0.7);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -347,76 +342,81 @@
     }
     
     .close-pinned-video:hover {
-      background: #ff6b6b;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.4);
     }
     
-    .resize-handle { 
-      position: absolute; 
-      width: 20px; 
-      height: 20px; 
-      bottom: 0; 
-      right: 0; 
-      cursor: nwse-resize; 
-      z-index: 100; 
-      background: linear-gradient(135deg, transparent 50%, #3ea6ff 50%);
+    .video-body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      position: relative;
     }
     
-    /* تحكمات يوتيوب المخصصة */
-    .youtube-controls {
+    .video-js {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* تحكمات Netflix */
+    .netflix-controls {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      padding: 0 12px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 10;
+      padding: 20px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      z-index: 50;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
     }
     
-    .video-body:hover .youtube-controls {
+    .video-body:hover .netflix-controls,
+    .video-body:hover .video-header {
       opacity: 1;
     }
     
-    /* شريط التقدم */
+    /* شريط التقدم Netflix */
     .progress-container {
       width: 100%;
       height: 4px;
       background: rgba(255,255,255,0.2);
       cursor: pointer;
       position: relative;
-      margin-bottom: 4px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      overflow: hidden;
     }
     
     .progress-bar {
       height: 100%;
-      background: #3ea6ff;
+      background: #e50914;
       width: 0%;
       position: relative;
       transition: width 0.1s linear;
+      border-radius: 2px;
     }
     
-    .progress-handle {
+    .progress-bar::after {
+      content: '';
       position: absolute;
       right: -6px;
       top: 50%;
       transform: translateY(-50%);
       width: 12px;
       height: 12px;
-      background: #3ea6ff;
+      background: #e50914;
       border-radius: 50%;
       opacity: 0;
       transition: opacity 0.2s ease;
+      box-shadow: 0 0 8px rgba(229,9,20,0.8);
     }
     
-    .progress-container:hover .progress-handle {
+    .progress-container:hover .progress-bar::after {
       opacity: 1;
     }
     
-    .progress-container:hover .progress-bar {
+    .progress-container:hover {
       height: 6px;
     }
     
@@ -425,19 +425,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 16px;
     }
     
     .controls-left, .controls-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
     }
     
     .control-btn {
       background: none;
-      border: none;
-      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
       cursor: pointer;
       padding: 8px;
       border-radius: 50%;
@@ -447,89 +447,86 @@
       justify-content: center;
       width: 40px;
       height: 40px;
-      position: relative;
+      backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.3);
     }
     
     .control-btn:hover {
       background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.4);
+      transform: scale(1.1);
     }
     
     .control-btn i {
-      font-size: 20px;
+      font-size: 18px;
     }
     
     .play-pause-btn {
-      width: 36px;
-      height: 36px;
+      width: 48px;
+      height: 48px;
+      background: rgba(229,9,20,0.8);
+      border: none;
+    }
+    
+    .play-pause-btn:hover {
+      background: #e50914;
     }
     
     .play-pause-btn i {
-      font-size: 16px;
+      font-size: 20px;
     }
     
-    /* الوقت */
     .time-display {
-      color: #ffffff;
-      font-size: 13px;
-      font-family: 'Roboto', sans-serif;
-      min-width: 80px;
-      text-align: center;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Netflix Sans', sans-serif;
+      min-width: 140px;
     }
     
-    /* شريط الصوت */
+    /* شريط الصوت Netflix */
     .volume-container {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
     }
     
     .volume-slider-container {
-      width: 0;
-      overflow: hidden;
-      transition: width 0.3s ease;
-      display: flex;
-      align-items: center;
-    }
-    
-    .volume-container:hover .volume-slider-container {
-      width: 80px;
-    }
-    
-    .volume-slider {
       width: 80px;
       height: 4px;
       background: rgba(255,255,255,0.2);
       border-radius: 2px;
       position: relative;
       cursor: pointer;
+      overflow: hidden;
     }
     
     .volume-level {
       height: 100%;
-      background: #ffffff;
+      background: #fff;
       border-radius: 2px;
       width: 100%;
       position: relative;
     }
     
-    .volume-handle {
+    .volume-level::after {
+      content: '';
       position: absolute;
       right: -4px;
       top: 50%;
       transform: translateY(-50%);
       width: 8px;
       height: 8px;
-      background: #ffffff;
+      background: #fff;
       border-radius: 50%;
       opacity: 0;
       transition: opacity 0.2s ease;
     }
     
-    .volume-slider:hover .volume-handle {
+    .volume-slider-container:hover .volume-level::after {
       opacity: 1;
     }
     
-    /* القوائم */
+    /* قوائم Netflix */
     .settings-menu {
       position: relative;
     }
@@ -537,14 +534,15 @@
     .menu-content {
       position: absolute;
       bottom: 100%;
-      left: 0;
-      background: #272727;
-      border: 1px solid #303030;
-      border-radius: 8px;
+      right: 0;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
       padding: 8px 0;
-      min-width: 150px;
+      min-width: 180px;
       display: none;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       z-index: 1000;
     }
     
@@ -553,8 +551,8 @@
     }
     
     .menu-item {
-      padding: 8px 16px;
-      color: #ffffff;
+      padding: 12px 20px;
+      color: #fff;
       cursor: pointer;
       transition: background 0.2s ease;
       font-size: 14px;
@@ -569,14 +567,15 @@
     }
     
     .menu-item.active {
-      color: #3ea6ff;
+      color: #e50914;
     }
     
     .menu-item i {
       font-size: 12px;
+      opacity: 0.7;
     }
     
-    /* ازرار التقديم */
+    /* أزرار التخطي الكبيرة Netflix */
     .skip-overlay {
       position: absolute;
       top: 0;
@@ -586,25 +585,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 20px;
+      padding: 0 40px;
       pointer-events: none;
-      z-index: 5;
+      z-index: 40;
     }
     
     .skip-btn {
       pointer-events: auto;
       background: rgba(0, 0, 0, 0.7);
-      border: none;
+      border: 2px solid rgba(255,255,255,0.3);
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
       color: white;
-      font-size: 24px;
+      font-size: 32px;
       opacity: 0;
       transform: scale(0.8);
     }
@@ -615,38 +614,116 @@
     }
     
     .skip-btn:hover {
-      background: rgba(62, 166, 255, 0.9);
+      background: rgba(229, 9, 20, 0.9);
+      border-color: #e50914;
       transform: scale(1.1);
     }
     
-    /* مؤشر التقديم */
+    /* مؤشر التخطي Netflix */
     .skip-indicator {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.9);
       color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 20;
+      padding: 16px 24px;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 600;
+      z-index: 60;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     
     .skip-indicator.show {
       opacity: 1;
     }
     
-    /* إخفاء تحكمات video.js الافتراضية */
+    /* مؤشر تحميل Netflix */
+    .loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 30;
+    }
+    
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(229,9,20,0.2);
+      border-top: 4px solid #e50914;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Netflix Preview */
+    .preview-overlay {
+      position: absolute;
+      bottom: 80px;
+      left: 20px;
+      background: rgba(0,0,0,0.9);
+      border-radius: 4px;
+      padding: 12px;
+      width: 300px;
+      display: none;
+      z-index: 100;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .preview-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    
+    .preview-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .preview-progress-bar {
+      height: 100%;
+      background: #e50914;
+      width: 30%;
+    }
+    
+    /* إخفاء تحكمات video.js */
     .video-js .vjs-control-bar {
       display: none !important;
+    }
+    
+    .video-js .vjs-big-play-button {
+      background: rgba(229,9,20,0.8);
+      border: none;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      line-height: 80px;
+      font-size: 40px;
+      transition: all 0.3s ease;
+    }
+    
+    .video-js .vjs-big-play-button:hover {
+      background: #e50914;
+      transform: scale(1.1);
     }
     
     /* شريط التمرير */
@@ -655,34 +732,292 @@
     }
     
     #messages::-webkit-scrollbar-track {
-      background: #0f0f0f;
+      background: #141414;
     }
     
     #messages::-webkit-scrollbar-thumb {
-      background: #303030;
+      background: #333;
       border-radius: 4px;
     }
     
     #messages::-webkit-scrollbar-thumb:hover {
-      background: #404040;
+      background: #444;
     }
-
-    /* تحسينات للعرض على الجوال */
+    
+    /* Netflix Like Subtitles */
+    .netflix-subtitles {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      max-width: 80%;
+      display: none;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      z-index: 40;
+    }
+    
+    /* Netflix Like Quality Selector */
+    .quality-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 20px;
+      min-width: 200px;
+      display: none;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .quality-menu.show {
+      display: block;
+    }
+    
+    .quality-option {
+      padding: 12px 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-radius: 4px;
+      margin: 4px 0;
+    }
+    
+    .quality-option:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .quality-option.active {
+      background: #e50914;
+      color: #fff;
+    }
+    
+    /* Netflix Like Speed Selector */
+    .speed-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 20px;
+      min-width: 200px;
+      display: none;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .speed-menu.show {
+      display: block;
+    }
+    
+    .speed-option {
+      padding: 12px 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-radius: 4px;
+      margin: 4px 0;
+    }
+    
+    .speed-option:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .speed-option.active {
+      background: #e50914;
+      color: #fff;
+    }
+    
+    /* Netflix Like Volume Control */
+    .volume-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 20px;
+      display: none;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .volume-overlay.show {
+      display: block;
+    }
+    
+    /* Modals */
+    #setVideoModal, #usersBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      padding: 30px;
+      border-radius: 4px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      z-index: 1003;
+      display: none;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.1);
+      min-width: 400px;
+      backdrop-filter: blur(10px);
+    }
+    
+    #overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.8);
+      z-index: 1001; 
+      display: none; 
+      backdrop-filter: blur(5px);
+    }
+    
+    #setVideoModal h4, #usersBox h4 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #fff;
+      text-align: center;
+    }
+    
+    #videoUrlInput {
+      width: 100%;
+      padding: 16px;
+      background: #333;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-family: 'Netflix Sans', sans-serif;
+    }
+    
+    #videoUrlInput:focus {
+      border-color: #e50914;
+      outline: none;
+    }
+    
+    #submitVideoUrlBtn {
+      width: 100%;
+      padding: 16px;
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      font-family: 'Netflix Sans', sans-serif;
+    }
+    
+    #submitVideoUrlBtn:hover {
+      background: #f40612;
+    }
+    
+    #usersList {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    .user-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .user-item:last-child {
+      border-bottom: none;
+    }
+    
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #2ecc71;
+    }
+    
+    .status-indicator.inactive {
+      background: #e74c3c;
+    }
+    
+    /* Netflix Like Resize Handle */
+    .resize-handle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      bottom: 0;
+      right: 0;
+      cursor: nwse-resize;
+      z-index: 100;
+      background: linear-gradient(135deg, transparent 50%, #e50914 50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    #pinnedVideoPlayer:hover .resize-handle {
+      opacity: 0.5;
+    }
+    
+    .resize-handle:hover {
+      opacity: 1 !important;
+    }
+    
+    /* Responsive Design */
     @media (max-width: 768px) {
       #pinnedVideoPlayer {
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        width: auto;
+        width: 95%;
+        height: 50%;
       }
       
-      .control-btn {
-        width: 36px;
-        height: 36px;
+      .netflix-header {
+        padding: 0 20px;
       }
       
-      .control-btn i {
-        font-size: 18px;
+      #topButtons {
+        right: 20px;
+      }
+      
+      #messages {
+        padding: 80px 20px 20px;
+      }
+      
+      #inputArea {
+        padding: 20px;
+      }
+      
+      .skip-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      }
+      
+      .preview-overlay {
+        display: none !important;
+      }
+      
+      #setVideoModal, #usersBox {
+        min-width: 90%;
+        margin: 0 20px;
       }
     }
   </style>
@@ -691,38 +1026,165 @@
 
   <div id="loginScreen">
     <div id="loginBox">
-      <h2>👋 أهلاً بك في الدردشة</h2>
-      <input type="text" id="usernameInput" placeholder="اكتب اسمك (بدون رموز خاصة)" maxlength="15" autofocus>
-      <button id="loginBtn">دخول</button>
+      <h2>مرحباً في شات Netflix</h2>
+      <input type="text" id="usernameInput" placeholder="اسم المستخدم" maxlength="20" autofocus>
+      <button id="loginBtn">ابدأ المشاهدة</button>
     </div>
   </div>
 
   <div id="chat-container" style="display: none;">
-    <div id="topButtons">
-      <div class="btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
-      <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span></div>
+    <!-- Netflix Header -->
+    <div class="netflix-header" id="netflixHeader">
+      <div class="netflix-logo">NETFLIX</div>
+      <div class="top-nav">
+        <a href="#" class="top-nav-item active">الرئيسية</a>
+        <a href="#" class="top-nav-item">المسلسلات</a>
+        <a href="#" class="top-nav-item">الأفلام</a>
+        <a href="#" class="top-nav-item">المفضلة</a>
+      </div>
+      <div id="topButtons">
+        <div class="btn" id="setVideoBtn" title="تشغيل فيديو">
+          <i class="fas fa-play"></i>
+          <span>تشغيل</span>
+        </div>
+        <div class="btn" id="onlineListBtn" title="المتصلين">
+          <i class="fas fa-users"></i>
+          <span id="count" class="count-text">0</span>
+        </div>
+      </div>
     </div>
     
-    <div id="pinnedVideoPlayer"></div>
+    <!-- Netflix Video Player -->
+    <div id="pinnedVideoPlayer">
+      <div class="video-header">
+        <div class="video-title" id="videoTitle">Netflix Player</div>
+        <button class="close-pinned-video" title="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="video-body">
+        <div class="loading-indicator">
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="netflix-subtitles" id="subtitles"></div>
+        <div class="preview-overlay" id="previewOverlay">
+          <div class="preview-title" id="previewTitle"></div>
+          <div class="preview-progress">
+            <div class="preview-progress-bar"></div>
+          </div>
+          <div class="preview-time" id="previewTime"></div>
+        </div>
+        <div class="skip-overlay">
+          <div class="skip-btn" id="skipBackward" title="رجوع 10 ثواني">⏪</div>
+          <div class="skip-btn" id="skipForward" title="تقديم 10 ثواني">⏩</div>
+        </div>
+        <div class="skip-indicator" id="skipIndicator"></div>
+      </div>
+      <div class="netflix-controls">
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="controls-bottom">
+          <div class="controls-left">
+            <button class="control-btn play-pause-btn" id="playPauseBtn" title="تشغيل/إيقاف">
+              <i class="fas fa-play"></i>
+            </button>
+            <button class="control-btn" id="rewindBtn" title="رجوع 10 ثواني">
+              <i class="fas fa-backward-step"></i>
+            </button>
+            <button class="control-btn" id="forwardBtn" title="تقديم 10 ثواني">
+              <i class="fas fa-forward-step"></i>
+            </button>
+            <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+          </div>
+          <div class="controls-right">
+            <div class="volume-container">
+              <button class="control-btn" id="volumeBtn" title="الصوت">
+                <i class="fas fa-volume-high"></i>
+              </button>
+              <div class="volume-slider-container" id="volumeSliderContainer">
+                <div class="volume-level" id="volumeLevel"></div>
+              </div>
+            </div>
+            <div class="settings-menu">
+              <button class="control-btn" id="settingsBtn" title="الإعدادات">
+                <i class="fas fa-gear"></i>
+              </button>
+              <div class="menu-content" id="settingsMenu">
+                <div class="menu-item" id="speedMenuItem">
+                  <span>سرعة التشغيل</span>
+                  <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="menu-item" id="qualityMenuItem">
+                  <span>الجودة</span>
+                  <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="menu-item" id="subtitlesMenuItem">
+                  <span>الترجمات</span>
+                  <i class="fas fa-closed-captioning"></i>
+                </div>
+              </div>
+            </div>
+            <button class="control-btn" id="fullscreenBtn" title="ملء الشاشة">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
     
+    <!-- Speed Menu -->
+    <div class="speed-menu" id="speedMenu">
+      <div class="speed-option" data-speed="0.25">0.25x</div>
+      <div class="speed-option" data-speed="0.5">0.5x</div>
+      <div class="speed-option" data-speed="0.75">0.75x</div>
+      <div class="speed-option active" data-speed="1">عادي (1x)</div>
+      <div class="speed-option" data-speed="1.25">1.25x</div>
+      <div class="speed-option" data-speed="1.5">1.5x</div>
+      <div class="speed-option" data-speed="2">2x</div>
+    </div>
+    
+    <!-- Quality Menu -->
+    <div class="quality-menu" id="qualityMenu">
+      <div class="quality-option active">تلقائي</div>
+      <div class="quality-option">144p</div>
+      <div class="quality-option">240p</div>
+      <div class="quality-option">360p</div>
+      <div class="quality-option">480p</div>
+      <div class="quality-option">720p</div>
+      <div class="quality-option">1080p</div>
+      <div class="quality-option">4K</div>
+    </div>
+    
+    <!-- Volume Overlay -->
+    <div class="volume-overlay" id="volumeOverlay">
+      <div class="volume-slider-container" style="width: 200px;">
+        <div class="volume-level" id="volumeOverlayLevel"></div>
+      </div>
+    </div>
+    
+    <!-- Modals -->
     <div id="setVideoModal">
-      <h4>تثبيت فيديو للجميع</h4>
-      <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4"/>
-      <button id="submitVideoUrlBtn">تثبيت</button>
+      <h4>🎬 تشغيل فيديو جديد</h4>
+      <input type="text" id="videoUrlInput" placeholder="https://www.youtube.com/watch?v=... أو رابط فيديو مباشر"/>
+      <button id="submitVideoUrlBtn">تشغيل</button>
     </div>
     
     <div id="usersBox">
-      <h4>المتصلين الآن</h4>
+      <h4>👥 المتصلين الآن</h4>
       <div id="usersList"></div>
     </div>
     
     <div id="overlay"></div>
     
-    <div id="messages" role="list"></div>
+    <!-- Chat Messages -->
+    <div id="messages"></div>
     
+    <!-- Chat Input -->
     <form id="inputArea">
+      <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off" />
       <button type="submit" id="sendBtn">إرسال</button>
-      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
     </form>
   </div>
 
@@ -741,8 +1203,14 @@
     let userRef, messagesRef, onlineRef, pinnedVideoRef;
     let serverTimeOffset = 0;
     let videoPlayerInstance = null;
-    let youtubeControls = null;
+    let isSeeking = false;
+    let isVolumeDragging = false;
+    let currentVolume = 1;
+    let isMuted = false;
+    let hideControlsTimeout;
+    let videoPlayerInitialized = false;
 
+    // DOM Elements
     const loginScreen = document.getElementById('loginScreen');
     const usernameInput = document.getElementById('usernameInput');
     const loginBtn = document.getElementById('loginBtn');
@@ -757,534 +1225,488 @@
     const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
     const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
     const overlay = document.getElementById("overlay");
+    const videoHeader = document.querySelector('.video-header');
+    const videoTitle = document.getElementById('videoTitle');
+    const closeVideoBtn = document.querySelector('.close-pinned-video');
+    const netflixHeader = document.getElementById('netflixHeader');
+    const loadingIndicator = document.querySelector('.loading-indicator');
+    const subtitles = document.getElementById('subtitles');
+    const previewOverlay = document.getElementById('previewOverlay');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewTime = document.getElementById('previewTime');
+    const skipBackward = document.getElementById('skipBackward');
+    const skipForward = document.getElementById('skipForward');
+    const skipIndicator = document.getElementById('skipIndicator');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const rewindBtn = document.getElementById('rewindBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const volumeBtn = document.getElementById('volumeBtn');
+    const volumeSliderContainer = document.getElementById('volumeSliderContainer');
+    const volumeLevel = document.getElementById('volumeLevel');
+    const volumeOverlay = document.getElementById('volumeOverlay');
+    const volumeOverlayLevel = document.getElementById('volumeOverlayLevel');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsMenu = document.getElementById('settingsMenu');
+    const speedMenuItem = document.getElementById('speedMenuItem');
+    const qualityMenuItem = document.getElementById('qualityMenuItem');
+    const subtitlesMenuItem = document.getElementById('subtitlesMenuItem');
+    const speedMenu = document.getElementById('speedMenu');
+    const qualityMenu = document.getElementById('qualityMenu');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const videoBody = document.querySelector('.video-body');
+    const resizeHandle = document.querySelector('.resize-handle');
 
+    // Netflix Login Experience
     function attemptLogin() {
-        let inputName = usernameInput.value.trim();
-        const invalidChars = /[.#$\[\]]/;
-        if (invalidChars.test(inputName)) {
-            alert("الاسم لا يجب أن يحتوي على رموز خاصة");
-            return;
-        }
-        if (inputName.length < 2) {
-            alert("الاسم قصير جداً");
-            return;
-        }
+      let inputName = usernameInput.value.trim();
+      if (inputName.length < 2) {
+        alert("الرجاء إدخال اسم صحيح");
+        return;
+      }
 
-        username = inputName;
-        userRef = db.ref("online/" + username);
-        messagesRef = db.ref("messages");
-        onlineRef = db.ref("online");
-        pinnedVideoRef = db.ref("pinned_video");
-        
-        startChat();
+      username = inputName;
+      userRef = db.ref("online/" + username);
+      messagesRef = db.ref("messages");
+      onlineRef = db.ref("online");
+      pinnedVideoRef = db.ref("pinned_video");
+      
+      loginScreen.style.opacity = '0';
+      setTimeout(() => {
+        loginScreen.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        initializeChat();
+      }, 500);
     }
 
     loginBtn.onclick = attemptLogin;
-    usernameInput.onkeypress = (e) => { if (e.key === 'Enter') attemptLogin(); };
+    usernameInput.onkeypress = (e) => { 
+      if (e.key === 'Enter') attemptLogin(); 
+    };
 
-    function startChat() {
-      loginScreen.style.display = 'none';
-      chatContainer.style.display = 'flex';
+    function initializeChat() {
+      // Initialize Firebase time offset
+      db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverTimeOffset = snap.val() || 0;
+      });
 
-      db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
-
-      userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+      // Set user as online
+      userRef.set({ 
+        lastActive: firebase.database.ServerValue.TIMESTAMP,
+        name: username 
+      });
       userRef.onDisconnect().remove();
 
+      // Update user activity every minute
       setInterval(() => {
         userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
       }, 60000);
 
+      // Clean inactive users every minute
       setInterval(() => {
-         const now = Date.now() + serverTimeOffset;
-         onlineRef.once('value', snap => {
-             snap.forEach(child => {
-                 if (now - child.val().lastActive > 90000) child.ref.remove();
-             });
-         });
+        const now = Date.now() + serverTimeOffset;
+        onlineRef.once('value', snap => {
+          snap.forEach(child => {
+            if (now - child.val().lastActive > 120000) {
+              child.ref.remove();
+            }
+          });
+        });
       }, 60000);
 
+      // Setup event listeners
+      setupEventListeners();
+      setupVideoPlayer();
+      
+      // Load messages
+      messagesRef.limitToLast(100).on("child_added", snap => {
+        addMessageToUI(snap.key, snap.val());
+      });
+
+      // Update online users count
+      onlineRef.on("value", snap => {
+        document.getElementById("count").textContent = snap.numChildren();
+        renderUsersList(snap.val() || {});
+      });
+
+      // Listen for video changes
+      pinnedVideoRef.on("value", async (snap) => {
+        const data = snap.val();
+        if (data) {
+          await loadVideo(data);
+        } else {
+          if (videoPlayerInstance) {
+            videoPlayerInstance.pause();
+            videoPlayerInstance.dispose();
+            videoPlayerInstance = null;
+          }
+          pinnedVideoPlayer.style.display = 'none';
+        }
+      });
+
+      // Netflix header scroll effect
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          netflixHeader.classList.add('scrolled');
+        } else {
+          netflixHeader.classList.remove('scrolled');
+        }
+      });
+    }
+
+    function setupEventListeners() {
+      // Online list button
       onlineListBtn.onclick = (e) => { 
         e.stopPropagation(); 
         usersBox.style.display = 'block'; 
         overlay.style.display = 'block'; 
       };
       
+      // Set video button
       setVideoBtn.onclick = (e) => { 
         e.stopPropagation(); 
         setVideoModal.style.display = 'block'; 
         overlay.style.display = 'block'; 
+        videoUrlInput.focus();
       };
       
+      // Close modals
       overlay.onclick = closeAllModals;
       
+      // Submit video URL
+      submitVideoUrlBtn.onclick = () => {
+        const url = videoUrlInput.value.trim();
+        if (!url) return;
+        
+        const videoData = parseVideoUrl(url);
+        if (!videoData) {
+          alert("الرابط غير مدعوم. الرجاء إدخال رابط YouTube أو فيديو مباشر.");
+          return;
+        }
+        
+        pinnedVideoRef.set({ 
+          ...videoData, 
+          setBy: username,
+          timestamp: firebase.database.ServerValue.TIMESTAMP 
+        });
+        
+        videoUrlInput.value = "";
+        closeAllModals();
+      };
+      
+      // Send message
       document.getElementById("inputArea").onsubmit = (e) => {
         e.preventDefault();
         const text = messageInput.value.trim();
         if (!text) return;
         
         const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false});
-        messagesRef.push({ user: username, text: text, time: time, timestamp: firebase.database.ServerValue.TIMESTAMP });
+        messagesRef.push({ 
+          user: username, 
+          text: text, 
+          time: time, 
+          timestamp: firebase.database.ServerValue.TIMESTAMP 
+        });
         messageInput.value = "";
         userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
         scrollToBottom();
       };
-
-      messagesRef.limitToLast(100).on("child_added", snap => {
-        addMessageToUI(snap.key, snap.val());
-      });
-
-      onlineRef.on("value", snap => {
-        document.getElementById("count").textContent = snap.numChildren();
-        renderUsersList(snap.val() || {});
-      });
-
-      submitVideoUrlBtn.onclick = () => {
-        const url = videoUrlInput.value.trim();
-        if (!url) return;
-        
-        const youtubeId = getYoutubeVideoId(url);
-        const tweetId = getTweetId(url);
-        
-        if (youtubeId) {
-          pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
-        } else if (tweetId) {
-          pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
-        } else if (url.toLowerCase().includes('.m3u')) {
-          pinnedVideoRef.set({ type: 'm3u', url: url, setBy: username });
-        } else if (isDirectVideo(url)) {
-          pinnedVideoRef.set({ type: 'direct', url: url, setBy: username });
-        } else {
-          alert("الرابط غير مدعوم.");
-          return;
-        }
-        
-        closeAllModals();
+      
+      // Close video button
+      closeVideoBtn.onclick = () => {
+        pinnedVideoRef.remove();
       };
-
-      pinnedVideoRef.on("value", async (snap) => {
-        const data = snap.val();
-        if (videoPlayerInstance) {
-          videoPlayerInstance.dispose();
-          videoPlayerInstance = null;
-        }
-        if (youtubeControls) {
-          youtubeControls.remove();
-          youtubeControls = null;
-        }
-        pinnedVideoPlayer.innerHTML = '';
-
-        if (data) {
-          pinnedVideoPlayer.style.display = 'flex';
-          const header = document.createElement('div');
-          header.className = 'video-header';
-          header.innerHTML = `<span>🎬 ${data.setBy}</span>`;
-          const closeBtn = document.createElement('button');
-          closeBtn.className = 'close-pinned-video';
-          closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-          closeBtn.onclick = () => pinnedVideoRef.remove();
-          header.appendChild(closeBtn);
-          const body = document.createElement('div');
-          body.className = 'video-body';
-          
-          const resizeHandle = document.createElement('div');
-          resizeHandle.className = 'resize-handle';
-          
-          pinnedVideoPlayer.appendChild(header);
-          pinnedVideoPlayer.appendChild(body);
-          pinnedVideoPlayer.appendChild(resizeHandle);
-          
-          makeDraggable(pinnedVideoPlayer, header);
-          makeResizable(pinnedVideoPlayer, resizeHandle);
-
-          let videoSource = null;
-          let videoType = '';
-
-          if (data.type === 'youtube') {
-            videoSource = `https://www.youtube.com/watch?v=${data.id}`;
-            videoType = 'video/youtube';
-          } else if (data.type === 'm3u') {
-            videoSource = data.url;
-            videoType = 'application/x-mpegURL';
-          } else if (data.type === 'direct') {
-            videoSource = data.url;
-            videoType = 'video/mp4';
-          } else if (data.type === 'twitter') {
-            try {
-              const response = await fetch(`https://api.vxtwitter.com/i/status/${data.id}`);
-              const tweetData = await response.json();
-              if (tweetData.media_extended && tweetData.media_extended.length > 0) {
-                videoSource = tweetData.media_extended[0].url;
-                videoType = 'video/mp4';
-              } else {
-                body.innerHTML = `<p style="color:white;padding:10px;">لم يتم العثور على فيديو.</p>`;
-              }
-            } catch (error) {
-              console.error("Error fetching Twitter video:", error);
-              body.innerHTML = `<p style="color:white;padding:10px;">حدث خطأ.</p>`;
-            }
-          }
-
-          if (videoSource) {
-            const videoEl = document.createElement('video-js');
-            videoEl.className = 'vjs-netflix-theme';
-            body.appendChild(videoEl);
-
-            let playerOptions = {
-              autoplay: true,
-              muted: true,
-              controls: false,
-              aspectRatio: '16:9',
-              playsinline: true,
-              techOrder: data.type === 'youtube' ? ['youtube'] : ['html5'],
-              sources: [{ type: videoType, src: videoSource }],
-              youtube: {
-                iv_load_policy: 1,
-                modestbranding: 1
-              }
-            };
-            
-            videoPlayerInstance = videojs(videoEl, playerOptions);
-            
-            videoPlayerInstance.ready(() => {
-              createYouTubeControls(body, videoPlayerInstance);
-            });
-          }
-
-          addNotification(`${data.setBy} قام بتشغيل فيديو`);
-        } else {
-          pinnedVideoPlayer.style.display = 'none';
-        }
-      });
     }
 
-    function createYouTubeControls(container, player) {
-      youtubeControls = document.createElement('div');
-      youtubeControls.className = 'youtube-controls';
+    function setupVideoPlayer() {
+      // Play/Pause
+      playPauseBtn.addEventListener('click', togglePlayPause);
       
-      const progressContainer = document.createElement('div');
-      progressContainer.className = 'progress-container';
-      const progressBar = document.createElement('div');
-      progressBar.className = 'progress-bar';
-      const progressHandle = document.createElement('div');
-      progressHandle.className = 'progress-handle';
-      progressBar.appendChild(progressHandle);
-      progressContainer.appendChild(progressBar);
+      // Skip buttons
+      rewindBtn.addEventListener('click', () => skipTime(-10));
+      skipBackward.addEventListener('click', () => skipTime(-10));
       
-      const controlsBottom = document.createElement('div');
-      controlsBottom.className = 'controls-bottom';
+      forwardBtn.addEventListener('click', () => skipTime(10));
+      skipForward.addEventListener('click', () => skipTime(10));
       
-      const controlsLeft = document.createElement('div');
-      controlsLeft.className = 'controls-left';
+      // Progress bar
+      progressContainer.addEventListener('mousedown', startSeeking);
+      document.addEventListener('mousemove', handleSeeking);
+      document.addEventListener('mouseup', stopSeeking);
       
-      const controlsRight = document.createElement('div');
-      controlsRight.className = 'controls-right';
+      // Volume
+      volumeBtn.addEventListener('click', toggleMute);
+      volumeSliderContainer.addEventListener('mousedown', startVolumeDragging);
+      document.addEventListener('mousemove', handleVolumeDragging);
+      document.addEventListener('mouseup', stopVolumeDragging);
       
-      const playPauseBtn = createControlButton('play-pause-btn', 'fas fa-play', 'تشغيل/إيقاف');
-      const rewindBtn = createControlButton('control-btn', 'fas fa-backward-step', 'رجوع 10 ثواني');
-      const forwardBtn = createControlButton('control-btn', 'fas fa-forward-step', 'تقديم 10 ثواني');
-      const timeDisplay = document.createElement('div');
-      timeDisplay.className = 'time-display';
-      timeDisplay.textContent = '0:00 / 0:00';
-      
-      const volumeBtn = createControlButton('control-btn', 'fas fa-volume-high', 'الصوت');
-      const settingsBtn = createControlButton('control-btn', 'fas fa-gear', 'الإعدادات');
-      const fullscreenBtn = createControlButton('control-btn', 'fas fa-expand', 'ملء الشاشة');
-      
-      const volumeContainer = document.createElement('div');
-      volumeContainer.className = 'volume-container';
-      const volumeSliderContainer = document.createElement('div');
-      volumeSliderContainer.className = 'volume-slider-container';
-      const volumeSlider = document.createElement('div');
-      volumeSlider.className = 'volume-slider';
-      const volumeLevel = document.createElement('div');
-      volumeLevel.className = 'volume-level';
-      const volumeHandle = document.createElement('div');
-      volumeHandle.className = 'volume-handle';
-      volumeLevel.appendChild(volumeHandle);
-      volumeSlider.appendChild(volumeLevel);
-      volumeSliderContainer.appendChild(volumeSlider);
-      volumeContainer.appendChild(volumeBtn);
-      volumeContainer.appendChild(volumeSliderContainer);
-      
-      const settingsMenu = createSettingsMenu();
-      const settingsContainer = document.createElement('div');
-      settingsContainer.className = 'settings-menu';
-      settingsContainer.appendChild(settingsBtn);
-      settingsContainer.appendChild(settingsMenu);
-      
-      controlsLeft.appendChild(playPauseBtn);
-      controlsLeft.appendChild(rewindBtn);
-      controlsLeft.appendChild(forwardBtn);
-      controlsLeft.appendChild(timeDisplay);
-      
-      controlsRight.appendChild(volumeContainer);
-      controlsRight.appendChild(settingsContainer);
-      controlsRight.appendChild(fullscreenBtn);
-      
-      controlsBottom.appendChild(controlsLeft);
-      controlsBottom.appendChild(controlsRight);
-      
-      const skipOverlay = document.createElement('div');
-      skipOverlay.className = 'skip-overlay';
-      const skipBackward = createSkipButton('⏪', 'رجوع 10 ثواني');
-      const skipForward = createSkipButton('⏩', 'تقديم 10 ثواني');
-      skipOverlay.appendChild(skipBackward);
-      skipOverlay.appendChild(skipForward);
-      
-      const skipIndicator = document.createElement('div');
-      skipIndicator.className = 'skip-indicator';
-      
-      youtubeControls.appendChild(progressContainer);
-      youtubeControls.appendChild(controlsBottom);
-      container.appendChild(youtubeControls);
-      container.appendChild(skipOverlay);
-      container.appendChild(skipIndicator);
-      
-      setupYouTubeControlEvents(player, {
-        playPauseBtn,
-        rewindBtn,
-        forwardBtn,
-        volumeBtn,
-        volumeSlider,
-        volumeLevel,
-        settingsBtn,
-        settingsMenu,
-        fullscreenBtn,
-        progressContainer,
-        progressBar,
-        timeDisplay,
-        skipBackward,
-        skipForward,
-        skipIndicator
-      });
-    }
-
-    function createControlButton(className, icon, title) {
-      const btn = document.createElement('button');
-      btn.className = className;
-      btn.innerHTML = `<i class="${icon}"></i>`;
-      btn.title = title;
-      return btn;
-    }
-
-    function createSkipButton(icon, title) {
-      const btn = document.createElement('div');
-      btn.className = 'skip-btn';
-      btn.innerHTML = icon;
-      btn.title = title;
-      return btn;
-    }
-
-    function createSettingsMenu() {
-      const menu = document.createElement('div');
-      menu.className = 'menu-content';
-      
-      const speedItem = document.createElement('div');
-      speedItem.className = 'menu-item';
-      speedItem.innerHTML = `
-        <span>سرعة التشغيل</span>
-        <i class="fas fa-chevron-left"></i>
-      `;
-      
-      const speedSubmenu = document.createElement('div');
-      speedSubmenu.className = 'menu-content';
-      speedSubmenu.style.left = '100%';
-      speedSubmenu.style.bottom = '0';
-      
-      const speeds = [
-        { value: 0.25, label: '0.25' },
-        { value: 0.5, label: '0.5' },
-        { value: 0.75, label: '0.75' },
-        { value: 1, label: 'عادي' },
-        { value: 1.25, label: '1.25' },
-        { value: 1.5, label: '1.5' },
-        { value: 2, label: '2' }
-      ];
-      
-      speeds.forEach(speed => {
-        const option = document.createElement('div');
-        option.className = 'menu-item speed-option';
-        option.dataset.speed = speed.value;
-        option.textContent = speed.label;
-        if (speed.value === 1) option.classList.add('active');
-        speedSubmenu.appendChild(option);
-      });
-      
-      speedItem.appendChild(speedSubmenu);
-      
-      const qualityItem = document.createElement('div');
-      qualityItem.className = 'menu-item';
-      qualityItem.innerHTML = `
-        <span>الجودة</span>
-        <i class="fas fa-chevron-left"></i>
-      `;
-      
-      const qualitySubmenu = document.createElement('div');
-      qualitySubmenu.className = 'menu-content';
-      qualitySubmenu.style.left = '100%';
-      qualitySubmenu.style.bottom = '0';
-      
-      const qualities = ['تلقائي', '144p', '240p', '360p', '480p', '720p', '1080p', '4K'];
-      
-      qualities.forEach(quality => {
-        const option = document.createElement('div');
-        option.className = 'menu-item quality-option';
-        option.textContent = quality;
-        if (quality === 'تلقائي') option.classList.add('active');
-        qualitySubmenu.appendChild(option);
-      });
-      
-      qualityItem.appendChild(qualitySubmenu);
-      
-      menu.appendChild(speedItem);
-      menu.appendChild(qualityItem);
-      
-      return menu;
-    }
-
-    function setupYouTubeControlEvents(player, controls) {
-      const {
-        playPauseBtn,
-        rewindBtn,
-        forwardBtn,
-        volumeBtn,
-        volumeSlider,
-        volumeLevel,
-        settingsBtn,
-        settingsMenu,
-        fullscreenBtn,
-        progressContainer,
-        progressBar,
-        timeDisplay,
-        skipBackward,
-        skipForward,
-        skipIndicator
-      } = controls;
-
-      let isPlaying = false;
-      playPauseBtn.addEventListener('click', () => {
-        if (player.paused()) {
-          player.play();
-          playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-          isPlaying = true;
-        } else {
-          player.pause();
-          playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-          isPlaying = false;
-        }
-      });
-
-      rewindBtn.addEventListener('click', () => skipTime(-10, player, skipIndicator));
-      skipBackward.addEventListener('click', () => skipTime(-10, player, skipIndicator));
-
-      forwardBtn.addEventListener('click', () => skipTime(10, player, skipIndicator));
-      skipForward.addEventListener('click', () => skipTime(10, player, skipIndicator));
-
-      let isMuted = false;
-      
-      volumeBtn.addEventListener('click', () => {
-        isMuted = !isMuted;
-        player.muted(isMuted);
-        volumeBtn.innerHTML = isMuted ? 
-          '<i class="fas fa-volume-xmark"></i>' : 
-          '<i class="fas fa-volume-high"></i>';
-      });
-
-      let isSeeking = false;
-      
-      progressContainer.addEventListener('mousedown', (e) => {
-        isSeeking = true;
-        seekToPosition(e, player, progressBar);
-      });
-      
-      progressContainer.addEventListener('mousemove', (e) => {
-        if (isSeeking) {
-          seekToPosition(e, player, progressBar);
-        }
-      });
-      
-      document.addEventListener('mouseup', () => {
-        isSeeking = false;
-      });
-
-      player.on('timeupdate', () => {
-        if (!isSeeking) {
-          const currentTime = player.currentTime();
-          const duration = player.duration();
-          const percent = (currentTime / duration) * 100;
-          progressBar.style.width = percent + '%';
-          
-          timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
-        }
-      });
-
-      player.on('play', () => {
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        isPlaying = true;
-      });
-
-      player.on('pause', () => {
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-        isPlaying = false;
-      });
-
+      // Settings menu
       settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         settingsMenu.classList.toggle('show');
       });
-
-      settingsMenu.querySelectorAll('.speed-option').forEach(option => {
+      
+      // Speed menu
+      speedMenuItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.remove('show');
+        speedMenu.classList.toggle('show');
+      });
+      
+      // Quality menu
+      qualityMenuItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.remove('show');
+        qualityMenu.classList.toggle('show');
+      });
+      
+      // Speed options
+      speedMenu.querySelectorAll('.speed-option').forEach(option => {
         option.addEventListener('click', (e) => {
-          e.stopPropagation();
           const speed = parseFloat(option.dataset.speed);
-          player.playbackRate(speed);
-          settingsMenu.querySelectorAll('.speed-option').forEach(opt => opt.classList.remove('active'));
+          setPlaybackSpeed(speed);
+          speedMenu.querySelectorAll('.speed-option').forEach(opt => {
+            opt.classList.remove('active');
+          });
           option.classList.add('active');
+          speedMenu.classList.remove('show');
         });
       });
-
-      fullscreenBtn.addEventListener('click', () => {
-        if (player.isFullscreen()) {
-          player.exitFullscreen();
-          fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-        } else {
-          player.requestFullscreen();
-          fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-        }
+      
+      // Quality options
+      qualityMenu.querySelectorAll('.quality-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+          qualityMenu.querySelectorAll('.quality-option').forEach(opt => {
+            opt.classList.remove('active');
+          });
+          option.classList.add('active');
+          qualityMenu.classList.remove('show');
+          // Here you would normally change video quality
+        });
       });
-
+      
+      // Fullscreen
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+      
+      // Video body interactions
+      videoBody.addEventListener('mousemove', () => {
+        showControls();
+        resetHideControlsTimeout();
+      });
+      
+      videoBody.addEventListener('mouseleave', () => {
+        hideControls();
+      });
+      
+      // Close menus when clicking outside
       document.addEventListener('click', () => {
         settingsMenu.classList.remove('show');
+        speedMenu.classList.remove('show');
+        qualityMenu.classList.remove('show');
+        volumeOverlay.classList.remove('show');
       });
-
-      settingsMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
+      
+      // Prevent closing when clicking inside menus
+      [settingsMenu, speedMenu, qualityMenu, volumeOverlay].forEach(menu => {
+        menu.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
       });
+      
+      // Make video player draggable and resizable
+      makeDraggable(pinnedVideoPlayer, videoHeader);
+      makeResizable(pinnedVideoPlayer, resizeHandle);
     }
 
-    function skipTime(seconds, player, indicator) {
-      const currentTime = player.currentTime();
-      const newTime = Math.max(0, Math.min(player.duration(), currentTime + seconds));
-      player.currentTime(newTime);
+    async function loadVideo(data) {
+      if (!videoPlayerInitialized) {
+        initializeVideoPlayerElement();
+        videoPlayerInitialized = true;
+      }
+      
+      if (videoPlayerInstance) {
+        videoPlayerInstance.dispose();
+      }
+      
+      pinnedVideoPlayer.style.display = 'flex';
+      showLoading();
+      
+      try {
+        let videoSource = null;
+        let videoType = '';
+        
+        if (data.type === 'youtube') {
+          videoSource = `https://www.youtube.com/watch?v=${data.id}`;
+          videoType = 'video/youtube';
+          videoTitle.textContent = `YouTube: ${data.id}`;
+        } else if (data.type === 'direct') {
+          videoSource = data.url;
+          videoType = getVideoType(data.url);
+          videoTitle.textContent = `الفيديو: ${data.setBy}`;
+        } else if (data.type === 'm3u') {
+          videoSource = data.url;
+          videoType = 'application/x-mpegURL';
+          videoTitle.textContent = `قائمة تشغيل: ${data.setBy}`;
+        }
+        
+        const videoEl = document.createElement('video-js');
+        videoEl.className = 'vjs-default-skin vjs-big-play-centered';
+        videoEl.style.width = '100%';
+        videoEl.style.height = '100%';
+        document.querySelector('.video-body').appendChild(videoEl);
+        
+        const playerOptions = {
+          autoplay: true,
+          muted: true,
+          controls: false,
+          aspectRatio: '16:9',
+          playsinline: true,
+          techOrder: data.type === 'youtube' ? ['youtube'] : ['html5'],
+          sources: [{ src: videoSource, type: videoType }],
+          youtube: {
+            iv_load_policy: 1,
+            modestbranding: 1,
+            rel: 0,
+            controls: 0,
+            showinfo: 0
+          },
+          html5: {
+            hls: {
+              overrideNative: true
+            }
+          }
+        };
+        
+        videoPlayerInstance = videojs(videoEl, playerOptions);
+        
+        // Setup event listeners for the new player
+        videoPlayerInstance.ready(() => {
+          hideLoading();
+          setupPlayerEvents();
+          playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        });
+        
+        videoPlayerInstance.on('error', (error) => {
+          console.error('Video error:', error);
+          hideLoading();
+          addNotification('حدث خطأ في تشغيل الفيديو');
+        });
+        
+        addNotification(`${data.setBy} قام بتشغيل فيديو`);
+        
+      } catch (error) {
+        console.error('Error loading video:', error);
+        hideLoading();
+        addNotification('حدث خطأ في تحميل الفيديو');
+      }
+    }
+
+    function initializeVideoPlayerElement() {
+      // Video element will be created dynamically
+    }
+
+    function setupPlayerEvents() {
+      if (!videoPlayerInstance) return;
+      
+      videoPlayerInstance.on('timeupdate', updateProgress);
+      videoPlayerInstance.on('play', () => {
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      });
+      videoPlayerInstance.on('pause', () => {
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      });
+      videoPlayerInstance.on('volumechange', () => {
+        updateVolumeDisplay();
+      });
+      videoPlayerInstance.on('waiting', () => {
+        showLoading();
+      });
+      videoPlayerInstance.on('playing', () => {
+        hideLoading();
+      });
+      
+      // Initialize volume
+      currentVolume = videoPlayerInstance.volume();
+      isMuted = videoPlayerInstance.muted();
+      updateVolumeDisplay();
+    }
+
+    function togglePlayPause() {
+      if (!videoPlayerInstance) return;
+      
+      if (videoPlayerInstance.paused()) {
+        videoPlayerInstance.play();
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      } else {
+        videoPlayerInstance.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      }
+    }
+
+    function skipTime(seconds) {
+      if (!videoPlayerInstance) return;
+      
+      const currentTime = videoPlayerInstance.currentTime();
+      const duration = videoPlayerInstance.duration();
+      const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
+      videoPlayerInstance.currentTime(newTime);
       
       const message = seconds > 0 ? 
         `<i class="fas fa-forward"></i> +${seconds} ثانية` : 
         `<i class="fas fa-backward"></i> ${seconds} ثانية`;
-      indicator.innerHTML = message;
-      indicator.classList.add('show');
+      skipIndicator.innerHTML = message;
+      skipIndicator.classList.add('show');
       
       setTimeout(() => {
-        indicator.classList.remove('show');
+        skipIndicator.classList.remove('show');
       }, 1000);
     }
 
-    function seekToPosition(e, player, progressBar) {
-      const rect = e.currentTarget.getBoundingClientRect();
+    function startSeeking(e) {
+      if (!videoPlayerInstance) return;
+      
+      isSeeking = true;
+      handleSeeking(e);
+    }
+
+    function handleSeeking(e) {
+      if (!isSeeking || !videoPlayerInstance) return;
+      
+      const rect = progressContainer.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
-      const newTime = player.duration() * percent;
-      player.currentTime(newTime);
-      progressBar.style.width = (percent * 100) + '%';
+      const newTime = videoPlayerInstance.duration() * Math.max(0, Math.min(1, percent));
+      
+      if (!isNaN(newTime)) {
+        videoPlayerInstance.currentTime(newTime);
+        updateProgressBar(percent);
+      }
+    }
+
+    function stopSeeking() {
+      isSeeking = false;
+    }
+
+    function updateProgress() {
+      if (!videoPlayerInstance || isSeeking) return;
+      
+      const currentTime = videoPlayerInstance.currentTime();
+      const duration = videoPlayerInstance.duration();
+      
+      if (!isNaN(duration) && duration > 0) {
+        const percent = currentTime / duration;
+        updateProgressBar(percent);
+        updateTimeDisplay(currentTime, duration);
+      }
+    }
+
+    function updateProgressBar(percent) {
+      progressBar.style.width = `${percent * 100}%`;
+    }
+
+    function updateTimeDisplay(currentTime, duration) {
+      timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
     }
 
     function formatTime(seconds) {
@@ -1299,6 +1721,202 @@
       } else {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
       }
+    }
+
+    function toggleMute() {
+      if (!videoPlayerInstance) return;
+      
+      isMuted = !isMuted;
+      videoPlayerInstance.muted(isMuted);
+      updateVolumeDisplay();
+    }
+
+    function startVolumeDragging(e) {
+      isVolumeDragging = true;
+      handleVolumeDragging(e);
+    }
+
+    function handleVolumeDragging(e) {
+      if (!isVolumeDragging || !videoPlayerInstance) return;
+      
+      const rect = volumeSliderContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      const volume = Math.max(0, Math.min(1, percent));
+      
+      videoPlayerInstance.volume(volume);
+      videoPlayerInstance.muted(volume === 0);
+      currentVolume = volume;
+      isMuted = volume === 0;
+      
+      updateVolumeDisplay();
+      updateVolumeOverlay(volume);
+    }
+
+    function stopVolumeDragging() {
+      isVolumeDragging = false;
+    }
+
+    function updateVolumeDisplay() {
+      if (!videoPlayerInstance) return;
+      
+      const volume = videoPlayerInstance.volume();
+      const muted = videoPlayerInstance.muted();
+      
+      volumeLevel.style.width = `${volume * 100}%`;
+      
+      if (muted || volume === 0) {
+        volumeBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
+      } else if (volume < 0.5) {
+        volumeBtn.innerHTML = '<i class="fas fa-volume-low"></i>';
+      } else {
+        volumeBtn.innerHTML = '<i class="fas fa-volume-high"></i>';
+      }
+    }
+
+    function updateVolumeOverlay(volume) {
+      volumeOverlayLevel.style.width = `${volume * 100}%`;
+    }
+
+    function setPlaybackSpeed(speed) {
+      if (!videoPlayerInstance) return;
+      
+      videoPlayerInstance.playbackRate(speed);
+    }
+
+    function toggleFullscreen() {
+      if (!videoPlayerInstance) return;
+      
+      if (videoPlayerInstance.isFullscreen()) {
+        videoPlayerInstance.exitFullscreen();
+        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+      } else {
+        videoPlayerInstance.requestFullscreen();
+        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+      }
+    }
+
+    function showControls() {
+      videoHeader.classList.add('show');
+      document.querySelector('.netflix-controls').style.opacity = '1';
+    }
+
+    function hideControls() {
+      if (!videoPlayerInstance || videoPlayerInstance.paused()) return;
+      
+      videoHeader.classList.remove('show');
+      document.querySelector('.netflix-controls').style.opacity = '0';
+    }
+
+    function resetHideControlsTimeout() {
+      clearTimeout(hideControlsTimeout);
+      hideControlsTimeout = setTimeout(hideControls, 3000);
+    }
+
+    function showLoading() {
+      loadingIndicator.style.display = 'block';
+    }
+
+    function hideLoading() {
+      loadingIndicator.style.display = 'none';
+    }
+
+    function parseVideoUrl(url) {
+      if (!url) return null;
+      
+      // YouTube
+      const youtubeId = getYoutubeVideoId(url);
+      if (youtubeId) {
+        return { type: 'youtube', id: youtubeId };
+      }
+      
+      // M3U/M3U8
+      if (url.toLowerCase().includes('.m3u') || url.toLowerCase().includes('.m3u8')) {
+        return { type: 'm3u', url: url };
+      }
+      
+      // Direct video
+      if (isDirectVideo(url)) {
+        return { type: 'direct', url: url };
+      }
+      
+      return null;
+    }
+
+    function getYoutubeVideoId(url) {
+      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      return (url.match(regex) || [])[1] || null;
+    }
+
+    function isDirectVideo(url) {
+      return /\.(mp4|webm|ogv|mov|avi|mkv|mpd)$/i.test(url);
+    }
+
+    function getVideoType(url) {
+      if (url.includes('.mp4')) return 'video/mp4';
+      if (url.includes('.webm')) return 'video/webm';
+      if (url.includes('.ogv')) return 'video/ogg';
+      if (url.includes('.mov')) return 'video/quicktime';
+      return 'video/mp4';
+    }
+
+    function makeDraggable(element, handle) {
+      let offsetX = 0, offsetY = 0;
+      let isDragging = false;
+      
+      const onDragStart = (e) => {
+        isDragging = true;
+        offsetX = e.clientX - element.offsetLeft;
+        offsetY = e.clientY - element.offsetTop;
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('mouseup', onDragEnd);
+      };
+      
+      const onDragMove = (e) => {
+        if (!isDragging) return;
+        
+        element.style.left = (e.clientX - offsetX) + "px";
+        element.style.top = (e.clientY - offsetY) + "px";
+      };
+      
+      const onDragEnd = () => {
+        isDragging = false;
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('mouseup', onDragEnd);
+      };
+      
+      handle.addEventListener('mousedown', onDragStart);
+    }
+
+    function makeResizable(element, handle) {
+      let initialWidth, initialHeight, initialX, initialY;
+      
+      function onResizeStart(e) {
+        initialWidth = element.offsetWidth;
+        initialHeight = element.offsetHeight;
+        initialX = e.clientX;
+        initialY = e.clientY;
+        document.addEventListener('mousemove', onResizeMove);
+        document.addEventListener('mouseup', onResizeEnd);
+      }
+      
+      function onResizeMove(e) {
+        const newWidth = initialWidth + (e.clientX - initialX);
+        const newHeight = initialHeight + (e.clientY - initialY);
+        
+        if (newWidth > 300) {
+          element.style.width = newWidth + 'px';
+        }
+        if (newHeight > 200) {
+          element.style.height = newHeight + 'px';
+        }
+      }
+      
+      function onResizeEnd() {
+        document.removeEventListener('mousemove', onResizeMove);
+        document.removeEventListener('mouseup', onResizeEnd);
+      }
+      
+      handle.addEventListener('mousedown', onResizeStart);
     }
 
     function addMessageToUI(key, { user, text, time, timestamp }) {
@@ -1318,7 +1936,6 @@
       `;
       
       div.appendChild(timeElement);
-
       messagesDiv.appendChild(div);
       scrollToBottom();
       
@@ -1333,34 +1950,18 @@
       const now = Date.now() + serverTimeOffset;
       const messageTime = timestamp + serverTimeOffset;
       const diffMs = now - messageTime;
-      const diffSec = Math.floor(diffMs / 1000);
-      const diffMin = Math.floor(diffSec / 60);
-      const diffHours = Math.floor(diffMin / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      const diffWeeks = Math.floor(diffDays / 7);
-      const diffMonths = Math.floor(diffDays / 30);
-      const diffYears = Math.floor(diffDays / 365);
+      const diffMin = Math.floor(diffMs / 60000);
       
       let timeText = "";
       
-      if (diffSec < 5) {
+      if (diffMin < 1) {
         timeText = "الآن";
-      } else if (diffSec < 60) {
-        timeText = "ثواني";
-      } else if (diffMin < 2) {
-        timeText = "د1";
       } else if (diffMin < 60) {
-        timeText = `د${diffMin}`;
-      } else if (diffHours < 24) {
-        timeText = `س${diffHours}`;
-      } else if (diffDays < 7) {
-        timeText = `ي${diffDays}`;
-      } else if (diffWeeks < 4) {
-        timeText = `أ${diffWeeks}`;
-      } else if (diffMonths < 12) {
-        timeText = `ش${diffMonths}`;
+        timeText = `${diffMin} دقيقة`;
+      } else if (diffMin < 1440) {
+        timeText = `${Math.floor(diffMin / 60)} ساعة`;
       } else {
-        timeText = `ع${diffYears}`;
+        timeText = `${Math.floor(diffMin / 1440)} يوم`;
       }
       
       timeElement.textContent = timeText;
@@ -1375,117 +1976,34 @@
     }
 
     function renderUsersList(users) {
-        const list = document.getElementById("usersList");
-        list.innerHTML = '';
-        const now = Date.now() + serverTimeOffset;
-        Object.keys(users).forEach(uName => {
-            const uData = users[uName];
-            const div = document.createElement("div");
-            div.className = "user-item";
-            let colorClass = 'status-green';
-            const diff = now - (uData.lastActive || 0);
-            if (diff > 60000) colorClass = 'status-gray';
-            else if (diff > 30000) colorClass = 'status-yellow';
-            div.innerHTML = `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
-            list.appendChild(div);
-        });
+      const list = document.getElementById("usersList");
+      list.innerHTML = '';
+      const now = Date.now() + serverTimeOffset;
+      
+      Object.keys(users).forEach(uName => {
+        const uData = users[uName];
+        const div = document.createElement("div");
+        div.className = "user-item";
+        
+        const diff = now - (uData.lastActive || 0);
+        const isActive = diff < 120000;
+        
+        div.innerHTML = `
+          <span class="status-indicator ${isActive ? '' : 'inactive'}"></span>
+          <span>${escapeHtml(uName)}</span>
+        `;
+        list.appendChild(div);
+      });
     }
 
     function closeAllModals() {
       usersBox.style.display = 'none';
       setVideoModal.style.display = 'none';
       overlay.style.display = 'none';
-    }
-
-    function makeDraggable(element, handle) {
-      let offsetX = 0, offsetY = 0;
-      let isDragging = false;
-      
-      const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
-      
-      const onDragStart = (e) => {
-        isDragging = true;
-        const pointer = getPointerPosition(e);
-        offsetX = pointer.clientX - element.offsetLeft;
-        offsetY = pointer.clientY - element.offsetTop;
-        document.addEventListener('mousemove', onDragMove);
-        document.addEventListener('touchmove', onDragMove, { passive: false });
-        document.addEventListener('mouseup', onDragEnd);
-        document.addEventListener('touchend', onDragEnd);
-      };
-      
-      const onDragMove = (e) => {
-        if (isDragging) {
-          e.preventDefault();
-          const pointer = getPointerPosition(e);
-          element.style.left = (pointer.clientX - offsetX) + "px";
-          element.style.top = (pointer.clientY - offsetY) + "px";
-        }
-      };
-      
-      const onDragEnd = () => {
-        isDragging = false;
-        document.removeEventListener('mousemove', onDragMove);
-        document.removeEventListener('touchmove', onDragMove);
-        document.removeEventListener('mouseup', onDragEnd);
-        document.removeEventListener('touchend', onDragEnd);
-      };
-      
-      handle.addEventListener('mousedown', onDragStart);
-      handle.addEventListener('touchstart', onDragStart, { passive: false });
-    }
-
-    function makeResizable(element, handle) {
-      let initialWidth, initialHeight, initialX, initialY;
-      const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
-
-      function onResizeStart(e) {
-        if(e.type === 'touchstart') e.preventDefault();
-        const pointer = getPointerPosition(e);
-        initialWidth = element.offsetWidth;
-        initialHeight = element.offsetHeight;
-        initialX = pointer.clientX;
-        initialY = pointer.clientY;
-        document.addEventListener('mousemove', onResizeMove);
-        document.addEventListener('touchmove', onResizeMove, { passive: false });
-        document.addEventListener('mouseup', onResizeEnd);
-        document.addEventListener('touchend', onResizeEnd);
-      }
-
-      function onResizeMove(e) {
-        if(e.type === 'touchmove') e.preventDefault();
-        const pointer = getPointerPosition(e);
-        const newWidth = initialWidth + (pointer.clientX - initialX);
-        const newHeight = initialHeight + (pointer.clientY - initialY);
-        if (newWidth > 300) { element.style.width = newWidth + 'px'; }
-        if (newHeight > 200) { element.style.height = newHeight + 'px'; }
-      }
-
-      function onResizeEnd() {
-        document.removeEventListener('mousemove', onResizeMove);
-        document.removeEventListener('touchmove', onResizeMove);
-        document.removeEventListener('mouseup', onResizeEnd);
-        document.removeEventListener('touchend', onResizeEnd);
-      }
-      
-      handle.addEventListener('mousedown', onResizeStart);
-      handle.addEventListener('touchstart', onResizeStart, { passive: false });
-    }
-
-    function getYoutubeVideoId(url) {
-      if (!url) return null;
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-      return (url.match(regex) || [])[1] || null;
-    }
-
-    function getTweetId(url) {
-      if (!url) return null;
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
-      return (url.match(regex) || [])[1] || null;
-    }
-
-    function isDirectVideo(url) {
-      return /\.(mp4|webm|ogv)$/.test(url);
+      speedMenu.classList.remove('show');
+      qualityMenu.classList.remove('show');
+      settingsMenu.classList.remove('show');
+      volumeOverlay.classList.remove('show');
     }
 
     function scrollToBottom() { 
@@ -1501,6 +2019,9 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;"); 
     }
+
+    // Initialize on page load
+    usernameInput.focus();
   });
 </script>
 </body>
