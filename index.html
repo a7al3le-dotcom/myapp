@@ -1,2678 +1,407 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>شات خاص</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta charset="UTF-8">
+<title>شات خاص</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <style>
-    /* --- START: Global Variables --- */
-    :root {
-      --bg-primary: #0a0e17;
-      --bg-secondary: #111827;
-      --bg-tertiary: #1f2937;
-      --bg-card: #1a2235;
-      --text-primary: #f1f5f9;
-      --text-secondary: #cbd5e1;
-      --text-muted: #94a3b8;
-      --accent-blue: #3b82f6;
-      --accent-blue-dark: #2563eb;
-      --accent-red: #ef4444;
-      --accent-red-dark: #dc2626;
-      --accent-green: #10b981;
-      --accent-yellow: #f59e0b;
-      --accent-purple: #8b5cf6;
-      --accent-pink: #ec4899;
-      --border-color: #374151;
-      --shadow-color: rgba(0, 0, 0, 0.5);
-      --transition-speed: 0.2s;
-      --radius-sm: 5px;
-      --radius-md: 7px;
-      --radius-lg: 10px;
-    }
-    /* --- END: Global Variables --- */
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family:'Tajawal', sans-serif;
+    background:#ece5dd;
+}
 
-    /* --- START: Global Styles --- */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    html {
-      height: 100%;
-      overflow: hidden;
-    }
-    
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      line-height: 1.4;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    ::selection {
-      background-color: rgba(59, 130, 246, 0.4);
-      color: white;
-    }
-    
-    /* --- START: Tooltip --- */
-    .tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .tooltip .tooltip-text {
-      visibility: hidden;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      text-align: center;
-      padding: 5px 10px;
-      border-radius: var(--radius-sm);
-      position: absolute;
-      z-index: 10000;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      font-size: 12px;
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-    }
-    
-    .tooltip .tooltip-text::after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-    }
-    
-    .tooltip:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-    /* --- END: Tooltip --- */
-    /* --- END: Global Styles --- */
+#chat-container {
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    max-width: 500px;
+    margin:auto;
+    border:1px solid #ccc;
+    background:white;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
 
-    /* --- START: Layout Container --- */
-    #chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      position: relative;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, #0c1424 100%);
-    }
-    /* --- END: Layout Container --- */
-    
-    /* --- START: Messages Area - ULTRA COMPACT --- */
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 6px 2px 6px;
-      background: var(--bg-secondary);
-      direction: ltr;
-      scroll-behavior: smooth;
-      position: relative;
-    }
-    
-    .messages-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      padding-bottom: 3px;
-    }
-    
-    .messages-header {
-      position: sticky;
-      top: 0;
-      background: rgba(17, 24, 39, 0.97);
-      padding: 8px 10px;
-      margin: -8px -6px 6px -6px;
-      border-bottom: 1px solid var(--border-color);
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(8px);
-      font-size: 13px;
-      min-height: 40px;
-    }
-    
-    .messages-header h3 {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-primary);
-    }
-    
-    .messages-header h3 i {
-      color: var(--accent-blue);
-      font-size: 15px;
-    }
-    
-    .message-count {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: white;
-      padding: 2px 7px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      min-width: 45px;
-      text-align: center;
-    }
-    /* --- END: Messages Area --- */
-    
-    /* --- START: Message Styles - ULTRA COMPACT --- */
-    .msg-wrapper {
-      margin-bottom: 1px;
-      transition: all var(--transition-speed);
-      animation: fadeIn 0.25s ease-out;
-      border-radius: var(--radius-md);
-      padding: 0;
-    }
-    
-    .msg-wrapper:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-    
-    .msg-wrapper.my-message {
-      background: rgba(59, 130, 246, 0.05);
-    }
-    
-    .msg-wrapper.my-message:hover {
-      background: rgba(59, 130, 246, 0.08);
-    }
-    
-    .msg-wrapper.new-message {
-      animation: highlightPulse 1.5s ease;
-    }
-    
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(3px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes highlightPulse {
-      0% {
-        background-color: rgba(59, 130, 246, 0.1);
-      }
-      70% {
-        background-color: rgba(59, 130, 246, 0.1);
-      }
-      100% {
-        background-color: transparent;
-      }
-    }
-    
-    .msg, .hmsg {
-      display: flex;
-      width: 100%;
-      background-color: transparent;
-      border-radius: var(--radius-md);
-      padding: 4px 6px;
-      transition: all var(--transition-speed);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .msg:hover {
-      background-color: rgba(31, 41, 55, 0.4);
-    }
-    
-    .msg.my-message {
-      border-right: 2px solid var(--accent-blue);
-    }
-    
-    .hmsg.notification {
-      background-color: rgba(59, 130, 246, 0.08);
-      border-left: 2px solid var(--accent-blue);
-      padding: 3px 6px;
-      font-size: 12px;
-    }
-    
-    .hmsg.notification .u-pic {
-      background: var(--accent-blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      width: 28px;
-      height: 28px;
-      font-size: 12px;
-    }
-    
-    /* Avatar - ultra compact */
-    .u-pic {
-      height: 32px;
-      width: 32px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-left: 8px;
-      border: 1px solid var(--border-color);
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      font-size: 14px;
-      color: white;
-    }
-    
-    .u-pic img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .msg-content-fill {
-      flex: 1;
-      overflow: hidden;
-      padding: 0 2px;
-      min-width: 0;
-    }
-    
-    /* Header - ultra compact */
-    .msg-header {
-      width: 100%;
-      display: flex;
-      height: 18px;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1px;
-    }
-    
-    .user-info-wrapper {
-      display: flex;
-      align-items: center;
-      flex-grow: 1;
-      overflow: hidden;
-      min-width: 0;
-      gap: 5px;
-    }
-    
-    .user-badge {
-      background: var(--accent-blue);
-      color: white;
-      font-size: 8px;
-      padding: 1px 4px;
-      border-radius: 6px;
-      font-weight: 600;
-      line-height: 1.2;
-    }
-    
-    .user-badge.owner {
-      background: var(--accent-purple);
-    }
-    
-    .user-badge.admin {
-      background: var(--accent-red);
-    }
-    
-    .u-topic {
-      color: var(--text-primary);
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      font-weight: 600;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    /* Message text - ultra compact */
-    .u-msg {
-      padding: 1px 0;
-      width: 100%;
-      word-wrap: break-word;
-      line-height: 1.45;
-      color: var(--text-secondary);
-      font-size: 13px;
-    }
-    
-    /* Emoji in messages */
-    .u-msg .emoji {
-      font-size: 14px;
-      vertical-align: middle;
-      margin: 0 1px;
-    }
-    
-    /* Links in messages */
-    .u-msg a {
-      color: var(--accent-blue);
-      text-decoration: none;
-      border-bottom: 1px dotted var(--accent-blue);
-    }
-    
-    .u-msg a:hover {
-      text-decoration: underline;
-      border-bottom: 1px solid var(--accent-blue);
-    }
-    
-    /* Time and delete button - ultra compact */
-    .tago, .time {
-      padding: 0 2px;
-      margin-left: 5px;
-      color: var(--text-muted);
-      font-size: 9px;
-      white-space: nowrap;
-      font-weight: normal;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-    
-    .time i, .tago i {
-      font-size: 8px;
-    }
-    
-    .delete-btn {
-      cursor: pointer;
-      color: white;
-      background-color: var(--accent-red);
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      opacity: 0;
-      transition: all var(--transition-speed);
-      border: none;
-      margin-right: 2px;
-    }
-    
-    .msg:hover .delete-btn {
-      opacity: 0.7;
-    }
-    
-    .delete-btn:hover {
-      background-color: var(--accent-red-dark);
-      opacity: 1;
-      transform: scale(1.05);
-    }
-    
-    /* Message actions */
-    .msg-actions {
-      display: flex;
-      gap: 3px;
-      opacity: 0;
-      transition: opacity var(--transition-speed);
-      margin-right: 5px;
-    }
-    
-    .msg:hover .msg-actions {
-      opacity: 1;
-    }
-    
-    .msg-action-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 3px;
-      color: var(--text-muted);
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      cursor: pointer;
-      transition: all var(--transition-speed);
-    }
-    
-    .msg-action-btn:hover {
-      background: var(--accent-blue);
-      color: white;
-      transform: scale(1.05);
-    }
-    
-    /* Quote styling */
-    .message-quote {
-      background: rgba(59, 130, 246, 0.1);
-      border-right: 2px solid var(--accent-blue);
-      border-radius: var(--radius-sm);
-      padding: 4px 6px;
-      margin: 3px 0;
-      font-size: 11px;
-      line-height: 1.3;
-    }
-    
-    .quote-author {
-      color: var(--accent-blue);
-      font-weight: 600;
-      font-size: 10px;
-      margin-bottom: 1px;
-    }
-    
-    .quote-text {
-      color: var(--text-muted);
-      font-style: italic;
-    }
-    /* --- END: Message Styles --- */
-    
-    /* --- START: Typing Indicator - ULTRA COMPACT --- */
-    #typing-indicator {
-      height: 22px;
-      padding: 3px 12px;
-      font-size: 11px;
-      color: var(--accent-yellow);
-      font-style: normal;
-      background-color: rgba(17, 24, 39, 0.95);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(5px);
-    }
-    
-    .typing-dots {
-      display: flex;
-      gap: 2px;
-    }
-    
-    .typing-dots span {
-      animation: typing 1.4s infinite;
-      background-color: var(--accent-yellow);
-      border-radius: 50%;
-      display: inline-block;
-      height: 5px;
-      width: 5px;
-    }
-    
-    .typing-dots span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .typing-dots span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    
-    @keyframes typing {
-      0%, 100% { 
-        opacity: 0.4;
-        transform: translateY(0);
-      }
-      50% { 
-        opacity: 1;
-        transform: translateY(-1px);
-      }
-    }
-    /* --- END: Typing Indicator --- */
-    
-    /* --- START: Input Area - ULTRA COMPACT --- */
-    #inputArea {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 6px;
-      border-top: 1px solid var(--border-color);
-      padding: 8px 10px;
-      background: var(--bg-secondary);
-      box-sizing: border-box;
-      position: relative;
-      min-height: 50px;
-    }
-    
-    .input-wrapper {
-      flex: 1;
-      position: relative;
-      height: 36px;
-    }
-    
-    #messageInput {
-      width: 100%;
-      height: 100%;
-      padding: 6px 35px 6px 10px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      outline: none;
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      font-size: 13px;
-      font-family: 'Tajawal', sans-serif;
-      transition: all var(--transition-speed);
-      resize: none;
-      line-height: 1.4;
-    }
-    
-    #messageInput:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-      background-color: #2d3748;
-    }
-    
-    #messageInput::placeholder {
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-    
-    .input-icons {
-      position: absolute;
-      left: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      gap: 5px;
-      z-index: 2;
-    }
-    
-    .input-icon {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 13px;
-      cursor: pointer;
-      padding: 2px;
-      border-radius: 3px;
-      transition: all var(--transition-speed);
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .input-icon:hover {
-      color: var(--accent-blue);
-      background: rgba(59, 130, 246, 0.1);
-    }
-    
-    #sendBtn {
-      padding: 0 14px;
-      cursor: pointer;
-      height: 36px;
-      box-sizing: border-box;
-      border: none;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
-      color: white;
-      font-weight: 600;
-      font-size: 12px;
-      transition: all var(--transition-speed);
-      min-width: 70px;
-    }
-    
-    #sendBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
-      background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
-    }
-    
-    #sendBtn:active {
-      transform: translateY(0);
-    }
-    
-    #sendBtn i {
-      font-size: 12px;
-    }
-    
-    /* Character counter */
-    .char-counter {
-      position: absolute;
-      left: 8px;
-      bottom: -18px;
-      font-size: 10px;
-      color: var(--text-muted);
-      opacity: 0.7;
-    }
-    
-    .char-counter.warning {
-      color: var(--accent-yellow);
-    }
-    
-    .char-counter.error {
-      color: var(--accent-red);
-    }
-    /* --- END: Input Area --- */
-    
-    /* --- START: Top Buttons & Features --- */
-    #topButtons {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      gap: 6px;
-      z-index: 1000;
-    }
-    
-    .top-btn {
-      padding: 6px 10px;
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 6px var(--shadow-color);
-      color: var(--text-primary);
-      transition: all var(--transition-speed);
-      backdrop-filter: blur(8px);
-      font-weight: 500;
-      min-height: 30px;
-    }
-    
-    .top-btn:hover {
-      background-color: rgba(71, 85, 105, 0.5);
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-    }
-    
-    .top-btn i {
-      font-size: 13px;
-    }
-    
-    .top-btn.video-btn i {
-      color: var(--accent-red);
-    }
-    
-    .top-btn.users-btn i {
-      color: var(--accent-green);
-    }
-    
-    .top-btn.settings-btn i {
-      color: var(--accent-purple);
-    }
-    
-    .badge {
-      background: var(--accent-blue);
-      color: white;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      font-weight: bold;
-    }
-    
-    /* Quick emoji selector */
-    #emojiSelector {
-      position: fixed;
-      bottom: 60px;
-      right: 10px;
-      background: rgba(30, 41, 59, 0.97);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      z-index: 1002;
-      display: none;
-      backdrop-filter: blur(10px);
-      max-width: 250px;
-    }
-    
-    .emoji-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 5px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    
-    .emoji-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all var(--transition-speed);
-    }
-    
-    .emoji-btn:hover {
-      background: var(--accent-blue);
-      transform: scale(1.1);
-    }
-    /* --- END: Top Buttons --- */
-    
-    /* --- START: Users Box - ULTRA COMPACT --- */
-    #usersBox {
-      position: fixed;
-      top: 55px;
-      right: 12px;
-      background: rgba(30, 41, 59, 0.98);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      min-width: 160px;
-      max-width: 200px;
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-      visibility: hidden;
-      transition: all var(--transition-speed) ease;
-      backdrop-filter: blur(12px);
-      border-top: 2px solid var(--accent-green);
-    }
-    
-    #usersBox.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      visibility: visible;
-    }
-    
-    #usersBox h4 {
-      color: var(--text-primary);
-      margin: 0 0 10px 0;
-      font-size: 13px;
-      text-align: center;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    
-    #usersBox h4 i {
-      color: var(--accent-green);
-      font-size: 13px;
-    }
-    
-    #usersList {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    
-    .user-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 4px;
-      border-bottom: 1px solid rgba(71, 85, 105, 0.2);
-      color: var(--text-primary);
-      transition: all var(--transition-speed);
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-    }
-    
-    .user-item:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    .user-item:last-child {
-      border-bottom: none;
-    }
-    
-    .user-item.you {
-      background: rgba(59, 130, 246, 0.1);
-      border-left: 2px solid var(--accent-blue);
-    }
-    
-    .status-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    
-    .status-green {
-      background-color: var(--accent-green);
-      box-shadow: 0 0 4px var(--accent-green);
-    }
-    
-    .status-yellow {
-      background-color: var(--accent-yellow);
-      box-shadow: 0 0 4px var(--accent-yellow);
-    }
-    
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      min-width: 0;
-    }
-    
-    .user-name {
-      font-weight: 500;
-      font-size: 11px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .user-status {
-      font-size: 9px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-    
-    .user-status.typing {
-      color: var(--accent-yellow);
-    }
-    
-    .user-typing {
-      display: flex;
-      align-items: center;
-      gap: 1px;
-    }
-    
-    .user-typing span {
-      width: 2px;
-      height: 2px;
-      background: var(--accent-yellow);
-      border-radius: 50%;
-      animation: userTyping 1.4s infinite;
-    }
-    
-    .user-typing span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .user-typing span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    /* --- END: Users Box --- */
-    
-    /* --- START: Video Modal - ULTRA COMPACT --- */
-    #setVideoModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(30, 41, 59, 0.98);
-      padding: 16px;
-      border-radius: var(--radius-md);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-      z-index: 1003;
-      display: none;
-      width: 90%;
-      max-width: 350px;
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(15px);
-      border-top: 3px solid var(--accent-blue);
-    }
-    
-    #setVideoModal h4 {
-      margin: 0 0 12px 0;
-      color: var(--text-primary);
-      font-size: 14px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    #setVideoModal h4 i {
-      color: var(--accent-blue);
-      font-size: 15px;
-    }
-    
-    .modal-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .video-input-group {
-      position: relative;
-    }
-    
-    #videoUrlInput {
-      width: 100%;
-      padding: 8px 10px 8px 35px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-      box-sizing: border-box;
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      font-size: 13px;
-      transition: all var(--transition-speed);
-    }
-    
-    #videoUrlInput:focus {
-      border-color: var(--accent-blue);
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-      background-color: #2d3748;
-    }
-    
-    #videoUrlInput::placeholder {
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-    
-    .video-input-icon {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-    
-    #submitVideoUrlBtn {
-      width: 100%;
-      padding: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 5px;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
-      border: none;
-      border-radius: var(--radius-md);
-      color: white;
-      cursor: pointer;
-      transition: all var(--transition-speed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    
-    #submitVideoUrlBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
-    }
-    
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1001;
-      display: none;
-      backdrop-filter: blur(2px);
-    }
-    /* --- END: Video Modal --- */
-    
-    /* --- START: Video Player - ULTRA COMPACT --- */
-    #pinnedVideoPlayer {
-      position: fixed;
-      top: 70px;
-      left: 30px;
-      width: clamp(280px, 80vw, 400px);
-      background: #000;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-      z-index: 998;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      min-width: 250px;
-      min-height: 150px;
-      max-width: 80vw;
-      max-height: 65vh;
-    }
-    
-    .video-header {
-      background: linear-gradient(135deg, var(--accent-blue), #2d4f9c);
-      color: white;
-      padding: 6px 10px;
-      cursor: move;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-      touch-action: none;
-      user-select: none;
-      font-weight: 600;
-      font-size: 12px;
-      min-height: 32px;
-    }
-    
-    .video-header span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .video-header i {
-      font-size: 13px;
-    }
-    
-    .close-pinned-video {
-      background: var(--accent-red);
-      border: none;
-      color: white;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      cursor: pointer;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all var(--transition-speed);
-    }
-    
-    .close-pinned-video:hover {
-      background-color: var(--accent-red-dark);
-      transform: rotate(90deg);
-    }
-    
-    .video-body {
-      width: 100%;
-      background: #000;
-      flex: 1;
-      min-height: 140px;
-      position: relative;
-    }
-    
-    .video-body iframe, .video-body video {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    
-    .video-selector {
-      display: flex;
-      gap: 5px;
-      padding: 6px;
-      background: var(--bg-tertiary);
-      flex-shrink: 0;
-      overflow-x: auto;
-      font-size: 11px;
-    }
-    
-    .video-selector button {
-      flex: 1;
-      padding: 5px 6px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      color: var(--text-primary);
-      white-space: nowrap;
-      min-width: 60px;
-      transition: all var(--transition-speed);
-      font-size: 11px;
-      font-weight: 500;
-    }
-    
-    .video-selector button:hover {
-      background-color: #475569;
-    }
-    
-    .video-selector button.active {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
-      color: white;
-      border-color: var(--accent-blue);
-      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-    }
-    /* --- END: Video Player --- */
-    
-    /* --- START: Notification Badge --- */
-    .notification-badge {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: var(--accent-red);
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: bold;
-      z-index: 1005;
-      animation: pulse 2s infinite;
-      cursor: pointer;
-    }
-    
-    .notification-badge.hidden {
-      display: none;
-    }
-    /* --- END: Notification Badge --- */
-    
-    /* --- START: Scrollbar - ULTRA COMPACT --- */
-    ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(42, 52, 71, 0.2);
-      border-radius: 2px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 2px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: #4a5a75;
-    }
-    
-    /* --- START: Responsive - ULTRA COMPACT --- */
-    @media (max-width: 768px) {
-      #pinnedVideoPlayer {
-        width: calc(100vw - 20px);
-        left: 10px;
-        right: 10px;
-        top: 60px;
-      }
-      
-      .top-btn {
-        padding: 5px 8px;
-        font-size: 11px;
-      }
-      
-      #topButtons {
-        top: 10px;
-        right: 10px;
-      }
-      
-      #usersBox {
-        right: 10px;
-        top: 50px;
-      }
-      
-      #messages {
-        padding: 6px 4px 2px 4px;
-      }
-      
-      .messages-header {
-        padding: 6px 8px;
-        margin: -6px -4px 4px -4px;
-        font-size: 12px;
-      }
-      
-      .msg, .hmsg {
-        padding: 3px 5px;
-      }
-      
-      .u-pic {
-        width: 28px;
-        height: 28px;
-        margin-left: 6px;
-        font-size: 12px;
-      }
-      
-      #inputArea {
-        padding: 6px 8px;
-        gap: 5px;
-      }
-      
-      #sendBtn {
-        padding: 0 10px;
-        font-size: 11px;
-        height: 32px;
-        min-width: 60px;
-      }
-      
-      #messageInput {
-        padding: 5px 30px 5px 8px;
-        font-size: 12px;
-      }
-      
-      .input-icons {
-        left: 4px;
-        gap: 3px;
-      }
-      
-      .input-icon {
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-      }
-      
-      .u-topic {
-        font-size: 11px;
-      }
-      
-      .u-msg {
-        font-size: 12px;
-      }
-      
-      #emojiSelector {
-        right: 5px;
-        bottom: 55px;
-        max-width: 200px;
-      }
-      
-      .emoji-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
-      
-      .emoji-btn {
-        width: 25px;
-        height: 25px;
-        font-size: 14px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      #topButtons {
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      .top-btn span:not(.badge) {
-        display: none;
-      }
-      
-      .top-btn {
-        width: 34px;
-        height: 34px;
-        justify-content: center;
-        padding: 0;
-      }
-      
-      .top-btn i {
-        margin: 0;
-        font-size: 14px;
-      }
-      
-      .msg-header {
-        flex-direction: column;
-        align-items: flex-start;
-        height: auto;
-        gap: 1px;
-        margin-bottom: 1px;
-      }
-      
-      .user-info-wrapper {
-        width: 100%;
-      }
-      
-      .time {
-        margin-left: 0;
-        align-self: flex-end;
-        font-size: 8px;
-      }
-      
-      .u-pic {
-        width: 26px;
-        height: 26px;
-        margin-left: 5px;
-      }
-      
-      #typing-indicator {
-        font-size: 10px;
-        height: 20px;
-        padding: 2px 10px;
-      }
-      
-      #emojiSelector {
-        max-width: 180px;
-      }
-      
-      .emoji-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-    
-    /* --- START: Utility Classes --- */
-    .hidden {
-      display: none !important;
-    }
-    
-    .compact {
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-    
-    .tight {
-      line-height: 1.35 !important;
-    }
-    
-    .no-margin {
-      margin: 0 !important;
-    }
-    
-    .no-padding {
-      padding: 0 !important;
-    }
-    
-    /* Image in messages */
-    .message-image {
-      margin: 2px 0;
-      max-width: 100%;
-    }
-    
-    .message-image img {
-      max-width: 100%;
-      max-height: 150px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-    }
-    
-    .message-image a {
-      color: var(--accent-blue);
-      font-size: 10px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 1px;
-    }
-    
-    .message-image a:hover {
-      text-decoration: underline;
-    }
-    
-    /* Reply/quote styling */
-    .reply-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 10px;
-      cursor: pointer;
-      padding: 1px 4px;
-      border-radius: 2px;
-      transition: all var(--transition-speed);
-    }
-    
-    .reply-btn:hover {
-      color: var(--accent-blue);
-      background: rgba(59, 130, 246, 0.1);
-    }
-    
-    /* Message context menu */
-    .context-menu {
-      position: fixed;
-      background: rgba(30, 41, 59, 0.98);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 5px 0;
-      z-index: 10000;
-      min-width: 120px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      display: none;
-    }
-    
-    .context-menu-item {
-      padding: 6px 12px;
-      color: var(--text-primary);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all var(--transition-speed);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .context-menu-item:hover {
-      background: rgba(59, 130, 246, 0.2);
-      color: var(--accent-blue);
-    }
-    
-    .context-menu-item i {
-      font-size: 11px;
-      width: 14px;
-    }
-    
-    /* Loading animation */
-    .loading {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: var(--accent-blue);
-      animation: spin 0.8s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    /* --- END: Utility Classes --- */
-  </style>
+/* الرسائل */
+#messages {
+    flex:1;
+    overflow-y:auto;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+}
+
+.msg {
+    width: 100%;
+    padding: 8px 12px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6e6e6;
+    font-size: 15px;
+    text-align: right;
+}
+
+/* اسم المرسل */
+.msgUser {
+    font-size: 13px;
+    font-weight: bold;
+    color: #0b6e99;
+    margin-bottom: 3px;
+}
+
+/* نص الرسالة */
+.msgText {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+/* الوقت */
+.time {
+    display:block;
+    font-size: 11px;
+    color:#888;
+    margin-top:3px;
+}
+
+/* رسالة النظام */
+.sys {
+    display:inline-block;
+    padding:4px 10px;
+    background:#e5e5e5;
+    color:#555;
+    font-size:12px;
+    border-radius:8px;
+    margin:10px auto;
+}
+
+/* الكتابة */
+#typing-indicator {
+    height:20px;
+    padding:0 15px;
+    font-size:13px;
+    color:#888;
+    font-style:italic;
+}
+
+/* الإدخال */
+#inputArea {
+    display:flex;
+    border-top:1px solid #ccc;
+    padding:8px;
+    background:#f0f0f0;
+    gap:8px;
+}
+
+#messageInput {
+    flex:1;
+    padding:10px 15px;
+    border-radius:20px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+#sendBtn {
+    padding:10px 15px;
+    border:none;
+    border-radius:20px;
+    background:#25d366;
+    color:white;
+    cursor:pointer;
+    font-size:15px;
+}
+
+/* قائمة المتصلين */
+#onlineList {
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:white;
+    border-radius:20px;
+    padding:5px 12px;
+    font-size:14px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    cursor:pointer;
+}
+
+#usersBox {
+    position:fixed;
+    top:40px;
+    left:50%;
+    transform:translateX(-50%);
+    background:white;
+    border-radius:8px;
+    padding:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    opacity:0;
+    visibility:hidden;
+    transition:0.2s;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+#usersBox.visible {
+    opacity:1;
+    visibility:visible;
+}
+
+.user-item {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:4px 0;
+}
+
+.status-indicator {
+    width:10px;
+    height:10px;
+    border-radius:50%;
+}
+
+.status-green { background:#28a745; }
+.status-yellow { background:#ffc107; }
+</style>
 </head>
 <body>
-  <!-- Notification Badge -->
-  <div class="notification-badge hidden" id="notificationBadge" title="إشعارات جديدة"></div>
-  
-  <!-- Emoji Selector -->
-  <div id="emojiSelector"></div>
-  
-  <!-- Context Menu -->
-  <div class="context-menu" id="contextMenu"></div>
-  
-  <div id="chat-container">
-    <!-- Top Buttons -->
-    <div id="topButtons">
-        <div class="top-btn video-btn tooltip" id="setVideoBtn" title="تثبيت فيديو">
-            <i class="fas fa-video"></i>
-            <span>فيديو</span>
-        </div>
-        <div class="top-btn users-btn tooltip" id="onlineListBtn" title="المتصلون الآن">
-            <i class="fas fa-users"></i>
-            <span>المتصلون</span>
-            <span class="badge" id="count">0</span>
-        </div>
-        <div class="top-btn settings-btn tooltip" id="settingsBtn" title="الإعدادات">
-            <i class="fas fa-cog"></i>
-            <span>إعدادات</span>
-        </div>
-    </div>
-    
-    <!-- Users List Box -->
-    <div id="usersBox">
-      <h4><i class="fas fa-user-friends"></i> المتصلين الآن</h4>
-      <div id="usersList"></div>
-    </div>
-    
-    <!-- Video Modal -->
-    <div id="setVideoModal">
-      <h4><i class="fas fa-film"></i> تثبيت فيديو للجميع</h4>
-      <div class="modal-content">
-        <div class="video-input-group">
-          <i class="fas fa-link video-input-icon"></i>
-          <input type="text" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، M3U، أو MP4"/>
-        </div>
-        <button id="submitVideoUrlBtn" class="btn-primary">
-          <i class="fas fa-thumbtack"></i>
-          تثبيت الفيديو
-        </button>
-      </div>
-    </div>
-    
-    <!-- Overlay -->
-    <div id="overlay"></div>
-    
-    <!-- Pinned Video Player -->
-    <div id="pinnedVideoPlayer"></div>
 
-    <!-- Messages Header -->
-    <div class="messages-header">
-      <h3><i class="fas fa-comments"></i> دردشة المجموعة</h3>
-      <div class="message-count" id="messageCount">0</div>
-    </div>
-    
-    <!-- Messages Area -->
-    <div id="messages">
-      <div class="messages-container" id="messagesContainer"></div>
-    </div>
-    
-    <!-- Typing Indicator -->
+<div id="chat-container">
+    <div id="messages"></div>
     <div id="typing-indicator"></div>
-    
-    <!-- Input Area -->
-    <form id="inputArea" action="javascript:void(0);">
-      <div class="input-wrapper">
-        <div class="input-icons">
-          <button type="button" class="input-icon tooltip" title="إضافة صورة" id="addImageBtn">
-            <i class="fas fa-image"></i>
-            <span class="tooltip-text">إضافة صورة</span>
-          </button>
-          <button type="button" class="input-icon tooltip" title="إضافة emoji" id="addEmojiBtn">
-            <i class="fas fa-smile"></i>
-            <span class="tooltip-text">إضافة إيموجي</span>
-          </button>
-          <button type="button" class="input-icon tooltip" title="إرفاق ملف" id="attachFileBtn">
-            <i class="fas fa-paperclip"></i>
-            <span class="tooltip-text">إرفاق ملف</span>
-          </button>
-        </div>
-        <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة" autofocus maxlength="500"/>
-        <div class="char-counter" id="charCounter">0/500</div>
-      </div>
-      <button type="submit" id="sendBtn" class="btn-primary tooltip" aria-label="إرسال" title="إرسال الرسالة">
-        <span>إرسال</span>
-        <i class="fas fa-paper-plane"></i>
-        <span class="tooltip-text">إرسال الرسالة</span>
-      </button>
-    </form>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // --- Firebase Configuration ---
-      const firebaseConfig = {
+    <form id="inputArea" action="javascript:void(0);">
+        <input type="text" id="messageInput" placeholder="اكتب رسالة..." autocomplete="off">
+        <button type="submit" id="sendBtn">إرسال</button>
+    </form>
+</div>
+
+<div id="onlineList">👥 <span id="count">0</span></div>
+<div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    /* Firebase */
+    const firebaseConfig = {
         apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
         authDomain: "mychat-2d881.firebaseapp.com",
         databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
       };
-      
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
 
-      // --- User Configuration ---
-      const username = "زائر_" + Math.floor(Math.random() * 1000);
-      const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
-      let userColor = '#3b82f6'; // Default color
-      
-      // Generate random color for user
-      const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
-      userColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      // --- DOM Elements ---
-      const messagesDiv = document.getElementById("messages");
-      const messagesContainer = document.getElementById("messagesContainer");
-      const messageInput = document.getElementById("messageInput");
-      const inputAreaForm = document.getElementById("inputArea");
-      const onlineListBtn = document.getElementById("onlineListBtn");
-      const usersBox = document.getElementById("usersBox");
-      const usersList = document.getElementById("usersList");
-      const count = document.getElementById("count");
-      const typingIndicator = document.getElementById("typing-indicator");
-      const messageCount = document.getElementById("messageCount");
-      const charCounter = document.getElementById("charCounter");
-      const notificationBadge = document.getElementById("notificationBadge");
-      const emojiSelector = document.getElementById("emojiSelector");
-      const contextMenu = document.getElementById("contextMenu");
-      const settingsBtn = document.getElementById("settingsBtn");
-      const attachFileBtn = document.getElementById("attachFileBtn");
-      
-      const setVideoBtn = document.getElementById("setVideoBtn");
-      const setVideoModal = document.getElementById("setVideoModal");
-      const videoUrlInput = document.getElementById("videoUrlInput");
-      const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
-      const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
-      const overlay = document.getElementById("overlay");
-      
-      const addImageBtn = document.getElementById("addImageBtn");
-      const addEmojiBtn = document.getElementById("addEmojiBtn");
-      
-      // --- Firebase References ---
-      const userRef = db.ref("online/" + username);
-      const messagesRef = db.ref("messages");
-      const onlineRef = db.ref("online");
-      const pinnedVideoRef = db.ref("pinned_video");
-      const reactionsRef = db.ref("reactions");
-      
-      // --- Global Variables ---
-      let typingTimer, serverTimeOffset = 0;
-      let initialLoad = true;
-      let isTyping = false;
-      let messageCounter = 0;
-      let unreadMessages = 0;
-      let isPageVisible = true;
-      let lastSeenMessageId = null;
-      let replyToMessage = null;
-      let selectedEmojis = ['😊', '😂', '😍', '👍', '❤️', '🔥', '🎉', '👏', '🙏', '🤔'];
-      
-      // --- Initialize User ---
-      function initializeUser() {
-        userRef.set({ 
-          lastActive: firebase.database.ServerValue.TIMESTAMP, 
-          isTyping: false,
-          uid: sessionUid,
-          color: userColor,
-          joinedAt: Date.now()
-        });
-        
-        userRef.onDisconnect().remove();
-        
-        db.ref('.info/serverTimeOffset').on('value', snap => { 
-          serverTimeOffset = snap.val() || 0; 
-        });
-        
-        // Keep user active
-        setInterval(() => { 
-          userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); 
-        }, 30000);
-        
-        // Cleanup stale users
-        setInterval(() => {
-          const now = Date.now() + serverTimeOffset; 
-          const STALE_THRESHOLD = 120 * 1000;
-          onlineRef.once('value', snapshot => {
-            const users = snapshot.val(); 
-            if (!users) return;
-            
-            Object.keys(users).forEach(u => { 
-              if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) {
-                db.ref('online/' + u).remove();
-              }
-            });
-          });
-        }, 60000);
-        
-        // Load message count
-        messagesRef.once('value', snapshot => {
-          messageCounter = snapshot.numChildren();
-          updateMessageCount();
-        });
-        
-        // Initialize emoji selector
-        initializeEmojiSelector();
-      }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-      // --- Initialize Emoji Selector ---
-      function initializeEmojiSelector() {
-        emojiSelector.innerHTML = '';
-        const emojiGrid = document.createElement('div');
-        emojiGrid.className = 'emoji-grid';
-        
-        selectedEmojis.forEach(emoji => {
-          const emojiBtn = document.createElement('button');
-          emojiBtn.className = 'emoji-btn';
-          emojiBtn.textContent = emoji;
-          emojiBtn.onclick = () => {
-            messageInput.value += emoji;
-            messageInput.focus();
-            emojiSelector.style.display = 'none';
-          };
-          emojiGrid.appendChild(emojiBtn);
-        });
-        
-        emojiSelector.appendChild(emojiGrid);
-      }
+    /* اسم المستخدم */
+    let username = localStorage.getItem('chatUsername');
+    if (!username) {
+        while (true) {
+            username = prompt("اكتب اسمك للانضمام:");
+            if (username && username.trim() !== "") break;
+        }
+        localStorage.setItem('chatUsername', username.trim());
+    }
 
-      // --- Modal Management ---
-      function closeAllModals() {
-        usersBox.classList.remove('visible');
-        setVideoModal.style.display = 'none';
-        overlay.style.display = 'none';
-        emojiSelector.style.display = 'none';
-        contextMenu.style.display = 'none';
-      }
-      
-      onlineListBtn.onclick = e => { 
-        e.stopPropagation(); 
-        closeAllModals(); 
-        usersBox.classList.toggle('visible'); 
-      };
-      
-      setVideoBtn.onclick = e => { 
-        e.stopPropagation(); 
-        closeAllModals(); 
-        setVideoModal.style.display = 'block'; 
-        overlay.style.display = 'block';
-        videoUrlInput.focus();
-      };
-      
-      settingsBtn.onclick = e => {
-        e.stopPropagation();
-        alert('إعدادات الدردشة:\n\n• يمكنك تغيير الاسم عن طريق تحديث الصفحة\n• الضغط على أي رسالة لنسخها\n• يمكنك حذف رسائلك الخاصة');
-      };
-      
-      addEmojiBtn.onclick = e => {
-        e.stopPropagation();
-        closeAllModals();
-        emojiSelector.style.display = 'block';
-        positionElement(emojiSelector, addEmojiBtn, 'top');
-      };
-      
-      document.onclick = closeAllModals;
-      usersBox.onclick = e => e.stopPropagation();
-      setVideoModal.onclick = e => e.stopPropagation();
-      emojiSelector.onclick = e => e.stopPropagation();
-      
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeAllModals();
-        }
-        
-        // Quick shortcuts
-        if (e.ctrlKey || e.metaKey) {
-          switch(e.key) {
-            case 'k':
-              e.preventDefault();
-              messageInput.focus();
-              break;
-            case 'u':
-              e.preventDefault();
-              onlineListBtn.click();
-              break;
-            case 'v':
-              e.preventDefault();
-              setVideoBtn.click();
-              break;
-          }
-        }
-      });
+    const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
 
-      // --- Character Counter ---
-      messageInput.addEventListener('input', () => {
-        const length = messageInput.value.length;
-        charCounter.textContent = `${length}/500`;
-        
-        if (length > 450) {
-          charCounter.classList.add('warning');
-          charCounter.classList.remove('error');
-        } else if (length >= 500) {
-          charCounter.classList.add('error');
-          charCounter.classList.remove('warning');
-        } else {
-          charCounter.classList.remove('warning', 'error');
-        }
-      });
+    const userRef = db.ref("online/" + username);
+    const messagesRef = db.ref("messages");
+    const onlineRef = db.ref("online");
 
-      // --- Online Users Management ---
-      onlineRef.on("value", snap => {
-        const onlineUsers = snap.val() || {};
-        count.textContent = snap.numChildren();
-        renderUsersList(onlineUsers);
-        updateTypingIndicator(onlineUsers);
-        
-        if (initialLoad) {
-          initialLoad = false;
-        }
-      });
+    const messagesDiv = document.getElementById("messages");
+    const typingIndicator = document.getElementById("typing-indicator");
+    const messageInput = document.getElementById("messageInput");
+    const inputAreaForm = document.getElementById("inputArea");
+    const onlineList = document.getElementById("onlineList");
+    const usersBox = document.getElementById("usersBox");
+    const usersList = document.getElementById("usersList");
+    const count = document.getElementById("count");
 
-      onlineRef.on("child_added", snap => { 
-        if (!initialLoad && snap.key !== username) {
-          showSystemMsg(`<i class="fas fa-user-plus"></i> ${snap.key} دخل الدردشة`); 
-          showNotification(`${snap.key} دخل الدردشة`);
-        }
-      });
-      
-      onlineRef.on("child_removed", snap => { 
-        showSystemMsg(`<i class="fas fa-user-minus"></i> ${snap.key} غادر الدردشة`); 
-      });
+    let typingTimer, serverTimeOffset = 0;
 
-      // --- Message Handling ---
-      inputAreaForm.onsubmit = sendMessage;
-      
-      messageInput.oninput = () => {
-        clearTimeout(typingTimer);
-        
-        if (!isTyping && messageInput.value.trim().length > 0) {
-          isTyping = true;
-          userRef.update({ 
-            isTyping: true, 
-            lastActive: firebase.database.ServerValue.TIMESTAMP 
-          });
-        }
-        
-        typingTimer = setTimeout(() => { 
-          if (isTyping) {
-            isTyping = false;
-            userRef.update({ isTyping: false }); 
-          }
-        }, 1200);
-      };
-      
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-      
-      // Add image button
-      addImageBtn.onclick = () => {
-        const imageUrl = prompt("أدخل رابط الصورة:");
-        if (imageUrl && imageUrl.trim()) {
-          messageInput.value += ` [صورة: ${imageUrl.trim()}] `;
-          messageInput.focus();
-        }
-      };
-      
-      // Attach file button
-      attachFileBtn.onclick = () => {
-        alert('لإرفاق ملف، قم بنسخ رابط الملف والصقه في الرسالة');
-      };
-      
-      // Reply message function
-      function replyTo(msgId, userName, messageText) {
-        replyToMessage = { id: msgId, user: userName, text: messageText };
-        messageInput.placeholder = `رد على ${userName}...`;
-        messageInput.focus();
-        
-        // Show notification
-        showSystemMsg(`<i class="fas fa-reply"></i> أنت ترد على ${userName}`);
-      }
+    /* تسجيل المستخدم */
+    userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping:false });
+    userRef.onDisconnect().remove();
 
-      function sendMessage() {
-        clearTimeout(typingTimer);
-        if (isTyping) {
-          isTyping = false;
-          userRef.update({ isTyping: false }); 
-        }
-        
-        const text = messageInput.value.trim(); 
-        if (!text) {
-          if (replyToMessage) {
-            replyToMessage = null;
-            messageInput.placeholder = "اكتب رسالتك...";
-          }
-          return;
-        }
-        
-        const time = new Date().toLocaleTimeString('ar-EG', {
-          hour: '2-digit', 
-          minute:'2-digit'
-        });
-        
-        const timestamp = Date.now();
-        
-        // Prepare message data
-        const messageData = { 
-          user: username, 
-          text, 
-          time, 
-          uid: sessionUid,
-          timestamp: timestamp,
-          color: userColor
-        };
-        
-        // Add reply info if replying
-        if (replyToMessage) {
-          messageData.replyTo = replyToMessage;
-        }
-        
-        messagesRef.push().set(messageData);
-        
-        // Reset input
-        messageInput.value = "";
-        replyToMessage = null;
-        messageInput.placeholder = "اكتب رسالتك...";
-        messageCounter++;
-        updateMessageCount();
-        
-        if (messageCounter > 300) {
-          cleanupOldMessages();
-        }
-      }
-      
-      // Load messages
-      messagesRef.limitToLast(100).on("child_added", snap => { 
-        addMessage(snap.key, snap.val()); 
-        
-        // Check for unread messages when page is not visible
-        if (!isPageVisible) {
-          unreadMessages++;
-          updateNotificationBadge();
-        }
-      });
-      
-      messagesRef.on('child_removed', snap => { 
-        const el = document.getElementById('msg-' + snap.key); 
-        if (el) {
-          el.parentElement.remove();
-          messageCounter = Math.max(0, messageCounter - 1);
-          updateMessageCount();
-        }
-      });
-      
-      // Delete message function
-      window.deleteMessage = function(messageKey) { 
-        if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) {
-          messagesRef.child(messageKey).remove().catch(error => {
-            console.error("خطأ في الحذف:", error);
-            alert("حدث خطأ أثناء حذف الرسالة");
-          });
-        }
-      };
-      
-      // Copy message text
-      function copyMessageText(text) {
-        navigator.clipboard.writeText(text).then(() => {
-          showSystemMsg(`<i class="fas fa-copy"></i> تم نسخ النص`);
-        }).catch(err => {
-          console.error('Failed to copy: ', err);
-        });
-      }
-      
-      // Show context menu for messages
-      function showMessageContextMenu(e, messageId, messageUserId, messageText) {
-        e.preventDefault();
-        closeAllModals();
-        
-        contextMenu.innerHTML = '';
-        
-        // Copy option
-        const copyItem = document.createElement('div');
-        copyItem.className = 'context-menu-item';
-        copyItem.innerHTML = '<i class="fas fa-copy"></i> نسخ النص';
-        copyItem.onclick = () => {
-          copyMessageText(messageText);
-          contextMenu.style.display = 'none';
-        };
-        contextMenu.appendChild(copyItem);
-        
-        // Reply option
-        const replyItem = document.createElement('div');
-        replyItem.className = 'context-menu-item';
-        replyItem.innerHTML = '<i class="fas fa-reply"></i> رد';
-        replyItem.onclick = () => {
-          // Extract username from message
-          const msgElement = document.getElementById('msg-' + messageId);
-          const usernameElement = msgElement?.querySelector('.u-topic');
-          const userName = usernameElement ? usernameElement.textContent.split(' ')[0] : 'مستخدم';
-          replyTo(messageId, userName, messageText);
-          contextMenu.style.display = 'none';
-        };
-        contextMenu.appendChild(replyItem);
-        
-        // Delete option (only for own messages)
-        if (messageUserId === sessionUid) {
-          const deleteItem = document.createElement('div');
-          deleteItem.className = 'context-menu-item';
-          deleteItem.innerHTML = '<i class="fas fa-trash-alt"></i> حذف';
-          deleteItem.onclick = () => {
-            deleteMessage(messageId);
-            contextMenu.style.display = 'none';
-          };
-          contextMenu.appendChild(deleteItem);
-        }
-        
-        // Position and show menu
-        contextMenu.style.display = 'block';
-        contextMenu.style.left = e.clientX + 'px';
-        contextMenu.style.top = e.clientY + 'px';
-      }
-      
-      function updateMessageCount() {
-        messageCount.textContent = `${messageCounter}`;
-      }
-      
-      function updateNotificationBadge() {
-        if (unreadMessages > 0) {
-          notificationBadge.textContent = unreadMessages;
-          notificationBadge.classList.remove('hidden');
-          notificationBadge.title = `${unreadMessages} رسالة جديدة`;
-        } else {
-          notificationBadge.classList.add('hidden');
-        }
-      }
-      
-      // Click notification badge to scroll to bottom
-      notificationBadge.onclick = () => {
-        messagesDiv.scrollTo({
-          top: messagesDiv.scrollHeight,
-          behavior: 'smooth'
-        });
-        unreadMessages = 0;
-        updateNotificationBadge();
-      };
-
-      // --- Helper Functions ---
-      function updateTypingIndicator(users) {
-        const typingUsers = Object.keys(users)
-          .filter(u => users[u].isTyping && u !== username);
-        
-        if (typingUsers.length === 0) {
-          typingIndicator.innerHTML = '';
-        } else {
-          let text = '';
-          if (typingUsers.length === 1) {
-            text = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
-          } else if (typingUsers.length === 2) {
-            text = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
-          } else {
-            text = `عدة أشخاص يكتبون الآن...`;
-          }
-          
-          typingIndicator.innerHTML = `
-            <div class="typing-dots">
-              <span></span><span></span><span></span>
-            </div>
-            ${text}
-          `;
-        }
-      }
-      
-      function renderUsersList(onlineUsersData) {
-        usersList.innerHTML = ''; 
-        const now = Date.now() + serverTimeOffset; 
-        const twoMinutesAgo = now - (2 * 60 * 1000);
-        
-        const sortedUsers = Object.keys(onlineUsersData)
-          .sort((a, b) => {
-            const aActive = onlineUsersData[a].lastActive > twoMinutesAgo;
-            const bActive = onlineUsersData[b].lastActive > twoMinutesAgo;
-            
-            if (aActive && !bActive) return -1;
-            if (!aActive && bActive) return 1;
-            
-            if (a === username) return -1;
-            if (b === username) return 1;
-            
-            return a.localeCompare(b);
-          });
-        
-        sortedUsers.forEach(user => {
-          const userData = onlineUsersData[user]; 
-          const userItem = document.createElement("div"); 
-          userItem.className = "user-item";
-          
-          if (user === username) {
-            userItem.classList.add('you');
-          }
-          
-          const statusIndicator = document.createElement("span"); 
-          statusIndicator.className = "status-indicator";
-          
-          if (userData.lastActive < twoMinutesAgo) { 
-            statusIndicator.classList.add('status-yellow'); 
-          } else { 
-            statusIndicator.classList.add('status-green'); 
-          }
-          
-          const userInfo = document.createElement("div");
-          userInfo.className = "user-info";
-          
-          const userName = document.createElement("div"); 
-          userName.className = "user-name";
-          userName.textContent = user;
-          
-          const userStatus = document.createElement("div");
-          userStatus.className = "user-status";
-          
-          if (userData.isTyping) {
-            userStatus.classList.add('typing');
-            userStatus.innerHTML = `
-              <div class="user-typing">
-                <span></span><span></span><span></span>
-              </div>
-              يكتب الآن...
-            `;
-          } else {
-            const lastSeen = userData.lastActive < twoMinutesAgo ? 
-              "غير نشط" : "نشط الآن";
-            userStatus.textContent = lastSeen;
-          }
-          
-          userInfo.appendChild(userName);
-          userInfo.appendChild(userStatus);
-          
-          userItem.appendChild(statusIndicator); 
-          userItem.appendChild(userInfo); 
-          
-          // Add badge for current user
-          if (user === username) {
-            const badge = document.createElement("span");
-            badge.className = "user-badge";
-            badge.textContent = "أنت";
-            userName.appendChild(badge);
-          }
-          
-          usersList.appendChild(userItem);
-        });
-      }
-
-      function addMessage(key, { user, text, time, uid, timestamp, color, replyTo }) {
-        if (document.getElementById('msg-' + key)) return;
-        
-        const wrapper = document.createElement("div");
-        wrapper.className = uid === sessionUid ? "msg-wrapper my-message" : "msg-wrapper";
-        wrapper.id = 'wrapper-' + key;
-        
-        // Add new message animation
-        if (!initialLoad) {
-          wrapper.classList.add('new-message');
-        }
-        
-        const div = document.createElement("div");
-        div.className = uid === sessionUid ? "msg my-message" : "msg";
-        div.id = 'msg-' + key;
-        
-        // Add context menu on right click
-        div.oncontextmenu = (e) => {
-          showMessageContextMenu(e, key, uid, text);
-        };
-        
-        // Add click to copy
-        div.style.cursor = 'pointer';
-        div.onclick = () => {
-          if (!window.getSelection().toString()) {
-            copyMessageText(text);
-            // Visual feedback
-            div.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-            setTimeout(() => {
-              div.style.backgroundColor = '';
-            }, 300);
-          }
-        };
-        
-        let deleteBtnHtml = '';
-        if (uid === sessionUid) {
-            deleteBtnHtml = `
-              <button class="delete-btn" onclick="deleteMessage('${key}')" title="حذف الرسالة">
-                <i class="fas fa-trash-alt"></i>
-              </button>`;
-        }
-        
-        // Generate avatar with user color
-        const userColor = color || '#3b82f6';
-        const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=${userColor.replace('#', '')}&color=fff&size=96`;
-        
-        // Check if message contains image URL
-        let messageContent = formatMessageText(escapeHtml(text));
-        const imageMatch = text.match(/\[صورة:\s*(.+?)\]/);
-        if (imageMatch) {
-          const imageUrl = imageMatch[1];
-          messageContent = messageContent.replace(/\[صورة:\s*.+?\]/, 
-            `<div class="message-image">
-              <img src="${escapeHtml(imageUrl)}" alt="صورة" onerror="this.style.display='none'">
-              <br><a href="${escapeHtml(imageUrl)}" target="_blank">فتح الصورة</a>
-            </div>`
-          );
-        }
-        
-        // Check for links and make them clickable
-        messageContent = messageContent.replace(
-          /(https?:\/\/[^\s]+)/g, 
-          '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>'
-        );
-        
-        // Add reply section if exists
-        let replySection = '';
-        if (replyTo) {
-          replySection = `
-            <div class="message-quote" onclick="event.stopPropagation()">
-              <div class="quote-author">${escapeHtml(replyTo.user)}</div>
-              <div class="quote-text">${escapeHtml(replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + '...' : replyTo.text)}</div>
-            </div>
-          `;
-        }
-        
-        div.innerHTML = `
-            <div class="u-pic" style="background: ${userColor};">
-              <i class="fas fa-user"></i>
-            </div>
-            <div class="msg-content-fill">
-                <div class="msg-header">
-                    <div class="user-info-wrapper">
-                        <span class="u-topic" style="color: ${userColor};">${escapeHtml(user)}</span>
-                        ${uid === sessionUid ? '<span class="user-badge owner">أنت</span>' : ''}
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                       <span class="time"><i class="far fa-clock"></i> ${escapeHtml(time)}</span>
-                       ${deleteBtnHtml}
-                    </div>
-                </div>
-                ${replySection}
-                <div class="u-msg">${messageContent}</div>
-                <div class="msg-actions">
-                  <button class="msg-action-btn tooltip" title="رد" onclick="event.stopPropagation(); replyTo('${key}', '${escapeHtml(user)}', '${escapeHtml(text.substring(0, 30))}${text.length > 30 ? '...' : ''}')">
-                    <i class="fas fa-reply"></i>
-                  </button>
-                </div>
-            </div>`;
-        
-        // Set avatar image if available
-        const avatarDiv = div.querySelector('.u-pic');
-        const img = document.createElement('img');
-        img.src = userAvatar;
-        img.alt = escapeHtml(user);
-        img.onerror = () => {
-          avatarDiv.innerHTML = `<i class="fas fa-user"></i>`;
-          avatarDiv.style.background = userColor;
-        };
-        avatarDiv.innerHTML = '';
-        avatarDiv.appendChild(img);
-        
-        wrapper.appendChild(div);
-        messagesContainer.appendChild(wrapper);
-        
-        // Remove new-message class after animation
-        setTimeout(() => {
-          wrapper.classList.remove('new-message');
-        }, 1500);
-        
-        // Smooth scroll to bottom
-        setTimeout(() => {
-          if (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight < 100) {
-            messagesDiv.scrollTo({
-              top: messagesDiv.scrollHeight,
-              behavior: 'smooth'
-            });
-          }
-        }, 50);
-        
-        // Update last seen message
-        lastSeenMessageId = key;
-      }
-      
-      function formatMessageText(text) {
-        // Replace common emoji codes
-        const emojiMap = {
-          ':)': '😊',
-          ':(': '😞',
-          ':D': '😃',
-          ':P': '😛',
-          ';)': '😉',
-          '<3': '❤️',
-          ':O': '😮',
-          ':/': '😕',
-          ':*': '😘'
-        };
-        
-        let formattedText = text;
-        Object.keys(emojiMap).forEach(code => {
-          const regex = new RegExp('\\' + code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-          formattedText = formattedText.replace(regex, `<span class="emoji">${emojiMap[code]}</span>`);
-        });
-        
-        return formattedText;
-      }
-      
-      function cleanupOldMessages() {
-        messagesRef.orderByChild('timestamp').limitToFirst(100).once('value', snapshot => {
-          let updates = {};
-          snapshot.forEach(child => {
-            updates[child.key] = null;
-          });
-          messagesRef.update(updates);
-        });
-      }
-      
-      function showSystemMsg(fullText) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "msg-wrapper";
-        
-        const div = document.createElement("div");
-        div.className = "hmsg notification";
-
-        const time = new Date().toLocaleTimeString('ar-EG', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        });
-        
-        div.innerHTML = `
-            <div class="u-pic">
-              <i class="fas fa-bell"></i>
-            </div>
-            <div class="msg-content-fill">
-                <div class="msg-header">
-                    <div class="user-info-wrapper">
-                        <span class="u-topic"><i class="fas fa-info-circle"></i> نظام</span>
-                    </div>
-                    <span class="tago"><i class="far fa-clock"></i> (${time})</span>
-                </div>
-                <div class="u-msg">${fullText}</div>
-            </div>`;
-        
-        wrapper.appendChild(div);
-        messagesContainer.appendChild(wrapper);
-        
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-          wrapper.style.transition = 'opacity 0.5s ease';
-          wrapper.style.opacity = '0';
-          wrapper.addEventListener('transitionend', () => {
-            if (wrapper.parentNode) {
-              wrapper.remove();
-            }
-          });
-        }, 3000);
-        
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      }
-      
-      function showNotification(text) {
-        // Update badge
-        if (!isPageVisible) {
-          unreadMessages++;
-          updateNotificationBadge();
-        }
-        
-        // Show browser notification if permitted
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("دردشة جديدة", {
-            body: text,
-            icon: "https://ui-avatars.com/api/?name=دردشة&background=3b82f6&color=fff&size=128"
-          });
-        }
-      }
-
-      function escapeHtml(unsafe) { 
-        if (!unsafe) return '';
-        return unsafe.toString()
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
-      }
-      
-      function positionElement(element, referenceElement, position = 'bottom') {
-        const rect = referenceElement.getBoundingClientRect();
-        
-        switch(position) {
-          case 'top':
-            element.style.top = (rect.top - element.offsetHeight - 5) + 'px';
-            element.style.left = rect.left + 'px';
-            break;
-          case 'bottom':
-            element.style.top = (rect.bottom + 5) + 'px';
-            element.style.left = rect.left + 'px';
-            break;
-        }
-      }
-
-      // --- Page Visibility API ---
-      document.addEventListener('visibilitychange', () => {
-        isPageVisible = !document.hidden;
-        
-        if (isPageVisible) {
-          // Reset unread count when page becomes visible
-          unreadMessages = 0;
-          updateNotificationBadge();
-          
-          // Update user activity
-          userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
-        }
-      });
-      
-      // Request notification permission
-      if ("Notification" in window && Notification.permission === "default") {
-        setTimeout(() => {
-          Notification.requestPermission();
-        }, 2000);
-      }
-
-      // --- Video Player Functions ---
-      function makeDraggable(element, handle) { 
-        let offsetX = 0, offsetY = 0; 
-        let isDragging = false;
-        
-        const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
-        
-        const onDragStart = (e) => { 
-          isDragging = true; 
-          const pointer = getPointerPosition(e); 
-          offsetX = pointer.clientX - element.offsetLeft; 
-          offsetY = pointer.clientY - element.offsetTop; 
-          
-          element.style.cursor = 'grabbing';
-          element.style.zIndex = '9999';
-          document.addEventListener('mousemove', onDragMove); 
-          document.addEventListener('touchmove', onDragMove, { passive: false }); 
-          document.addEventListener('mouseup', onDragEnd); 
-          document.addEventListener('touchend', onDragEnd); 
-        }; 
-        
-        const onDragMove = (e) => { 
-          if (isDragging) { 
-            e.preventDefault(); 
-            const pointer = getPointerPosition(e); 
-            const newX = pointer.clientX - offsetX;
-            const newY = pointer.clientY - offsetY;
-            
-            const maxX = window.innerWidth - element.offsetWidth;
-            const maxY = window.innerHeight - element.offsetHeight;
-            
-            element.style.left = Math.max(0, Math.min(newX, maxX)) + "px"; 
-            element.style.top = Math.max(0, Math.min(newY, maxY)) + "px"; 
-          } 
-        }; 
-        
-        const onDragEnd = () => { 
-          isDragging = false; 
-          element.style.cursor = '';
-          element.style.zIndex = '998';
-          document.removeEventListener('mousemove', onDragMove); 
-          document.removeEventListener('touchmove', onDragMove); 
-          document.removeEventListener('mouseup', onDragEnd); 
-          document.removeEventListener('touchend', onDragEnd); 
-        }; 
-        
-        handle.addEventListener('mousedown', onDragStart); 
-        handle.addEventListener('touchstart', onDragStart, { passive: false });
-        
-        handle.style.userSelect = 'none';
-      }
-      
-      function getYoutubeVideoId(url) { 
-        if (!url) return null; 
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/; 
-        return (url.match(regex) || [])[1] || null; 
-      }
-      
-      function getTweetId(url) { 
-        if (!url) return null; 
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/; 
-        return (url.match(regex) || [])[1] || null; 
-      }
-      
-      function isDirectVideo(url) { 
-        return /\.(mp4|webm|ogv|m3u8?)$/i.test(url); 
-      }
-
-      submitVideoUrlBtn.onclick = () => {
-        const url = videoUrlInput.value.trim(); 
-        if (!url) {
-          alert("يرجى إدخال رابط الفيديو");
-          videoUrlInput.focus();
-          return;
-        }
-        
-        const youtubeId = getYoutubeVideoId(url); 
-        const tweetId = getTweetId(url);
-        
-        if (youtubeId) { 
-          pinnedVideoRef.set({ 
-            type: 'youtube', 
-            id: youtubeId, 
-            setBy: username,
-            timestamp: Date.now()
-          }); 
-        } else if (tweetId) { 
-          pinnedVideoRef.set({ 
-            type: 'twitter', 
-            id: tweetId, 
-            setBy: username,
-            timestamp: Date.now()
-          }); 
-        } else if (url.toLowerCase().includes('.m3u')) { 
-          pinnedVideoRef.set({ 
-            type: 'm3u', 
-            url: url, 
-            setBy: username,
-            timestamp: Date.now()
-          }); 
-        } else if (isDirectVideo(url)) { 
-          pinnedVideoRef.set({ 
-            type: 'direct', 
-            url: url, 
-            setBy: username,
-            timestamp: Date.now()
-          }); 
-        } else { 
-          alert("الرابط غير مدعوم. يرجى استخدام رابط يوتيوب، تويتر، M3U، أو MP4"); 
-          videoUrlInput.focus();
-          return; 
-        }
-        
-        videoUrlInput.value = "";
-        closeAllModals();
-      };
-      
-      videoUrlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          submitVideoUrlBtn.click();
-        }
-      });
-      
-      // Listen for pinned video changes
-      pinnedVideoRef.on("value", async (snap) => {
-        const data = snap.val(); 
-        pinnedVideoPlayer.innerHTML = '';
-        
-        if (data) {
-          pinnedVideoPlayer.style.display = 'flex';
-          
-          const header = document.createElement('div'); 
-          header.className = 'video-header'; 
-          header.innerHTML = `<span><i class="fas fa-video"></i> ${data.setBy || 'مجهول'}</span>`;
-          
-          const closeBtn = document.createElement('button'); 
-          closeBtn.className = 'close-pinned-video'; 
-          closeBtn.innerHTML = '<i class="fas fa-times"></i>'; 
-          closeBtn.onclick = () => pinnedVideoRef.remove();
-          closeBtn.title = "إغلاق الفيديو";
-          
-          header.appendChild(closeBtn);
-          const body = document.createElement('div'); 
-          body.className = 'video-body';
-          
-          pinnedVideoPlayer.appendChild(header); 
-          pinnedVideoPlayer.appendChild(body);
-          makeDraggable(pinnedVideoPlayer, header);
-
-          const createAndAppendVideo = (src, aspectRatio = "16 / 9") => {
-            const video = document.createElement('video'); 
-            video.src = src; 
-            video.controls = true; 
-            video.autoplay = true; 
-            video.muted = true;
-            video.style.aspectRatio = aspectRatio; 
-            video.setAttribute('playsinline', '');
-            
-            if (src.includes('.m3u') && Hls.isSupported()) {
-              const hls = new Hls(); 
-              hls.loadSource(src); 
-              hls.attachMedia(video);
-            }
-            
-            video.onerror = () => {
-              body.innerHTML = `<div style="color:white;padding:20px;text-align:center;font-size:12px;">
-                <p>خطأ في تحميل الفيديو</p>
-              </div>`;
-            };
-            
-            body.appendChild(video); 
-            return video;
-          };
-
-          try {
-            if (data.type === 'youtube') { 
-              body.innerHTML = `
-                <iframe 
-                  src="https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1&rel=0" 
-                  allow="autoplay; encrypted-media; fullscreen" 
-                  allowfullscreen 
-                  style="aspect-ratio: 16 / 9;"
-                  title="فيديو يوتيوب"
-                ></iframe>`; 
-            } else if (data.type === 'm3u' || data.type === 'direct') { 
-              createAndAppendVideo(data.url); 
-            } else if (data.type === 'twitter') {
-              try {
-                const response = await fetch(`https://api.vxtwitter.com/i/status/${data.id}`); 
-                if (!response.ok) throw new Error('Failed to fetch tweet');
-                
-                const tweetData = await response.json(); 
-                const mediaItems = tweetData.media_extended;
-                
-                if (mediaItems && mediaItems.length > 0) {
-                  const videoItems = mediaItems.filter(item => 
-                    item.type === 'video' || item.type === 'gif'
-                  );
-                  
-                  if (videoItems.length > 0) {
-                    const playMedia = (mediaItem, clickedButton) => {
-                      body.innerHTML = ''; 
-                      const aspectRatio = mediaItem.width / mediaItem.height; 
-                      createAndAppendVideo(mediaItem.url, aspectRatio);
-                      
-                      if (selectorContainer) { 
-                        selectorContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active')); 
-                        if (clickedButton) clickedButton.classList.add('active'); 
-                      }
-                    };
-                    
-                    let selectorContainer;
-                    if (videoItems.length > 1) {
-                      selectorContainer = document.createElement('div'); 
-                      selectorContainer.className = 'video-selector';
-                      
-                      videoItems.forEach((item, index) => { 
-                        const button = document.createElement('button'); 
-                        button.innerText = `المقطع ${index + 1}`; 
-                        button.onclick = () => playMedia(item, button); 
-                        selectorContainer.appendChild(button); 
-                        
-                        if (index === 0) {
-                          button.classList.add('active');
-                          playMedia(item, button);
-                        }
-                      });
-                      
-                      pinnedVideoPlayer.appendChild(selectorContainer);
-                    } else { 
-                      playMedia(videoItems[0], null); 
-                    }
-                  } else { 
-                    body.innerHTML = `<div style="color:white;padding:20px;text-align:center;font-size:12px;">
-                      <p>لم يتم العثور على فيديو في التغريدة</p>
-                    </div>`; 
-                  }
-                } else { 
-                  body.innerHTML = `<div style="color:white;padding:20px;text-align:center;font-size:12px;">
-                    <p>لم يتم العثور على فيديو في التغريدة</p>
-                  </div>`; 
-                }
-              } catch (error) { 
-                console.error("Error fetching Twitter video:", error); 
-                body.innerHTML = `<div style="color:white;padding:20px;text-align:center;font-size:12px;">
-                  <p>حدث خطأ في جلب الفيديو من تويتر</p>
-                </div>`; 
-              }
-            }
-            
-            if (!initialLoad && data.setBy && data.setBy !== username) { 
-              showSystemMsg(`<i class="fas fa-video"></i> ${data.setBy} قام بتشغيل فيديو`); 
-              showNotification(`${data.setBy} قام بتشغيل فيديو`);
-            }
-          } catch (error) {
-            console.error("Error loading video:", error);
-            body.innerHTML = `<div style="color:white;padding:20px;text-align:center;font-size:12px;">
-              <p>حدث خطأ في تحميل الفيديو</p>
-            </div>`;
-          }
-        } else {
-          pinnedVideoPlayer.style.display = 'none';
-        }
-      });
-
-      // --- Initialize the Application ---
-      initializeUser();
-      
-      // Focus on input field
-      setTimeout(() => {
-        messageInput.focus();
-      }, 200);
-      
-      // Add welcome message
-      setTimeout(() => {
-        showSystemMsg(`<i class="fas fa-star"></i> مرحباً ${username}! استخدم Ctrl+K للكتابة السريعة`);
-      }, 600);
-      
-      // Keyboard shortcuts help
-      setTimeout(() => {
-        showSystemMsg(`<i class="fas fa-keyboard"></i> اختصارات: Ctrl+U (المستخدمون), Ctrl+V (فيديو)`);
-      }, 3000);
+    db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverTimeOffset = snap.val() || 0;
     });
-  </script>
+
+    /* تحديث النشاط */
+    setInterval(() => {
+        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+    }, 30000);
+
+    /* حذف غير النشطين */
+    setInterval(() => {
+        const now = Date.now() + serverTimeOffset;
+        onlineRef.once('value', snap => {
+            const users = snap.val();
+            if (!users) return;
+            Object.keys(users).forEach(u => {
+                if (now - (users[u].lastActive || 0) > 90000)
+                    db.ref('online/' + u).remove();
+            });
+        });
+    }, 60000);
+
+    /* قائمة المتصلين */
+    onlineList.onclick = e => {
+        e.stopPropagation();
+        usersBox.classList.toggle('visible');
+    };
+
+    document.onclick = () => usersBox.classList.remove('visible');
+    usersBox.onclick = e => e.stopPropagation();
+
+    /* تحديث قائمة المتصلين */
+    onlineRef.on("value", snap => {
+        const users = snap.val() || {};
+        count.textContent = snap.numChildren();
+        renderUsersList(users);
+        updateTypingIndicator(users);
+    });
+
+    /* دخول وخروج */
+    onlineRef.on("child_added", snap => {
+        if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`);
+    });
+
+    onlineRef.on("child_removed", snap => {
+        showSystemMsg(`📤 ${snap.key} غادر الدردشة`);
+    });
+
+    /* إرسال رسالة */
+    inputAreaForm.onsubmit = sendMessage;
+
+    messageInput.oninput = () => {
+        clearTimeout(typingTimer);
+        userRef.update({ isTyping:true, lastActive:firebase.database.ServerValue.TIMESTAMP });
+        typingTimer = setTimeout(() => userRef.update({ isTyping:false }), 2000);
+    };
+
+    /* معالجة وإرسال الرسالة */
+    async function sendMessage() {
+        clearTimeout(typingTimer);
+        userRef.update({ isTyping:false });
+
+        let text = messageInput.value.trim();
+        if (!text) return;
+
+        const time = new Date().toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit' });
+
+        /* 🔥 دعم فيديو تويتر */
+        if (text.includes("x.com") || text.includes("twitter.com")) {
+
+            const apiUrl = text
+                .replace("x.com", "api.vxtwitter.com")
+                .replace("twitter.com", "api.vxtwitter.com");
+
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+
+                if (data.media && data.media.length > 0) {
+
+                    const videoUrl = data.media[0].url;
+
+                    text = `
+                        <video controls width="100%" style="border-radius:8px;">
+                            <source src="${videoUrl}" type="video/mp4">
+                        </video>
+                    `;
+                }
+            } catch (e) {
+                console.log("خطأ تحميل فيديو تويتر:", e);
+            }
+        }
+
+        messagesRef.push().set({
+            user: username,
+            text,
+            time,
+            uid: sessionUid
+        });
+
+        messageInput.value = "";
+    }
+
+    /* إضافة رسالة للواجهة */
+    function addMessage(key, data) {
+        if (!data) return;
+
+        const { user, text, time } = data;
+
+        const isAtBottom =
+            messagesDiv.scrollTop + messagesDiv.clientHeight >= messagesDiv.scrollHeight - 40;
+
+        const div = document.createElement("div");
+        div.className = "msg";
+
+        div.innerHTML = `
+            <div class="msgUser">${user}</div>
+            <div class="msgText">${text}</div>
+            <span class="time">${time}</span>
+        `;
+
+        messagesDiv.appendChild(div);
+
+        if (isAtBottom)
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    messagesRef.limitToLast(50).on("child_added", snap => addMessage(snap.key, snap.val()));
+
+    /* مؤشر الكتابة */
+    function updateTypingIndicator(users) {
+        const typingUsers = Object.keys(users).filter(
+            u => users[u].isTyping && u !== username
+        );
+        if (typingUsers.length === 0) typingIndicator.textContent = "";
+        else if (typingUsers.length === 1)
+            typingIndicator.textContent = `${typingUsers[0]} يكتب الآن...`;
+        else typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+    }
+
+    /* قائمة المتصلين */
+    function renderUsersList(users) {
+        usersList.innerHTML = "";
+        const now = Date.now() + serverTimeOffset;
+        const twoMinutesAgo = now - 120000;
+
+        Object.keys(users).forEach(user => {
+            const uData = users[user];
+            const item = document.createElement("div");
+            item.className = "user-item";
+
+            const status = document.createElement("span");
+            status.className =
+                "status-indicator " +
+                (uData.lastActive < twoMinutesAgo ? 'status-yellow' : 'status-green');
+
+            const uname = document.createElement("span");
+            uname.textContent = user;
+
+            item.appendChild(status);
+            item.appendChild(uname);
+            usersList.appendChild(item);
+        });
+    }
+
+    /* رسائل النظام */
+    function showSystemMsg(text) {
+        const div = document.createElement("div");
+        div.className = "sys";
+        div.textContent = text;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+});
+</script>
+
 </body>
 </html>
