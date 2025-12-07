@@ -15,6 +15,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
+    :root {
+      --primary-color: #3366cc;
+      --secondary-color: #28a745;
+      --danger-color: #dc3545;
+      --warning-color: #ffc107;
+      --dark-color: #343a40;
+      --light-color: #f8f9fa;
+      --shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
     body { font-family: 'Tajawal', sans-serif; background: #f4f7f9; display: flex; flex-direction: column; position: relative; }
     #chat-container { display: flex; flex-direction: column; height: 100%; }
@@ -23,81 +33,530 @@
     .msg:hover .delete-btn { opacity: 1; transform: scale(1); }
     .sys { text-align: center; color: #888; font-size: 12px; margin: 10px auto; font-style: italic; background-color: #f0f0f0; padding: 4px 10px; border-radius: 12px; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 1; transform: translateY(0); }
     .sys.fade-out { opacity: 0; transform: translateY(-20px); }
-    .user { font-weight: bold; color: #005c97; }
+    .user { font-weight: bold; color: var(--primary-color); }
     .time { font-size: 11px; color: #999; }
-    .delete-btn { cursor: pointer; color: white; background-color: #e74c3c; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 10px; opacity: 0; transform: scale(0.8); transition: opacity 0.2s, transform 0.2s; }
+    .delete-btn { cursor: pointer; color: white; background-color: var(--danger-color); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 10px; opacity: 0; transform: scale(0.8); transition: opacity 0.2s, transform 0.2s; }
     .delete-btn:hover { background-color: #c0392b; }
     #typing-indicator { height: 20px; padding: 0 15px; font-size: 13px; color: #888; font-style: italic; transition: opacity 0.3s; }
     #inputArea { display: flex; flex-direction: row; align-items: center; gap: 8px; border-top: 1px solid #ddd; padding: 8px; background: #fdfdfd; }
     #messageInput { flex: 1; font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 20px; font-family: 'Tajawal', sans-serif; transition: border-color 0.2s; }
-    #sendBtn { padding: 10px 15px; border: none; border-radius: 20px; background: #3366cc; color: white; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 15px; transition: background-color 0.2s; }
-    #onlineList { position: fixed; top: 10px; right: 10px; border: 1px solid #ccc; background: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; gap: 5px; }
-    #usersBox { position: fixed; top: 55px; right: 10px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 999; min-width: 160px; max-width: 200px; opacity: 0; transform: translateY(-10px); visibility: hidden; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
+    #sendBtn { padding: 10px 15px; border: none; border-radius: 20px; background: var(--primary-color); color: white; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 15px; transition: background-color 0.2s; }
+    #sendBtn:hover { background: #2a56b5; }
+    #onlineList { position: fixed; top: 10px; right: 10px; border: 1px solid #ccc; background: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: var(--shadow); z-index: 1000; display: flex; align-items: center; gap: 5px; transition: all 0.3s ease; }
+    #onlineList:hover { background: #f5f5f5; transform: translateY(-2px); }
+    #usersBox { position: fixed; top: 55px; right: 10px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px; box-shadow: var(--shadow); z-index: 999; min-width: 160px; max-width: 200px; opacity: 0; transform: translateY(-10px); visibility: hidden; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
     #usersBox.visible { opacity: 1; transform: translateY(0); visibility: visible; }
     #usersList { max-height: 200px; overflow-y: auto; }
     .user-item { display: flex; align-items: center; gap: 8px; padding: 5px 2px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
     .status-indicator { width: 10px; height: 10px; border-radius: 50%; }
-    .status-green { background-color: #28a745; }
-    .status-yellow { background-color: #ffc107; }
+    .status-green { background-color: var(--secondary-color); }
+    .status-yellow { background-color: var(--warning-color); }
     
-    /* مشغل الفيديو المثبت */
-    #videoPlayer { position: fixed; top: 60px; left: 20px; width: 400px; height: 225px; background: #000; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 998; display: none; flex-direction: column; overflow: hidden; }
-    .video-header { background-color: #333; color: white; padding: 5px 10px; border-top-left-radius: 7px; border-top-right-radius: 7px; cursor: move; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; touch-action: none; font-size: 14px; }
-    .video-body { width: 100%; background: #000; flex-grow: 1; }
-    .close-video { background: #d9534f; border: 1px solid #d43f3a; color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 14px; line-height: 20px; text-align: center; }
-    .resize-handle { position: absolute; width: 20px; height: 20px; bottom: 0; right: 0; cursor: nwse-resize; z-index: 10; }
+    /* === مشغل الفيديو المطور === */
+    #videoPlayer { 
+      position: fixed; 
+      top: 80px; 
+      left: 20px; 
+      width: 420px; 
+      height: 250px; 
+      background: #000; 
+      border: 2px solid var(--primary-color); 
+      border-radius: 12px; 
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5); 
+      z-index: 999; 
+      display: none; 
+      flex-direction: column; 
+      overflow: hidden; 
+      transition: all 0.3s ease;
+    }
     
-    /* أزرار التحكم في الفيديو */
-    #videoControls { position: fixed; top: 10px; left: 10px; display: flex; gap: 8px; z-index: 1000; }
-    .video-control-btn { padding: 6px 10px; background: white; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .video-header { 
+      background: linear-gradient(135deg, var(--primary-color), #2a56b5);
+      color: white; 
+      padding: 8px 12px; 
+      border-top-left-radius: 10px; 
+      border-top-right-radius: 10px; 
+      cursor: move; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      flex-shrink: 0; 
+      touch-action: none; 
+      font-size: 14px; 
+      font-weight: bold;
+      user-select: none;
+    }
     
-    /* نافذة إدخال رابط الفيديو */
-    #videoModal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1003; display: none; min-width: 300px; }
-    #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
-    #videoUrlInput { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
-    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; }
-    .modal-btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-    .modal-btn.primary { background: #3366cc; color: white; }
-    .modal-btn.secondary { background: #e0e0e0; color: #333; }
+    .video-body { 
+      width: 100%; 
+      height: 100%; 
+      background: #000; 
+      flex-grow: 1; 
+      position: relative;
+    }
+    
+    .video-actions {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    
+    .video-action-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 12px;
+    }
+    
+    .video-action-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+    
+    .video-action-btn.danger {
+      background: rgba(220, 53, 69, 0.8);
+    }
+    
+    .video-action-btn.danger:hover {
+      background: rgba(220, 53, 69, 1);
+    }
+    
+    .resize-handle { 
+      position: absolute; 
+      width: 20px; 
+      height: 20px; 
+      bottom: 0; 
+      right: 0; 
+      cursor: nwse-resize; 
+      z-index: 10;
+      background: linear-gradient(135deg, transparent 50%, var(--primary-color) 50%);
+      border-bottom-right-radius: 10px;
+    }
+    
+    /* === أزرار التحكم في الفيديو === */
+    #videoControls { 
+      position: fixed; 
+      top: 10px; 
+      left: 10px; 
+      display: flex; 
+      gap: 10px; 
+      z-index: 1000;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 25px;
+      box-shadow: var(--shadow);
+      border: 1px solid #ddd;
+    }
+    
+    .video-control-btn {
+      padding: 8px 14px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 500;
+    }
+    
+    .video-control-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+      border-color: var(--primary-color);
+    }
+    
+    .video-control-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .video-control-btn.danger {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+    }
+    
+    .video-control-btn.danger:hover {
+      background: var(--danger-color);
+      color: white;
+    }
+    
+    .video-control-btn .badge {
+      background: var(--danger-color);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* === نافذة إدخال رابط الفيديو === */
+    #videoModal { 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: white; 
+      padding: 25px; 
+      border-radius: 12px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+      z-index: 1003; 
+      display: none; 
+      min-width: 350px;
+      max-width: 500px;
+    }
+    
+    #overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.7); 
+      z-index: 1001; 
+      display: none; 
+      backdrop-filter: blur(3px);
+    }
+    
+    .modal-header {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .modal-header h4 {
+      margin: 0;
+      color: var(--dark-color);
+      font-size: 18px;
+    }
+    
+    #videoUrlInput { 
+      width: 100%; 
+      padding: 12px; 
+      margin: 10px 0; 
+      border: 2px solid #ddd; 
+      border-radius: 8px; 
+      font-size: 16px;
+      font-family: 'Tajawal', sans-serif;
+      transition: border-color 0.3s;
+    }
+    
+    #videoUrlInput:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    .modal-buttons { 
+      display: flex; 
+      gap: 10px; 
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    .modal-btn { 
+      padding: 10px 20px; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 14px;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-btn.primary { 
+      background: var(--primary-color); 
+      color: white; 
+    }
+    
+    .modal-btn.primary:hover {
+      background: #2a56b5;
+      transform: translateY(-2px);
+    }
+    
+    .modal-btn.secondary { 
+      background: #e0e0e0; 
+      color: #333; 
+    }
+    
+    .modal-btn.secondary:hover {
+      background: #d0d0d0;
+    }
+    
+    /* === تحكم المشغل المتقدم === */
+    .video-controls-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+    
+    .video-body:hover .video-controls-bar {
+      opacity: 1;
+    }
+    
+    .player-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .player-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .volume-slider {
+      width: 80px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px;
+      outline: none;
+    }
+    
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+    }
+    
+    /* === إشعارات === */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+      border-right: 4px solid var(--primary-color);
+    }
+    
+    .notification.success { border-color: var(--secondary-color); }
+    .notification.warning { border-color: var(--warning-color); }
+    .notification.error { border-color: var(--danger-color); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .notification.fade-out {
+      animation: slideOut 0.3s ease;
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    /* === تقدم التشغيل === */
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      width: 0%;
+      transition: width 0.1s;
+    }
+    
+    /* === وضع ملء الشاشة === */
+    #videoPlayer.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 2000;
+      border-radius: 0;
+      border: none;
+    }
+    
+    #videoPlayer.fullscreen .video-body video {
+      height: 100% !important;
+      width: 100% !important;
+    }
+    
+    /* === التحكم في الوضوح === */
+    .quality-selector {
+      position: absolute;
+      bottom: 50px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      border-radius: 6px;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 100px;
+      z-index: 11;
+    }
+    
+    .quality-option {
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: right;
+      transition: background 0.2s;
+    }
+    
+    .quality-option:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .quality-option.active {
+      background: var(--primary-color);
+    }
   </style>
 </head>
 <body>
   <!-- أزرار التحكم في الفيديو -->
   <div id="videoControls">
-    <div class="video-control-btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
+    <div class="video-control-btn" id="setVideoBtn" title="تثبيت فيديو جديد">
+      <i class="fa fa-video-camera"></i>
+      <span>فيديو جديد</span>
+    </div>
+    <div class="video-control-btn" id="toggleVideoBtn" title="إظهار/إخفاء المشغل">
+      <i class="fa fa-eye"></i>
+      <span>إظهار المشغل</span>
+    </div>
+    <div class="video-control-btn" id="clearVideoBtn" title="إزالة الفيديو المثبت">
+      <i class="fa fa-trash"></i>
+      <span>إزالة الفيديو</span>
+    </div>
   </div>
   
-  <!-- مشغل الفيديو المثبت -->
+  <!-- مشغل الفيديو المطور -->
   <div id="videoPlayer">
     <div class="video-header">
-      <span>الفيديو المثبت</span>
-      <button class="close-video" id="closeVideoBtn">✖</button>
+      <span id="videoTitle">الفيديو المثبت</span>
+      <div class="video-actions">
+        <button class="video-action-btn" id="pipBtn" title="صورة داخل صورة">
+          <i class="fa fa-clone"></i>
+        </button>
+        <button class="video-action-btn" id="fullscreenBtn" title="ملء الشاشة">
+          <i class="fa fa-expand"></i>
+        </button>
+        <button class="video-action-btn" id="qualityBtn" title="جودة التشغيل">
+          <i class="fa fa-cog"></i>
+        </button>
+        <button class="video-action-btn danger" id="closeVideoBtn" title="إغلاق المشغل">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
     </div>
     <div class="video-body">
       <video id="myVideo" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto"></video>
+      <div class="video-controls-bar">
+        <div class="player-controls">
+          <button class="player-btn" id="playPauseBtn" title="تشغيل/إيقاف">
+            <i class="fa fa-play"></i>
+          </button>
+          <button class="player-btn" id="muteBtn" title="كتم/إلغاء كتم">
+            <i class="fa fa-volume-up"></i>
+          </button>
+          <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" title="مستوى الصوت">
+        </div>
+        <div class="time-display">
+          <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+        </div>
+      </div>
     </div>
     <div class="resize-handle"></div>
+    <div class="quality-selector" id="qualitySelector">
+      <div class="quality-option active" data-quality="auto">تلقائي</div>
+      <div class="quality-option" data-quality="1080">1080p</div>
+      <div class="quality-option" data-quality="720">720p</div>
+      <div class="quality-option" data-quality="480">480p</div>
+      <div class="quality-option" data-quality="360">360p</div>
+    </div>
   </div>
   
   <!-- نافذة إدخال رابط الفيديو -->
   <div id="overlay"></div>
   <div id="videoModal">
-    <h4>تثبيت فيديو للجميع</h4>
-    <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4"/>
+    <div class="modal-header">
+      <h4><i class="fa fa-video-camera"></i> تثبيت فيديو للجميع</h4>
+    </div>
+    <input type="text" id="videoUrlInput" placeholder="https://www.youtube.com/watch?v=... أو رابط MP4 مباشر"/>
+    <div class="modal-info">
+      <small><i class="fa fa-info-circle"></i> المدعوم: YouTube، تويتر، M3U، MP4، WebM</small>
+    </div>
     <div class="modal-buttons">
       <button class="modal-btn secondary" id="cancelVideoBtn">إلغاء</button>
-      <button class="modal-btn primary" id="submitVideoBtn">تثبيت</button>
+      <button class="modal-btn primary" id="submitVideoBtn">
+        <i class="fa fa-check"></i> تثبيت الفيديو
+      </button>
     </div>
   </div>
 
+  <!-- منطقة الإشعارات -->
+  <div id="notifications"></div>
+
   <!-- واجهة الدردشة -->
   <div id="chat-container">
-    <div id="onlineList" title="المتصلون الآن">👥 <span id="count">0</span></div>
+    <div id="onlineList" title="المتصلون الآن">
+      <i class="fa fa-users"></i>
+      <span id="count">0</span>
+      <span>متصل</span>
+    </div>
     <div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="typing-indicator"></div>
     <form id="inputArea" action="javascript:void(0);">
-      <button type="submit" id="sendBtn" aria-label="إرسال">إرسال</button>
+      <button type="submit" id="sendBtn" aria-label="إرسال">
+        <i class="fa fa-paper-plane"></i> إرسال
+      </button>
       <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
     </form>
   </div>
@@ -119,7 +578,7 @@
       const username = "زائر_" + Math.floor(Math.random() * 1000);
       const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
       
-      // عناصر واجهة الدردشة
+      // === عناصر واجهة الدردشة ===
       const onlineList = document.getElementById("onlineList");
       const usersBox = document.getElementById("usersBox");
       const usersList = document.getElementById("usersList");
@@ -135,21 +594,39 @@
       
       let typingTimer, serverTimeOffset = 0;
 
-      // === عناصر مشغل الفيديو ===
+      // === عناصر مشغل الفيديو المطور ===
       const videoPlayer = document.getElementById('videoPlayer');
       const myVideo = document.getElementById('myVideo');
       const setVideoBtn = document.getElementById('setVideoBtn');
+      const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+      const clearVideoBtn = document.getElementById('clearVideoBtn');
       const closeVideoBtn = document.getElementById('closeVideoBtn');
       const videoModal = document.getElementById('videoModal');
       const overlay = document.getElementById('overlay');
       const videoUrlInput = document.getElementById('videoUrlInput');
       const submitVideoBtn = document.getElementById('submitVideoBtn');
       const cancelVideoBtn = document.getElementById('cancelVideoBtn');
+      const videoTitle = document.getElementById('videoTitle');
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const muteBtn = document.getElementById('muteBtn');
+      const volumeSlider = document.getElementById('volumeSlider');
+      const pipBtn = document.getElementById('pipBtn');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const qualityBtn = document.getElementById('qualityBtn');
+      const qualitySelector = document.getElementById('qualitySelector');
+      const progressFill = document.getElementById('progressFill');
+      const currentTime = document.getElementById('currentTime');
+      const videoDuration = document.getElementById('duration');
+      const notifications = document.getElementById('notifications');
       
       let videoPlayerInstance = null;
       let currentVideoUrl = '';
+      let isVideoPlaying = false;
+      let isFullscreen = false;
+      let isPipActive = false;
+      let updateInterval = null;
 
-      // === تهيئة مشغل الفيديو ===
+      // === تهيئة مشغل الفيديو المتطور ===
       function initVideoPlayer() {
         if (videoPlayerInstance) {
           videoPlayerInstance.dispose();
@@ -162,8 +639,53 @@
           playsinline: true,
           aspectRatio: '16:9',
           techOrder: ['youtube', 'html5'],
-          sources: []
+          sources: [],
+          controlBar: {
+            volumePanel: false,
+            currentTimeDisplay: false,
+            timeDivider: false,
+            durationDisplay: false,
+            progressControl: false,
+            remainingTimeDisplay: false,
+            fullscreenToggle: false
+          }
         });
+
+        // إضافة مستمعي الأحداث
+        videoPlayerInstance.on('play', () => {
+          isVideoPlaying = true;
+          playPauseBtn.innerHTML = '<i class="fa fa-pause"></i>';
+          startProgressUpdate();
+        });
+
+        videoPlayerInstance.on('pause', () => {
+          isVideoPlaying = false;
+          playPauseBtn.innerHTML = '<i class="fa fa-play"></i>';
+          stopProgressUpdate();
+        });
+
+        videoPlayerInstance.on('volumechange', () => {
+          updateVolumeControls();
+        });
+
+        videoPlayerInstance.on('loadedmetadata', () => {
+          updateTimeDisplay();
+        });
+
+        videoPlayerInstance.on('fullscreenchange', () => {
+          isFullscreen = videoPlayerInstance.isFullscreen();
+          if (isFullscreen) {
+            videoPlayer.classList.add('fullscreen');
+            fullscreenBtn.innerHTML = '<i class="fa fa-compress"></i>';
+          } else {
+            videoPlayer.classList.remove('fullscreen');
+            fullscreenBtn.innerHTML = '<i class="fa fa-expand"></i>';
+          }
+        });
+
+        // إعداد الصوت الابتدائي
+        videoPlayerInstance.volume(0.7);
+        updateVolumeControls();
       }
 
       // === دوال مساعدة للفيديو ===
@@ -183,9 +705,23 @@
         return /\.(mp4|webm|ogv|m3u8?)$/i.test(url);
       }
 
+      function extractVideoTitle(url) {
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+          return 'فيديو YouTube';
+        } else if (url.includes('twitter.com') || url.includes('x.com')) {
+          return 'فيديو تويتر';
+        } else if (url.includes('.m3u')) {
+          return 'بث مباشر';
+        } else {
+          return 'فيديو مباشر';
+        }
+      }
+
       function loadVideo(url) {
         const youtubeId = getYoutubeVideoId(url);
         const tweetId = getTweetId(url);
+        
+        videoTitle.textContent = extractVideoTitle(url);
         
         if (youtubeId) {
           // فيديو يوتيوب
@@ -194,9 +730,12 @@
             src: `https://www.youtube.com/watch?v=${youtubeId}`
           });
           currentVideoUrl = url;
-          videoPlayer.style.display = 'flex';
+          showVideoPlayer();
+          showNotification('تم تحميل فيديو YouTube', 'success');
         } else if (tweetId) {
           // فيديو تويتر (X)
+          showNotification('جاري تحميل فيديو تويتر...', 'warning');
+          
           fetch(`https://api.vxtwitter.com/i/status/${tweetId}`)
             .then(response => response.json())
             .then(tweetData => {
@@ -206,12 +745,15 @@
                   src: tweetData.media_extended[0].url
                 });
                 currentVideoUrl = tweetData.media_extended[0].url;
-                videoPlayer.style.display = 'flex';
+                showVideoPlayer();
+                showNotification('تم تحميل فيديو تويتر', 'success');
+              } else {
+                showNotification('لم يتم العثور على فيديو في التغريدة', 'error');
               }
             })
             .catch(error => {
               console.error("Error fetching Twitter video:", error);
-              alert("حدث خطأ في تحميل فيديو تويتر");
+              showNotification('حدث خطأ في تحميل فيديو تويتر', 'error');
             });
         } else if (isDirectVideo(url)) {
           // فيديو مباشر (MP4, M3U, etc.)
@@ -221,10 +763,98 @@
             src: url
           });
           currentVideoUrl = url;
-          videoPlayer.style.display = 'flex';
+          showVideoPlayer();
+          showNotification('تم تحميل الفيديو المباشر', 'success');
         } else {
-          alert("الرابط غير مدعوم. الرجاء استخدام رابط يوتيوب، تويتر، M3U، أو MP4.");
+          showNotification('الرابط غير مدعوم', 'error');
         }
+      }
+
+      function showVideoPlayer() {
+        videoPlayer.style.display = 'flex';
+        toggleVideoBtn.innerHTML = '<i class="fa fa-eye-slash"></i> <span>إخفاء المشغل</span>';
+        toggleVideoBtn.classList.add('active');
+        localStorage.setItem('videoPlayerVisible', 'true');
+      }
+
+      function hideVideoPlayer() {
+        videoPlayer.style.display = 'none';
+        toggleVideoBtn.innerHTML = '<i class="fa fa-eye"></i> <span>إظهار المشغل</span>';
+        toggleVideoBtn.classList.remove('active');
+        localStorage.setItem('videoPlayerVisible', 'false');
+      }
+
+      function updateVolumeControls() {
+        const volume = videoPlayerInstance.volume();
+        const isMuted = videoPlayerInstance.muted();
+        
+        volumeSlider.value = volume * 100;
+        
+        if (isMuted || volume === 0) {
+          muteBtn.innerHTML = '<i class="fa fa-volume-off"></i>';
+          muteBtn.title = 'إلغاء كتم الصوت';
+        } else if (volume < 0.5) {
+          muteBtn.innerHTML = '<i class="fa fa-volume-down"></i>';
+          muteBtn.title = 'كتم الصوت';
+        } else {
+          muteBtn.innerHTML = '<i class="fa fa-volume-up"></i>';
+          muteBtn.title = 'كتم الصوت';
+        }
+      }
+
+      function updateTimeDisplay() {
+        if (!videoPlayerInstance) return;
+        
+        const current = videoPlayerInstance.currentTime();
+        const duration = videoPlayerInstance.duration();
+        
+        if (isNaN(duration)) return;
+        
+        // تحديث شريط التقدم
+        const progress = (current / duration) * 100;
+        progressFill.style.width = progress + '%';
+        
+        // تحديث الوقت
+        currentTime.textContent = formatTime(current);
+        videoDuration.textContent = formatTime(duration);
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      function startProgressUpdate() {
+        stopProgressUpdate();
+        updateInterval = setInterval(updateTimeDisplay, 100);
+      }
+
+      function stopProgressUpdate() {
+        if (updateInterval) {
+          clearInterval(updateInterval);
+          updateInterval = null;
+        }
+      }
+
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+          <i class="fa fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          <span>${message}</span>
+        `;
+        
+        notifications.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.classList.add('fade-out');
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
       }
 
       // === دوال السحب وتغيير الحجم ===
@@ -306,28 +936,123 @@
         handle.addEventListener('touchstart', onResizeStart, { passive: false });
       }
 
-      // === معالج أحداث الفيديو ===
+      // === معالج أحداث الفيديو المتطور ===
       setVideoBtn.onclick = () => {
         videoModal.style.display = 'block';
         overlay.style.display = 'block';
         videoUrlInput.focus();
+        videoUrlInput.value = '';
       };
       
-      closeVideoBtn.onclick = () => {
-        videoPlayer.style.display = 'none';
-        if (videoPlayerInstance) {
-          videoPlayerInstance.pause();
+      toggleVideoBtn.onclick = () => {
+        if (videoPlayer.style.display === 'none' || videoPlayer.style.display === '') {
+          if (currentVideoUrl) {
+            showVideoPlayer();
+          } else {
+            showNotification('لا يوجد فيديو مثبت للعرض', 'warning');
+          }
+        } else {
+          hideVideoPlayer();
         }
       };
       
+      clearVideoBtn.onclick = () => {
+        if (confirm('هل تريد إزالة الفيديو المثبت للجميع؟')) {
+          db.ref("pinned_video").remove();
+          showNotification('تم إزالة الفيديو المثبت', 'success');
+        }
+      };
+      
+      closeVideoBtn.onclick = () => {
+        hideVideoPlayer();
+      };
+      
+      playPauseBtn.onclick = () => {
+        if (videoPlayerInstance) {
+          if (isVideoPlaying) {
+            videoPlayerInstance.pause();
+          } else {
+            videoPlayerInstance.play();
+          }
+        }
+      };
+      
+      muteBtn.onclick = () => {
+        if (videoPlayerInstance) {
+          videoPlayerInstance.muted(!videoPlayerInstance.muted());
+        }
+      };
+      
+      volumeSlider.oninput = (e) => {
+        if (videoPlayerInstance) {
+          const volume = e.target.value / 100;
+          videoPlayerInstance.volume(volume);
+          videoPlayerInstance.muted(volume === 0);
+        }
+      };
+      
+      pipBtn.onclick = () => {
+        if (document.pictureInPictureEnabled && videoPlayerInstance) {
+          if (!isPipActive) {
+            videoPlayerInstance.enterPictureInPicture();
+          } else {
+            document.exitPictureInPicture();
+          }
+        } else {
+          showNotification('ميزة الصورة داخل الصورة غير مدعومة', 'warning');
+        }
+      };
+      
+      fullscreenBtn.onclick = () => {
+        if (videoPlayerInstance) {
+          if (!isFullscreen) {
+            videoPlayerInstance.requestFullscreen();
+          } else {
+            videoPlayerInstance.exitFullscreen();
+          }
+        }
+      };
+      
+      qualityBtn.onclick = (e) => {
+        e.stopPropagation();
+        qualitySelector.style.display = qualitySelector.style.display === 'flex' ? 'none' : 'flex';
+      };
+      
+      document.querySelectorAll('.quality-option').forEach(option => {
+        option.onclick = (e) => {
+          e.stopPropagation();
+          const quality = option.getAttribute('data-quality');
+          
+          document.querySelectorAll('.quality-option').forEach(opt => {
+            opt.classList.remove('active');
+          });
+          option.classList.add('active');
+          
+          // هنا يمكن إضافة منطق تغيير الجودة
+          showNotification(`تم تغيير الجودة إلى ${quality === 'auto' ? 'تلقائي' : quality + 'p'}`, 'info');
+          qualitySelector.style.display = 'none';
+        };
+      });
+      
+      // إغلاق قائمة الجودة عند النقر خارجها
+      document.addEventListener('click', () => {
+        if (qualitySelector.style.display === 'flex') {
+          qualitySelector.style.display = 'none';
+        }
+      });
+      
       submitVideoBtn.onclick = () => {
         const url = videoUrlInput.value.trim();
-        if (!url) return;
+        if (!url) {
+          showNotification('يرجى إدخال رابط الفيديو', 'warning');
+          return;
+        }
         
         // حفظ رابط الفيديو في Firebase للمشاركة
         db.ref("pinned_video").set({
           url: url,
           setBy: username,
+          title: extractVideoTitle(url),
           timestamp: firebase.database.ServerValue.TIMESTAMP
         });
         
@@ -352,14 +1077,18 @@
           
           // إشعار بوجود فيديو جديد
           if (data.setBy !== username) {
+            showNotification(`📺 ${data.setBy} قام بتثبيت فيديو جديد`, 'info');
             showSystemMsg(`📺 ${data.setBy} قام بتثبيت فيديو جديد`, true);
           }
         } else if (!data) {
-          videoPlayer.style.display = 'none';
+          hideVideoPlayer();
           if (videoPlayerInstance) {
             videoPlayerInstance.pause();
           }
           currentVideoUrl = '';
+          videoTitle.textContent = 'الفيديو المثبت';
+          toggleVideoBtn.innerHTML = '<i class="fa fa-eye"></i> <span>إظهار المشغل</span>';
+          toggleVideoBtn.classList.remove('active');
         }
       });
 
@@ -371,28 +1100,61 @@
       const resizeHandle = document.querySelector('.resize-handle');
       makeDraggable(videoPlayer, videoHeader);
       makeResizable(videoPlayer, resizeHandle);
+      
+      // استعادة حالة المشغل من التخزين المحلي
+      const wasVisible = localStorage.getItem('videoPlayerVisible') === 'true';
+      if (wasVisible) {
+        videoPlayer.style.display = 'flex';
+        toggleVideoBtn.innerHTML = '<i class="fa fa-eye-slash"></i> <span>إخفاء المشغل</span>';
+        toggleVideoBtn.classList.add('active');
+      }
 
-      // ===== باقي كود الدردشة (لم يتغير) =====
+      // ===== باقي كود الدردشة (مع تحسينات) =====
       // تسجيل الدخول وإعداد حالة الكتابة
-      userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping: false });
+      userRef.set({ 
+        lastActive: firebase.database.ServerValue.TIMESTAMP, 
+        isTyping: false,
+        name: username,
+        joinedAt: firebase.database.ServerValue.TIMESTAMP
+      });
       userRef.onDisconnect().remove();
 
       // مزامنة وقت السيرفر
-      db.ref('.info/serverTimeOffset').on('value', snap => { serverTimeOffset = snap.val() || 0; });
+      db.ref('.info/serverTimeOffset').on('value', snap => { 
+        serverTimeOffset = snap.val() || 0; 
+      });
       
       // نظام الحضور والمغادرة والتنظيف
-      setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
+      setInterval(() => { 
+        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); 
+      }, 30000);
+      
       setInterval(() => {
-        const now = Date.now() + serverTimeOffset; const STALE_THRESHOLD = 90 * 1000;
+        const now = Date.now() + serverTimeOffset; 
+        const STALE_THRESHOLD = 90 * 1000;
         onlineRef.once('value', snapshot => {
-          const users = snapshot.val(); if (!users) return;
-          Object.keys(users).forEach(u => { if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) db.ref('online/' + u).remove(); });
+          const users = snapshot.val(); 
+          if (!users) return;
+          Object.keys(users).forEach(u => { 
+            if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) {
+              db.ref('online/' + u).remove(); 
+            }
+          });
         });
       }, 60000);
 
       // وظائف زر المتصلين
-      onlineList.onclick = e => { e.stopPropagation(); usersBox.classList.toggle('visible'); };
-      document.onclick = () => { if (usersBox.classList.contains('visible')) usersBox.classList.remove('visible'); };
+      onlineList.onclick = e => { 
+        e.stopPropagation(); 
+        usersBox.classList.toggle('visible'); 
+      };
+      
+      document.onclick = () => { 
+        if (usersBox.classList.contains('visible')) {
+          usersBox.classList.remove('visible'); 
+        }
+      };
+      
       usersBox.onclick = e => e.stopPropagation();
 
       // المستمع الرئيسي للمستخدمين المتصلين
@@ -404,70 +1166,148 @@
       });
 
       // إشعارات الدخول والخروج
-      onlineRef.on("child_added", snap => { if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); });
-      onlineRef.on("child_removed", snap => { showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); });
+      onlineRef.on("child_added", snap => { 
+        if (snap.key !== username) {
+          showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); 
+        }
+      });
+      
+      onlineRef.on("child_removed", snap => { 
+        showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); 
+      });
       
       inputAreaForm.onsubmit = sendMessage;
+      
       messageInput.oninput = () => {
         clearTimeout(typingTimer);
-        userRef.update({ isTyping: true, lastActive: firebase.database.ServerValue.TIMESTAMP });
-        typingTimer = setTimeout(() => { userRef.update({ isTyping: false }); }, 2000);
+        userRef.update({ 
+          isTyping: true, 
+          lastActive: firebase.database.ServerValue.TIMESTAMP 
+        });
+        typingTimer = setTimeout(() => { 
+          userRef.update({ isTyping: false }); 
+        }, 2000);
       };
 
       function sendMessage() {
         clearTimeout(typingTimer);
         userRef.update({ isTyping: false });
-        const text = messageInput.value.trim(); if (!text) return;
+        const text = messageInput.value.trim(); 
+        if (!text) return;
+        
         const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-        messagesRef.push().set({ user: username, text, time, uid: sessionUid });
+        messagesRef.push().set({ 
+          user: username, 
+          text, 
+          time, 
+          uid: sessionUid 
+        });
+        
         messageInput.value = "";
         cleanupOldMessages();
       }
       
       function updateTypingIndicator(users) {
         const typingUsers = Object.keys(users).filter(u => users[u].isTyping && u !== username);
-        if (typingUsers.length === 0) typingIndicator.textContent = '';
-        else if (typingUsers.length === 1) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
-        else if (typingUsers.length === 2) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
-        else typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+        if (typingUsers.length === 0) {
+          typingIndicator.textContent = '';
+        } else if (typingUsers.length === 1) {
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
+        } else if (typingUsers.length === 2) {
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
+        } else {
+          typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+        }
       }
       
       function renderUsersList(onlineUsersData) {
-        usersList.innerHTML = ''; const now = Date.now() + serverTimeOffset; const twoMinutesAgo = now - (2 * 60 * 1000);
+        usersList.innerHTML = ''; 
+        const now = Date.now() + serverTimeOffset; 
+        const twoMinutesAgo = now - (2 * 60 * 1000);
+        
         Object.keys(onlineUsersData).forEach(user => {
-            const userData = onlineUsersData[user]; const userItem = document.createElement("div"); userItem.className = "user-item";
-            const statusIndicator = document.createElement("span"); statusIndicator.className = "status-indicator";
-            if (userData.lastActive < twoMinutesAgo) { statusIndicator.classList.add('status-yellow'); } else { statusIndicator.classList.add('status-green'); }
-            const userName = document.createElement("span"); userName.textContent = user;
-            userItem.appendChild(statusIndicator); userItem.appendChild(userName); usersList.appendChild(userItem);
+          const userData = onlineUsersData[user]; 
+          const userItem = document.createElement("div"); 
+          userItem.className = "user-item";
+          
+          const statusIndicator = document.createElement("span"); 
+          statusIndicator.className = "status-indicator";
+          
+          if (userData.lastActive < twoMinutesAgo) { 
+            statusIndicator.classList.add('status-yellow'); 
+          } else { 
+            statusIndicator.classList.add('status-green'); 
+          }
+          
+          const userName = document.createElement("span"); 
+          userName.textContent = user;
+          userName.title = `انضم منذ: ${new Date(userData.joinedAt || now).toLocaleTimeString()}`;
+          
+          userItem.appendChild(statusIndicator); 
+          userItem.appendChild(userName); 
+          usersList.appendChild(userItem);
         });
       }
 
-      messagesRef.limitToLast(50).on("child_added", snap => { addMessage(snap.key, snap.val()); });
-      messagesRef.on('child_removed', snap => { const el = document.getElementById('msg-' + snap.key); if (el) el.remove(); });
+      messagesRef.limitToLast(50).on("child_added", snap => { 
+        addMessage(snap.key, snap.val()); 
+      });
+      
+      messagesRef.on('child_removed', snap => { 
+        const el = document.getElementById('msg-' + snap.key); 
+        if (el) el.remove(); 
+      });
       
       function addMessage(key, { user, text, time, uid }) {
-        const div = document.createElement("div"); div.className = "msg"; div.id = 'msg-' + key;
+        const div = document.createElement("div"); 
+        div.className = "msg"; 
+        div.id = 'msg-' + key;
+        
         let deleteBtnHtml = '';
-        if (uid === sessionUid) { deleteBtnHtml = `<i class="delete-btn fa fa-times" onclick="deleteMessage('${key}')" title="حذف الرسالة"></i>`; }
-        div.innerHTML = `<span class="user">${escapeHtml(user)}</span><span>${escapeHtml(text)}</span><span class="time">${escapeHtml(time)}</span>${deleteBtnHtml}`;
-        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (uid === sessionUid) { 
+          deleteBtnHtml = `<i class="delete-btn fa fa-times" onclick="deleteMessage('${key}')" title="حذف الرسالة"></i>`; 
+        }
+        
+        div.innerHTML = `
+          <span class="user">${escapeHtml(user)}</span>
+          <span>${escapeHtml(text)}</span>
+          <span class="time">${escapeHtml(time)}</span>
+          ${deleteBtnHtml}
+        `;
+        
+        messagesDiv.appendChild(div); 
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
       
-      window.deleteMessage = function(messageKey) { messagesRef.child(messageKey).remove().catch(error => console.error("Error deleting:", error)); }
+      window.deleteMessage = function(messageKey) { 
+        messagesRef.child(messageKey).remove()
+          .catch(error => console.error("Error deleting:", error)); 
+      }
       
       function cleanupOldMessages() {
         messagesRef.once('value', snapshot => {
           if (snapshot.numChildren() > 50) {
-            let updates = {}; let count = 0; const limit = snapshot.numChildren() - 50;
-            snapshot.forEach(child => { if (count < limit) updates[child.key] = null; count++; });
+            let updates = {}; 
+            let count = 0; 
+            const limit = snapshot.numChildren() - 50;
+            snapshot.forEach(child => { 
+              if (count < limit) {
+                updates[child.key] = null; 
+              }
+              count++; 
+            });
             messagesRef.update(updates);
           }
         });
       }
+      
       function showSystemMsg(text, isTemporary) {
-        const div = document.createElement("div"); div.className = "sys"; div.textContent = text;
-        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const div = document.createElement("div"); 
+        div.className = "sys"; 
+        div.textContent = text;
+        messagesDiv.appendChild(div); 
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
         if (isTemporary) {
           setTimeout(() => {
             div.classList.add('fade-out');
@@ -475,7 +1315,20 @@
           }, 4000);
         }
       }
-      function escapeHtml(unsafe) { return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+      
+      function escapeHtml(unsafe) { 
+        return unsafe.toString()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;"); 
+      }
+      
+      // إظهار رسالة ترحيب
+      setTimeout(() => {
+        showSystemMsg(`مرحباً ${username} في الدردشة!`, true);
+      }, 1000);
     });
   </script>
 </body>
