@@ -1,407 +1,482 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>شات خاص</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>شات خاص</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <!-- Video.js مكتبات -->
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet">
+  
+  <!-- Firebase مكتبات -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<style>
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family:'Tajawal', sans-serif;
-    background:#ece5dd;
-}
-
-#chat-container {
-    display:flex;
-    flex-direction:column;
-    height:100%;
-    max-width: 500px;
-    margin:auto;
-    border:1px solid #ccc;
-    background:white;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-/* الرسائل */
-#messages {
-    flex:1;
-    overflow-y:auto;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-}
-
-.msg {
-    width: 100%;
-    padding: 8px 12px;
-    background: #ffffff;
-    border-bottom: 1px solid #e6e6e6;
-    font-size: 15px;
-    text-align: right;
-}
-
-/* اسم المرسل */
-.msgUser {
-    font-size: 13px;
-    font-weight: bold;
-    color: #0b6e99;
-    margin-bottom: 3px;
-}
-
-/* نص الرسالة */
-.msgText {
-    font-size: 15px;
-    line-height: 1.4;
-}
-
-/* الوقت */
-.time {
-    display:block;
-    font-size: 11px;
-    color:#888;
-    margin-top:3px;
-}
-
-/* رسالة النظام */
-.sys {
-    display:inline-block;
-    padding:4px 10px;
-    background:#e5e5e5;
-    color:#555;
-    font-size:12px;
-    border-radius:8px;
-    margin:10px auto;
-}
-
-/* الكتابة */
-#typing-indicator {
-    height:20px;
-    padding:0 15px;
-    font-size:13px;
-    color:#888;
-    font-style:italic;
-}
-
-/* الإدخال */
-#inputArea {
-    display:flex;
-    border-top:1px solid #ccc;
-    padding:8px;
-    background:#f0f0f0;
-    gap:8px;
-}
-
-#messageInput {
-    flex:1;
-    padding:10px 15px;
-    border-radius:20px;
-    border:1px solid #ccc;
-    font-size:15px;
-}
-
-#sendBtn {
-    padding:10px 15px;
-    border:none;
-    border-radius:20px;
-    background:#25d366;
-    color:white;
-    cursor:pointer;
-    font-size:15px;
-}
-
-/* قائمة المتصلين */
-#onlineList {
-    position:fixed;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    background:white;
-    border-radius:20px;
-    padding:5px 12px;
-    font-size:14px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    cursor:pointer;
-}
-
-#usersBox {
-    position:fixed;
-    top:40px;
-    left:50%;
-    transform:translateX(-50%);
-    background:white;
-    border-radius:8px;
-    padding:10px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.15);
-    opacity:0;
-    visibility:hidden;
-    transition:0.2s;
-    max-height:200px;
-    overflow-y:auto;
-}
-
-#usersBox.visible {
-    opacity:1;
-    visibility:visible;
-}
-
-.user-item {
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:4px 0;
-}
-
-.status-indicator {
-    width:10px;
-    height:10px;
-    border-radius:50%;
-}
-
-.status-green { background:#28a745; }
-.status-yellow { background:#ffc107; }
-</style>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body { font-family: 'Tajawal', sans-serif; background: #f4f7f9; display: flex; flex-direction: column; position: relative; }
+    #chat-container { display: flex; flex-direction: column; height: 100%; }
+    #messages { flex: 1; overflow-y: auto; padding: 15px; background: #fff; }
+    .msg { margin: 8px 0; display: flex; gap: 10px; align-items: center; direction: ltr; text-align: left; position: relative; font-size: 15px; line-height: 1.4; }
+    .msg:hover .delete-btn { opacity: 1; transform: scale(1); }
+    .sys { text-align: center; color: #888; font-size: 12px; margin: 10px auto; font-style: italic; background-color: #f0f0f0; padding: 4px 10px; border-radius: 12px; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 1; transform: translateY(0); }
+    .sys.fade-out { opacity: 0; transform: translateY(-20px); }
+    .user { font-weight: bold; color: #005c97; }
+    .time { font-size: 11px; color: #999; }
+    .delete-btn { cursor: pointer; color: white; background-color: #e74c3c; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 10px; opacity: 0; transform: scale(0.8); transition: opacity 0.2s, transform 0.2s; }
+    .delete-btn:hover { background-color: #c0392b; }
+    #typing-indicator { height: 20px; padding: 0 15px; font-size: 13px; color: #888; font-style: italic; transition: opacity 0.3s; }
+    #inputArea { display: flex; flex-direction: row; align-items: center; gap: 8px; border-top: 1px solid #ddd; padding: 8px; background: #fdfdfd; }
+    #messageInput { flex: 1; font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 20px; font-family: 'Tajawal', sans-serif; transition: border-color 0.2s; }
+    #sendBtn { padding: 10px 15px; border: none; border-radius: 20px; background: #3366cc; color: white; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 15px; transition: background-color 0.2s; }
+    #onlineList { position: fixed; top: 10px; right: 10px; border: 1px solid #ccc; background: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; gap: 5px; }
+    #usersBox { position: fixed; top: 55px; right: 10px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 999; min-width: 160px; max-width: 200px; opacity: 0; transform: translateY(-10px); visibility: hidden; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
+    #usersBox.visible { opacity: 1; transform: translateY(0); visibility: visible; }
+    #usersList { max-height: 200px; overflow-y: auto; }
+    .user-item { display: flex; align-items: center; gap: 8px; padding: 5px 2px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .status-indicator { width: 10px; height: 10px; border-radius: 50%; }
+    .status-green { background-color: #28a745; }
+    .status-yellow { background-color: #ffc107; }
+    
+    /* مشغل الفيديو المثبت */
+    #videoPlayer { position: fixed; top: 60px; left: 20px; width: 400px; height: 225px; background: #000; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 998; display: none; flex-direction: column; overflow: hidden; }
+    .video-header { background-color: #333; color: white; padding: 5px 10px; border-top-left-radius: 7px; border-top-right-radius: 7px; cursor: move; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; touch-action: none; font-size: 14px; }
+    .video-body { width: 100%; background: #000; flex-grow: 1; }
+    .close-video { background: #d9534f; border: 1px solid #d43f3a; color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 14px; line-height: 20px; text-align: center; }
+    .resize-handle { position: absolute; width: 20px; height: 20px; bottom: 0; right: 0; cursor: nwse-resize; z-index: 10; }
+    
+    /* أزرار التحكم في الفيديو */
+    #videoControls { position: fixed; top: 10px; left: 10px; display: flex; gap: 8px; z-index: 1000; }
+    .video-control-btn { padding: 6px 10px; background: white; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    /* نافذة إدخال رابط الفيديو */
+    #videoModal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1003; display: none; min-width: 300px; }
+    #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
+    #videoUrlInput { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .modal-btn.primary { background: #3366cc; color: white; }
+    .modal-btn.secondary { background: #e0e0e0; color: #333; }
+  </style>
 </head>
 <body>
+  <!-- أزرار التحكم في الفيديو -->
+  <div id="videoControls">
+    <div class="video-control-btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
+  </div>
+  
+  <!-- مشغل الفيديو المثبت -->
+  <div id="videoPlayer">
+    <div class="video-header">
+      <span>الفيديو المثبت</span>
+      <button class="close-video" id="closeVideoBtn">✖</button>
+    </div>
+    <div class="video-body">
+      <video id="myVideo" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto"></video>
+    </div>
+    <div class="resize-handle"></div>
+  </div>
+  
+  <!-- نافذة إدخال رابط الفيديو -->
+  <div id="overlay"></div>
+  <div id="videoModal">
+    <h4>تثبيت فيديو للجميع</h4>
+    <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4"/>
+    <div class="modal-buttons">
+      <button class="modal-btn secondary" id="cancelVideoBtn">إلغاء</button>
+      <button class="modal-btn primary" id="submitVideoBtn">تثبيت</button>
+    </div>
+  </div>
 
-<div id="chat-container">
+  <!-- واجهة الدردشة -->
+  <div id="chat-container">
+    <div id="onlineList" title="المتصلون الآن">👥 <span id="count">0</span></div>
+    <div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="typing-indicator"></div>
-
     <form id="inputArea" action="javascript:void(0);">
-        <input type="text" id="messageInput" placeholder="اكتب رسالة..." autocomplete="off">
-        <button type="submit" id="sendBtn">إرسال</button>
+      <button type="submit" id="sendBtn" aria-label="إرسال">إرسال</button>
+      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
     </form>
-</div>
+  </div>
 
-<div id="onlineList">👥 <span id="count">0</span></div>
-<div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
+  <!-- Video.js مكتبات JavaScript -->
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+  <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    /* Firebase */
-    const firebaseConfig = {
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const firebaseConfig = {
         apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
         authDomain: "mychat-2d881.firebaseapp.com",
         databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
       };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+      const username = "زائر_" + Math.floor(Math.random() * 1000);
+      const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
+      
+      // عناصر واجهة الدردشة
+      const onlineList = document.getElementById("onlineList");
+      const usersBox = document.getElementById("usersBox");
+      const usersList = document.getElementById("usersList");
+      const count = document.getElementById("count");
+      const messagesDiv = document.getElementById("messages");
+      const typingIndicator = document.getElementById("typing-indicator");
+      
+      const userRef = db.ref("online/" + username);
+      const messagesRef = db.ref("messages");
+      const onlineRef = db.ref("online");
+      const messageInput = document.getElementById("messageInput");
+      const inputAreaForm = document.getElementById("inputArea");
+      
+      let typingTimer, serverTimeOffset = 0;
 
-    /* اسم المستخدم */
-    let username = localStorage.getItem('chatUsername');
-    if (!username) {
-        while (true) {
-            username = prompt("اكتب اسمك للانضمام:");
-            if (username && username.trim() !== "") break;
+      // === عناصر مشغل الفيديو ===
+      const videoPlayer = document.getElementById('videoPlayer');
+      const myVideo = document.getElementById('myVideo');
+      const setVideoBtn = document.getElementById('setVideoBtn');
+      const closeVideoBtn = document.getElementById('closeVideoBtn');
+      const videoModal = document.getElementById('videoModal');
+      const overlay = document.getElementById('overlay');
+      const videoUrlInput = document.getElementById('videoUrlInput');
+      const submitVideoBtn = document.getElementById('submitVideoBtn');
+      const cancelVideoBtn = document.getElementById('cancelVideoBtn');
+      
+      let videoPlayerInstance = null;
+      let currentVideoUrl = '';
+
+      // === تهيئة مشغل الفيديو ===
+      function initVideoPlayer() {
+        if (videoPlayerInstance) {
+          videoPlayerInstance.dispose();
         }
-        localStorage.setItem('chatUsername', username.trim());
-    }
+        
+        videoPlayerInstance = videojs(myVideo, {
+          autoplay: true,
+          muted: true,
+          controls: true,
+          playsinline: true,
+          aspectRatio: '16:9',
+          techOrder: ['youtube', 'html5'],
+          sources: []
+        });
+      }
 
-    const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
+      // === دوال مساعدة للفيديو ===
+      function getYoutubeVideoId(url) {
+        if (!url) return null;
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        return (url.match(regex) || [])[1] || null;
+      }
+      
+      function getTweetId(url) {
+        if (!url) return null;
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
+        return (url.match(regex) || [])[1] || null;
+      }
+      
+      function isDirectVideo(url) {
+        return /\.(mp4|webm|ogv|m3u8?)$/i.test(url);
+      }
 
-    const userRef = db.ref("online/" + username);
-    const messagesRef = db.ref("messages");
-    const onlineRef = db.ref("online");
-
-    const messagesDiv = document.getElementById("messages");
-    const typingIndicator = document.getElementById("typing-indicator");
-    const messageInput = document.getElementById("messageInput");
-    const inputAreaForm = document.getElementById("inputArea");
-    const onlineList = document.getElementById("onlineList");
-    const usersBox = document.getElementById("usersBox");
-    const usersList = document.getElementById("usersList");
-    const count = document.getElementById("count");
-
-    let typingTimer, serverTimeOffset = 0;
-
-    /* تسجيل المستخدم */
-    userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping:false });
-    userRef.onDisconnect().remove();
-
-    db.ref('.info/serverTimeOffset').on('value', snap => {
-        serverTimeOffset = snap.val() || 0;
-    });
-
-    /* تحديث النشاط */
-    setInterval(() => {
-        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
-    }, 30000);
-
-    /* حذف غير النشطين */
-    setInterval(() => {
-        const now = Date.now() + serverTimeOffset;
-        onlineRef.once('value', snap => {
-            const users = snap.val();
-            if (!users) return;
-            Object.keys(users).forEach(u => {
-                if (now - (users[u].lastActive || 0) > 90000)
-                    db.ref('online/' + u).remove();
+      function loadVideo(url) {
+        const youtubeId = getYoutubeVideoId(url);
+        const tweetId = getTweetId(url);
+        
+        if (youtubeId) {
+          // فيديو يوتيوب
+          videoPlayerInstance.src({
+            type: 'video/youtube',
+            src: `https://www.youtube.com/watch?v=${youtubeId}`
+          });
+          currentVideoUrl = url;
+          videoPlayer.style.display = 'flex';
+        } else if (tweetId) {
+          // فيديو تويتر (X)
+          fetch(`https://api.vxtwitter.com/i/status/${tweetId}`)
+            .then(response => response.json())
+            .then(tweetData => {
+              if (tweetData.media_extended && tweetData.media_extended.length > 0) {
+                videoPlayerInstance.src({
+                  type: 'video/mp4',
+                  src: tweetData.media_extended[0].url
+                });
+                currentVideoUrl = tweetData.media_extended[0].url;
+                videoPlayer.style.display = 'flex';
+              }
+            })
+            .catch(error => {
+              console.error("Error fetching Twitter video:", error);
+              alert("حدث خطأ في تحميل فيديو تويتر");
             });
-        });
-    }, 60000);
-
-    /* قائمة المتصلين */
-    onlineList.onclick = e => {
-        e.stopPropagation();
-        usersBox.classList.toggle('visible');
-    };
-
-    document.onclick = () => usersBox.classList.remove('visible');
-    usersBox.onclick = e => e.stopPropagation();
-
-    /* تحديث قائمة المتصلين */
-    onlineRef.on("value", snap => {
-        const users = snap.val() || {};
-        count.textContent = snap.numChildren();
-        renderUsersList(users);
-        updateTypingIndicator(users);
-    });
-
-    /* دخول وخروج */
-    onlineRef.on("child_added", snap => {
-        if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`);
-    });
-
-    onlineRef.on("child_removed", snap => {
-        showSystemMsg(`📤 ${snap.key} غادر الدردشة`);
-    });
-
-    /* إرسال رسالة */
-    inputAreaForm.onsubmit = sendMessage;
-
-    messageInput.oninput = () => {
-        clearTimeout(typingTimer);
-        userRef.update({ isTyping:true, lastActive:firebase.database.ServerValue.TIMESTAMP });
-        typingTimer = setTimeout(() => userRef.update({ isTyping:false }), 2000);
-    };
-
-    /* معالجة وإرسال الرسالة */
-    async function sendMessage() {
-        clearTimeout(typingTimer);
-        userRef.update({ isTyping:false });
-
-        let text = messageInput.value.trim();
-        if (!text) return;
-
-        const time = new Date().toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit' });
-
-        /* 🔥 دعم فيديو تويتر */
-        if (text.includes("x.com") || text.includes("twitter.com")) {
-
-            const apiUrl = text
-                .replace("x.com", "api.vxtwitter.com")
-                .replace("twitter.com", "api.vxtwitter.com");
-
-            try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-
-                if (data.media && data.media.length > 0) {
-
-                    const videoUrl = data.media[0].url;
-
-                    text = `
-                        <video controls width="100%" style="border-radius:8px;">
-                            <source src="${videoUrl}" type="video/mp4">
-                        </video>
-                    `;
-                }
-            } catch (e) {
-                console.log("خطأ تحميل فيديو تويتر:", e);
-            }
+        } else if (isDirectVideo(url)) {
+          // فيديو مباشر (MP4, M3U, etc.)
+          const videoType = url.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4';
+          videoPlayerInstance.src({
+            type: videoType,
+            src: url
+          });
+          currentVideoUrl = url;
+          videoPlayer.style.display = 'flex';
+        } else {
+          alert("الرابط غير مدعوم. الرجاء استخدام رابط يوتيوب، تويتر، M3U، أو MP4.");
         }
+      }
 
-        messagesRef.push().set({
-            user: username,
-            text,
-            time,
-            uid: sessionUid
+      // === دوال السحب وتغيير الحجم ===
+      function makeDraggable(element, handle) {
+        let offsetX = 0, offsetY = 0;
+        let isDragging = false;
+        
+        const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+        
+        const onDragStart = (e) => {
+          isDragging = true;
+          const pointer = getPointerPosition(e);
+          offsetX = pointer.clientX - element.offsetLeft;
+          offsetY = pointer.clientY - element.offsetTop;
+          
+          document.addEventListener('mousemove', onDragMove);
+          document.addEventListener('touchmove', onDragMove, { passive: false });
+          document.addEventListener('mouseup', onDragEnd);
+          document.addEventListener('touchend', onDragEnd);
+        };
+        
+        const onDragMove = (e) => {
+          if (isDragging) {
+            e.preventDefault();
+            const pointer = getPointerPosition(e);
+            element.style.left = (pointer.clientX - offsetX) + "px";
+            element.style.top = (pointer.clientY - offsetY) + "px";
+          }
+        };
+        
+        const onDragEnd = () => {
+          isDragging = false;
+          document.removeEventListener('mousemove', onDragMove);
+          document.removeEventListener('touchmove', onDragMove);
+          document.removeEventListener('mouseup', onDragEnd);
+          document.removeEventListener('touchend', onDragEnd);
+        };
+        
+        handle.addEventListener('mousedown', onDragStart);
+        handle.addEventListener('touchstart', onDragStart, { passive: false });
+      }
+
+      function makeResizable(element, handle) {
+        let initialWidth, initialHeight, initialX, initialY;
+        const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+        
+        function onResizeStart(e) {
+          if(e.type === 'touchstart') e.preventDefault();
+          const pointer = getPointerPosition(e);
+          initialWidth = element.offsetWidth;
+          initialHeight = element.offsetHeight;
+          initialX = pointer.clientX;
+          initialY = pointer.clientY;
+          
+          document.addEventListener('mousemove', onResizeMove);
+          document.addEventListener('touchmove', onResizeMove, { passive: false });
+          document.addEventListener('mouseup', onResizeEnd);
+          document.addEventListener('touchend', onResizeEnd);
+        }
+        
+        function onResizeMove(e) {
+          if(e.type === 'touchmove') e.preventDefault();
+          const pointer = getPointerPosition(e);
+          const newWidth = initialWidth + (pointer.clientX - initialX);
+          const newHeight = initialHeight + (pointer.clientY - initialY);
+          
+          if (newWidth > 300) element.style.width = newWidth + 'px';
+          if (newHeight > 200) element.style.height = newHeight + 'px';
+        }
+        
+        function onResizeEnd() {
+          document.removeEventListener('mousemove', onResizeMove);
+          document.removeEventListener('touchmove', onResizeMove);
+          document.removeEventListener('mouseup', onResizeEnd);
+          document.removeEventListener('touchend', onResizeEnd);
+        }
+        
+        handle.addEventListener('mousedown', onResizeStart);
+        handle.addEventListener('touchstart', onResizeStart, { passive: false });
+      }
+
+      // === معالج أحداث الفيديو ===
+      setVideoBtn.onclick = () => {
+        videoModal.style.display = 'block';
+        overlay.style.display = 'block';
+        videoUrlInput.focus();
+      };
+      
+      closeVideoBtn.onclick = () => {
+        videoPlayer.style.display = 'none';
+        if (videoPlayerInstance) {
+          videoPlayerInstance.pause();
+        }
+      };
+      
+      submitVideoBtn.onclick = () => {
+        const url = videoUrlInput.value.trim();
+        if (!url) return;
+        
+        // حفظ رابط الفيديو في Firebase للمشاركة
+        db.ref("pinned_video").set({
+          url: url,
+          setBy: username,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
         });
+        
+        loadVideo(url);
+        closeModal();
+      };
+      
+      cancelVideoBtn.onclick = closeModal;
+      overlay.onclick = closeModal;
+      
+      function closeModal() {
+        videoModal.style.display = 'none';
+        overlay.style.display = 'none';
+        videoUrlInput.value = '';
+      }
 
+      // === مراقبة الفيديو المثبت من Firebase ===
+      db.ref("pinned_video").on("value", (snap) => {
+        const data = snap.val();
+        if (data && data.url && data.url !== currentVideoUrl) {
+          loadVideo(data.url);
+          
+          // إشعار بوجود فيديو جديد
+          if (data.setBy !== username) {
+            showSystemMsg(`📺 ${data.setBy} قام بتثبيت فيديو جديد`, true);
+          }
+        } else if (!data) {
+          videoPlayer.style.display = 'none';
+          if (videoPlayerInstance) {
+            videoPlayerInstance.pause();
+          }
+          currentVideoUrl = '';
+        }
+      });
+
+      // === تهيئة المشغل بعد تحميل DOM ===
+      initVideoPlayer();
+      
+      // جعل نافذة الفيديو قابلة للسحب وتغيير الحجم
+      const videoHeader = document.querySelector('.video-header');
+      const resizeHandle = document.querySelector('.resize-handle');
+      makeDraggable(videoPlayer, videoHeader);
+      makeResizable(videoPlayer, resizeHandle);
+
+      // ===== باقي كود الدردشة (لم يتغير) =====
+      // تسجيل الدخول وإعداد حالة الكتابة
+      userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping: false });
+      userRef.onDisconnect().remove();
+
+      // مزامنة وقت السيرفر
+      db.ref('.info/serverTimeOffset').on('value', snap => { serverTimeOffset = snap.val() || 0; });
+      
+      // نظام الحضور والمغادرة والتنظيف
+      setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
+      setInterval(() => {
+        const now = Date.now() + serverTimeOffset; const STALE_THRESHOLD = 90 * 1000;
+        onlineRef.once('value', snapshot => {
+          const users = snapshot.val(); if (!users) return;
+          Object.keys(users).forEach(u => { if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) db.ref('online/' + u).remove(); });
+        });
+      }, 60000);
+
+      // وظائف زر المتصلين
+      onlineList.onclick = e => { e.stopPropagation(); usersBox.classList.toggle('visible'); };
+      document.onclick = () => { if (usersBox.classList.contains('visible')) usersBox.classList.remove('visible'); };
+      usersBox.onclick = e => e.stopPropagation();
+
+      // المستمع الرئيسي للمستخدمين المتصلين
+      onlineRef.on("value", snap => {
+        const onlineUsers = snap.val() || {};
+        count.textContent = snap.numChildren();
+        renderUsersList(onlineUsers);
+        updateTypingIndicator(onlineUsers);
+      });
+
+      // إشعارات الدخول والخروج
+      onlineRef.on("child_added", snap => { if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); });
+      onlineRef.on("child_removed", snap => { showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); });
+      
+      inputAreaForm.onsubmit = sendMessage;
+      messageInput.oninput = () => {
+        clearTimeout(typingTimer);
+        userRef.update({ isTyping: true, lastActive: firebase.database.ServerValue.TIMESTAMP });
+        typingTimer = setTimeout(() => { userRef.update({ isTyping: false }); }, 2000);
+      };
+
+      function sendMessage() {
+        clearTimeout(typingTimer);
+        userRef.update({ isTyping: false });
+        const text = messageInput.value.trim(); if (!text) return;
+        const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+        messagesRef.push().set({ user: username, text, time, uid: sessionUid });
         messageInput.value = "";
-    }
-
-    /* إضافة رسالة للواجهة */
-    function addMessage(key, data) {
-        if (!data) return;
-
-        const { user, text, time } = data;
-
-        const isAtBottom =
-            messagesDiv.scrollTop + messagesDiv.clientHeight >= messagesDiv.scrollHeight - 40;
-
-        const div = document.createElement("div");
-        div.className = "msg";
-
-        div.innerHTML = `
-            <div class="msgUser">${user}</div>
-            <div class="msgText">${text}</div>
-            <span class="time">${time}</span>
-        `;
-
-        messagesDiv.appendChild(div);
-
-        if (isAtBottom)
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    messagesRef.limitToLast(50).on("child_added", snap => addMessage(snap.key, snap.val()));
-
-    /* مؤشر الكتابة */
-    function updateTypingIndicator(users) {
-        const typingUsers = Object.keys(users).filter(
-            u => users[u].isTyping && u !== username
-        );
-        if (typingUsers.length === 0) typingIndicator.textContent = "";
-        else if (typingUsers.length === 1)
-            typingIndicator.textContent = `${typingUsers[0]} يكتب الآن...`;
+        cleanupOldMessages();
+      }
+      
+      function updateTypingIndicator(users) {
+        const typingUsers = Object.keys(users).filter(u => users[u].isTyping && u !== username);
+        if (typingUsers.length === 0) typingIndicator.textContent = '';
+        else if (typingUsers.length === 1) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
+        else if (typingUsers.length === 2) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
         else typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
-    }
-
-    /* قائمة المتصلين */
-    function renderUsersList(users) {
-        usersList.innerHTML = "";
-        const now = Date.now() + serverTimeOffset;
-        const twoMinutesAgo = now - 120000;
-
-        Object.keys(users).forEach(user => {
-            const uData = users[user];
-            const item = document.createElement("div");
-            item.className = "user-item";
-
-            const status = document.createElement("span");
-            status.className =
-                "status-indicator " +
-                (uData.lastActive < twoMinutesAgo ? 'status-yellow' : 'status-green');
-
-            const uname = document.createElement("span");
-            uname.textContent = user;
-
-            item.appendChild(status);
-            item.appendChild(uname);
-            usersList.appendChild(item);
+      }
+      
+      function renderUsersList(onlineUsersData) {
+        usersList.innerHTML = ''; const now = Date.now() + serverTimeOffset; const twoMinutesAgo = now - (2 * 60 * 1000);
+        Object.keys(onlineUsersData).forEach(user => {
+            const userData = onlineUsersData[user]; const userItem = document.createElement("div"); userItem.className = "user-item";
+            const statusIndicator = document.createElement("span"); statusIndicator.className = "status-indicator";
+            if (userData.lastActive < twoMinutesAgo) { statusIndicator.classList.add('status-yellow'); } else { statusIndicator.classList.add('status-green'); }
+            const userName = document.createElement("span"); userName.textContent = user;
+            userItem.appendChild(statusIndicator); userItem.appendChild(userName); usersList.appendChild(userItem);
         });
-    }
+      }
 
-    /* رسائل النظام */
-    function showSystemMsg(text) {
-        const div = document.createElement("div");
-        div.className = "sys";
-        div.textContent = text;
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-});
-</script>
-
+      messagesRef.limitToLast(50).on("child_added", snap => { addMessage(snap.key, snap.val()); });
+      messagesRef.on('child_removed', snap => { const el = document.getElementById('msg-' + snap.key); if (el) el.remove(); });
+      
+      function addMessage(key, { user, text, time, uid }) {
+        const div = document.createElement("div"); div.className = "msg"; div.id = 'msg-' + key;
+        let deleteBtnHtml = '';
+        if (uid === sessionUid) { deleteBtnHtml = `<i class="delete-btn fa fa-times" onclick="deleteMessage('${key}')" title="حذف الرسالة"></i>`; }
+        div.innerHTML = `<span class="user">${escapeHtml(user)}</span><span>${escapeHtml(text)}</span><span class="time">${escapeHtml(time)}</span>${deleteBtnHtml}`;
+        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+      
+      window.deleteMessage = function(messageKey) { messagesRef.child(messageKey).remove().catch(error => console.error("Error deleting:", error)); }
+      
+      function cleanupOldMessages() {
+        messagesRef.once('value', snapshot => {
+          if (snapshot.numChildren() > 50) {
+            let updates = {}; let count = 0; const limit = snapshot.numChildren() - 50;
+            snapshot.forEach(child => { if (count < limit) updates[child.key] = null; count++; });
+            messagesRef.update(updates);
+          }
+        });
+      }
+      function showSystemMsg(text, isTemporary) {
+        const div = document.createElement("div"); div.className = "sys"; div.textContent = text;
+        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (isTemporary) {
+          setTimeout(() => {
+            div.classList.add('fade-out');
+            div.addEventListener('transitionend', () => div.remove());
+          }, 4000);
+        }
+      }
+      function escapeHtml(unsafe) { return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+    });
+  </script>
 </body>
 </html>
