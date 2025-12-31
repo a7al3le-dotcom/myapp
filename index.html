@@ -3,170 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <title>شات خاص</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     html, body { 
       height: 100%; 
       margin: 0; 
       padding: 0; 
       overflow: hidden; 
+      -webkit-tap-highlight-color: transparent;
     }
     
     body { 
       font-family: 'Tajawal', sans-serif; 
-      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      background: #1a1a1a;
       color: #e0e0e0;
       display: flex; 
       flex-direction: column; 
       position: relative; 
-      transition: background 0.3s ease;
+      touch-action: manipulation;
     }
     
     #chat-container { 
       display: flex; 
       flex-direction: column; 
-      height: 100%; 
+      height: 100vh;
+      height: -webkit-fill-available;
+      max-height: 100%;
     }
     
     #messages { 
       flex: 1; 
       overflow-y: auto; 
-      padding: 15px; 
-      background: #252525; 
-      scrollbar-width: thin;
-      scrollbar-color: #555 #252525;
-    }
-    
-    #messages::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    #messages::-webkit-scrollbar-track {
-      background: #252525;
-    }
-    
-    #messages::-webkit-scrollbar-thumb {
-      background-color: #555;
-      border-radius: 4px;
+      padding: 10px 15px; 
+      background: #1e1e1e;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      min-height: 0;
     }
     
     .msg { 
       margin: 8px 0; 
       display: flex; 
-      gap: 10px; 
-      align-items: center; 
+      flex-direction: column;
+      gap: 4px;
       direction: ltr; 
       text-align: left; 
       position: relative; 
       font-size: 15px; 
       line-height: 1.4; 
-      padding: 8px 12px;
-      border-radius: 8px;
-      background-color: #333;
-      transition: background-color 0.2s;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #2a2a2a;
+      border-right: 4px solid #3a6ea5;
+      word-break: break-word;
     }
     
-    .msg:hover { 
-      background-color: #3a3a3a; 
-    }
-    
-    .msg:hover .delete-btn { 
-      opacity: 1; 
-      transform: scale(1); 
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
     }
     
     .sys { 
       text-align: center; 
       color: #aaa; 
-      font-size: 12px; 
+      font-size: 13px; 
       margin: 10px auto; 
       font-style: italic; 
-      background-color: #3a3a3a; 
-      padding: 4px 10px; 
-      border-radius: 12px; 
-      transition: opacity 0.5s ease, transform 0.5s ease; 
+      background: #2d2d2d; 
+      padding: 6px 12px; 
+      border-radius: 20px; 
+      max-width: 85%;
       opacity: 1; 
       transform: translateY(0); 
-      max-width: 80%;
+      transition: opacity 0.4s ease;
     }
     
     .sys.fade-out { 
       opacity: 0; 
-      transform: translateY(-20px); 
     }
     
     .user { 
-      font-weight: bold; 
-      color: #5a9bd5; 
+      font-weight: 700; 
+      color: #4a9ae9; 
+      font-size: 14px;
     }
     
     .time { 
       font-size: 11px; 
       color: #888; 
-      margin-left: auto;
     }
     
-    .delete-btn { 
-      cursor: pointer; 
-      color: white; 
-      background-color: #c0392b; 
-      border-radius: 50%; 
-      width: 22px; 
-      height: 22px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      font-size: 14px; 
-      margin-left: 10px; 
-      opacity: 0; 
-      transform: scale(0.8); 
-      transition: opacity 0.2s, transform 0.2s, background-color 0.2s; 
-    }
-    
-    .delete-btn:hover { 
-      background-color: #a93226; 
+    .msg-text {
+      font-size: 15px;
+      color: #e0e0e0;
+      line-height: 1.5;
+      padding-top: 4px;
     }
     
     #typing-indicator { 
-      height: 20px; 
+      height: 24px; 
       padding: 0 15px; 
       font-size: 13px; 
       color: #aaa; 
       font-style: italic; 
       transition: opacity 0.3s; 
+      background: #1e1e1e;
+      border-top: 1px solid #333;
+      display: flex;
+      align-items: center;
     }
     
     #inputArea { 
       display: flex; 
-      flex-direction: row; 
       align-items: center; 
       gap: 8px; 
-      border-top: 1px solid #444; 
-      padding: 8px; 
-      background: #2a2a2a; 
+      border-top: 1px solid #333; 
+      padding: 12px 15px; 
+      background: #222; 
+      flex-shrink: 0;
     }
     
     #messageInput { 
       flex: 1; 
       font-size: 16px; 
-      padding: 10px; 
-      border: 1px solid #555; 
-      border-radius: 20px; 
+      padding: 12px 16px; 
+      border: 1px solid #444; 
+      border-radius: 24px; 
       font-family: 'Tajawal', sans-serif; 
-      transition: border-color 0.2s; 
-      background-color: #3a3a3a;
-      color: #e0e0e0;
+      background: #2d2d2d;
+      color: #fff;
+      min-height: 44px;
+      line-height: 1.4;
+      -webkit-appearance: none;
+      appearance: none;
     }
     
     #messageInput:focus { 
       outline: none; 
-      border-color: #5a9bd5; 
-      background-color: #404040;
+      border-color: #4a9ae9; 
     }
     
     #messageInput::placeholder {
@@ -174,61 +159,66 @@
     }
     
     #sendBtn { 
-      padding: 10px 15px; 
+      padding: 0;
+      width: 44px;
+      height: 44px;
       border: none; 
-      border-radius: 20px; 
-      background: #4a6fa5; 
+      border-radius: 50%; 
+      background: #3a6ea5; 
       color: white; 
       cursor: pointer; 
       font-family: 'Tajawal', sans-serif; 
-      font-size: 15px; 
-      transition: background-color 0.2s; 
+      font-size: 16px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
     
-    #sendBtn:hover { 
-      background-color: #5a9bd5; 
+    #sendBtn:hover,
+    #sendBtn:active { 
+      background: #4a9ae9; 
     }
     
     #onlineList { 
       position: fixed; 
       top: 10px; 
       right: 10px; 
-      border: 1px solid #555; 
-      background: #333; 
+      border: 1px solid #444; 
+      background: #2a2a2a; 
       padding: 8px 14px; 
       border-radius: 20px; 
       font-size: 14px; 
       cursor: pointer; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
-      z-index: 1000; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4); 
+      z-index: 100; 
       display: flex; 
       align-items: center; 
-      gap: 5px; 
+      gap: 6px; 
       color: #e0e0e0;
-      transition: background-color 0.2s;
-    }
-    
-    #onlineList:hover { 
-      background-color: #3a3a3a; 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     
     #usersBox { 
       position: fixed; 
       top: 55px; 
       right: 10px; 
-      background: #333; 
-      border: 1px solid #555; 
-      border-radius: 8px; 
-      padding: 10px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
-      z-index: 999; 
+      background: #2a2a2a; 
+      border: 1px solid #444; 
+      border-radius: 16px; 
+      padding: 15px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+      z-index: 99; 
       min-width: 160px; 
       max-width: 200px; 
       opacity: 0; 
       transform: translateY(-10px); 
       visibility: hidden; 
-      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; 
+      transition: all 0.2s ease; 
       color: #e0e0e0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     
     #usersBox.visible { 
@@ -238,40 +228,25 @@
     }
     
     #usersBox h4 {
-      margin: 0 0 10px 0;
+      margin: 0 0 12px 0;
       color: #e0e0e0;
-      font-size: 15px;
+      font-size: 16px;
       text-align: center;
-      border-bottom: 1px solid #555;
-      padding-bottom: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #444;
     }
     
     #usersList { 
       max-height: 200px; 
       overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #555 #333;
-    }
-    
-    #usersList::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    #usersList::-webkit-scrollbar-track {
-      background: #333;
-    }
-    
-    #usersList::-webkit-scrollbar-thumb {
-      background-color: #555;
-      border-radius: 3px;
     }
     
     .user-item { 
       display: flex; 
       align-items: center; 
-      gap: 8px; 
-      padding: 5px 2px; 
-      border-bottom: 1px solid #444; 
+      gap: 10px; 
+      padding: 8px 4px; 
+      border-bottom: 1px solid #3a3a3a; 
       font-size: 14px; 
     }
     
@@ -283,41 +258,125 @@
       width: 10px; 
       height: 10px; 
       border-radius: 50%; 
+      flex-shrink: 0;
     }
     
     .status-green { 
       background-color: #2ecc71; 
-      box-shadow: 0 0 4px rgba(46, 204, 113, 0.7);
+      box-shadow: 0 0 6px rgba(46, 204, 113, 0.7);
     }
     
     .status-yellow { 
       background-color: #f39c12; 
-      box-shadow: 0 0 4px rgba(243, 156, 18, 0.7);
+      box-shadow: 0 0 6px rgba(243, 156, 18, 0.7);
     }
     
-    /* تنسيق للهواتف */
+    /* تنسيق متقدم للهواتف */
     @media (max-width: 768px) {
       #onlineList {
-        top: 5px;
-        right: 5px;
-        font-size: 13px;
-        padding: 6px 10px;
+        top: env(safe-area-inset-top, 10px);
+        right: 15px;
+        font-size: 14px;
+        padding: 10px 16px;
       }
       
       #usersBox {
-        top: 45px;
-        right: 5px;
+        top: calc(55px + env(safe-area-inset-top, 0px));
+        right: 15px;
+        border-radius: 20px;
+        padding: 16px;
+      }
+      
+      #messages {
+        padding: 12px 15px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      }
+      
+      .msg {
+        padding: 12px 14px;
+        margin: 10px 0;
+        font-size: 16px;
+      }
+      
+      .msg-text {
+        font-size: 16px;
+      }
+      
+      #inputArea {
+        padding: 15px;
+        padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+        gap: 10px;
+      }
+      
+      #messageInput {
+        font-size: 16px;
+        padding: 14px 18px;
+        border-radius: 28px;
+        min-height: 48px;
+      }
+      
+      #sendBtn {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+      }
+      
+      .sys {
+        font-size: 13px;
+        padding: 8px 14px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      #onlineList {
+        padding: 8px 14px;
+        font-size: 13px;
+        right: 10px;
+      }
+      
+      #usersBox {
+        right: 10px;
+        max-width: 180px;
+      }
+      
+      #messages {
+        padding: 10px 12px;
+      }
+      
+      .msg {
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+      
+      .msg-text {
+        font-size: 15px;
       }
       
       #messageInput {
         font-size: 15px;
-        padding: 8px;
+        padding: 12px 16px;
+        min-height: 44px;
       }
       
       #sendBtn {
-        padding: 8px 12px;
-        font-size: 14px;
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
       }
+    }
+    
+    /* دعم الشاشات الكبيرة */
+    @media (min-width: 769px) {
+      #chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+    
+    /* تجنب التكبير على iOS */
+    input, textarea, button, select {
+      font-size: 16px;
     }
   </style>
 </head>
@@ -328,25 +387,29 @@
     <div id="messages"></div>
     <div id="typing-indicator"></div>
     <form id="inputArea" action="javascript:void(0);">
-      <button type="submit" id="sendBtn" aria-label="إرسال">إرسال</button>
       <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
+      <button type="submit" id="sendBtn" aria-label="إرسال">
+        <i class="fa fa-paper-plane"></i>
+      </button>
     </form>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // تكوين Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
         authDomain: "mychat-2d881.firebaseapp.com",
         databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
       };
+      
       firebase.initializeApp(firebaseConfig);
       const db = firebase.database();
 
+      // إنشاء اسم مستخدم عشوائي
       const username = "زائر_" + Math.floor(Math.random() * 1000);
-      const sessionUid = 'uid_' + Date.now() + Math.random().toString(36).substr(2, 9);
       
-      // استعادة تعريف العناصر المحذوفة
+      // الحصول على عناصر DOM
       const onlineList = document.getElementById("onlineList");
       const usersBox = document.getElementById("usersBox");
       const usersList = document.getElementById("usersList");
@@ -354,37 +417,67 @@
       const messagesDiv = document.getElementById("messages");
       const typingIndicator = document.getElementById("typing-indicator");
       
+      // مراجع Firebase
       const userRef = db.ref("online/" + username);
       const messagesRef = db.ref("messages");
       const onlineRef = db.ref("online");
       const messageInput = document.getElementById("messageInput");
       const inputAreaForm = document.getElementById("inputArea");
       
+      // متغيرات
       let typingTimer, serverTimeOffset = 0;
 
-      // تسجيل الدخول وإعداد حالة الكتابة
-      userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP, isTyping: false });
+      // تسجيل الدخول
+      userRef.set({ 
+        lastActive: firebase.database.ServerValue.TIMESTAMP, 
+        isTyping: false 
+      });
+      
+      // إزالة المستخدم عند الخروج
       userRef.onDisconnect().remove();
 
       // مزامنة وقت السيرفر
-      db.ref('.info/serverTimeOffset').on('value', snap => { serverTimeOffset = snap.val() || 0; });
+      db.ref('.info/serverTimeOffset').on('value', snap => { 
+        serverTimeOffset = snap.val() || 0; 
+      });
       
-      // نظام الحضور والمغادرة والتنظيف
-      setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
+      // تحديث النشاط كل 30 ثانية
+      setInterval(() => { 
+        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); 
+      }, 30000);
+      
+      // تنظيف المستخدمين غير النشطين
       setInterval(() => {
-        const now = Date.now() + serverTimeOffset; const STALE_THRESHOLD = 90 * 1000;
+        const now = Date.now() + serverTimeOffset; 
+        const STALE_THRESHOLD = 90 * 1000;
+        
         onlineRef.once('value', snapshot => {
-          const users = snapshot.val(); if (!users) return;
-          Object.keys(users).forEach(u => { if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) db.ref('online/' + u).remove(); });
+          const users = snapshot.val(); 
+          if (!users) return;
+          
+          Object.keys(users).forEach(u => { 
+            if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) {
+              db.ref('online/' + u).remove(); 
+            }
+          });
         });
       }, 60000);
 
-      // استعادة وظائف زر المتصلين
-      onlineList.onclick = e => { e.stopPropagation(); usersBox.classList.toggle('visible'); };
-      document.onclick = () => { if (usersBox.classList.contains('visible')) usersBox.classList.remove('visible'); };
+      // عرض/إخفاء قائمة المستخدمين
+      onlineList.onclick = e => { 
+        e.stopPropagation(); 
+        usersBox.classList.toggle('visible'); 
+      };
+      
+      document.onclick = () => { 
+        if (usersBox.classList.contains('visible')) {
+          usersBox.classList.remove('visible'); 
+        }
+      };
+      
       usersBox.onclick = e => e.stopPropagation();
 
-      // المستمع الرئيسي للمستخدمين المتصلين
+      // تحديث قائمة المستخدمين والمؤشرات
       onlineRef.on("value", snap => {
         const onlineUsers = snap.val() || {};
         count.textContent = snap.numChildren();
@@ -392,81 +485,190 @@
         updateTypingIndicator(onlineUsers);
       });
 
-      // استعادة إشعارات الدخول والخروج
-      onlineRef.on("child_added", snap => { if (snap.key !== username) showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); });
-      onlineRef.on("child_removed", snap => { showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); });
+      // إشعارات الدخول والخروج
+      onlineRef.on("child_added", snap => { 
+        if (snap.key !== username) {
+          showSystemMsg(`📥 ${snap.key} دخل الدردشة`, true); 
+        }
+      });
       
+      onlineRef.on("child_removed", snap => { 
+        showSystemMsg(`📤 ${snap.key} غادر الدردشة`, true); 
+      });
+      
+      // إرسال الرسالة
       inputAreaForm.onsubmit = sendMessage;
+      
+      // مؤشر الكتابة
       messageInput.oninput = () => {
         clearTimeout(typingTimer);
-        userRef.update({ isTyping: true, lastActive: firebase.database.ServerValue.TIMESTAMP });
-        typingTimer = setTimeout(() => { userRef.update({ isTyping: false }); }, 2000);
+        userRef.update({ 
+          isTyping: true, 
+          lastActive: firebase.database.ServerValue.TIMESTAMP 
+        });
+        
+        typingTimer = setTimeout(() => { 
+          userRef.update({ isTyping: false }); 
+        }, 2000);
       };
 
+      // دالة إرسال الرسالة
       function sendMessage() {
         clearTimeout(typingTimer);
         userRef.update({ isTyping: false });
-        const text = messageInput.value.trim(); if (!text) return;
-        const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-        messagesRef.push().set({ user: username, text, time, uid: sessionUid });
+        
+        const text = messageInput.value.trim(); 
+        if (!text) return;
+        
+        const time = new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit', 
+          minute:'2-digit',
+          hour12: false
+        });
+        
+        messagesRef.push().set({ 
+          user: username, 
+          text, 
+          time 
+        });
+        
         messageInput.value = "";
+        messageInput.focus();
+        
+        // تنظيف الرسائل القديمة
         cleanupOldMessages();
       }
       
+      // تحديث مؤشر الكتابة
       function updateTypingIndicator(users) {
-        const typingUsers = Object.keys(users).filter(u => users[u].isTyping && u !== username);
-        if (typingUsers.length === 0) typingIndicator.textContent = '';
-        else if (typingUsers.length === 1) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
-        else if (typingUsers.length === 2) typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
-        else typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+        const typingUsers = Object.keys(users).filter(u => 
+          users[u].isTyping && u !== username
+        );
+        
+        if (typingUsers.length === 0) {
+          typingIndicator.textContent = '';
+        } else if (typingUsers.length === 1) {
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
+        } else if (typingUsers.length === 2) {
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
+        } else {
+          typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+        }
       }
       
-      // استعادة دالة عرض قائمة المستخدمين كاملة
+      // عرض قائمة المستخدمين
       function renderUsersList(onlineUsersData) {
-        usersList.innerHTML = ''; const now = Date.now() + serverTimeOffset; const twoMinutesAgo = now - (2 * 60 * 1000);
+        usersList.innerHTML = ''; 
+        const now = Date.now() + serverTimeOffset; 
+        const twoMinutesAgo = now - (2 * 60 * 1000);
+        
         Object.keys(onlineUsersData).forEach(user => {
-            const userData = onlineUsersData[user]; const userItem = document.createElement("div"); userItem.className = "user-item";
-            const statusIndicator = document.createElement("span"); statusIndicator.className = "status-indicator";
-            if (userData.lastActive < twoMinutesAgo) { statusIndicator.classList.add('status-yellow'); } else { statusIndicator.classList.add('status-green'); }
-            const userName = document.createElement("span"); userName.textContent = user;
-            userItem.appendChild(statusIndicator); userItem.appendChild(userName); usersList.appendChild(userItem);
+          const userData = onlineUsersData[user]; 
+          const userItem = document.createElement("div"); 
+          userItem.className = "user-item";
+          
+          const statusIndicator = document.createElement("span"); 
+          statusIndicator.className = "status-indicator";
+          
+          if (userData.lastActive < twoMinutesAgo) { 
+            statusIndicator.classList.add('status-yellow'); 
+          } else { 
+            statusIndicator.classList.add('status-green'); 
+          }
+          
+          const userName = document.createElement("span"); 
+          userName.textContent = user;
+          
+          userItem.appendChild(statusIndicator); 
+          userItem.appendChild(userName); 
+          usersList.appendChild(userItem);
         });
       }
 
-      messagesRef.limitToLast(50).on("child_added", snap => { addMessage(snap.key, snap.val()); });
-      messagesRef.on('child_removed', snap => { const el = document.getElementById('msg-' + snap.key); if (el) el.remove(); });
+      // عرض الرسائل الجديدة
+      messagesRef.limitToLast(50).on("child_added", snap => { 
+        addMessage(snap.key, snap.val()); 
+      });
       
-      function addMessage(key, { user, text, time, uid }) {
-        const div = document.createElement("div"); div.className = "msg"; div.id = 'msg-' + key;
-        let deleteBtnHtml = '';
-        if (uid === sessionUid) { deleteBtnHtml = `<i class="delete-btn fa fa-times" onclick="deleteMessage('${key}')" title="حذف الرسالة"></i>`; }
-        div.innerHTML = `<span class="user">${escapeHtml(user)}</span><span>${escapeHtml(text)}</span><span class="time">${escapeHtml(time)}</span>${deleteBtnHtml}`;
-        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      // إضافة رسالة جديدة
+      function addMessage(key, { user, text, time }) {
+        const div = document.createElement("div"); 
+        div.className = "msg"; 
+        
+        div.innerHTML = `
+          <div class="msg-header">
+            <span class="user">${escapeHtml(user)}</span>
+            <span class="time">${escapeHtml(time)}</span>
+          </div>
+          <div class="msg-text">${escapeHtml(text)}</div>
+        `;
+        
+        messagesDiv.appendChild(div); 
+        
+        // التمرير لأسفل
+        setTimeout(() => {
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 100);
       }
       
-      window.deleteMessage = function(messageKey) { messagesRef.child(messageKey).remove().catch(error => console.error("Error deleting:", error)); }
-      
-      // استعادة الدوال المساعدة كاملة
+      // تنظيف الرسائل القديمة
       function cleanupOldMessages() {
         messagesRef.once('value', snapshot => {
           if (snapshot.numChildren() > 50) {
-            let updates = {}; let count = 0; const limit = snapshot.numChildren() - 50;
-            snapshot.forEach(child => { if (count < limit) updates[child.key] = null; count++; });
+            let updates = {}; 
+            let count = 0; 
+            const limit = snapshot.numChildren() - 50;
+            
+            snapshot.forEach(child => { 
+              if (count < limit) updates[child.key] = null; 
+              count++; 
+            });
+            
             messagesRef.update(updates);
           }
         });
       }
+      
+      // عرض رسالة النظام
       function showSystemMsg(text, isTemporary) {
-        const div = document.createElement("div"); div.className = "sys"; div.textContent = text;
-        messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const div = document.createElement("div"); 
+        div.className = "sys"; 
+        div.textContent = text;
+        
+        messagesDiv.appendChild(div); 
+        
+        // التمرير لأسفل
+        setTimeout(() => {
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 100);
+        
         if (isTemporary) {
           setTimeout(() => {
             div.classList.add('fade-out');
-            div.addEventListener('transitionend', () => div.remove());
+            
+            div.addEventListener('transitionend', () => {
+              if (div.parentNode) {
+                div.remove();
+              }
+            });
           }, 4000);
         }
       }
-      function escapeHtml(unsafe) { return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+      
+      // حماية من XSS
+      function escapeHtml(unsafe) { 
+        return unsafe.toString()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;"); 
+      }
+      
+      // التركيز على حقل الإدخال عند التحميل
+      setTimeout(() => {
+        messageInput.focus();
+      }, 500);
     });
   </script>
 </body>
