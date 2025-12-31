@@ -5,231 +5,302 @@
   <title>شات خاص</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
+    /* Reset وأساسيات */
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
     
     html, body { 
       height: 100%; 
-      margin: 0; 
-      padding: 0; 
       overflow: hidden; 
       -webkit-tap-highlight-color: transparent;
     }
     
     body { 
-      font-family: 'Tajawal', sans-serif; 
-      background: #1a1a1a;
-      color: #e0e0e0;
+      font-family: 'Tajawal', 'Segoe UI', sans-serif; 
+      background: #36393f;
+      color: #dcddde;
       display: flex; 
       flex-direction: column; 
       position: relative; 
       touch-action: manipulation;
     }
     
+    /* تصميم الدردشة الرئيسي */
     #chat-container { 
       display: flex; 
       flex-direction: column; 
       height: 100vh;
       height: -webkit-fill-available;
       max-height: 100%;
+      background: #36393f;
     }
     
+    /* شريط العناوين */
+    #chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #2f3136;
+      border-bottom: 1px solid #202225;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .channel-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .channel-name {
+      font-weight: 600;
+      font-size: 16px;
+      color: #fff;
+    }
+    
+    .channel-topic {
+      font-size: 12px;
+      color: #b9bbbe;
+    }
+    
+    /* منطقة الرسائل */
     #messages { 
       flex: 1; 
       overflow-y: auto; 
-      padding: 8px 12px; 
-      background: #1a1a1a;
+      padding: 16px; 
+      background: #36393f;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       min-height: 0;
     }
     
+    /* تصميم الرسائل */
+    .message-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .message-group:last-child {
+      margin-bottom: 0;
+    }
+    
     .msg { 
-      margin: 4px 0; 
       display: flex; 
-      flex-direction: column;
-      direction: ltr; 
-      text-align: left; 
-      position: relative; 
-      font-size: 14px; 
-      line-height: 1.3; 
-      padding: 6px 10px;
-      border-radius: 10px;
-      background: #252525;
-      border-right: 3px solid #3a6ea5;
-      word-break: break-word;
+      padding: 2px 48px 2px 16px;
+      position: relative;
+      border-radius: 5px;
+      transition: background-color 0.1s ease;
+      direction: ltr;
+      text-align: left;
+    }
+    
+    .msg:hover {
+      background: rgba(79, 84, 92, 0.16);
+    }
+    
+    .msg-avatar {
+      position: absolute;
+      right: 16px;
+      top: 5px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #5865f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      user-select: none;
+    }
+    
+    .msg-content {
+      flex: 1;
+      min-width: 0;
     }
     
     .msg-header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
+      align-items: baseline;
       margin-bottom: 2px;
     }
     
+    .user { 
+      font-weight: 600; 
+      font-size: 16px;
+      color: #fff;
+      margin-left: 8px;
+    }
+    
+    .time { 
+      font-size: 12px; 
+      color: #72767d; 
+      font-weight: 400;
+    }
+    
+    .msg-text {
+      font-size: 15px;
+      color: #dcddde;
+      line-height: 1.375;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    
+    /* رسائل النظام */
     .sys { 
       text-align: center; 
-      color: #aaa; 
-      font-size: 12px; 
-      margin: 6px auto; 
-      font-style: italic; 
-      background: #2d2d2d; 
-      padding: 5px 10px; 
-      border-radius: 15px; 
+      color: #b9bbbe; 
+      font-size: 14px; 
+      margin: 12px auto 16px; 
       max-width: 85%;
       opacity: 1; 
       transform: translateY(0); 
       transition: opacity 0.4s ease;
+      padding: 8px 12px;
+      background: rgba(79, 84, 92, 0.16);
+      border-radius: 8px;
+      border: 1px solid rgba(79, 84, 92, 0.3);
     }
     
     .sys.fade-out { 
       opacity: 0; 
     }
     
-    .user { 
-      font-weight: 600; 
-      color: #4a9ae9; 
-      font-size: 13px;
-    }
-    
-    .time { 
-      font-size: 11px; 
-      color: #888; 
-      font-family: 'Tajawal', sans-serif;
-      direction: rtl;
-      unicode-bidi: embed;
-    }
-    
-    .am-pm {
-      font-size: 9px;
-      color: #666;
-      margin-right: 2px;
-      font-weight: 500;
-    }
-    
-    .msg-text {
-      font-size: 14px;
-      color: #e0e0e0;
-      line-height: 1.4;
-      padding-right: 2px;
-    }
-    
+    /* مؤشر الكتابة */
     #typing-indicator { 
       height: 22px; 
-      padding: 0 12px; 
-      font-size: 12px; 
-      color: #aaa; 
-      font-style: italic; 
+      padding: 0 16px 4px; 
+      font-size: 13px; 
+      color: #b9bbbe; 
       transition: opacity 0.3s; 
-      background: #1a1a1a;
+      background: #36393f;
       display: flex;
       align-items: center;
+      min-height: 32px;
     }
     
+    /* منطقة الإدخال */
     #inputArea { 
       display: flex; 
       align-items: center; 
       gap: 8px; 
-      padding: 8px 12px; 
-      background: #1a1a1a;
+      padding: 0 16px 24px 16px; 
+      background: #36393f;
       flex-shrink: 0;
-      margin: 0 12px 8px 12px;
-      border-radius: 25px;
-      border: 1px solid #333;
+    }
+    
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      background: #40444b;
+      border-radius: 8px;
+      padding: 11px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.3);
     }
     
     #messageInput { 
-      flex: 1; 
-      font-size: 14px; 
-      padding: 10px 12px; 
+      width: 100%;
+      font-size: 15px; 
       border: none; 
-      border-radius: 20px; 
       font-family: 'Tajawal', sans-serif; 
-      background: #252525;
-      color: #fff;
-      min-height: 36px;
-      line-height: 1.4;
+      background: transparent;
+      color: #dcddde;
+      min-height: 20px;
+      line-height: 1.375;
       -webkit-appearance: none;
       appearance: none;
-    }
-    
-    #messageInput:focus { 
-      outline: none; 
-      background: #2a2a2a;
+      resize: none;
+      max-height: 200px;
+      outline: none;
+      padding: 0;
     }
     
     #messageInput::placeholder {
-      color: #777;
+      color: #72767d;
     }
     
     #sendBtn { 
       padding: 0;
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border: none; 
       border-radius: 50%; 
-      background: #3a6ea5; 
+      background: #5865f2; 
       color: white; 
       cursor: pointer; 
       font-family: 'Tajawal', sans-serif; 
-      font-size: 14px; 
+      font-size: 16px; 
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: background-color 0.2s ease, transform 0.1s ease;
     }
     
-    #sendBtn:hover,
+    #sendBtn:hover { 
+      background: #4752c4; 
+    }
+    
     #sendBtn:active { 
-      background: #4a9ae9; 
+      transform: translateY(1px); 
     }
     
+    /* قائمة المستخدمين المتصلين */
     #onlineList { 
       position: fixed; 
-      top: 8px; 
-      right: 8px; 
-      border: 1px solid #444; 
-      background: rgba(42, 42, 42, 0.9); 
-      padding: 6px 10px; 
-      border-radius: 15px; 
-      font-size: 12px; 
+      top: 12px; 
+      left: 12px; 
+      border: none; 
+      background: #2f3136; 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      font-size: 14px; 
       cursor: pointer; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
       z-index: 100; 
       display: flex; 
       align-items: center; 
-      gap: 5px; 
-      color: #e0e0e0;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      gap: 8px; 
+      color: #b9bbbe;
+      transition: background-color 0.2s ease;
+    }
+    
+    #onlineList:hover { 
+      background: #36393f; 
     }
     
     #usersBox { 
       position: fixed; 
-      top: 45px; 
-      right: 8px; 
-      background: rgba(42, 42, 42, 0.95); 
-      border: 1px solid #444; 
-      border-radius: 12px; 
-      padding: 10px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+      top: 60px; 
+      left: 12px; 
+      background: #2f3136; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 12px; 
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24); 
       z-index: 99; 
-      min-width: 140px; 
-      max-width: 160px; 
+      width: 220px; 
       opacity: 0; 
       transform: translateY(-10px); 
       visibility: hidden; 
       transition: all 0.2s ease; 
-      color: #e0e0e0;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      color: #dcddde;
     }
     
     #usersBox.visible { 
@@ -239,30 +310,63 @@
     }
     
     #usersBox h4 {
-      margin: 0 0 8px 0;
-      color: #e0e0e0;
-      font-size: 13px;
-      text-align: center;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #444;
+      margin: 0 0 12px 0;
+      color: #b9bbbe;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      text-align: right;
     }
     
     #usersList { 
-      max-height: 150px; 
+      max-height: 300px; 
       overflow-y: auto;
     }
     
     .user-item { 
       display: flex; 
       align-items: center; 
-      gap: 8px; 
-      padding: 5px 2px; 
-      border-bottom: 1px solid #3a3a3a; 
-      font-size: 12px; 
+      gap: 12px; 
+      padding: 8px; 
+      border-radius: 4px; 
+      font-size: 14px; 
+      transition: background-color 0.2s ease;
+      margin-bottom: 2px;
     }
     
-    .user-item:last-child {
-      border-bottom: none;
+    .user-item:hover {
+      background: rgba(79, 84, 92, 0.3);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #5865f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .user-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .user-name {
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .user-status {
+      font-size: 12px;
+      color: #b9bbbe;
     }
     
     .status-indicator { 
@@ -270,154 +374,228 @@
       height: 8px; 
       border-radius: 50%; 
       flex-shrink: 0;
+      margin-right: 4px;
     }
     
     .status-green { 
-      background-color: #2ecc71; 
+      background-color: #3ba55d; 
+      box-shadow: 0 0 0 2px #2f3136;
     }
     
     .status-yellow { 
-      background-color: #f39c12; 
+      background-color: #faa81a; 
+      box-shadow: 0 0 0 2px #2f3136;
     }
     
-    /* تنسيق متقدم للهواتف */
-    @media (max-width: 768px) {
-      #onlineList {
-        top: env(safe-area-inset-top, 8px);
-        right: 12px;
-        font-size: 11px;
-        padding: 5px 8px;
-      }
-      
-      #usersBox {
-        top: calc(40px + env(safe-area-inset-top, 0px));
-        right: 12px;
-        border-radius: 12px;
-        padding: 8px;
-        max-width: 140px;
-      }
-      
-      #messages {
-        padding: 6px 10px;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-      }
-      
-      .msg {
-        padding: 6px 8px;
-        margin: 3px 0;
-        font-size: 13px;
-      }
-      
-      .msg-text {
-        font-size: 13px;
-      }
-      
-      #inputArea {
-        padding: 6px 8px;
-        margin: 0 10px 8px 10px;
-        border-radius: 22px;
-        gap: 6px;
-      }
-      
-      #messageInput {
-        font-size: 13px;
-        padding: 8px 10px;
-        border-radius: 18px;
-        min-height: 32px;
-      }
-      
-      #sendBtn {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
-      }
-      
-      .sys {
-        font-size: 11px;
-        padding: 4px 8px;
-        margin: 4px auto;
-      }
-      
-      .user {
-        font-size: 12px;
-      }
-      
-      .time {
-        font-size: 10px;
-      }
-      
-      .am-pm {
-        font-size: 8px;
-      }
+    .status-gray { 
+      background-color: #747f8d; 
+      box-shadow: 0 0 0 2px #2f3136;
     }
     
-    @media (max-width: 480px) {
-      #onlineList {
-        padding: 4px 6px;
-        font-size: 10px;
-        right: 8px;
-      }
-      
-      #usersBox {
-        right: 8px;
-        max-width: 120px;
-      }
-      
-      #messages {
-        padding: 4px 8px;
-      }
-      
-      .msg {
-        padding: 5px 7px;
-        font-size: 12px;
-      }
-      
-      .msg-text {
-        font-size: 12px;
-      }
-      
-      #messageInput {
-        font-size: 12px;
-        padding: 7px 9px;
-        min-height: 30px;
-      }
-      
-      #sendBtn {
-        width: 30px;
-        height: 30px;
-        font-size: 11px;
-      }
+    /* تخصيص شريط التمرير */
+    #messages::-webkit-scrollbar,
+    #usersList::-webkit-scrollbar {
+      width: 8px;
     }
     
-    /* دعم الشاشات الكبيرة */
-    @media (min-width: 769px) {
-      #chat-container {
-        max-width: 600px;
-        margin: 0 auto;
-        width: 100%;
-      }
-      
-      #inputArea {
-        margin: 0 15px 10px 15px;
-      }
+    #messages::-webkit-scrollbar-track,
+    #usersList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    #messages::-webkit-scrollbar-thumb,
+    #usersList::-webkit-scrollbar-thumb {
+      background: #202225;
+      border-radius: 4px;
+    }
+    
+    #messages::-webkit-scrollbar-thumb:hover,
+    #usersList::-webkit-scrollbar-thumb:hover {
+      background: #1a1c20;
     }
     
     /* تجنب التكبير على iOS */
     input, textarea, button, select {
       font-size: 16px;
     }
+    
+    /* تنسيق متقدم للهواتف */
+    @media (max-width: 768px) {
+      #chat-header {
+        padding: 8px 12px;
+      }
+      
+      .channel-name {
+        font-size: 14px;
+      }
+      
+      .channel-topic {
+        font-size: 11px;
+      }
+      
+      #messages {
+        padding: 12px;
+      }
+      
+      .msg {
+        padding: 2px 44px 2px 12px;
+      }
+      
+      .msg-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+        right: 12px;
+      }
+      
+      .user { 
+        font-size: 15px;
+      }
+      
+      .msg-text {
+        font-size: 14px;
+      }
+      
+      .sys {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      
+      #onlineList {
+        top: env(safe-area-inset-top, 8px);
+        left: 8px;
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      
+      #usersBox {
+        top: calc(50px + env(safe-area-inset-top, 0px));
+        left: 8px;
+        width: 200px;
+      }
+      
+      #inputArea {
+        padding: 0 12px 16px 12px;
+      }
+      
+      .input-wrapper {
+        padding: 8px 12px;
+      }
+      
+      #messageInput {
+        font-size: 14px;
+      }
+      
+      #sendBtn {
+        width: 40px;
+        height: 40px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      #onlineList {
+        padding: 5px 8px;
+        font-size: 12px;
+        left: 6px;
+      }
+      
+      #usersBox {
+        left: 6px;
+        width: 180px;
+      }
+      
+      .msg-avatar {
+        width: 32px;
+        height: 32px;
+        right: 8px;
+      }
+      
+      .msg {
+        padding: 2px 40px 2px 8px;
+      }
+      
+      .user {
+        font-size: 14px;
+      }
+      
+      .time {
+        font-size: 11px;
+      }
+      
+      .msg-text {
+        font-size: 13px;
+      }
+    }
+    
+    /* دعم الشاشات الكبيرة */
+    @media (min-width: 769px) {
+      #chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+    
+    /* فاصل التاريخ */
+    .date-divider {
+      display: flex;
+      align-items: center;
+      margin: 16px 0;
+      color: #72767d;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .date-divider::before,
+    .date-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(79, 84, 92, 0.48);
+    }
+    
+    .date-divider span {
+      padding: 0 16px;
+    }
   </style>
 </head>
 <body>
   <div id="chat-container">
-    <div id="onlineList" title="المتصلون الآن">👥 <span id="count">0</span></div>
-    <div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
+    <!-- شريط العنوان -->
+    <div id="chat-header">
+      <div class="header-left">
+        <div class="channel-info">
+          <div class="channel-name">💬 دردشة عامة</div>
+          <div class="channel-topic">مرحباً بكم في الدردشة العامة</div>
+        </div>
+      </div>
+      <div id="onlineList" title="المتصلون الآن">
+        <i class="fas fa-users"></i>
+        <span id="count">0</span>
+      </div>
+    </div>
+    
+    <!-- قائمة المستخدمين -->
+    <div id="usersBox">
+      <h4>المتصلين الآن</h4>
+      <div id="usersList"></div>
+    </div>
+    
+    <!-- منطقة الرسائل -->
     <div id="messages"></div>
+    
+    <!-- مؤشر الكتابة -->
     <div id="typing-indicator"></div>
+    
+    <!-- منطقة الإدخال -->
     <form id="inputArea" action="javascript:void(0);">
-      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
+      <div class="input-wrapper">
+        <input type="text" id="messageInput" placeholder="رسالة في #الدردشة-العامة" autocomplete="off" aria-label="حقل إدخال الرسالة"/>
+      </div>
       <button type="submit" id="sendBtn" aria-label="إرسال">
-        <i class="fa fa-paper-plane"></i>
+        <i class="fas fa-paper-plane"></i>
       </button>
     </form>
   </div>
@@ -434,8 +612,9 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.database();
 
-      // إنشاء اسم مستخدم عشوائي
+      // إنشاء اسم مستخدم عشوائي مع لون مميز
       const username = "زائر_" + Math.floor(Math.random() * 1000);
+      const userColor = generateUserColor(username);
       
       // الحصول على عناصر DOM
       const onlineList = document.getElementById("onlineList");
@@ -454,11 +633,13 @@
       
       // متغيرات
       let typingTimer, serverTimeOffset = 0;
+      let lastMessageDate = null;
 
       // تسجيل الدخول
       userRef.set({ 
         lastActive: firebase.database.ServerValue.TIMESTAMP, 
-        isTyping: false 
+        isTyping: false,
+        color: userColor
       });
       
       // إزالة المستخدم عند الخروج
@@ -548,41 +729,16 @@
         const text = messageInput.value.trim(); 
         if (!text) return;
         
-        // تنسيق الوقت بالأرقام العربية مع ص/م
+        // تنسيق الوقت
         const now = new Date();
-        let hours = now.getHours();
-        const minutes = now.getMinutes();
-        const ampm = hours >= 12 ? 'م' : 'ص';
-        
-        // تحويل إلى نظام 12 ساعة
-        hours = hours % 12;
-        hours = hours ? hours : 12; // الساعة 0 تصبح 12
-        
-        // تحويل الأرقام الإنجليزية إلى عربية
-        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        
-        const hoursStr = hours.toString();
-        const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
-        
-        let arabicHours = '';
-        let arabicMinutes = '';
-        
-        // تحويل الساعات إلى أرقام عربية
-        for (let i = 0; i < hoursStr.length; i++) {
-          arabicHours += arabicNumbers[parseInt(hoursStr[i])];
-        }
-        
-        // تحويل الدقائق إلى أرقام عربية
-        for (let i = 0; i < minutesStr.length; i++) {
-          arabicMinutes += arabicNumbers[parseInt(minutesStr[i])];
-        }
-        
-        const time = `<span class="am-pm">${ampm}</span> ${arabicHours}:${arabicMinutes}`;
+        const time = formatTime(now);
         
         messagesRef.push().set({ 
           user: username, 
           text, 
-          time 
+          time,
+          timestamp: firebase.database.ServerValue.TIMESTAMP,
+          color: userColor
         });
         
         messageInput.value = "";
@@ -601,11 +757,11 @@
         if (typingUsers.length === 0) {
           typingIndicator.textContent = '';
         } else if (typingUsers.length === 1) {
-          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب الآن...`;
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} يكتب...`;
         } else if (typingUsers.length === 2) {
-          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان الآن...`;
+          typingIndicator.textContent = `${escapeHtml(typingUsers[0])} و ${escapeHtml(typingUsers[1])} يكتبان...`;
         } else {
-          typingIndicator.textContent = `عدة أشخاص يكتبون الآن...`;
+          typingIndicator.textContent = `عدة أشخاص يكتبون...`;
         }
       }
       
@@ -620,57 +776,109 @@
           const userItem = document.createElement("div"); 
           userItem.className = "user-item";
           
+          // إنشاء رمز المستخدم
+          const userAvatar = document.createElement("div"); 
+          userAvatar.className = "user-avatar";
+          userAvatar.style.backgroundColor = userData.color || "#5865f2";
+          userAvatar.textContent = user.substring(0, 2);
+          
+          const userInfo = document.createElement("div"); 
+          userInfo.className = "user-info";
+          
+          const userName = document.createElement("div"); 
+          userName.className = "user-name";
+          userName.textContent = user;
+          
+          const userStatus = document.createElement("div"); 
+          userStatus.className = "user-status";
+          
           const statusIndicator = document.createElement("span"); 
           statusIndicator.className = "status-indicator";
           
           if (userData.lastActive < twoMinutesAgo) { 
             statusIndicator.classList.add('status-yellow'); 
+            userStatus.appendChild(statusIndicator);
+            userStatus.appendChild(document.createTextNode("خامل"));
           } else { 
             statusIndicator.classList.add('status-green'); 
+            userStatus.appendChild(statusIndicator);
+            userStatus.appendChild(document.createTextNode("متصل"));
           }
           
-          const userName = document.createElement("span"); 
-          userName.textContent = user;
+          userInfo.appendChild(userName);
+          userInfo.appendChild(userStatus);
           
-          userItem.appendChild(statusIndicator); 
-          userItem.appendChild(userName); 
+          userItem.appendChild(userAvatar); 
+          userItem.appendChild(userInfo); 
           usersList.appendChild(userItem);
         });
       }
 
       // عرض الرسائل الجديدة
-      messagesRef.limitToLast(50).on("child_added", snap => { 
+      messagesRef.limitToLast(100).on("child_added", snap => { 
         addMessage(snap.key, snap.val()); 
       });
       
       // إضافة رسالة جديدة
-      function addMessage(key, { user, text, time }) {
-        const div = document.createElement("div"); 
-        div.className = "msg"; 
+      function addMessage(key, { user, text, time, color }) {
+        const now = new Date();
+        const today = now.toDateString();
         
-        div.innerHTML = `
+        // إضافة فاصل التاريخ إذا تغير
+        if (lastMessageDate !== today) {
+          const dateDivider = document.createElement("div");
+          dateDivider.className = "date-divider";
+          
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          const dateText = now.toLocaleDateString('ar-SA', options);
+          
+          dateDivider.innerHTML = `<span>${dateText}</span>`;
+          messagesDiv.appendChild(dateDivider);
+          lastMessageDate = today;
+        }
+        
+        // إنشاء عنصر الرسالة
+        const msgGroup = document.createElement("div");
+        msgGroup.className = "message-group";
+        
+        const msgDiv = document.createElement("div"); 
+        msgDiv.className = "msg"; 
+        
+        // إنشاء رمز المستخدم
+        const avatarDiv = document.createElement("div");
+        avatarDiv.className = "msg-avatar";
+        avatarDiv.style.backgroundColor = color || generateUserColor(user);
+        avatarDiv.textContent = user.substring(0, 2);
+        
+        const contentDiv = document.createElement("div"); 
+        contentDiv.className = "msg-content";
+        
+        contentDiv.innerHTML = `
           <div class="msg-header">
             <span class="user">${escapeHtml(user)}</span>
-            <span class="time">${time}</span>
+            <span class="time">${time || formatTime(new Date())}</span>
           </div>
           <div class="msg-text">${escapeHtml(text)}</div>
         `;
         
-        messagesDiv.appendChild(div); 
+        msgDiv.appendChild(avatarDiv);
+        msgDiv.appendChild(contentDiv);
+        msgGroup.appendChild(msgDiv);
+        messagesDiv.appendChild(msgGroup); 
         
         // التمرير لأسفل
         setTimeout(() => {
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }, 100);
+        }, 50);
       }
       
       // تنظيف الرسائل القديمة
       function cleanupOldMessages() {
         messagesRef.once('value', snapshot => {
-          if (snapshot.numChildren() > 50) {
+          if (snapshot.numChildren() > 100) {
             let updates = {}; 
             let count = 0; 
-            const limit = snapshot.numChildren() - 50;
+            const limit = snapshot.numChildren() - 100;
             
             snapshot.forEach(child => { 
               if (count < limit) updates[child.key] = null; 
@@ -708,6 +916,52 @@
         }
       }
       
+      // توليد لون مميز للمستخدم
+      function generateUserColor(username) {
+        const colors = [
+          '#5865f2', '#57f287', '#fee75c', '#eb459e', 
+          '#ed4245', '#faa61a', '#1e90ff', '#9b59b6',
+          '#607d8b', '#1abc9c', '#e74c3c', '#3498db'
+        ];
+        
+        // استخدام اسم المستخدم لاختيار لون ثابت له
+        let hash = 0;
+        for (let i = 0; i < username.length; i++) {
+          hash = username.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        return colors[Math.abs(hash) % colors.length];
+      }
+      
+      // تنسيق الوقت
+      function formatTime(date) {
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'مساءً' : 'صباحاً';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        
+        // تحويل الأرقام الإنجليزية إلى عربية
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        
+        const hoursStr = hours.toString();
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
+        
+        let arabicHours = '';
+        let arabicMinutes = '';
+        
+        for (let i = 0; i < hoursStr.length; i++) {
+          arabicHours += arabicNumbers[parseInt(hoursStr[i])];
+        }
+        
+        for (let i = 0; i < minutesStr.length; i++) {
+          arabicMinutes += arabicNumbers[parseInt(minutesStr[i])];
+        }
+        
+        return `${arabicHours}:${arabicMinutes} ${ampm}`;
+      }
+      
       // حماية من XSS
       function escapeHtml(unsafe) { 
         return unsafe.toString()
@@ -721,7 +975,12 @@
       // التركيز على حقل الإدخال عند التحميل
       setTimeout(() => {
         messageInput.focus();
-      }, 500);
+      }, 300);
+      
+      // إضافة رسالة ترحيبية
+      setTimeout(() => {
+        showSystemMsg(`مرحباً بك ${username} في الدردشة!`, false);
+      }, 1000);
     });
   </script>
 </body>
