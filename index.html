@@ -43,27 +43,26 @@
     #messages { 
       flex: 1; 
       overflow-y: auto; 
-      padding: 10px 15px; 
-      background: #1e1e1e;
+      padding: 8px 12px; 
+      background: #1a1a1a;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       min-height: 0;
     }
     
     .msg { 
-      margin: 8px 0; 
+      margin: 4px 0; 
       display: flex; 
       flex-direction: column;
-      gap: 4px;
       direction: ltr; 
       text-align: left; 
       position: relative; 
-      font-size: 15px; 
-      line-height: 1.4; 
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: #2a2a2a;
-      border-right: 4px solid #3a6ea5;
+      font-size: 14px; 
+      line-height: 1.3; 
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: #252525;
+      border-right: 3px solid #3a6ea5;
       word-break: break-word;
     }
     
@@ -72,17 +71,18 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
+      margin-bottom: 2px;
     }
     
     .sys { 
       text-align: center; 
       color: #aaa; 
-      font-size: 13px; 
-      margin: 10px auto; 
+      font-size: 12px; 
+      margin: 6px auto; 
       font-style: italic; 
       background: #2d2d2d; 
-      padding: 6px 12px; 
-      border-radius: 20px; 
+      padding: 5px 10px; 
+      border-radius: 15px; 
       max-width: 85%;
       opacity: 1; 
       transform: translateY(0); 
@@ -94,32 +94,41 @@
     }
     
     .user { 
-      font-weight: 700; 
+      font-weight: 600; 
       color: #4a9ae9; 
-      font-size: 14px;
+      font-size: 13px;
     }
     
     .time { 
       font-size: 11px; 
       color: #888; 
+      font-family: 'Tajawal', sans-serif;
+      direction: rtl;
+      unicode-bidi: embed;
+    }
+    
+    .am-pm {
+      font-size: 9px;
+      color: #666;
+      margin-right: 2px;
+      font-weight: 500;
     }
     
     .msg-text {
-      font-size: 15px;
+      font-size: 14px;
       color: #e0e0e0;
-      line-height: 1.5;
-      padding-top: 4px;
+      line-height: 1.4;
+      padding-right: 2px;
     }
     
     #typing-indicator { 
-      height: 24px; 
-      padding: 0 15px; 
-      font-size: 13px; 
+      height: 22px; 
+      padding: 0 12px; 
+      font-size: 12px; 
       color: #aaa; 
       font-style: italic; 
       transition: opacity 0.3s; 
-      background: #1e1e1e;
-      border-top: 1px solid #333;
+      background: #1a1a1a;
       display: flex;
       align-items: center;
     }
@@ -128,22 +137,24 @@
       display: flex; 
       align-items: center; 
       gap: 8px; 
-      border-top: 1px solid #333; 
-      padding: 12px 15px; 
-      background: #222; 
+      padding: 8px 12px; 
+      background: #1a1a1a;
       flex-shrink: 0;
+      margin: 0 12px 8px 12px;
+      border-radius: 25px;
+      border: 1px solid #333;
     }
     
     #messageInput { 
       flex: 1; 
-      font-size: 16px; 
-      padding: 12px 16px; 
-      border: 1px solid #444; 
-      border-radius: 24px; 
+      font-size: 14px; 
+      padding: 10px 12px; 
+      border: none; 
+      border-radius: 20px; 
       font-family: 'Tajawal', sans-serif; 
-      background: #2d2d2d;
+      background: #252525;
       color: #fff;
-      min-height: 44px;
+      min-height: 36px;
       line-height: 1.4;
       -webkit-appearance: none;
       appearance: none;
@@ -151,24 +162,24 @@
     
     #messageInput:focus { 
       outline: none; 
-      border-color: #4a9ae9; 
+      background: #2a2a2a;
     }
     
     #messageInput::placeholder {
-      color: #888;
+      color: #777;
     }
     
     #sendBtn { 
       padding: 0;
-      width: 44px;
-      height: 44px;
+      width: 36px;
+      height: 36px;
       border: none; 
       border-radius: 50%; 
       background: #3a6ea5; 
       color: white; 
       cursor: pointer; 
       font-family: 'Tajawal', sans-serif; 
-      font-size: 16px; 
+      font-size: 14px; 
       display: flex;
       align-items: center;
       justify-content: center;
@@ -182,19 +193,19 @@
     
     #onlineList { 
       position: fixed; 
-      top: 10px; 
-      right: 10px; 
+      top: 8px; 
+      right: 8px; 
       border: 1px solid #444; 
-      background: #2a2a2a; 
-      padding: 8px 14px; 
-      border-radius: 20px; 
-      font-size: 14px; 
+      background: rgba(42, 42, 42, 0.9); 
+      padding: 6px 10px; 
+      border-radius: 15px; 
+      font-size: 12px; 
       cursor: pointer; 
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4); 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
       z-index: 100; 
       display: flex; 
       align-items: center; 
-      gap: 6px; 
+      gap: 5px; 
       color: #e0e0e0;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -202,16 +213,16 @@
     
     #usersBox { 
       position: fixed; 
-      top: 55px; 
-      right: 10px; 
-      background: #2a2a2a; 
+      top: 45px; 
+      right: 8px; 
+      background: rgba(42, 42, 42, 0.95); 
       border: 1px solid #444; 
-      border-radius: 16px; 
-      padding: 15px; 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+      border-radius: 12px; 
+      padding: 10px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
       z-index: 99; 
-      min-width: 160px; 
-      max-width: 200px; 
+      min-width: 140px; 
+      max-width: 160px; 
       opacity: 0; 
       transform: translateY(-10px); 
       visibility: hidden; 
@@ -228,26 +239,26 @@
     }
     
     #usersBox h4 {
-      margin: 0 0 12px 0;
+      margin: 0 0 8px 0;
       color: #e0e0e0;
-      font-size: 16px;
+      font-size: 13px;
       text-align: center;
-      padding-bottom: 10px;
+      padding-bottom: 6px;
       border-bottom: 1px solid #444;
     }
     
     #usersList { 
-      max-height: 200px; 
+      max-height: 150px; 
       overflow-y: auto;
     }
     
     .user-item { 
       display: flex; 
       align-items: center; 
-      gap: 10px; 
-      padding: 8px 4px; 
+      gap: 8px; 
+      padding: 5px 2px; 
       border-bottom: 1px solid #3a3a3a; 
-      font-size: 14px; 
+      font-size: 12px; 
     }
     
     .user-item:last-child {
@@ -255,122 +266,139 @@
     }
     
     .status-indicator { 
-      width: 10px; 
-      height: 10px; 
+      width: 8px; 
+      height: 8px; 
       border-radius: 50%; 
       flex-shrink: 0;
     }
     
     .status-green { 
       background-color: #2ecc71; 
-      box-shadow: 0 0 6px rgba(46, 204, 113, 0.7);
     }
     
     .status-yellow { 
       background-color: #f39c12; 
-      box-shadow: 0 0 6px rgba(243, 156, 18, 0.7);
     }
     
     /* تنسيق متقدم للهواتف */
     @media (max-width: 768px) {
       #onlineList {
-        top: env(safe-area-inset-top, 10px);
-        right: 15px;
-        font-size: 14px;
-        padding: 10px 16px;
+        top: env(safe-area-inset-top, 8px);
+        right: 12px;
+        font-size: 11px;
+        padding: 5px 8px;
       }
       
       #usersBox {
-        top: calc(55px + env(safe-area-inset-top, 0px));
-        right: 15px;
-        border-radius: 20px;
-        padding: 16px;
+        top: calc(40px + env(safe-area-inset-top, 0px));
+        right: 12px;
+        border-radius: 12px;
+        padding: 8px;
+        max-width: 140px;
       }
       
       #messages {
-        padding: 12px 15px;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        padding: 6px 10px;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
       }
       
       .msg {
-        padding: 12px 14px;
-        margin: 10px 0;
-        font-size: 16px;
+        padding: 6px 8px;
+        margin: 3px 0;
+        font-size: 13px;
       }
       
       .msg-text {
-        font-size: 16px;
+        font-size: 13px;
       }
       
       #inputArea {
-        padding: 15px;
-        padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
-        gap: 10px;
+        padding: 6px 8px;
+        margin: 0 10px 8px 10px;
+        border-radius: 22px;
+        gap: 6px;
       }
       
       #messageInput {
-        font-size: 16px;
-        padding: 14px 18px;
-        border-radius: 28px;
-        min-height: 48px;
+        font-size: 13px;
+        padding: 8px 10px;
+        border-radius: 18px;
+        min-height: 32px;
       }
       
       #sendBtn {
-        width: 48px;
-        height: 48px;
-        font-size: 18px;
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
       }
       
       .sys {
-        font-size: 13px;
-        padding: 8px 14px;
+        font-size: 11px;
+        padding: 4px 8px;
+        margin: 4px auto;
+      }
+      
+      .user {
+        font-size: 12px;
+      }
+      
+      .time {
+        font-size: 10px;
+      }
+      
+      .am-pm {
+        font-size: 8px;
       }
     }
     
     @media (max-width: 480px) {
       #onlineList {
-        padding: 8px 14px;
-        font-size: 13px;
-        right: 10px;
+        padding: 4px 6px;
+        font-size: 10px;
+        right: 8px;
       }
       
       #usersBox {
-        right: 10px;
-        max-width: 180px;
+        right: 8px;
+        max-width: 120px;
       }
       
       #messages {
-        padding: 10px 12px;
+        padding: 4px 8px;
       }
       
       .msg {
-        padding: 10px 12px;
-        font-size: 15px;
+        padding: 5px 7px;
+        font-size: 12px;
       }
       
       .msg-text {
-        font-size: 15px;
+        font-size: 12px;
       }
       
       #messageInput {
-        font-size: 15px;
-        padding: 12px 16px;
-        min-height: 44px;
+        font-size: 12px;
+        padding: 7px 9px;
+        min-height: 30px;
       }
       
       #sendBtn {
-        width: 44px;
-        height: 44px;
-        font-size: 16px;
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
       }
     }
     
     /* دعم الشاشات الكبيرة */
     @media (min-width: 769px) {
       #chat-container {
-        max-width: 800px;
+        max-width: 600px;
         margin: 0 auto;
         width: 100%;
+      }
+      
+      #inputArea {
+        margin: 0 15px 10px 15px;
       }
     }
     
@@ -520,11 +548,36 @@
         const text = messageInput.value.trim(); 
         if (!text) return;
         
-        const time = new Date().toLocaleTimeString('en-US', {
-          hour: '2-digit', 
-          minute:'2-digit',
-          hour12: false
-        });
+        // تنسيق الوقت بالأرقام العربية مع ص/م
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'م' : 'ص';
+        
+        // تحويل إلى نظام 12 ساعة
+        hours = hours % 12;
+        hours = hours ? hours : 12; // الساعة 0 تصبح 12
+        
+        // تحويل الأرقام الإنجليزية إلى عربية
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        
+        const hoursStr = hours.toString();
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
+        
+        let arabicHours = '';
+        let arabicMinutes = '';
+        
+        // تحويل الساعات إلى أرقام عربية
+        for (let i = 0; i < hoursStr.length; i++) {
+          arabicHours += arabicNumbers[parseInt(hoursStr[i])];
+        }
+        
+        // تحويل الدقائق إلى أرقام عربية
+        for (let i = 0; i < minutesStr.length; i++) {
+          arabicMinutes += arabicNumbers[parseInt(minutesStr[i])];
+        }
+        
+        const time = `<span class="am-pm">${ampm}</span> ${arabicHours}:${arabicMinutes}`;
         
         messagesRef.push().set({ 
           user: username, 
@@ -598,7 +651,7 @@
         div.innerHTML = `
           <div class="msg-header">
             <span class="user">${escapeHtml(user)}</span>
-            <span class="time">${escapeHtml(time)}</span>
+            <span class="time">${time}</span>
           </div>
           <div class="msg-text">${escapeHtml(text)}</div>
         `;
