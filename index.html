@@ -12,84 +12,25 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;}
 body{height:100vh;display:flex;flex-direction:column;background:#36393f;color:#dcddde;}
-
-/* شاشة تسجيل الاسم */
 #loginScreen{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;background:#2f3136;}
 #loginScreen input{padding:10px;font-size:16px;width:80%;max-width:300px;margin-bottom:10px;border-radius:5px;border:none;}
 #loginScreen button{padding:10px 20px;font-size:16px;cursor:pointer;border:none;border-radius:5px;background:#7289da;color:white;}
 #loginError{color:red;margin-top:6px;}
-
-/* شاشة الدردشة */
 #chatScreen{display:none;flex-direction:column;flex:1;height:100%;position:relative;}
-
-/* صندوق الرسائل */
-.messages{
-    flex: 1;
-    overflow-y:auto;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    margin-bottom:80px; 
-}
-.message{
-    display:flex;
-    flex-direction:column;
-    margin-bottom:2px; 
-    width:100%;
-}
-.message-header{
-    display:flex;
-    justify-content:flex-start;
-    gap:6px;
-}
-.message .name{
-    font-weight:bold;
-    font-size:14px;
-}
-.message .time{
-    font-size:12px;
-    color:#72767d;
-}
-.message .text{
-    background:none;
-    padding:0;
-    border-radius:0;
-    font-size:14px;
-    word-wrap: break-word;
-}
-.video {
-    margin-top:2px;
-    border-radius:0;
-    overflow:hidden;
-    max-width:100%;
-}
-.video video{
-    width:100%;
-    height:auto;
-}
-.video iframe{
-    width:100%;
-    height:315px;
-}
-.input-box{
-    display:flex;
-    align-items:center;
-    padding:10px;
-    background:#40444b;
-    border-top:1px solid #2f3136;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-}
+.messages{flex: 1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;margin-bottom:80px;}
+.message{display:flex;flex-direction:column;margin-bottom:2px;width:100%;}
+.message-header{display:flex;justify-content:flex-start;gap:6px;}
+.message .name{font-weight:bold;font-size:14px;}
+.message .time{font-size:12px;color:#72767d;}
+.message .text{background:none;padding:0;border-radius:0;font-size:14px;word-wrap: break-word;}
+.video {margin-top:2px;border-radius:0;overflow:hidden;max-width:100%;}
+.video video{width:100%;height:auto;}
+.video iframe{width:100%;height:315px;}
+.input-box{display:flex;align-items:center;padding:10px;background:#40444b;border-top:1px solid #2f3136;position: fixed;bottom: 0;width: 100%;z-index: 10;}
 .input-box input{flex:1;padding:10px 12px;border-radius:20px;border:none;background:#2f3136;color:#dcddde;font-size:14px;}
 .input-box button{margin-left:8px;background:#7289da;color:white;border:none;border-radius:20px;padding:8px 16px;cursor:pointer;font-size:14px;font-weight:bold;}
 .input-box button:hover{background:#5b6eae;}
-@media(max-width:480px){
-    .video video, .video iframe, .message, .messages{
-        max-width:100%;
-    }
-}
+@media(max-width:480px){.video video, .video iframe, .message, .messages{max-width:100%;}}
 </style>
 </head>
 <body>
@@ -126,12 +67,7 @@ function login(){
     const input = document.getElementById("usernameInput");
     const name = input.value.trim();
     const error = document.getElementById("loginError");
-
-    if(!name){
-        error.textContent = "الرجاء إدخال اسم صالح";
-        return;
-    }
-
+    if(!name){ error.textContent = "الرجاء إدخال اسم صالح"; return; }
     usersRef.once("value", snap=>{
         const users = snap.val() || {};
         if(users[name]){
@@ -142,50 +78,36 @@ function login(){
             document.getElementById("loginScreen").style.display="none";
             document.getElementById("chatScreen").style.display="flex";
             document.getElementById("messageInput").focus();
-
-            window.addEventListener("beforeunload", ()=> {
-                usersRef.child(username).remove();
-            });
+            window.addEventListener("beforeunload", ()=> { usersRef.child(username).remove(); });
         }
     });
 }
 
 // ============================
-// دعم روابط الفيديو MP4 و YouTube بدون إعلانات
+// دعم روابط الفيديو MP4 و YouTube بدون تشغيل تلقائي
 function getVideoFromText(text){
-    // ملفات مباشرة
     const fileReg = /(https?:\/\/\S+\.(mp4|webm|ogg))/i;
     const fileMatch = text.match(fileReg);
-    if(fileMatch){
-        return { type: "file", value: fileMatch[0] };
-    }
-
-    // روابط يوتيوب
+    if(fileMatch){ return { type: "file", value: fileMatch[0] }; }
     const ytReg = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/;
     const ytMatch = text.match(ytReg);
-    if(ytMatch){
-        return { type: "youtube", value: ytMatch[1] };
-    }
-
+    if(ytMatch){ return { type: "youtube", value: ytMatch[1] }; }
     return null;
 }
 
-function removeVideoURL(text){
-    return text.replace(/https?:\/\/\S+/g,"").trim();
-}
+function removeVideoURL(text){ return text.replace(/https?:\/\/\S+/g,"").trim(); }
 
 function videoHTML(video){
     if(video.type === "file"){
         return `<div class="video">
-                    <video controls autoplay>
+                    <video controls>
                         <source src="${video.value}">
                     </video>
                 </div>`;
     }
-
     if(video.type === "youtube"){
         return `<div class="video">
-                    <iframe src="https://yewtu.be/embed/${video.value}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <iframe src="https://yewtu.be/embed/${video.value}" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
                 </div>`;
     }
 }
@@ -195,33 +117,24 @@ function videoHTML(video){
 function sendMessage(input){
     const rawText = input.value.trim();
     if(!rawText || !username) return;
-
     const video = getVideoFromText(rawText);
     const cleanText = removeVideoURL(rawText);
-
     chatRef.push({
         user: username,
         text: cleanText || null,
         video: video || null,
         time: Date.now()
     });
-
     input.value = "";
 }
 
-function sendMessageByButton(){
-    const input = document.getElementById("messageInput");
-    sendMessage(input);
-}
+function sendMessageByButton(){ sendMessage(document.getElementById("messageInput")); }
 
 document.getElementById("messageInput").addEventListener("keydown", function(e){
     if(e.key === "Enter") sendMessage(this);
 });
 
-chatRef.limitToLast(30).on("child_added", snap => {
-    const data = snap.val();
-    renderMessage(data);
-});
+chatRef.limitToLast(30).on("child_added", snap => { renderMessage(snap.val()); });
 
 function renderMessage(data){
     const messages = document.getElementById("messages");
