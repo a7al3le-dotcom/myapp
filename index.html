@@ -24,13 +24,12 @@ body{height:100vh;display:flex;flex-direction:column;background:#36393f;color:#d
 .message .time{font-size:12px;color:#72767d;}
 .message .text{background:none;padding:0;border-radius:0;font-size:14px;word-wrap: break-word;}
 .video {margin-top:2px;border-radius:0;overflow:hidden;max-width:100%;}
-.video video{width:100%;height:auto;}
-.video iframe{width:100%;height:315px;}
+.video iframe{width:100%;height:auto;}
 .input-box{display:flex;align-items:center;padding:10px;background:#40444b;border-top:1px solid #2f3136;position: fixed;bottom: 0;width: 100%;z-index: 10;}
 .input-box input{flex:1;padding:10px 12px;border-radius:20px;border:none;background:#2f3136;color:#dcddde;font-size:14px;}
 .input-box button{margin-left:8px;background:#7289da;color:white;border:none;border-radius:20px;padding:8px 16px;cursor:pointer;font-size:14px;font-weight:bold;}
 .input-box button:hover{background:#5b6eae;}
-@media(max-width:480px){.video video, .video iframe, .message, .messages{max-width:100%;}}
+@media(max-width:480px){.video iframe, .message, .messages{max-width:100%;}}
 </style>
 </head>
 <body>
@@ -45,12 +44,13 @@ body{height:100vh;display:flex;flex-direction:column;background:#36393f;color:#d
 <div id="chatScreen">
     <div class="messages" id="messages"></div>
     <div class="input-box">
-        <input type="text" id="messageInput" placeholder="اكتب رسالة أو رابط فيديو MP4/YouTube">
+        <input type="text" id="messageInput" placeholder="اكتب رسالة أو رابط فيديو">
         <button onclick="sendMessageByButton()">إرسال</button>
     </div>
 </div>
 
 <script>
+// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
     authDomain: "mychat-2d881.firebaseapp.com",
@@ -63,11 +63,17 @@ const usersRef = db.ref("activeUsers");
 
 let username = "";
 
+// تسجيل الدخول
 function login(){
     const input = document.getElementById("usernameInput");
     const name = input.value.trim();
     const error = document.getElementById("loginError");
-    if(!name){ error.textContent = "الرجاء إدخال اسم صالح"; return; }
+
+    if(!name){
+        error.textContent = "الرجاء إدخال اسم صالح";
+        return;
+    }
+
     usersRef.once("value", snap=>{
         const users = snap.val() || {};
         if(users[name]){
@@ -78,63 +84,59 @@ function login(){
             document.getElementById("loginScreen").style.display="none";
             document.getElementById("chatScreen").style.display="flex";
             document.getElementById("messageInput").focus();
-            window.addEventListener("beforeunload", ()=> { usersRef.child(username).remove(); });
+
+            window.addEventListener("beforeunload", ()=> {
+                usersRef.child(username).remove();
+            });
         }
     });
 }
 
-// ============================
-// دعم روابط الفيديو MP4 و YouTube بدون تشغيل تلقائي
-function getVideoFromText(text){
-    const fileReg = /(https?:\/\/\S+\.(mp4|webm|ogg))/i;
-    const fileMatch = text.match(fileReg);
-    if(fileMatch){ return { type: "file", value: fileMatch[0] }; }
-    const ytReg = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/;
-    const ytMatch = text.match(ytReg);
-    if(ytMatch){ return { type: "youtube", value: ytMatch[1] }; }
-    return null;
+// تحويل رابط YouTube إلى iframe عادي
+function getYouTubeEmbedURL(text){
+    const reg = /https?:\/\/(www\.)?youtube\.com\/watch\?v=([\w-]+)/i;
+    const match = text.match(reg);
+    return match ? `https://www.youtube.com/embed/${match[2]}` : null;
+}
+function removeVideoURL(text){
+    return text.replace(/https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/i,"").trim();
+}
+function videoHTML(embedURL){
+    return `<div class="video">
+                <iframe src="${embedURL}" frameborder="0" allowfullscreen></iframe>
+            </div>`;
 }
 
-function removeVideoURL(text){ return text.replace(/https?:\/\/\S+/g,"").trim(); }
-
-function videoHTML(video){
-    if(video.type === "file"){
-        return `<div class="video">
-                    <video controls>
-                        <source src="${video.value}">
-                    </video>
-                </div>`;
-    }
-    if(video.type === "youtube"){
-        return `<div class="video">
-                    <iframe src="https://yewtu.be/embed/${video.value}" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
-                </div>`;
-    }
-}
-
-// ============================
 // إرسال رسالة
 function sendMessage(input){
     const rawText = input.value.trim();
     if(!rawText || !username) return;
-    const video = getVideoFromText(rawText);
+
+    const embedURL = getYouTubeEmbedURL(rawText);
     const cleanText = removeVideoURL(rawText);
+
     chatRef.push({
         user: username,
         text: cleanText || null,
-        video: video || null,
-        time: Date.now()
+        embedURL: embedURL || null,
+        time: Date.now()  
     });
+
     input.value = "";
 }
-
-function sendMessageByButton(){ sendMessage(document.getElementById("messageInput")); }
-
+function sendMessageByButton(){
+    const input = document.getElementById("messageInput");
+    sendMessage(input);
+}
 document.getElementById("messageInput").addEventListener("keydown", function(e){
     if(e.key === "Enter") sendMessage(this);
 });
 
-chatRef.limitToLast(30).on("child_added", snap => { renderMessage(snap.val()); });
+// استقبال الرسائل وعرضها
+chatRef.limitToLast(30).on("child_added", snap => {
+    const data = snap.val();
+    renderMessage(data);
+});
 
 function renderMessage(data){
     const messages = document.getElementById("messages");
@@ -169,8 +171,8 @@ function renderMessage(data){
         msg.appendChild(t);
     }
 
-    if(data.video){
-        msg.insertAdjacentHTML("beforeend", videoHTML(data.video));
+    if(data.embedURL){
+        msg.insertAdjacentHTML("beforeend", videoHTML(data.embedURL));
     }
 
     messages.appendChild(msg);
