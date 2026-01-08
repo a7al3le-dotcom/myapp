@@ -5,52 +5,78 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات خاص</title>
 
-<!-- Firebase SDK -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Tahoma;height:100vh;display:flex;flex-direction:column;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;}
+body{height:100vh;display:flex;flex-direction:column;background:#36393f;color:#dcddde;}
 
 /* شاشة تسجيل الاسم */
-#loginScreen{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;background:#ececec;}
-#loginScreen input{padding:10px;font-size:16px;width:80%;max-width:300px;margin-bottom:10px;}
-#loginScreen button{padding:10px 20px;font-size:16px;cursor:pointer;}
+#loginScreen{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;background:#2f3136;}
+#loginScreen input{padding:10px;font-size:16px;width:80%;max-width:300px;margin-bottom:10px;border-radius:5px;border:none;}
+#loginScreen button{padding:10px 20px;font-size:16px;cursor:pointer;border:none;border-radius:5px;background:#7289da;color:white;}
+#loginError{color:red;margin-top:6px;}
 
 /* شاشة الدردشة */
 #chatScreen{display:none;flex-direction:column;flex:1;height:100%;}
 
-/* الرسائل */
-.messages{flex:1;overflow-y:auto;padding:10px;background:#f5f5f5;}
-.message{margin-bottom:12px;font-size:14px;width:100%;}
-.message-header{display:flex;justify-content:space-between;margin-bottom:2px;}
-.message .name{font-weight:bold;}
-.message .time{color:gray;font-size:12px;}
-.video{margin-top:4px;}
-.thumb{width:100%;max-width:300px;border-radius:4px;cursor:pointer;}
-.player{display:none;margin-top:4px;}
-.player iframe{width:100%;height:210px;border:none;border-radius:4px;}
+/* صندوق الرسائل */
+.messages{
+    flex:1;
+    overflow-y:auto;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+}
 
-/* إدخال الرسائل */
-.input-box{display:flex;border-top:1px solid #ddd;padding:6px;background:#fff;}
-.input-box input{flex:1;padding:10px;font-size:16px;}
-.input-box button{padding:0 16px;font-size:16px;margin-left:6px;cursor:pointer;}
+/* شكل كل رسالة */
+.message{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:12px;
+    width:100%; /* كامل عرض الصفحة */
+}
+.message-header{display:flex;justify-content:space-between;margin-bottom:4px;}
+.message .name{font-weight:bold;font-size:14px;color:#fff;}
+.message .time{font-size:12px;color:#72767d;}
+.message .text{
+    background:#40444b;
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:14px;
+    word-wrap: break-word;
+}
+
+/* الفيديوهات مصغرة داخل الرسائل */
+.video {margin-top:6px;border-radius:8px;overflow:hidden;max-width:100%;cursor:pointer;background:#202225;transition: transform 0.2s;}
+.video:hover { transform: scale(1.02); }
+.thumb { width:100%; display:block; border-radius:8px; }
+.player { display:none; margin-top:4px; border-radius:8px; }
+.player iframe { width:100%; height:202px; border:none; border-radius:8px; }
+
+/* مربع الادخال + زر ارسال مثل Discord */
+.input-box{display:flex;align-items:center;padding:10px;background:#40444b;border-top:1px solid #2f3136;}
+.input-box input{flex:1;padding:10px 12px;border-radius:20px;border:none;background:#2f3136;color:#dcddde;font-size:14px;}
+.input-box button{margin-left:8px;background:#7289da;color:white;border:none;border-radius:20px;padding:8px 16px;cursor:pointer;font-size:14px;font-weight:bold;}
+.input-box button:hover{background:#5b6eae;}
 
 /* Responsive للجوال */
 @media(max-width:480px){
-    .thumb, .player iframe{max-width:100%;}
+    .thumb, .player iframe, .message, .video{
+        max-width:100%;
+    }
 }
 </style>
 </head>
-
 <body>
 
 <!-- شاشة تسجيل الاسم -->
 <div id="loginScreen">
-    <h3>أدخل اسمك للدخول للدردشة</h3>
+    <h3 style="color:white;">أدخل اسمك للدخول للدردشة</h3>
     <input type="text" id="usernameInput" placeholder="اسمك">
-    <div id="loginError" style="color:red;margin-top:6px;"></div>
+    <div id="loginError"></div>
     <button onclick="login()">دخول</button>
 </div>
 
@@ -75,7 +101,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const chatRef = db.ref("messages");
-const usersRef = db.ref("users"); 
+const usersRef = db.ref("activeUsers"); // لتخزين الاسماء النشطة فقط  
 
 // ============================
 // المتغيرات
@@ -83,8 +109,7 @@ const usersRef = db.ref("users");
 let username = "";
 
 // ============================
-// تسجيل الدخول
-// ============================
+// تسجيل الدخول (اسم مؤقت فقط أثناء الجلسة)
 function login(){
     const input = document.getElementById("usernameInput");
     const name = input.value.trim();
@@ -98,42 +123,42 @@ function login(){
     usersRef.once("value", snap=>{
         const users = snap.val() || {};
         if(users[name]){
-            error.textContent = "هذا الاسم موجود بالفعل، اختر اسم آخر";
+            error.textContent = "هذا الاسم مستخدم حاليا، اختر اسم آخر";
         } else {
-            usersRef.child(name).set(true);
             username = name;
+            usersRef.child(name).set(true); // مؤقت أثناء الجلسة
             document.getElementById("loginScreen").style.display="none";
             document.getElementById("chatScreen").style.display="flex";
             document.getElementById("messageInput").focus();
+
+            // عند الخروج من الصفحة يتم حذف الاسم
+            window.addEventListener("beforeunload", ()=> {
+                usersRef.child(username).remove();
+            });
         }
     });
 }
 
 // ============================
-// YouTube Helpers
-// ============================
+// YouTube Helpers (Piped بدون إعلانات)
 function getYouTubeID(text){
     const reg = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = text.match(reg);
     return match ? match[1] : null;
 }
-
 function removeYouTubeURL(text){
     return text.replace(/(https?:\/\/)?(www\.)?(youtube\.com\/\S+|youtu\.be\/\S+)/g,"").trim();
 }
-
 function videoHTML(videoId){
     return `
         <div class="video">
             <img class="thumb"
                  src="https://img.youtube.com/vi/${videoId}/0.jpg"
-                 onclick="this.style.display='none';
-                          this.nextElementSibling.style.display='block'">
+                 onclick="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <div class="player">
-                <iframe
-                  src="https://www.youtube.com/embed/${videoId}?autoplay=1"
-                  allow="autoplay; encrypted-media"
-                  allowfullscreen></iframe>
+                <iframe src="https://piped.kavin.rocks/watch?v=${videoId}&autoplay=1"
+                        allowfullscreen
+                        allow="autoplay"></iframe>
             </div>
         </div>
     `;
@@ -141,7 +166,6 @@ function videoHTML(videoId){
 
 // ============================
 // إرسال رسالة
-// ============================
 function sendMessage(input){
     const rawText = input.value.trim();
     if(!rawText || !username) return;
@@ -158,35 +182,28 @@ function sendMessage(input){
 
     input.value = "";
 }
-
-// زر الإرسال
 function sendMessageByButton(){
     const input = document.getElementById("messageInput");
     sendMessage(input);
 }
-
-// Enter لإرسال
 document.getElementById("messageInput").addEventListener("keydown", function(e){
     if(e.key === "Enter") sendMessage(this);
 });
 
 // ============================
-// استقبال الرسائل لحظيًا
-// ============================
-chatRef.limitToLast(100).on("child_added", snap => {
+// استقبال الرسائل لحظيًا + تحميل أحدث 30 رسالة
+chatRef.limitToLast(30).on("child_added", snap => {
     const data = snap.val();
     renderMessage(data);
 });
 
 // ============================
 // عرض رسالة مع الوقت بالعربي
-// ============================
 function renderMessage(data){
     const messages = document.getElementById("messages");
     const msg = document.createElement("div");
     msg.className = "message";
 
-    // header: الاسم + الوقت
     const headerDiv = document.createElement("div");
     headerDiv.className = "message-header";
 
@@ -196,30 +213,25 @@ function renderMessage(data){
 
     const timeDiv = document.createElement("span");
     timeDiv.className = "time";
-
     const date = new Date(data.time);
     let hours = date.getHours();
     const minutes = date.getMinutes().toString().padStart(2,'0');
-    let period = "ص"; // صباحًا
-    if(hours >= 12){
-        period = "م"; // مساءً
-        if(hours > 12) hours -= 12;
-    }
-    if(hours === 0) hours = 12;
+    let period = "ص";
+    if(hours >=12){ period="م"; if(hours>12) hours-=12;}
+    if(hours===0) hours=12;
     timeDiv.textContent = `${hours}:${minutes} ${period}`;
 
     headerDiv.appendChild(nameDiv);
     headerDiv.appendChild(timeDiv);
     msg.appendChild(headerDiv);
 
-    // النص
     if(data.text){
         const t = document.createElement("div");
+        t.className="text";
         t.textContent = data.text;
         msg.appendChild(t);
     }
 
-    // الفيديو
     if(data.videoId){
         msg.insertAdjacentHTML("beforeend", videoHTML(data.videoId));
     }
