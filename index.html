@@ -10,24 +10,73 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:tahoma}
-body{background:#36393f;color:#fff;height:100vh;display:flex;flex-direction:column}
+body{background:#36393f;color:#fff;height:100vh;overflow:hidden}
 
+/* ===== LOGIN ===== */
 #loginScreen{
-  flex:1;display:flex;flex-direction:column;
+  height:100vh;display:flex;flex-direction:column;
   justify-content:center;align-items:center
 }
+#loginScreen input{padding:10px;margin-bottom:8px}
+#loginScreen button{padding:8px 16px}
 
-#chatScreen{display:none;flex:1;flex-direction:column}
+/* ===== CHAT ===== */
+#chatScreen{display:none;height:100vh}
 
-#statusBar{
-  padding:6px 10px;
+/* ===== TOP BAR ===== */
+#topBar{
+  position:fixed;top:0;width:100%;
   background:#2f3136;
-  font-size:13px
+  padding:8px 12px;
+  font-size:13px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:20;
 }
 
+#onlineBtn{
+  cursor:pointer;
+  color:#9aff9a;
+}
+
+/* ===== POPUP ===== */
+#overlay{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  z-index:30;
+}
+
+#onlinePopup{
+  background:#2f3136;
+  width:260px;
+  max-height:70vh;
+  overflow-y:auto;
+  padding:12px;
+  border-radius:8px;
+  position:absolute;
+  top:60px;
+  right:10px;
+}
+
+#onlinePopup h4{
+  margin-bottom:8px;
+  font-size:14px;
+  text-align:center;
+}
+
+.user{font-size:13px;margin-bottom:6px}
+
+/* ===== MESSAGES ===== */
 .messages{
-  flex:1;overflow-y:auto;
-  padding:10px;margin-bottom:110px
+  position:absolute;
+  top:45px;
+  bottom:110px;
+  width:100%;
+  overflow-y:auto;
+  padding:10px;
 }
 
 .message{margin-bottom:10px}
@@ -39,56 +88,63 @@ body{background:#36393f;color:#fff;height:100vh;display:flex;flex-direction:colu
   margin-top:5px;border-radius:6px
 }
 
-.typing{
-  font-size:13px;color:#aaa;
-  padding:5px 10px;height:20px
+/* ===== TYPING ===== */
+#typingStatus{
+  position:fixed;
+  bottom:70px;
+  padding:5px 10px;
+  font-size:13px;
+  color:#aaa;
 }
 
+/* ===== INPUT ===== */
 .input-box{
-  position:fixed;bottom:0;width:100%;
-  background:#40444b
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#40444b;
 }
-
-.input-row{
-  display:flex;padding:8px
-}
-
+.input-row{display:flex;padding:8px}
 .input-row input{
   flex:1;border:none;padding:10px;border-radius:20px
 }
-
 .input-row button{
   margin-left:6px;border:none;border-radius:20px;
   padding:10px;background:#7289da;color:#fff
-}
-
-#onlineUsersList{
-  padding:5px 10px;
-  font-size:13px;color:#ccc;
-  background:#2f3136
 }
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <input id="usernameInput" placeholder="اسمك">
   <button onclick="login()">دخول</button>
 </div>
 
+<!-- CHAT -->
 <div id="chatScreen">
 
-  <div id="statusBar">
-    <span id="myStatus" style="color:#9aff9a">● متصل</span>
-    <span id="onlineCount" style="float:left;color:#aaa"></span>
+  <!-- TOP BAR -->
+  <div id="topBar">
+    <span id="myStatus">🟢 متصل</span>
+    <span id="onlineBtn">المتصلون (<span id="onlineCount">0</span>)</span>
   </div>
 
-  <div id="onlineUsersList"></div>
+  <!-- POPUP -->
+  <div id="overlay" onclick="closePopup()">
+    <div id="onlinePopup" onclick="event.stopPropagation()">
+      <h4>المتصلون الآن</h4>
+      <div id="onlineUsersList"></div>
+    </div>
+  </div>
 
+  <!-- CHAT -->
   <div class="messages" id="messages"></div>
-  <div class="typing" id="typingStatus"></div>
+  <div id="typingStatus"></div>
 
+  <!-- INPUT -->
   <div class="input-box">
     <div class="input-row">
       <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب">
@@ -99,7 +155,7 @@ body{background:#36393f;color:#fff;height:100vh;display:flex;flex-direction:colu
 </div>
 
 <script>
-// ================= FIREBASE =================
+// ===== FIREBASE =====
 firebase.initializeApp({
   apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
   databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
@@ -111,128 +167,96 @@ const typingRef = db.ref("typing");
 const onlineRef = db.ref("onlineUsers");
 const connectedRef = db.ref(".info/connected");
 
-let username = "";
+let username="";
 
-// ================= LOGIN =================
+// ===== LOGIN =====
 function login(){
-  username = usernameInput.value.trim();
-  if(!username) return;
+  username=usernameInput.value.trim();
+  if(!username)return;
 
   loginScreen.style.display="none";
-  chatScreen.style.display="flex";
+  chatScreen.style.display="block";
 
-  connectedRef.on("value", snap=>{
-    if(snap.val() === true){
-      const userRef = onlineRef.child(username);
-
-      userRef.set({
-        status:"online",
-        lastActive:Date.now()
-      });
-
-      userRef.onDisconnect().remove();
+  connectedRef.on("value",snap=>{
+    if(snap.val()){
+      const ref=onlineRef.child(username);
+      ref.set({status:"online",lastActive:Date.now()});
+      ref.onDisconnect().remove();
     }
   });
 }
 
-// ================= VIDEO DETECTION =================
+// ===== VIDEO =====
 function extractVideo(text){
-  const yt = text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if(yt) return {type:"youtube", id:yt[1]};
-
-  const mp4 = text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
-  if(mp4) return {type:"file", id:mp4[0]};
-
+  const yt=text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(yt)return{type:"youtube",id:yt[1]};
+  const mp4=text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
+  if(mp4)return{type:"file",id:mp4[0]};
   return null;
 }
 
-// ================= SEND MESSAGE =================
+// ===== SEND =====
 function send(){
-  const txt = messageInput.value.trim();
-  if(!txt) return;
-
-  const video = extractVideo(txt);
+  const txt=messageInput.value.trim();
+  if(!txt)return;
+  const v=extractVideo(txt);
 
   chatRef.push({
-    user: username,
-    text: txt,
-    videoType: video ? video.type : null,
-    videoId: video ? video.id : null,
-    time: Date.now()
+    user:username,
+    text:txt,
+    videoType:v?v.type:null,
+    videoId:v?v.id:null,
+    time:Date.now()
   });
 
   messageInput.value="";
   typingRef.child(username).remove();
-  onlineRef.child(username).update({lastActive:Date.now()});
 }
 
-// ================= ENTER KEY =================
-messageInput.addEventListener("keydown", e=>{
-  if(e.key === "Enter"){
-    e.preventDefault();
-    send();
-  }
+// ENTER
+messageInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();send();}
 });
 
-// ================= TYPING =================
-let typingTimeout;
-messageInput.addEventListener("input", ()=>{
+// ===== TYPING =====
+let tmr;
+messageInput.addEventListener("input",()=>{
   typingRef.child(username).set(true);
-
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(()=>{
-    typingRef.child(username).remove();
-  },1500);
+  clearTimeout(tmr);
+  tmr=setTimeout(()=>typingRef.child(username).remove(),1500);
 });
 
-typingRef.on("value", snap=>{
-  const users = snap.val() || {};
-  const names = Object.keys(users).filter(u=>u!==username);
-  typingStatus.textContent = names.length ? `${names[0]} يكتب الآن...` : "";
+typingRef.on("value",snap=>{
+  const u=Object.keys(snap.val()||{}).filter(x=>x!==username);
+  typingStatus.textContent=u.length?`${u[0]} يكتب الآن...`:"";
 });
 
-// ================= ONLINE USERS =================
-onlineRef.on("value", snap=>{
-  const users = snap.val() || {};
-  const names = Object.keys(users);
-
-  onlineCount.textContent =
-    names.length>1 ? `متصلون (${names.length})` : "أنت المتصل الوحيد";
-
-  onlineUsersList.innerHTML = names.map(n=>{
-    return n===username
-      ? `🟢 <strong>${n} (أنت)</strong>`
-      : `🟢 ${n}`;
-  }).join("<br>");
+// ===== ONLINE USERS =====
+onlineRef.on("value",snap=>{
+  const users=snap.val()||{};
+  const names=Object.keys(users);
+  onlineCount.textContent=names.length;
+  onlineUsersList.innerHTML=names.map(n=>
+    n===username?`🟢 <b>${n} (أنت)</b>`:`🟢 ${n}`
+  ).join("<br>");
 });
 
-// ================= RENDER MESSAGES =================
-chatRef.limitToLast(50).on("child_added", snap=>{
-  const d = snap.val();
-  const div = document.createElement("div");
+// POPUP
+onlineBtn.onclick=()=>overlay.style.display="block";
+function closePopup(){overlay.style.display="none";}
+
+// ===== RENDER =====
+chatRef.limitToLast(50).on("child_added",snap=>{
+  const d=snap.val();
+  const div=document.createElement("div");
   div.className="message";
-
-  div.innerHTML = `
-    <div class="name">${d.user}</div>
-    <div class="text">${d.text}</div>
-  `;
-
-  if(d.videoType==="youtube"){
-    div.innerHTML += `
-      <div class="video">
-        <iframe src="https://www.youtube.com/embed/${d.videoId}" allowfullscreen></iframe>
-      </div>`;
-  }
-
-  if(d.videoType==="file"){
-    div.innerHTML += `
-      <div class="video">
-        <video controls src="${d.videoId}"></video>
-      </div>`;
-  }
-
+  div.innerHTML=`<div class="name">${d.user}</div><div class="text">${d.text}</div>`;
+  if(d.videoType==="youtube")
+    div.innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${d.videoId}" allowfullscreen></iframe></div>`;
+  if(d.videoType==="file")
+    div.innerHTML+=`<div class="video"><video controls src="${d.videoId}"></video></div>`;
   messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  messages.scrollTop=messages.scrollHeight;
 });
 </script>
 
