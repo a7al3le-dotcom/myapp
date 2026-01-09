@@ -11,36 +11,95 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:tahoma}
 body{background:#36393f;color:#fff;height:100vh;display:flex;flex-direction:column}
-#loginScreen,#chatScreen{flex:1}
-#loginScreen{display:flex;flex-direction:column;justify-content:center;align-items:center}
-#chatScreen{display:none;flex-direction:column}
-.messages{flex:1;overflow-y:auto;padding:10px;margin-bottom:70px}
+
+#loginScreen{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:center;align-items:center
+}
+
+#chatScreen{display:none;flex:1;flex-direction:column}
+
+#statusBar{
+  padding:6px 10px;
+  background:#2f3136;
+  font-size:13px
+}
+
+.messages{
+  flex:1;overflow-y:auto;
+  padding:10px;margin-bottom:110px
+}
+
 .message{margin-bottom:10px}
-.name{font-weight:bold}
-.video iframe,.video video{width:100%;max-width:560px;height:315px;margin-top:5px;border-radius:6px}
-.input-box{position:fixed;bottom:0;width:100%;display:flex;background:#40444b;padding:8px}
-.input-box input{flex:1;border:none;padding:10px;border-radius:20px}
-.input-box button{margin-left:6px;border:none;border-radius:20px;padding:10px;background:#7289da;color:#fff}
+.name{font-weight:bold;font-size:14px}
+.text{margin-top:2px}
+
+.video iframe,.video video{
+  width:100%;max-width:560px;height:315px;
+  margin-top:5px;border-radius:6px
+}
+
+.typing{
+  font-size:13px;color:#aaa;
+  padding:5px 10px;height:20px
+}
+
+.input-box{
+  position:fixed;bottom:0;width:100%;
+  background:#40444b
+}
+
+.input-row{
+  display:flex;padding:8px
+}
+
+.input-row input{
+  flex:1;border:none;padding:10px;border-radius:20px
+}
+
+.input-row button{
+  margin-left:6px;border:none;border-radius:20px;
+  padding:10px;background:#7289da;color:#fff
+}
+
+#onlineUsersList{
+  padding:5px 10px;
+  font-size:13px;color:#ccc;
+  background:#2f3136
+}
 </style>
 </head>
 
 <body>
 
 <div id="loginScreen">
-    <input id="usernameInput" placeholder="اسمك">
-    <button onclick="login()">دخول</button>
-    <div id="loginError"></div>
+  <input id="usernameInput" placeholder="اسمك">
+  <button onclick="login()">دخول</button>
 </div>
 
 <div id="chatScreen">
-    <div class="messages" id="messages"></div>
-    <div class="input-box">
-        <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب">
-        <button onclick="send()">إرسال</button>
+
+  <div id="statusBar">
+    <span id="myStatus" style="color:#9aff9a">● متصل</span>
+    <span id="onlineCount" style="float:left;color:#aaa"></span>
+  </div>
+
+  <div id="onlineUsersList"></div>
+
+  <div class="messages" id="messages"></div>
+  <div class="typing" id="typingStatus"></div>
+
+  <div class="input-box">
+    <div class="input-row">
+      <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب">
+      <button onclick="send()">إرسال</button>
     </div>
+  </div>
+
 </div>
 
 <script>
+// ================= FIREBASE =================
 firebase.initializeApp({
   apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
   databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
@@ -48,75 +107,132 @@ firebase.initializeApp({
 
 const db = firebase.database();
 const chatRef = db.ref("messages");
-let username="";
+const typingRef = db.ref("typing");
+const onlineRef = db.ref("onlineUsers");
+const connectedRef = db.ref(".info/connected");
 
-// ========= LOGIN =========
+let username = "";
+
+// ================= LOGIN =================
 function login(){
-  username=usernameInput.value.trim();
-  if(!username)return;
+  username = usernameInput.value.trim();
+  if(!username) return;
+
   loginScreen.style.display="none";
   chatScreen.style.display="flex";
+
+  connectedRef.on("value", snap=>{
+    if(snap.val() === true){
+      const userRef = onlineRef.child(username);
+
+      userRef.set({
+        status:"online",
+        lastActive:Date.now()
+      });
+
+      userRef.onDisconnect().remove();
+    }
+  });
 }
 
-// ========= VIDEO DETECTION =========
+// ================= VIDEO DETECTION =================
 function extractVideo(text){
-  let yt = text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if(yt){
-    return {type:"youtube",id:yt[1]};
-  }
+  const yt = text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(yt) return {type:"youtube", id:yt[1]};
 
-  let mp4=text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
-  if(mp4){
-    return {type:"file",id:mp4[0]};
-  }
+  const mp4 = text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
+  if(mp4) return {type:"file", id:mp4[0]};
 
   return null;
 }
 
-// ========= SEND =========
+// ================= SEND MESSAGE =================
 function send(){
-  const txt=messageInput.value.trim();
-  if(!txt)return;
+  const txt = messageInput.value.trim();
+  if(!txt) return;
 
-  const video=extractVideo(txt);
+  const video = extractVideo(txt);
 
   chatRef.push({
-    user:username,
+    user: username,
     text: txt,
     videoType: video ? video.type : null,
     videoId: video ? video.id : null,
-    time:Date.now()
+    time: Date.now()
   });
 
   messageInput.value="";
+  typingRef.child(username).remove();
+  onlineRef.child(username).update({lastActive:Date.now()});
 }
 
-// ========= RENDER =========
-chatRef.limitToLast(50).on("child_added",snap=>{
-  const d=snap.val();
-  const div=document.createElement("div");
+// ================= ENTER KEY =================
+messageInput.addEventListener("keydown", e=>{
+  if(e.key === "Enter"){
+    e.preventDefault();
+    send();
+  }
+});
+
+// ================= TYPING =================
+let typingTimeout;
+messageInput.addEventListener("input", ()=>{
+  typingRef.child(username).set(true);
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=>{
+    typingRef.child(username).remove();
+  },1500);
+});
+
+typingRef.on("value", snap=>{
+  const users = snap.val() || {};
+  const names = Object.keys(users).filter(u=>u!==username);
+  typingStatus.textContent = names.length ? `${names[0]} يكتب الآن...` : "";
+});
+
+// ================= ONLINE USERS =================
+onlineRef.on("value", snap=>{
+  const users = snap.val() || {};
+  const names = Object.keys(users);
+
+  onlineCount.textContent =
+    names.length>1 ? `متصلون (${names.length})` : "أنت المتصل الوحيد";
+
+  onlineUsersList.innerHTML = names.map(n=>{
+    return n===username
+      ? `🟢 <strong>${n} (أنت)</strong>`
+      : `🟢 ${n}`;
+  }).join("<br>");
+});
+
+// ================= RENDER MESSAGES =================
+chatRef.limitToLast(50).on("child_added", snap=>{
+  const d = snap.val();
+  const div = document.createElement("div");
   div.className="message";
 
-  div.innerHTML=`<div class="name">${d.user}</div>
-                 <div>${d.text}</div>`;
+  div.innerHTML = `
+    <div class="name">${d.user}</div>
+    <div class="text">${d.text}</div>
+  `;
 
   if(d.videoType==="youtube"){
-    div.innerHTML+=`
+    div.innerHTML += `
       <div class="video">
-        <iframe src="https://www.youtube.com/embed/${d.videoId}"
-        allowfullscreen></iframe>
+        <iframe src="https://www.youtube.com/embed/${d.videoId}" allowfullscreen></iframe>
       </div>`;
   }
 
   if(d.videoType==="file"){
-    div.innerHTML+=`
+    div.innerHTML += `
       <div class="video">
         <video controls src="${d.videoId}"></video>
       </div>`;
   }
 
   messages.appendChild(div);
-  messages.scrollTop=messages.scrollHeight;
+  messages.scrollTop = messages.scrollHeight;
 });
 </script>
 
