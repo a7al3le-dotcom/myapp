@@ -35,7 +35,9 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden}
 .message{margin-bottom:10px}
 .name{font-weight:bold;font-size:14px}
 .text{margin-top:2px}
+.time{font-size:11px;color:#aaa;margin-top:2px}
 .video iframe,.video video{width:100%;max-width:560px;height:315px;margin-top:5px;border-radius:6px}
+.image img{max-width:300px;border-radius:6px;margin-top:5px}
 
 /* ===== TYPING ===== */
 #typingStatus{position:fixed;bottom:70px;padding:5px 10px;font-size:13px;color:#aaa}
@@ -80,7 +82,7 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden}
   <!-- INPUT -->
   <div class="input-box">
     <div class="input-row">
-      <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب">
+      <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب/صورة">
       <button onclick="send()">إرسال</button>
     </div>
   </div>
@@ -102,7 +104,18 @@ const connectedRef = db.ref(".info/connected");
 
 let username="";
 
-// ===== LOGIN =====
+// DOM Elements
+const usernameInput = document.getElementById("usernameInput");
+const loginScreen = document.getElementById("loginScreen");
+const chatScreen = document.getElementById("chatScreen");
+const messageInput = document.getElementById("messageInput");
+const messages = document.getElementById("messages");
+const typingStatus = document.getElementById("typingStatus");
+const onlineCount = document.getElementById("onlineCount");
+const onlineUsersList = document.getElementById("onlineUsersList");
+const overlay = document.getElementById("overlay");
+const onlineBtn = document.getElementById("onlineBtn");
+  // ===== LOGIN =====
 function login(){
   username=usernameInput.value.trim();
   if(!username) return;
@@ -121,12 +134,14 @@ function login(){
   });
 }
 
-// ===== VIDEO =====
-function extractVideo(text){
-  const yt=text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if(yt)return{type:"youtube",id:yt[1]};
+// ===== MEDIA =====
+function extractMedia(text){
+  const yt=text.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(yt) return {type:"youtube",id:yt[1]};
   const mp4=text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
-  if(mp4)return{type:"file",id:mp4[0]};
+  if(mp4) return {type:"file",id:mp4[0]};
+  const img=text.match(/https?:\/\/\S+\.(jpg|jpeg|png|gif)/i);
+  if(img) return {type:"image",id:img[0]};
   return null;
 }
 
@@ -134,13 +149,13 @@ function extractVideo(text){
 function send(){
   const txt=messageInput.value.trim();
   if(!txt) return;
-  const v=extractVideo(txt);
+  const m=extractMedia(txt);
 
   chatRef.push({
     user: username,
     text: txt,
-    videoType: v?v.type:null,
-    videoId: v?v.id:null,
+    mediaType: m?m.type:null,
+    mediaId: m?m.id:null,
     time: Date.now()
   });
 
@@ -153,29 +168,27 @@ messageInput.addEventListener("keydown",e=>{
   if(e.key==="Enter"){e.preventDefault();send();}
 });
 
-// ===== TYPING (دقيق 100%) =====
+// ===== TYPING =====
 messageInput.addEventListener("input", ()=>{
   if(!username) return;
   typingRef.child(username).set(Date.now());
 });
 
 // DISPLAY TYPING
-setInterval(()=>{
+typingRef.on("value",snap=>{
   const now = Date.now();
-  typingRef.once("value",snap=>{
-    const data = snap.val()||{};
-    const active = Object.keys(data).filter(u=>{
-      return u!==username && (now - data[u] < 2000);
-    });
-    if(active.length===0){
-      typingStatus.textContent="";
-    }else if(active.length===1){
-      typingStatus.textContent=`${active[0]} يكتب الآن...`;
-    }else{
-      typingStatus.textContent=`${active.length} أشخاص يكتبون الآن...`;
-    }
+  const data = snap.val()||{};
+  const active = Object.keys(data).filter(u=>{
+    return u!==username && (now - data[u] < 2000);
   });
-},500); // التحديث كل نصف ثانية لضمان دقة عالية
+  if(active.length===0){
+    typingStatus.textContent="";
+  }else if(active.length===1){
+    typingStatus.textContent=`${active[0]} يكتب الآن...`;
+  }else{
+    typingStatus.textContent=`${active.length} أشخاص يكتبون الآن...`;
+  }
+});
 
 // ===== ONLINE USERS =====
 onlineRef.on("value",snap=>{
@@ -194,13 +207,24 @@ chatRef.limitToLast(50).on("child_added",snap=>{
   const d=snap.val();
   const div=document.createElement("div");
   div.className="message";
+
+  // اسم + نص
   div.innerHTML=`<div class="name">${d.user}</div><div class="text">${d.text}</div>`;
-  if(d.videoType==="youtube")
-    div.innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${d.videoId}" allowfullscreen></iframe></div>`;
-  if(d.videoType==="file")
-    div.innerHTML+=`<div class="video"><video controls src="${d.videoId}"></video></div>`;
+
+  // توقيت الرسالة
+  const timeStr=new Date(d.time).toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  div.innerHTML+=`<div class="time">${timeStr}</div>`;
+
+  // وسائط
+  if(d.mediaType==="youtube")
+    div.innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${d.mediaId}" allowfullscreen></iframe></div>`;
+  if(d.mediaType==="file")
+    div.innerHTML+=`<div class="video"><video controls src="${d.mediaId}"></video></div>`;
+  if(d.mediaType==="image")
+    div.innerHTML+=`<div class="image"><img src="${d.mediaId}" alt="صورة"></div>`;
+
   messages.appendChild(div);
-  messages.scrollTop=messages.scrollHeight;
+  div.scrollIntoView({behavior:"smooth"});
 });
 </script>
 
