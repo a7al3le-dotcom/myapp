@@ -68,204 +68,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     transform:scale(0.98);
 }
 
-/* ===== MEDIA PLAYER ===== */
-#mediaPlayerContainer {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    z-index: 19;
-    background: rgba(32, 34, 37, 0.95);
-    border-bottom: 2px solid #7289da;
-    backdrop-filter: blur(10px);
-    transform: translateY(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-
-#mediaPlayerContainer.visible {
-    transform: translateY(0);
-}
-
-#mediaPlayer {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    gap: 15px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-#playerToggleBtn {
-    background: #7289da;
-    color: white;
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    transition: all 0.3s;
-    flex-shrink: 0;
-}
-
-#playerToggleBtn:hover {
-    background: #5f73bc;
-    transform: scale(1.05);
-}
-
-#playerToggleBtn:active {
-    transform: scale(0.95);
-}
-
-#playerToggleBtn.pinned {
-    background: #43b581;
-}
-
-#nowPlaying {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-}
-
-#nowPlaying h4 {
-    color: #7289da;
-    margin-bottom: 5px;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#trackInfo {
-    font-size: 13px;
-    color: #b9bbbe;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#playerControls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-.playerBtn {
-    background: #40444b;
-    border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-
-.playerBtn:hover {
-    background: #7289da;
-    transform: scale(1.05);
-}
-
-.playerBtn:active {
-    transform: scale(0.95);
-}
-
-.playerBtn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.playerBtn.disabled:hover {
-    background: #40444b;
-    transform: none;
-}
-
-#progressContainer {
-    flex: 2;
-    min-width: 150px;
-    max-width: 300px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#progressBar {
-    flex: 1;
-    height: 6px;
-    background: #202225;
-    border-radius: 3px;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-#progress {
-    height: 100%;
-    background: #7289da;
-    width: 0%;
-    transition: width 0.1s;
-    border-radius: 3px;
-}
-
-#timeDisplay {
-    font-size: 12px;
-    color: #b9bbbe;
-    min-width: 80px;
-    text-align: center;
-}
-
-#volumeContainer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-}
-
-#volumeIcon {
-    color: #7289da;
-    font-size: 16px;
-    min-width: 20px;
-}
-
-#volumeSlider {
-    flex: 1;
-    height: 4px;
-    background: #202225;
-    border-radius: 2px;
-    outline: none;
-    -webkit-appearance: none;
-}
-
-#volumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: #7289da;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-#volumeSlider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: #7289da;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
-#mediaElement {
-    display: none;
-}
-
 /* ===== CHAT ===== */
 #chatScreen{display:none;height:100vh}
 
@@ -362,15 +164,11 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     overflow-y:auto;
     padding:10px;
     display:flex;
-    flex-direction:column-reverse;
+    flex-direction:column-reverse; /* الرسائل من الأسفل للأعلى */
     scroll-behavior:smooth;
 }
 
-/* تعديل الهامش العلوي عند فتح المشغل */
-.messages.with-player {
-    top: 110px; /* 60px للبار العلوي + 50px للمشغل */
-}
-
+/* إخفاء شريط التمرير ولكن مع إمكانية التمرير */
 .messages::-webkit-scrollbar{width:6px}
 .messages::-webkit-scrollbar-track{background:#2f3136}
 .messages::-webkit-scrollbar-thumb{background:#7289da;border-radius:3px}
@@ -437,31 +235,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     display:block;
 }
 
-/* زر تشغيل الوسائط في الرسائل */
-.media-play-btn {
-    background: #7289da;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s;
-}
-
-.media-play-btn:hover {
-    background: #5f73bc;
-    transform: scale(1.05);
-}
-
-.media-play-btn:active {
-    transform: scale(0.95);
-}
-
 /* ===== TYPING ===== */
 #typingStatus{
     position:fixed;
@@ -499,7 +272,7 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     background:#40444b;
     color:#fff;
     font-size:15px;
-    min-height:44px;
+    min-height:44px; /* للحصول على منطقة لمس أفضل */
 }
 .input-row input:focus{
     outline:none;
@@ -574,28 +347,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     .messages{
         padding:12px;
     }
-    
-    /* تحسين المشغل للهواتف */
-    #mediaPlayer {
-        flex-wrap: wrap;
-        padding: 8px;
-        gap: 8px;
-    }
-    
-    #progressContainer {
-        order: 3;
-        max-width: none;
-        min-width: 100%;
-        margin-top: 5px;
-    }
-    
-    #volumeContainer {
-        min-width: 100px;
-    }
-    
-    .messages.with-player {
-        top: 120px;
-    }
 }
 
 @media (max-width: 480px){
@@ -610,10 +361,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
         bottom:100px;
     }
     
-    .messages.with-player {
-        top: 115px;
-    }
-    
     .input-row input{
         font-size:14px;
         padding:10px 14px;
@@ -625,30 +372,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     
     .message{
         max-width:95%;
-    }
-    
-    /* تحسين المشغل للشاشات الصغيرة */
-    #mediaPlayer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-    
-    #nowPlaying {
-        text-align: center;
-    }
-    
-    #playerControls {
-        justify-content: center;
-    }
-    
-    #progressContainer {
-        order: 0;
-    }
-    
-    #volumeContainer {
-        min-width: 100%;
-        justify-content: center;
     }
 }
 
@@ -672,7 +395,7 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
 <!-- LOGIN -->
 <div id="loginScreen">
     <div id="loginContainer">
-        <h2>💬 شات خاص مع مشغل وسائط</h2>
+        <h2>💬 شات خاص</h2>
         <input id="usernameInput" placeholder="اسمك (حرفين على الأقل)" autocomplete="off">
         <button onclick="login()" id="loginBtn">دخول إلى الشات</button>
     </div>
@@ -680,38 +403,6 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
 
 <!-- CHAT -->
 <div id="chatScreen">
-    <!-- MEDIA PLAYER -->
-    <div id="mediaPlayerContainer">
-        <div id="mediaPlayer">
-            <button id="playerToggleBtn" title="إظهار/إخفاء المشغل">🎵</button>
-            
-            <div id="nowPlaying">
-                <h4 id="currentTrackTitle">لا يوجد وسائط قيد التشغيل</h4>
-                <div id="trackInfo">جاهز للتشغيل</div>
-            </div>
-            
-            <div id="playerControls">
-                <button id="prevBtn" class="playerBtn disabled" title="السابق">⏮</button>
-                <button id="playPauseBtn" class="playerBtn" title="تشغيل/إيقاف">▶</button>
-                <button id="nextBtn" class="playerBtn disabled" title="التالي">⏭</button>
-            </div>
-            
-            <div id="progressContainer">
-                <div id="progressBar">
-                    <div id="progress"></div>
-                </div>
-                <div id="timeDisplay">00:00 / 00:00</div>
-            </div>
-            
-            <div id="volumeContainer">
-                <span id="volumeIcon">🔊</span>
-                <input type="range" id="volumeSlider" min="0" max="100" value="80" title="مستوى الصوت">
-            </div>
-        </div>
-    </div>
-    
-    <audio id="mediaElement" preload="metadata"></audio>
-
     <!-- TOP BAR -->
     <div id="topBar">
         <span id="myStatus">🟢 متصل</span>
@@ -738,7 +429,7 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
     <!-- INPUT -->
     <div class="input-box">
         <div class="input-row">
-            <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب/صورة/صوتي/فيديو" autocomplete="off">
+            <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب/صورة" autocomplete="off">
             <button onclick="send()" id="sendBtn">➤</button>
         </div>
     </div>
@@ -746,7 +437,7 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
 </div>
 
 <script>
-// ===== FIREBASE CONFIG =====
+// ===== FIREBASE CONFIG (يجب نقل هذا لملف منفصل في الإنتاج) =====
 const firebaseConfig = {
     apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
     databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
@@ -765,13 +456,6 @@ let connectionListeners = [];
 let lastMessageKey = null;
 let isScrolledUp = false;
 
-// متغيرات المشغل
-let currentPlaylist = [];
-let currentTrackIndex = -1;
-let isPlayerVisible = false;
-let isPlayerPinned = false;
-let lastPlayerState = null;
-
 // ===== DOM ELEMENTS =====
 const usernameInput = document.getElementById("usernameInput");
 const loginScreen = document.getElementById("loginScreen");
@@ -787,22 +471,8 @@ const connectionStatus = document.getElementById("connectionStatus");
 const loginBtn = document.getElementById("loginBtn");
 const sendBtn = document.getElementById("sendBtn");
 
-// عناصر المشغل
-const mediaPlayerContainer = document.getElementById("mediaPlayerContainer");
-const playerToggleBtn = document.getElementById("playerToggleBtn");
-const currentTrackTitle = document.getElementById("currentTrackTitle");
-const trackInfo = document.getElementById("trackInfo");
-const playPauseBtn = document.getElementById("playPauseBtn");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const progressBar = document.getElementById("progressBar");
-const progress = document.getElementById("progress");
-const timeDisplay = document.getElementById("timeDisplay");
-const volumeSlider = document.getElementById("volumeSlider");
-const volumeIcon = document.getElementById("volumeIcon");
-const mediaElement = document.getElementById("mediaElement");
-
 // ===== UTILITY FUNCTIONS =====
+// دالة لمنع هجمات XSS
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -810,6 +480,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// دالة لتحويل الوقت
 function formatTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('ar-SA', {
@@ -819,219 +490,11 @@ function formatTime(timestamp) {
     });
 }
 
-// دالة لتنسيق الوقت من الثواني
-function formatDuration(seconds) {
-    if (!seconds || seconds < 0) return "00:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-// ===== MEDIA PLAYER FUNCTIONS =====
-function togglePlayerVisibility() {
-    isPlayerVisible = !isPlayerVisible;
-    
-    if (isPlayerVisible) {
-        mediaPlayerContainer.classList.add('visible');
-        messages.classList.add('with-player');
-        if (!isPlayerPinned) {
-            // إخفاء تلقائي بعد 10 ثواني إذا لم يكن مثبتاً
-            setTimeout(() => {
-                if (!isPlayerPinned && isPlayerVisible) {
-                    hidePlayer();
-                }
-            }, 10000);
-        }
-    } else {
-        hidePlayer();
-    }
-    
-    updatePlayerToggleButton();
-}
-
-function hidePlayer() {
-    isPlayerVisible = false;
-    mediaPlayerContainer.classList.remove('visible');
-    messages.classList.remove('with-player');
-}
-
-function togglePlayerPin() {
-    isPlayerPinned = !isPlayerPinned;
-    updatePlayerToggleButton();
-    
-    if (isPlayerPinned && !isPlayerVisible) {
-        togglePlayerVisibility();
-    }
-}
-
-function updatePlayerToggleButton() {
-    playerToggleBtn.innerHTML = isPlayerPinned ? '📌' : '🎵';
-    playerToggleBtn.title = isPlayerPinned ? 'إلغاء تثبيت المشغل' : 'إظهار/إخفاء المشغل';
-    playerToggleBtn.classList.toggle('pinned', isPlayerPinned);
-}
-
-function addToPlaylist(mediaData, userName) {
-    if (!mediaData || !mediaData.id || !mediaData.type) return;
-    
-    const track = {
-        id: mediaData.id,
-        type: mediaData.type,
-        title: `وسائط من ${userName}`,
-        user: userName,
-        url: mediaData.id,
-        timestamp: Date.now()
-    };
-    
-    currentPlaylist.push(track);
-    
-    // إذا كان المشغل مخفي، إظهاره مؤقتاً
-    if (!isPlayerVisible && currentPlaylist.length === 1) {
-        togglePlayerVisibility();
-    }
-    
-    // تشغيل تلقائي إذا لم يكن هناك شيء يعمل
-    if (currentTrackIndex === -1 && currentPlaylist.length === 1) {
-        playTrack(0);
-    }
-    
-    updatePlaylistControls();
-}
-
-function playTrack(index) {
-    if (index < 0 || index >= currentPlaylist.length) return;
-    
-    const track = currentPlaylist[index];
-    currentTrackIndex = index;
-    
-    // إعداد عنصر الوسائط
-    if (track.type === 'file' || track.type === 'audio') {
-        mediaElement.src = track.url;
-        mediaElement.type = 'audio/mpeg';
-        currentTrackTitle.textContent = `🎵 ${escapeHtml(track.title)}`;
-        trackInfo.textContent = `بواسطة ${escapeHtml(track.user)}`;
-    }
-    
-    // تشغيل
-    mediaElement.play().then(() => {
-        playPauseBtn.innerHTML = '⏸';
-        playPauseBtn.title = 'إيقاف مؤقت';
-        
-        // إظهار المشغل إذا كان مخفياً
-        if (!isPlayerVisible) {
-            togglePlayerVisibility();
-        }
-    }).catch(error => {
-        console.error('خطأ في التشغيل:', error);
-    });
-    
-    updatePlaylistControls();
-}
-
-function playPause() {
-    if (mediaElement.src) {
-        if (mediaElement.paused) {
-            mediaElement.play();
-            playPauseBtn.innerHTML = '⏸';
-            playPauseBtn.title = 'إيقاف مؤقت';
-        } else {
-            mediaElement.pause();
-            playPauseBtn.innerHTML = '▶';
-            playPauseBtn.title = 'تشغيل';
-        }
-    }
-}
-
-function nextTrack() {
-    if (currentPlaylist.length === 0) return;
-    const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length;
-    playTrack(nextIndex);
-}
-
-function prevTrack() {
-    if (currentPlaylist.length === 0) return;
-    const prevIndex = currentTrackIndex > 0 ? currentTrackIndex - 1 : currentPlaylist.length - 1;
-    playTrack(prevIndex);
-}
-
-function updatePlaylistControls() {
-    prevBtn.classList.toggle('disabled', currentPlaylist.length <= 1);
-    nextBtn.classList.toggle('disabled', currentPlaylist.length <= 1);
-}
-
-function updateProgress() {
-    if (!mediaElement.src) return;
-    
-    const currentTime = mediaElement.currentTime;
-    const duration = mediaElement.duration || 0;
-    
-    // تحديث شريط التقدم
-    const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-    progress.style.width = `${progressPercent}%`;
-    
-    // تحديث عرض الوقت
-    timeDisplay.textContent = `${formatDuration(currentTime)} / ${formatDuration(duration)}`;
-    
-    // تحديث الأيقونة
-    const volume = mediaElement.volume * 100;
-    if (volume === 0) {
-        volumeIcon.textContent = '🔇';
-    } else if (volume < 50) {
-        volumeIcon.textContent = '🔉';
-    } else {
-        volumeIcon.textContent = '🔊';
-    }
-}
-
-// ===== EVENT LISTENERS للمشغل =====
-playerToggleBtn.addEventListener('click', (e) => {
-    if (e.shiftKey) {
-        // Shift + زر المشغل للتثبيت
-        togglePlayerPin();
-    } else {
-        togglePlayerVisibility();
-    }
-});
-
-playPauseBtn.addEventListener('click', playPause);
-prevBtn.addEventListener('click', prevTrack);
-nextBtn.addEventListener('click', nextTrack);
-
-progressBar.addEventListener('click', (e) => {
-    if (!mediaElement.src || !mediaElement.duration) return;
-    
-    const rect = progressBar.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    mediaElement.currentTime = percent * mediaElement.duration;
-});
-
-volumeSlider.addEventListener('input', (e) => {
-    const volume = e.target.value / 100;
-    mediaElement.volume = volume;
-});
-
-mediaElement.addEventListener('timeupdate', updateProgress);
-mediaElement.addEventListener('loadedmetadata', updateProgress);
-
-mediaElement.addEventListener('ended', () => {
-    // الانتقال للعنصر التالي عند الانتهاء
-    if (currentPlaylist.length > 1) {
-        nextTrack();
-    } else {
-        playPauseBtn.innerHTML = '▶';
-        playPauseBtn.title = 'تشغيل';
-    }
-});
-
-mediaElement.addEventListener('error', (e) => {
-    console.error('خطأ في تشغيل الوسائط:', e);
-    currentTrackTitle.textContent = 'خطأ في تشغيل الوسائط';
-    trackInfo.textContent = 'تعذر تحميل الملف';
-});
-
 // ===== LOGIN FUNCTION =====
 function login() {
     const rawUsername = usernameInput.value.trim();
     
+    // التحقق من صحة اسم المستخدم
     if (!rawUsername || rawUsername.length < 2) {
         alert("الرجاء إدخال اسم صحيح (حرفين على الأقل)");
         return;
@@ -1042,14 +505,20 @@ function login() {
         return;
     }
     
+    // تنظيف وإعداد اسم المستخدم
     username = escapeHtml(rawUsername);
     
+    // إخفاء شاشة الدخول وإظهار الشات
     loginScreen.style.display = "none";
     chatScreen.style.display = "block";
     
+    // تحميل الرسائل السابقة
     loadMessages();
+    
+    // إعداد حالة الاتصال
     setupConnection();
     
+    // التركيز على حقل الرسالة
     setTimeout(() => {
         messageInput.focus();
     }, 300);
@@ -1057,11 +526,14 @@ function login() {
 
 // ===== CONNECTION MANAGEMENT =====
 function setupConnection() {
+    // استماع لحالة الاتصال
     const connectedRef = db.ref(".info/connected");
     const connectionListener = connectedRef.on("value", (snap) => {
         if (snap.val()) {
+            // متصل
             connectionStatus.style.display = "none";
             
+            // تعيين حالة المستخدم كمتصل
             const onlineRef = db.ref("onlineUsers/" + encodeURIComponent(username));
             onlineRef.set({
                 name: username,
@@ -1069,27 +541,35 @@ function setupConnection() {
                 lastActive: Date.now()
             });
             
+            // تنظيف عند الخروج
             onlineRef.onDisconnect().remove();
             
+            // تنظيف حالة الكتابة عند الخروج
             const typingRef = db.ref("typing/" + encodeURIComponent(username));
             typingRef.onDisconnect().remove();
             
             connectionListeners.push(connectionListener);
         } else {
+            // غير متصل
             connectionStatus.style.display = "block";
         }
     });
     
+    // إعداد استماع للمستخدمين المتصلين
     setupOnlineUsers();
+    
+    // إعداد استماع لحالة الكتابة
     setupTyping();
 }
 
 // ===== MESSAGES MANAGEMENT =====
 function loadMessages() {
+    // إزالة أي مستمعين سابقين
     cleanupListeners();
     
     const chatRef = db.ref("messages");
     
+    // استماع للرسائل الجديدة فقط
     const messageListener = chatRef.limitToLast(30).on("child_added", (snap) => {
         const data = snap.val();
         if (!data) return;
@@ -1129,9 +609,6 @@ function renderMessage(data) {
     } else if (data.mediaType === "file") {
         div.innerHTML += `<div class="video">
             <video controls src="${escapeHtml(data.mediaId)}"></video>
-            <button class="media-play-btn" onclick="addToPlaylist(${JSON.stringify({id: data.mediaId, type: 'file'})}, '${escapeHtml(data.user)}')">
-                ➕ أضف إلى المشغل
-            </button>
         </div>`;
     } else if (data.mediaType === "image") {
         div.innerHTML += `<div class="image">
@@ -1141,15 +618,9 @@ function renderMessage(data) {
                 loading="lazy"
                 onerror="this.style.display='none'">
         </div>`;
-    } else if (data.mediaType === "audio") {
-        div.innerHTML += `<div class="audio">
-            <audio controls src="${escapeHtml(data.mediaId)}"></audio>
-            <button class="media-play-btn" onclick="addToPlaylist(${JSON.stringify({id: data.mediaId, type: 'audio'})}, '${escapeHtml(data.user)}')">
-                ➕ أضف إلى المشغل
-            </button>
-        </div>`;
     }
     
+    // إضافة الرسالة في البداية (لأننا نستخدم flex-direction: column-reverse)
     const loadingElement = messages.querySelector('.loading');
     if (loadingElement) {
         loadingElement.remove();
@@ -1157,6 +628,7 @@ function renderMessage(data) {
     
     messages.insertBefore(div, messages.firstChild);
     
+    // التمرير تلقائياً للأسفل إلا إذا كان المستخدم يقرأ رسائل قديمة
     if (!isScrolledUp) {
         setTimeout(() => {
             messages.scrollTop = 0;
@@ -1166,20 +638,13 @@ function renderMessage(data) {
 
 // ===== SEND MESSAGE =====
 function extractMedia(text) {
-    // يوتيوب
     const yt = text.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if (yt) return { type: "youtube", id: yt[1] };
     
-    // فيديو
-    const video = text.match(/https?:\/\/\S+\.(mp4|webm|ogg|mov|avi|wmv)/i);
-    if (video) return { type: "file", id: video[0] };
+    const mp4 = text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
+    if (mp4) return { type: "file", id: mp4[0] };
     
-    // صوت
-    const audio = text.match(/https?:\/\/\S+\.(mp3|wav|ogg|m4a|flac)/i);
-    if (audio) return { type: "audio", id: audio[0] };
-    
-    // صور
-    const img = text.match(/https?:\/\/\S+\.(jpg|jpeg|png|gif|webp|bmp)/i);
+    const img = text.match(/https?:\/\/\S+\.(jpg|jpeg|png|gif|webp)/i);
     if (img) return { type: "image", id: img[0] };
     
     return null;
@@ -1200,11 +665,14 @@ function send() {
         time: Date.now()
     });
     
+    // مسح حقل الإدخال
     messageInput.value = "";
     
+    // إزالة حالة الكتابة
     const typingRef = db.ref("typing/" + encodeURIComponent(username));
     typingRef.remove();
     
+    // التركيز مجدداً على الحقل
     messageInput.focus();
 }
 
@@ -1212,22 +680,26 @@ function send() {
 function setupTyping() {
     const typingRef = db.ref("typing");
     
+    // تحديث حالة الكتابة
     messageInput.addEventListener("input", () => {
         if (!username) return;
         
         const userTypingRef = db.ref("typing/" + encodeURIComponent(username));
         userTypingRef.set(Date.now());
         
+        // إزالة حالة الكتابة بعد 2 ثانية من التوقف
         clearTimeout(window.typingTimeout);
         window.typingTimeout = setTimeout(() => {
             userTypingRef.remove();
         }, 2000);
     });
     
+    // استماع لحالات الكتابة الأخرى
     const typingListener = typingRef.on("value", (snap) => {
         const data = snap.val() || {};
         const now = Date.now();
         
+        // فلترة المستخدمين الذين يكتبون حالياً (خلال آخر 2 ثانية)
         const activeTyping = Object.keys(data).filter(key => {
             const user = decodeURIComponent(key);
             return user !== username && (now - data[key] < 2000);
@@ -1256,8 +728,10 @@ function setupOnlineUsers() {
         const users = snap.val() || {};
         const userNames = Object.keys(users);
         
+        // تحديث العداد
         onlineCount.textContent = userNames.length;
         
+        // تحديث القائمة
         onlineUsersList.innerHTML = userNames.map(key => {
             const userData = users[key];
             const userName = userData.name || decodeURIComponent(key);
@@ -1278,6 +752,7 @@ messages.addEventListener('scroll', () => {
     const scrollHeight = messages.scrollHeight;
     const clientHeight = messages.clientHeight;
     
+    // إذا كان المستخدم بعيداً عن الأسفل بمسافة كبيرة
     isScrolledUp = scrollTop < scrollHeight - clientHeight - 100;
 });
 
@@ -1290,7 +765,7 @@ function closePopup() {
     overlay.style.display = "none";
 }
 
-// ===== KEYBOARD SHORTCUTS =====
+// ===== KEYBOARD EVENTS =====
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -1298,32 +773,9 @@ messageInput.addEventListener("keydown", (e) => {
     }
 });
 
-// اختصارات لوحة المفاتيح للمشغل
-document.addEventListener('keydown', (e) => {
-    // Space للتحكم في التشغيل/الإيقاف
-    if (e.target === document.body && e.key === ' ') {
-        e.preventDefault();
-        if (mediaElement.src) {
-            playPause();
-        }
-    }
-    
-    // Ctrl+Arrow للتحكم في الصوت
-    if (e.ctrlKey) {
-        if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            volumeSlider.value = Math.min(100, parseInt(volumeSlider.value) + 10);
-            volumeSlider.dispatchEvent(new Event('input'));
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            volumeSlider.value = Math.max(0, parseInt(volumeSlider.value) - 10);
-            volumeSlider.dispatchEvent(new Event('input'));
-        }
-    }
-});
-
 // ===== MEMORY MANAGEMENT =====
 function cleanupListeners() {
+    // تنظيف جميع المستمعين
     messageListeners.forEach(listener => {
         if (listener && typeof listener === 'function') {
             const chatRef = db.ref("messages");
@@ -1352,6 +804,7 @@ function cleanupListeners() {
         }
     });
     
+    // تفريغ المصفوفات
     messageListeners = [];
     typingListeners = [];
     onlineListeners = [];
@@ -1362,58 +815,35 @@ function cleanupListeners() {
 function logout() {
     if (!username) return;
     
+    // تنظيف من قاعدة البيانات
     const onlineRef = db.ref("onlineUsers/" + encodeURIComponent(username));
     onlineRef.remove();
     
     const typingRef = db.ref("typing/" + encodeURIComponent(username));
     typingRef.remove();
     
+    // تنظيف المستمعين
     cleanupListeners();
     
-    // إيقاف المشغل
-    mediaElement.pause();
-    mediaElement.src = '';
-    currentPlaylist = [];
-    currentTrackIndex = -1;
-    
+    // إعادة التعيين
     username = "";
     lastMessageKey = null;
     isScrolledUp = false;
-    isPlayerVisible = false;
-    isPlayerPinned = false;
     
+    // إعادة العرض
     chatScreen.style.display = "none";
     loginScreen.style.display = "flex";
     usernameInput.value = "";
     messages.innerHTML = '<div class="loading">جارٍ تحميل الرسائل...</div>';
-    mediaPlayerContainer.classList.remove('visible');
-    messages.classList.remove('with-player');
-    updatePlayerToggleButton();
 }
 
 // ===== PAGE VISIBILITY =====
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+        // الصفحة غير مرئية
         if (username) {
             const typingRef = db.ref("typing/" + encodeURIComponent(username));
             typingRef.remove();
-        }
-        
-        // حفظ حالة المشغل
-        if (mediaElement.src) {
-            lastPlayerState = {
-                currentTime: mediaElement.currentTime,
-                isPlaying: !mediaElement.paused
-            };
-            mediaElement.pause();
-        }
-    } else {
-        // استعادة حالة المشغل
-        if (lastPlayerState && mediaElement.src) {
-            mediaElement.currentTime = lastPlayerState.currentTime;
-            if (lastPlayerState.isPlaying) {
-                mediaElement.play();
-            }
         }
     }
 });
@@ -1427,12 +857,10 @@ window.addEventListener('beforeunload', () => {
 window.onload = () => {
     usernameInput.focus();
     
+    // تحسين تجربة الهاتف
     if ('ontouchstart' in window) {
         document.body.classList.add('touch-device');
     }
-    
-    // تعيين حجم الصوت الافتراضي
-    mediaElement.volume = volumeSlider.value / 100;
 };
 </script>
 
