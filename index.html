@@ -13,383 +13,64 @@
 body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan-y}
 
 /* ===== LOGIN ===== */
-#loginScreen{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    background: linear-gradient(135deg, #36393f 0%, #2f3136 100%);
-}
-#loginContainer{
-    background:#2f3136;
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.3);
-    width:100%;
-    max-width:400px;
-}
-#loginScreen h2{
-    margin-bottom:20px;
-    text-align:center;
-    color:#7289da;
-}
-#loginScreen input{
-    padding:12px 15px;
-    margin-bottom:15px;
-    width:100%;
-    border:2px solid #40444b;
-    border-radius:8px;
-    background:#40444b;
-    color:#fff;
-    font-size:16px;
-}
-#loginScreen input:focus{
-    outline:none;
-    border-color:#7289da;
-}
-#loginScreen button{
-    padding:12px 20px;
-    width:100%;
-    background:#7289da;
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:background 0.3s;
-}
-#loginScreen button:hover{
-    background:#5f73bc;
-}
-#loginScreen button:active{
-    transform:scale(0.98);
-}
+#loginScreen{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;background: linear-gradient(135deg, #36393f 0%, #2f3136 100%);}
+#loginContainer{background:#2f3136;padding:30px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);width:100%;max-width:400px;}
+#loginScreen h2{margin-bottom:20px;text-align:center;color:#7289da;}
+#loginScreen input{padding:12px 15px;margin-bottom:15px;width:100%;border:2px solid #40444b;border-radius:8px;background:#40444b;color:#fff;font-size:16px;}
+#loginScreen input:focus{outline:none;border-color:#7289da;}
+#loginScreen button{padding:12px 20px;width:100%;background:#7289da;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:background 0.3s;}
+#loginScreen button:hover{background:#5f73bc;}
+#loginScreen button:active{transform:scale(0.98);}
 
 /* ===== CHAT ===== */
-#chatScreen{display:none;height:100vh}
+#chatScreen{display:none;height:100vh;position:relative}
 
 /* ===== TOP BAR ===== */
-#topBar{
-    position:fixed;
-    top:0;
-    width:100%;
-    background:#2f3136;
-    padding:12px 16px;
-    font-size:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    z-index:20;
-    border-bottom:1px solid #202225;
-    height:60px;
-}
-#myStatus{
-    color:#43b581;
-    font-weight:bold;
-}
-#onlineBtn{
-    cursor:pointer;
-    color:#9aff9a;
-    background:#202225;
-    padding:6px 12px;
-    border-radius:6px;
-    font-size:13px;
-    transition:background 0.3s;
-}
-#onlineBtn:active{
-    background:#36393f;
-}
+#topBar{position:fixed;top:0;width:100%;background:#2f3136;padding:12px 16px;font-size:14px;display:flex;justify-content:space-between;align-items:center;z-index:20;border-bottom:1px solid #202225;height:60px;}
+#myStatus{color:#43b581;font-weight:bold;}
+#onlineBtn, #adminBtn{cursor:pointer;background:#202225;padding:6px 12px;border-radius:6px;font-size:13px;transition:background 0.3s;margin-left:8px;}
+#onlineBtn:active, #adminBtn:active{background:#36393f;}
 
-/* ===== POPUP ===== */
-#overlay{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.7);
-    display:none;
-    z-index:30;
-    animation:fadeIn 0.3s;
-}
-@keyframes fadeIn{
-    from{opacity:0} to{opacity:1}
-}
-#onlinePopup{
-    background:#2f3136;
-    width:90%;
-    max-width:300px;
-    max-height:80vh;
-    overflow-y:auto;
-    padding:16px;
-    border-radius:12px;
-    position:absolute;
-    top:70px;
-    right:5%;
-    border:1px solid #202225;
-    box-shadow:0 4px 20px rgba(0,0,0,0.5);
-}
-#onlinePopup h4{
-    margin-bottom:12px;
-    font-size:16px;
-    text-align:center;
-    color:#7289da;
-    padding-bottom:8px;
-    border-bottom:1px solid #40444b;
-}
-.user{
-    font-size:14px;
-    margin-bottom:8px;
-    padding:6px 10px;
-    border-radius:6px;
-    transition:background 0.2s;
-}
-.user:hover{
-    background:#40444b;
-}
-.user.you{
-    background:rgba(114,137,218,0.2);
-    border-right:3px solid #7289da;
-}
+/* ===== POPUPS ===== */
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;z-index:30;animation:fadeIn 0.3s;}
+@keyframes fadeIn{from{opacity:0} to{opacity:1}}
+#onlinePopup,#adminPopup{background:#2f3136;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;padding:16px;border-radius:12px;position:absolute;top:70px;right:5%;border:1px solid #202225;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+#onlinePopup h4,#adminPopup h4{margin-bottom:12px;font-size:16px;text-align:center;color:#7289da;padding-bottom:8px;border-bottom:1px solid #40444b;}
+.user{font-size:14px;margin-bottom:8px;padding:6px 10px;border-radius:6px;transition:background 0.2s;}
+.user:hover{background:#40444b;}
+.user.you{background:rgba(114,137,218,0.2);border-right:3px solid #7289da;}
 
 /* ===== MESSAGES ===== */
-.messages{
-    position:absolute;
-    top:60px;
-    bottom:110px;
-    width:100%;
-    overflow-y:auto;
-    padding:10px;
-    display:flex;
-    flex-direction:column-reverse; /* الرسائل من الأسفل للأعلى */
-    scroll-behavior:smooth;
-}
-
-/* إخفاء شريط التمرير ولكن مع إمكانية التمرير */
+.messages{position:absolute;top:60px;bottom:110px;width:100%;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;scroll-behavior:smooth;direction:rtl;}
 .messages::-webkit-scrollbar{width:6px}
 .messages::-webkit-scrollbar-track{background:#2f3136}
 .messages::-webkit-scrollbar-thumb{background:#7289da;border-radius:3px}
 .messages::-webkit-scrollbar-thumb:hover{background:#5f73bc}
 
-.message{
-    margin-bottom:16px;
-    padding:8px 12px;
-    border-radius:8px;
-    animation:fadeInUp 0.3s;
-    max-width:85%;
-    word-wrap:break-word;
-}
-@keyframes fadeInUp{
-    from{opacity:0;transform:translateY(10px)}
-    to{opacity:1;transform:translateY(0)}
-}
-.message.mine{
-    background:rgba(114,137,218,0.15);
-    align-self:flex-end;
-    margin-left:auto;
-    margin-right:0;
-}
-.message.other{
-    background:rgba(79,84,92,0.15);
-    align-self:flex-start;
-    margin-left:0;
-    margin-right:auto;
-}
-.name{
-    font-weight:bold;
-    font-size:14px;
-    margin-bottom:4px;
-    color:#7289da;
-}
-.message.other .name{
-    color:#43b581;
-}
-.text{
-    margin-top:4px;
-    font-size:15px;
-    line-height:1.4;
-}
-.time{
-    font-size:11px;
-    color:#aaa;
-    margin-top:6px;
-    text-align:left;
-    direction:ltr;
-}
-.video iframe, .video video{
-    width:100%;
-    max-width:560px;
-    height:315px;
-    margin-top:8px;
-    border-radius:8px;
-    border:none;
-}
-.image img{
-    max-width:100%;
-    max-height:400px;
-    border-radius:8px;
-    margin-top:8px;
-    display:block;
-}
+.message{margin-bottom:12px;padding:8px 12px;border-radius:8px;animation:fadeInUp 0.3s;word-wrap:break-word;display:flex;align-items:center;gap:6px;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)}}
+.name{font-weight:bold;font-size:14px;color:#7289da;}
+.text{font-size:15px;line-height:1.4;}
+.time{font-size:11px;color:#aaa;}
 
 /* ===== TYPING ===== */
-#typingStatus{
-    position:fixed;
-    bottom:70px;
-    padding:8px 16px;
-    font-size:13px;
-    color:#aaa;
-    background:#2f3136;
-    border-radius:20px;
-    margin:0 16px;
-    right:0;
-    animation:fadeIn 0.3s;
-    border:1px solid #40444b;
-}
+#typingStatus{position:fixed;bottom:70px;padding:4px 12px;font-size:13px;color:#aaa;right:16px;}
 
 /* ===== INPUT ===== */
-.input-box{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    background:#2f3136;
-    border-top:1px solid #202225;
-    padding:8px 0;
-}
-.input-row{
-    display:flex;
-    padding:0 8px;
-    gap:8px;
-}
-.input-row input{
-    flex:1;
-    border:none;
-    padding:12px 16px;
-    border-radius:25px;
-    background:#40444b;
-    color:#fff;
-    font-size:15px;
-    min-height:44px; /* للحصول على منطقة لمس أفضل */
-}
-.input-row input:focus{
-    outline:none;
-}
-.input-row button{
-    border:none;
-    border-radius:50%;
-    width:44px;
-    height:44px;
-    background:#7289da;
-    color:#fff;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background 0.3s;
-    font-size:18px;
-}
-.input-row button:active{
-    background:#5f73bc;
-    transform:scale(0.95);
-}
+.input-box{position:fixed;bottom:0;width:100%;background:#2f3136;border-top:1px solid #202225;padding:8px 0;}
+.input-row{display:flex;padding:0 8px;gap:8px;}
+.input-row input{flex:1;border:none;padding:12px 16px;border-radius:25px;background:#40444b;color:#fff;font-size:15px;min-height:44px;}
+.input-row input:focus{outline:none;}
+.input-row button{border:none;border-radius:50%;width:44px;height:44px;background:#7289da;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.3s;font-size:18px;}
+.input-row button:active{background:#5f73bc;transform:scale(0.95);}
 
 /* ===== CONNECTION STATUS ===== */
-#connectionStatus{
-    position:fixed;
-    top:60px;
-    width:100%;
-    background:#faa81a;
-    color:#000;
-    text-align:center;
-    padding:10px;
-    font-size:14px;
-    z-index:15;
-    display:none;
-    font-weight:bold;
-}
+#connectionStatus{position:fixed;top:60px;width:100%;background:#faa81a;color:#000;text-align:center;padding:10px;font-size:14px;z-index:15;display:none;font-weight:bold;}
 
 /* ===== LOADING ===== */
-.loading{
-    text-align:center;
-    padding:20px;
-    color:#aaa;
-    font-size:14px;
-}
-
-/* ===== MEDIA QUERIES للهواتف ===== */
-@media (max-width: 768px){
-    #loginContainer{
-        padding:20px;
-        margin:10px;
-    }
-    
-    .message{
-        max-width:90%;
-        padding:10px;
-    }
-    
-    .video iframe, .video video{
-        height:200px;
-    }
-    
-    #onlinePopup{
-        width:95%;
-        right:2.5%;
-    }
-    
-    .input-row{
-        padding:0 12px;
-    }
-    
-    .messages{
-        padding:12px;
-    }
-}
-
-@media (max-width: 480px){
-    #topBar{
-        padding:10px;
-        font-size:13px;
-        height:55px;
-    }
-    
-    .messages{
-        top:55px;
-        bottom:100px;
-    }
-    
-    .input-row input{
-        font-size:14px;
-        padding:10px 14px;
-    }
-    
-    .video iframe, .video video{
-        height:180px;
-    }
-    
-    .message{
-        max-width:95%;
-    }
-}
-
-/* تحسينات للأجهزة اللوحية */
-@media (min-width: 769px) and (max-width: 1024px){
-    .messages{
-        padding:20px;
-        max-width:800px;
-        margin:0 auto;
-    }
-    
-    .message{
-        max-width:80%;
-    }
-}
+.loading{text-align:center;padding:20px;color:#aaa;font-size:14px;}
 </style>
 </head>
-
 <body>
 
 <!-- LOGIN -->
@@ -403,20 +84,32 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
 
 <!-- CHAT -->
 <div id="chatScreen">
-    <!-- TOP BAR -->
     <div id="topBar">
         <span id="myStatus">🟢 متصل</span>
-        <span id="onlineBtn">👥 المتصلون (<span id="onlineCount">0</span>)</span>
+        <div>
+            <span id="onlineBtn">👥 المتصلون (<span id="onlineCount">0</span>)</span>
+            <span id="adminBtn">⚙️ لوحة التحكم</span>
+        </div>
     </div>
 
-    <!-- CONNECTION STATUS -->
     <div id="connectionStatus">🔄 جاري إعادة الاتصال...</div>
 
-    <!-- POPUP -->
+    <!-- POPUPS -->
     <div id="overlay" onclick="closePopup()">
         <div id="onlinePopup" onclick="event.stopPropagation()">
             <h4>👥 المتصلون الآن</h4>
             <div id="onlineUsersList"></div>
+        </div>
+        <div id="adminPopup" onclick="event.stopPropagation()">
+            <h4>⚙️ لوحة التحكم</h4>
+            <div id="adminControls">
+                <h5>🔹 التحكم بالشات</h5>
+                <button onclick="clearMessages()">🧹 مسح كل الرسائل</button>
+                <button onclick="toggleTyping()">✏️ السماح/حظر الكتابة</button>
+                <h5>🔹 التحكم بالمستخدمين</h5>
+                <button onclick="kickAll()">🚫 طرد جميع المستخدمين</button>
+                <button onclick="kickUserPrompt()">👤 طرد مستخدم محدد</button>
+            </div>
         </div>
     </div>
 
@@ -433,17 +126,14 @@ body{background:#36393f;color:#fff;height:100vh;overflow:hidden;touch-action:pan
             <button onclick="send()" id="sendBtn">➤</button>
         </div>
     </div>
-
 </div>
 
 <script>
-// ===== FIREBASE CONFIG (يجب نقل هذا لملف منفصل في الإنتاج) =====
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
     apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
     databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
 };
-
-// ===== INITIALIZATION =====
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -455,6 +145,8 @@ let onlineListeners = [];
 let connectionListeners = [];
 let lastMessageKey = null;
 let isScrolledUp = false;
+let adminName = "admin"; // يمكن تغييره لاحقًا
+let typingAllowed = true;
 
 // ===== DOM ELEMENTS =====
 const usernameInput = document.getElementById("usernameInput");
@@ -467,402 +159,124 @@ const onlineCount = document.getElementById("onlineCount");
 const onlineUsersList = document.getElementById("onlineUsersList");
 const overlay = document.getElementById("overlay");
 const onlineBtn = document.getElementById("onlineBtn");
+const adminBtn = document.getElementById("adminBtn");
 const connectionStatus = document.getElementById("connectionStatus");
-const loginBtn = document.getElementById("loginBtn");
-const sendBtn = document.getElementById("sendBtn");
 
-// ===== UTILITY FUNCTIONS =====
-// دالة لمنع هجمات XSS
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// دالة لتحويل الوقت
-function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('ar-SA', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
-}
-
-// ===== LOGIN FUNCTION =====
+// ===== LOGIN =====
 function login() {
     const rawUsername = usernameInput.value.trim();
-    
-    // التحقق من صحة اسم المستخدم
-    if (!rawUsername || rawUsername.length < 2) {
-        alert("الرجاء إدخال اسم صحيح (حرفين على الأقل)");
-        return;
-    }
-    
-    if (rawUsername.length > 20) {
-        alert("الاسم طويل جداً (20 حرف كحد أقصى)");
-        return;
-    }
-    
-    // تنظيف وإعداد اسم المستخدم
+    if (!rawUsername || rawUsername.length < 2) { alert("الرجاء إدخال اسم صحيح (حرفين على الأقل)"); return; }
+    if (rawUsername.length > 20) { alert("الاسم طويل جداً (20 حرف كحد أقصى)"); return; }
     username = escapeHtml(rawUsername);
-    
-    // إخفاء شاشة الدخول وإظهار الشات
     loginScreen.style.display = "none";
     chatScreen.style.display = "block";
-    
-    // تحميل الرسائل السابقة
     loadMessages();
-    
-    // إعداد حالة الاتصال
     setupConnection();
-    
-    // التركيز على حقل الرسالة
-    setTimeout(() => {
-        messageInput.focus();
-    }, 300);
+    setTimeout(()=>{messageInput.focus()},300);
 }
 
-// ===== CONNECTION MANAGEMENT =====
+// ===== CONNECTION =====
 function setupConnection() {
-    // استماع لحالة الاتصال
     const connectedRef = db.ref(".info/connected");
-    const connectionListener = connectedRef.on("value", (snap) => {
-        if (snap.val()) {
-            // متصل
-            connectionStatus.style.display = "none";
-            
-            // تعيين حالة المستخدم كمتصل
-            const onlineRef = db.ref("onlineUsers/" + encodeURIComponent(username));
-            onlineRef.set({
-                name: username,
-                status: "online",
-                lastActive: Date.now()
-            });
-            
-            // تنظيف عند الخروج
+    connectedRef.on("value", (snap)=>{
+        if(snap.val()){
+            connectionStatus.style.display="none";
+            const onlineRef = db.ref("onlineUsers/"+encodeURIComponent(username));
+            onlineRef.set({name:username,status:"online",lastActive:Date.now()});
             onlineRef.onDisconnect().remove();
-            
-            // تنظيف حالة الكتابة عند الخروج
-            const typingRef = db.ref("typing/" + encodeURIComponent(username));
-            typingRef.onDisconnect().remove();
-            
-            connectionListeners.push(connectionListener);
-        } else {
-            // غير متصل
-            connectionStatus.style.display = "block";
-        }
+            db.ref("typing/"+encodeURIComponent(username)).onDisconnect().remove();
+        } else { connectionStatus.style.display="block"; }
     });
-    
-    // إعداد استماع للمستخدمين المتصلين
     setupOnlineUsers();
-    
-    // إعداد استماع لحالة الكتابة
     setupTyping();
 }
 
-// ===== MESSAGES MANAGEMENT =====
-function loadMessages() {
-    // إزالة أي مستمعين سابقين
-    cleanupListeners();
-    
+// ===== MESSAGES =====
+function loadMessages(){
     const chatRef = db.ref("messages");
-    
-    // استماع للرسائل الجديدة فقط
-    const messageListener = chatRef.limitToLast(30).on("child_added", (snap) => {
-        const data = snap.val();
-        if (!data) return;
-        
-        lastMessageKey = snap.key;
+    chatRef.limitToLast(50).on("child_added",(snap)=>{
+        const data = snap.val(); if(!data) return;
         renderMessage(data);
     });
-    
-    messageListeners.push(messageListener);
 }
 
-function renderMessage(data) {
-    const isMine = data.user === username;
-    const messageClass = isMine ? "message mine" : "message other";
-    
+function renderMessage(data){
     const div = document.createElement("div");
-    div.className = messageClass;
-    
-    // اسم المستخدم
-    div.innerHTML = `<div class="name">${escapeHtml(data.user)}</div>`;
-    
-    // نص الرسالة
-    div.innerHTML += `<div class="text">${escapeHtml(data.text)}</div>`;
-    
-    // الوقت
-    div.innerHTML += `<div class="time">${formatTime(data.time)}</div>`;
-    
-    // معالجة الوسائط
-    if (data.mediaType === "youtube") {
-        div.innerHTML += `<div class="video">
-            <iframe 
-                src="https://www.youtube.com/embed/${escapeHtml(data.mediaId)}" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
-        </div>`;
-    } else if (data.mediaType === "file") {
-        div.innerHTML += `<div class="video">
-            <video controls src="${escapeHtml(data.mediaId)}"></video>
-        </div>`;
-    } else if (data.mediaType === "image") {
-        div.innerHTML += `<div class="image">
-            <img 
-                src="${escapeHtml(data.mediaId)}" 
-                alt="صورة" 
-                loading="lazy"
-                onerror="this.style.display='none'">
-        </div>`;
-    }
-    
-    // إضافة الرسالة في البداية (لأننا نستخدم flex-direction: column-reverse)
-    const loadingElement = messages.querySelector('.loading');
-    if (loadingElement) {
-        loadingElement.remove();
-    }
-    
-    messages.insertBefore(div, messages.firstChild);
-    
-    // التمرير تلقائياً للأسفل إلا إذا كان المستخدم يقرأ رسائل قديمة
-    if (!isScrolledUp) {
-        setTimeout(() => {
-            messages.scrollTop = 0;
-        }, 100);
-    }
+    div.className="message";
+    div.innerHTML=`<span class="name">${escapeHtml(data.user)}:</span> <span class="text">${escapeHtml(data.text)}</span> <span class="time">${formatTime(data.time)}</span>`;
+    messages.insertBefore(div,messages.firstChild);
+    if(!isScrolledUp){setTimeout(()=>{messages.scrollTop=0},100);}
 }
 
 // ===== SEND MESSAGE =====
-function extractMedia(text) {
-    const yt = text.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if (yt) return { type: "youtube", id: yt[1] };
-    
-    const mp4 = text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
-    if (mp4) return { type: "file", id: mp4[0] };
-    
-    const img = text.match(/https?:\/\/\S+\.(jpg|jpeg|png|gif|webp)/i);
-    if (img) return { type: "image", id: img[0] };
-    
-    return null;
-}
-
-function send() {
+function send(){
+    if(!typingAllowed){ alert("الكتابة محظورة من قبل المدير"); return; }
     const text = messageInput.value.trim();
-    if (!text || !username) return;
-    
-    const media = extractMedia(text);
-    
+    if(!text||!username) return;
     const chatRef = db.ref("messages");
-    chatRef.push({
-        user: username,
-        text: text,
-        mediaType: media ? media.type : null,
-        mediaId: media ? media.id : null,
-        time: Date.now()
-    });
-    
-    // مسح حقل الإدخال
-    messageInput.value = "";
-    
-    // إزالة حالة الكتابة
-    const typingRef = db.ref("typing/" + encodeURIComponent(username));
-    typingRef.remove();
-    
-    // التركيز مجدداً على الحقل
+    chatRef.push({user:username,text:text,time:Date.now()});
+    messageInput.value="";
+    db.ref("typing/"+encodeURIComponent(username)).remove();
     messageInput.focus();
 }
 
-// ===== TYPING MANAGEMENT =====
-function setupTyping() {
-    const typingRef = db.ref("typing");
-    
-    // تحديث حالة الكتابة
-    messageInput.addEventListener("input", () => {
-        if (!username) return;
-        
-        const userTypingRef = db.ref("typing/" + encodeURIComponent(username));
+// ===== TYPING =====
+function setupTyping(){
+    const typingRef=db.ref("typing");
+    messageInput.addEventListener("input",()=>{
+        if(!username) return;
+        const userTypingRef = db.ref("typing/"+encodeURIComponent(username));
         userTypingRef.set(Date.now());
-        
-        // إزالة حالة الكتابة بعد 2 ثانية من التوقف
         clearTimeout(window.typingTimeout);
-        window.typingTimeout = setTimeout(() => {
-            userTypingRef.remove();
-        }, 2000);
+        window.typingTimeout=setTimeout(()=>{userTypingRef.remove()},2000);
     });
-    
-    // استماع لحالات الكتابة الأخرى
-    const typingListener = typingRef.on("value", (snap) => {
-        const data = snap.val() || {};
-        const now = Date.now();
-        
-        // فلترة المستخدمين الذين يكتبون حالياً (خلال آخر 2 ثانية)
-        const activeTyping = Object.keys(data).filter(key => {
-            const user = decodeURIComponent(key);
-            return user !== username && (now - data[key] < 2000);
-        });
-        
-        if (activeTyping.length === 0) {
-            typingStatus.textContent = "";
-        } else {
-            const names = activeTyping.map(key => decodeURIComponent(key));
-            if (names.length === 1) {
-                typingStatus.textContent = `${names[0]} يكتب الآن...`;
-            } else {
-                typingStatus.textContent = `${names.length} أشخاص يكتبون الآن...`;
-            }
-        }
+    typingRef.on("value",(snap)=>{
+        const data = snap.val()||{}; const now = Date.now();
+        const activeTyping = Object.keys(data).filter(key=>decodeURIComponent(key)!==username&&(now-data[key]<2000));
+        typingStatus.textContent = activeTyping.length===0?"":`${activeTyping.map(k=>decodeURIComponent(k)).join(", ")} يكتب الآن...`;
     });
-    
-    typingListeners.push(typingListener);
 }
 
-// ===== ONLINE USERS MANAGEMENT =====
-function setupOnlineUsers() {
+// ===== ONLINE USERS =====
+function setupOnlineUsers(){
     const onlineRef = db.ref("onlineUsers");
-    
-    const onlineListener = onlineRef.on("value", (snap) => {
-        const users = snap.val() || {};
+    onlineRef.on("value",(snap)=>{
+        const users = snap.val()||{};
         const userNames = Object.keys(users);
-        
-        // تحديث العداد
         onlineCount.textContent = userNames.length;
-        
-        // تحديث القائمة
-        onlineUsersList.innerHTML = userNames.map(key => {
+        onlineUsersList.innerHTML = userNames.map(key=>{
             const userData = users[key];
-            const userName = userData.name || decodeURIComponent(key);
-            const isYou = userName === username;
-            
-            return `<div class="user ${isYou ? 'you' : ''}">
-                🟢 ${escapeHtml(userName)} ${isYou ? '(أنت)' : ''}
-            </div>`;
+            const userName = userData.name||decodeURIComponent(key);
+            const isYou = userName===username;
+            return `<div class="user ${isYou?'you':''}">🟢 ${escapeHtml(userName)} ${isYou?'(أنت)':''}</div>`;
         }).join('');
     });
-    
-    onlineListeners.push(onlineListener);
 }
 
-// ===== SCROLL MANAGEMENT =====
-messages.addEventListener('scroll', () => {
-    const scrollTop = messages.scrollTop;
-    const scrollHeight = messages.scrollHeight;
-    const clientHeight = messages.clientHeight;
-    
-    // إذا كان المستخدم بعيداً عن الأسفل بمسافة كبيرة
-    isScrolledUp = scrollTop < scrollHeight - clientHeight - 100;
+// ===== POPUPS =====
+onlineBtn.onclick = ()=>{overlay.style.display="block";document.getElementById('onlinePopup').style.display="block";document.getElementById('adminPopup').style.display="none";}
+adminBtn.onclick = ()=>{ if(username!==adminName){alert("ليست لديك صلاحيات الإدارة"); return;} overlay.style.display="block";document.getElementById('adminPopup').style.display="block";document.getElementById('onlinePopup').style.display="none";}
+function closePopup(){overlay.style.display="none";}
+
+// ===== ADMIN FUNCTIONS =====
+function clearMessages(){if(confirm("مسح كل الرسائل؟")) db.ref("messages").remove();}
+function toggleTyping(){typingAllowed=!typingAllowed;alert(typingAllowed?"تم السماح بالكتابة":"تم حظر الكتابة");}
+function kickAll(){if(confirm("طرد جميع المستخدمين؟")) db.ref("onlineUsers").remove();}
+function kickUserPrompt(){const u=prompt("ادخل اسم المستخدم للطرد"); if(u) db.ref("onlineUsers/"+encodeURIComponent(u)).remove();}
+
+// ===== UTILITIES =====
+function escapeHtml(text){if(!text) return ''; const div=document.createElement('div'); div.textContent=text; return div.innerHTML;}
+function formatTime(ts){const d=new Date(ts); return d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit',hour12:true});}
+
+// ===== SCROLL =====
+messages.addEventListener('scroll',()=>{
+    const scrollTop=messages.scrollTop,scrollHeight=messages.scrollHeight,clientHeight=messages.clientHeight;
+    isScrolledUp=scrollTop<scrollHeight-clientHeight-100;
 });
 
-// ===== POPUP MANAGEMENT =====
-onlineBtn.onclick = () => {
-    overlay.style.display = "block";
-};
+// ===== ENTER KEY =====
+messageInput.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
 
-function closePopup() {
-    overlay.style.display = "none";
-}
-
-// ===== KEYBOARD EVENTS =====
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        send();
-    }
-});
-
-// ===== MEMORY MANAGEMENT =====
-function cleanupListeners() {
-    // تنظيف جميع المستمعين
-    messageListeners.forEach(listener => {
-        if (listener && typeof listener === 'function') {
-            const chatRef = db.ref("messages");
-            chatRef.off("child_added", listener);
-        }
-    });
-    
-    typingListeners.forEach(listener => {
-        if (listener && typeof listener === 'function') {
-            const typingRef = db.ref("typing");
-            typingRef.off("value", listener);
-        }
-    });
-    
-    onlineListeners.forEach(listener => {
-        if (listener && typeof listener === 'function') {
-            const onlineRef = db.ref("onlineUsers");
-            onlineRef.off("value", listener);
-        }
-    });
-    
-    connectionListeners.forEach(listener => {
-        if (listener && typeof listener === 'function') {
-            const connectedRef = db.ref(".info/connected");
-            connectedRef.off("value", listener);
-        }
-    });
-    
-    // تفريغ المصفوفات
-    messageListeners = [];
-    typingListeners = [];
-    onlineListeners = [];
-    connectionListeners = [];
-}
-
-// ===== LOGOUT FUNCTION =====
-function logout() {
-    if (!username) return;
-    
-    // تنظيف من قاعدة البيانات
-    const onlineRef = db.ref("onlineUsers/" + encodeURIComponent(username));
-    onlineRef.remove();
-    
-    const typingRef = db.ref("typing/" + encodeURIComponent(username));
-    typingRef.remove();
-    
-    // تنظيف المستمعين
-    cleanupListeners();
-    
-    // إعادة التعيين
-    username = "";
-    lastMessageKey = null;
-    isScrolledUp = false;
-    
-    // إعادة العرض
-    chatScreen.style.display = "none";
-    loginScreen.style.display = "flex";
-    usernameInput.value = "";
-    messages.innerHTML = '<div class="loading">جارٍ تحميل الرسائل...</div>';
-}
-
-// ===== PAGE VISIBILITY =====
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        // الصفحة غير مرئية
-        if (username) {
-            const typingRef = db.ref("typing/" + encodeURIComponent(username));
-            typingRef.remove();
-        }
-    }
-});
-
-// ===== BEFORE UNLOAD =====
-window.addEventListener('beforeunload', () => {
-    logout();
-});
-
-// ===== INITIAL FOCUS =====
-window.onload = () => {
-    usernameInput.focus();
-    
-    // تحسين تجربة الهاتف
-    if ('ontouchstart' in window) {
-        document.body.classList.add('touch-device');
-    }
-};
 </script>
-
 </body>
 </html>
