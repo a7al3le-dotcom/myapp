@@ -1,227 +1,863 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-
-  <!-- الإضافة الوحيدة للجوال -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>غرفة الدردشة</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
+  <meta charset="UTF-8" />
+  <title>public-room - مشغل + دردشة بأسلوب ديسكورد</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* الإضافة الوحيدة للجوال */
-    html, body {
-      width: 100%;
-      overflow-x: hidden;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background-color: #f9f9f9; display: flex; flex-direction: column;
-      height: 100vh; overflow: hidden;
+      margin: 0;
+      background: #020617;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      height: 100vh;
+      max-height: 900px;
+      background: #020617;
+      border-radius: 12px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    @media (max-width: 900px) {
+      .app {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+      }
     }
 
-    #login-screen {
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #545E6B; z-index: 100;
+    /* شاشة الدخول */
+    .login-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
     }
-    .login-box { background-color: #fff; padding: 30px; text-align: center; width: 300px; }
-    .login-box h2 { margin-top: 0; margin-bottom: 20px; color: #333; }
-    #username-input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; box-sizing: border-box; }
-    #login-btn { width: 100%; padding: 10px; border: none; background-color: #545E6B; color: white; font-size: 16px; cursor: pointer; }
-    #login-error { color: red; margin-top: 10px; display: none; }
-
-    #chat-container { display: none; flex-direction: column; height: 100%; }
-
-    .messages { flex: 1; overflow-y: auto; padding: 0; background: #fff; }
-    .uzr {
-      display: flex; width: 100%; border-bottom: 1px solid lavender;
-      margin: 0; padding: 4px 2px; background: #fff;
+    .login-card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 20px 18px;
+      width: 90%;
+      max-width: 360px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-    .u-pic {
-      min-width: 52px; width: 52px; height: 46px; background-color: #f3f3f3;
-      background-size: cover; background-position: center; border: 1px solid #ddd; cursor: pointer;
+    .login-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-align: center;
     }
-    .msg-body {
-      flex: 1; padding-left: 5px; padding-top: 1px; display: flex;
-      flex-direction: column; overflow: hidden;
+    .login-sub {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 16px;
+      text-align: center;
     }
-    .msg-top {
-      display: flex; justify-content: space-between; height: 21px;
-      align-items: center; width: 100%;
+    .login-card label {
+      font-size: 13px;
+      margin-bottom: 4px;
+      display: block;
     }
-    .user-wrapper { display: flex; align-items: center; }
-    .u-ico { min-height: 14px; height: 14px; margin-right: 2px; }
-
-    .u-topic {
-      padding: 1px 4px;
-      margin-left: 4px;
-      border-radius: 0;
-      color: #000;
-      background-color: transparent;
+    .login-card input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .login-card button {
+      width: 100%;
+      padding: 9px 0;
+      border-radius: 8px;
       border: none;
+      background: #6366f1;
+      color: #e5e7eb;
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
     }
-    .minix { font-size: 11px; color: grey; margin-right: 5px; }
-    .u-msg {
-      padding: 1px 1px 1px 5px; width: 100%; color: #000;
-      font-size: 14px;
-      word-wrap: break-word; text-align: left;
+    .login-error {
+      font-size: 12px;
+      color: #f97373;
+      min-height: 16px;
+      margin-top: 4px;
     }
 
-    .tablebox.footer {
-      width: 100%; padding: 2px; background: #fff;
-      display: flex; align-items: center;
+    .sidebar {
+      width: 220px;
+      background: #020617;
+      border-inline-end: 1px solid #1f2937;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .tablebox.footer img.emobox { padding: 5px; width: 34px; height: 34px; cursor: pointer; }
-    .tablebox.footer .tbox {
-      flex: 1; height: 34px; resize: none; border: 1px solid #ccc;
-      padding: 5px; margin: 0; border-radius: 0;
+    @media (max-width: 800px) {
+      .sidebar {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        z-index: 20;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+    .server-title {
       font-size: 14px;
+      font-weight: 600;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .channel {
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #111827;
+      color: #e5e7eb;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .channel span.hash {
+      color: #6b7280;
     }
 
-    .tablebox.footer .btn {
-      height: 34px; margin: 0; border-radius: 0; width: auto;
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #020617;
+      position: relative;
+    }
+    .header {
+      height: 52px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      background: #020617;
+      gap: 8px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .header-left .hash {
+      color: #6b7280;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .online-pill {
+      background: #111827;
+      border-radius: 999px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+    .user-pill {
+      background: #111827;
+      border-radius: 999px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .toggle-btn {
+      display: none;
+      border: none;
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    @media (max-width: 800px) {
+      .toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    .chat-layout {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 12px;
+      background: radial-gradient(circle at top left, #1e293b 0, #020617 45%);
+      min-width: 0;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding-inline-end: 6px;
+    }
+    .message {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7eb;
+      flex-shrink: 0;
+    }
+    .bubble {
+      background: #020617;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #1f2937;
+      max-width: 100%;
+      font-size: 14px;
+    }
+    .bubble-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .username {
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .timestamp {
+      font-size: 11px;
+      color: #6b7280;
+    }
+    .bubble-content {
+      margin-top: 4px;
+      word-wrap: break-word;
+    }
+
+    .video-card {
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 8px;
+    }
+    video {
+      width: 100%;
+      border-radius: 8px;
+      background: #000;
+      max-height: 260px;
+    }
+    @media (max-width: 600px) {
+      video {
+        max-height: 220px;
+      }
+    }
+    .video-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .video-controls label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .video-controls select,
+    .video-controls input[type="range"],
+    .video-controls button {
+      cursor: pointer;
+    }
+    .video-time {
+      margin-inline-start: auto;
+      white-space: nowrap;
+    }
+    .video-status {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .url-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: nowrap;
+    }
+    .url-input-row input {
+      flex: 1;
       padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 12px;
+      min-width: 0;
+    }
+    .url-input-row button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #22c55e;
+      color: #020617;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .input-area {
+      border-top: 1px solid #1f2937;
+      padding: 8px 12px;
+      display: flex;
+      gap: 8px;
+      background: #020617;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
       font-size: 14px;
     }
-
-    .btn.btn-primary {
-      background-color: #545E6B;
-      border-color: #4A5361;
-    }
-
-    .actions-footer {
-      display: flex; width: 100%; background-color: #545E6B;
-      padding: 2px; justify-content: flex-start; gap: 3px;
-    }
-
-    .action-btn {
-      width: 80px; height: 31.58px; display: flex;
-      justify-content: center; align-items: center;
-      border: 1px solid #000;
-      padding: 0 5px;
-      border-radius: 0;
+    .input-area button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #6366f1;
+      color: #e5e7eb;
       font-size: 14px;
-      color: white;
-      background-color: #545E6B; cursor: pointer;
-      white-space: nowrap; flex-shrink: 0;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .members {
+      width: 220px;
+      border-inline-start: 1px solid #1f2937;
+      background: #020617;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    @media (max-width: 900px) {
+      .members {
+        display: none;
+      }
+    }
+    .member-title {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .member {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .member-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+    .member-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+    .member-name {
+      flex: 1;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 999px;
     }
   </style>
 </head>
-
 <body>
 
-<div id="login-screen">
-  <div class="login-box">
-    <h2>دخول الدردشة</h2>
-    <input type="text" id="username-input" placeholder="اكتب اسمك هنا">
-    <button id="login-btn">دخول</button>
-    <p id="login-error">الرجاء إدخال اسم.</p>
+<div class="app">
+
+  <!-- شاشة الدخول -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-title">الدخول إلى public-room</div>
+      <div class="login-sub">اكتب اسم المستخدم الذي سيظهر للجميع في الغرفة.</div>
+      <label for="loginName">اسم المستخدم</label>
+      <input id="loginName" type="text" placeholder="مثال: هـ..ــلآ">
+      <button id="loginBtn">دخول إلى الغرفة</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- الواجهة الرئيسية -->
+  <div class="sidebar" id="sidebar">
+    <div class="server-title">سيرفر المشاهدة</div>
+    <div class="channel">
+      <span class="hash">#</span>
+      <span>public-room</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="header-left">
+        <button class="toggle-btn" id="toggleSidebar">القنوات</button>
+        <span class="hash">#</span>
+        <span>public-room</span>
+      </div>
+      <div class="header-right">
+        <div class="online-pill">
+          <div class="online-dot"></div>
+          <span id="onlineText">0 متواجد الآن</span>
+        </div>
+        <div class="user-pill">
+          <span>أنت:</span>
+          <span id="currentUserName">غير معروف</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-layout">
+      <div class="chat">
+        <div class="messages" id="messages">
+          <!-- رسالة المشغّل -->
+          <div class="message" id="playerMessage">
+            <div class="avatar">هـ</div>
+            <div class="bubble" style="width:100%;">
+              <div class="bubble-header">
+                <span class="username">مشغّل البث</span>
+                <span class="timestamp">مشترك للجميع</span>
+              </div>
+              <div class="bubble-content">
+                <div class="video-card">
+                  <div class="url-input-row">
+                    <input id="newUrl" type="text" placeholder="أدخل رابط HLS (ينتهي بـ .m3u8)">
+                    <button id="loadUrlBtn">تشغيل</button>
+                  </div>
+
+                  <video id="video" crossorigin="anonymous"></video>
+
+                  <div class="video-controls">
+                    <button id="playPause">تشغيل</button>
+
+                    <label>الصوت
+                      <input id="volume" type="range" min="0" max="1" step="0.05" value="1">
+                    </label>
+
+                    <label>الجودة
+                      <select id="quality"></select>
+                    </label>
+
+                    <label>الترجمة
+                      <select id="subs">
+                        <option value="off">إيقاف</option>
+                      </select>
+                    </label>
+
+                    <span class="video-time">
+                      <span id="currentTime">0:00</span> / <span id="duration">--:--</span>
+                    </span>
+
+                    <button id="fullscreen">ملء الشاشة</button>
+                  </div>
+
+                  <div class="video-status" id="status">
+                    أدخل رابطًا لبدء التشغيل (مشترك بين الجميع في public-room).
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <input id="chatInput" type="text" placeholder="اكتب رسالة في الدردشة...">
+          <button id="sendChat">إرسال</button>
+        </div>
+      </div>
+
+      <div class="members" id="membersPanel">
+        <div class="member-title">المتواجدون في public-room</div>
+        <div id="membersList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div id="chat-container">
-  <div id="messages" class="messages"></div>
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-  <div class="tablebox footer">
-    <img class="emobox" src="https://l7b.net/imgs/emoii.gif">
-    <textarea id="message-input" placeholder="اكتب رسالتك هنا" class="tbox" style="text-align:left;"></textarea>
-    <button id="send-btn" class="btn btn-primary"><i class="fa fa-send"></i>ارسال</button>
-  </div>
+<!-- Firebase compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <div id="d0" class="actions-footer">
-    <button id="btn-users" class="action-btn fa fa-user"><span id="busers">0</span></button>
-    <button id="btn-chats" class="action-btn fa fa-comment">خاص</button>
-    <button id="btn-rooms" class="action-btn fa fa-users">الغرف</button>
-    <button id="btn-wall" class="action-btn fa fa-commenting"><span id="bwall">0</span>الحائط</button>
-    <button id="btn-settings" class="action-btn fa fa-gear">الضبط</button>
-  </div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
+<script>
+  // ====== إعداد Firebase ======
   const firebaseConfig = {
     apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
     authDomain: "mychat-2d881.firebaseapp.com",
-    databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+    databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const messagesRef = ref(db, "messages");
+  const ROOM_ID = "public-room";
 
-  let currentUsername = null;
+  // ====== شاشة الدخول ======
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginNameInput = document.getElementById('loginName');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+  const currentUserNameEl = document.getElementById('currentUserName');
 
-  const loginScreen = document.getElementById("login-screen");
-  const chatContainer = document.getElementById("chat-container");
-  const usernameInput = document.getElementById("username-input");
-  const loginButton = document.getElementById("login-btn");
-  const loginError = document.getElementById("login-error");
-  const messagesContainer = document.getElementById("messages");
-  const messageInput = document.getElementById("message-input");
-  const sendButton = document.getElementById("send-btn");
+  let myName = null;
+  let myPresenceRef = null;
 
-  function enterChat(username) {
-    currentUsername = username;
-    localStorage.setItem("chat_username", username);
-    loginScreen.style.display = "none";
-    chatContainer.style.display = "flex";
+  function startPresence() {
+    const presenceRef = db.ref("rooms/" + ROOM_ID + "/presence");
+    const connectedRef = db.ref(".info/connected");
+    myPresenceRef = presenceRef.push();
 
-    onChildAdded(messagesRef, (snapshot) => {
-      displayMessage(snapshot.val());
+    connectedRef.on("value", snap => {
+      if (snap.val() === true && myName) {
+        myPresenceRef.onDisconnect().remove();
+        myPresenceRef.set({
+          name: myName,
+          online: true,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    });
+
+    presenceRef.on("value", snap => {
+      const count = snap.numChildren();
+      document.getElementById('onlineText').textContent = count + " متواجد الآن";
+      renderMembers(snap);
     });
   }
 
-  loginButton.addEventListener("click", () => {
-    const username = usernameInput.value.trim();
-    if (username) enterChat(username);
-    else loginError.style.display = "block";
+  function renderMembers(snapshot) {
+    const membersList = document.getElementById('membersList');
+    membersList.innerHTML = "";
+    snapshot.forEach(child => {
+      const val = child.val();
+      const div = document.createElement("div");
+      div.className = "member";
+
+      const avatar = document.createElement("div");
+      avatar.className = "member-avatar";
+      avatar.textContent = (val.name || "?").slice(0,2);
+
+      const name = document.createElement("div");
+      name.className = "member-name";
+      name.textContent = val.name || "مستخدم";
+
+      const dot = document.createElement("div");
+      dot.className = "member-status-dot";
+
+      div.appendChild(avatar);
+      div.appendChild(name);
+      div.appendChild(dot);
+
+      membersList.appendChild(div);
+    });
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const name = loginNameInput.value.trim();
+    if (!name) {
+      loginError.textContent = "الرجاء إدخال اسم مستخدم.";
+      return;
+    }
+    if (name.length < 2) {
+      loginError.textContent = "الاسم قصير جدًا.";
+      return;
+    }
+    myName = name;
+    currentUserNameEl.textContent = myName;
+    loginOverlay.style.display = "none";
+    startPresence();
   });
 
-  const savedUsername = localStorage.getItem("chat_username");
-  if (savedUsername) enterChat(savedUsername);
+  loginNameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loginBtn.click();
+  });
 
-  function displayMessage(data) {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "uzr";
-    msgDiv.innerHTML = `
-      <div class="u-pic" style="background-image:url('https://l7b.net/pic/default.png')"></div>
-      <div class="msg-body">
-        <div class="msg-top">
-          <div class="user-wrapper">
-            <img class="u-ico" src="https://l7b.net/sico/z1g351o4em1018XOCi04iHr0.gif">
-            <span class="u-topic">${data.user}</span>
-          </div>
-          <span class="minix">${data.time}</span>
-        </div>
-        <div class="u-msg">${data.text}</div>
-      </div>`;
-    messagesContainer.appendChild(msgDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  // ====== Sidebar للجوال ======
+  const sidebar = document.getElementById('sidebar');
+  const toggleSidebar = document.getElementById('toggleSidebar');
+  toggleSidebar.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+
+  // ====== دردشة عبر Firebase ======
+  const messagesEl = document.getElementById('messages');
+  const chatInput = document.getElementById('chatInput');
+  const sendChat = document.getElementById('sendChat');
+  const chatRef = db.ref("rooms/" + ROOM_ID + "/chat");
+
+  function addChatMessageToUI(val) {
+    const msg = document.createElement('div');
+    msg.className = 'message';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = (val.name || "مستخدم").slice(0,1);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    const header = document.createElement('div');
+    header.className = 'bubble-header';
+
+    const username = document.createElement('span');
+    username.className = 'username';
+    username.textContent = val.name || "مستخدم";
+
+    const ts = document.createElement('span');
+    ts.className = 'timestamp';
+    const date = val.ts ? new Date(val.ts) : null;
+    ts.textContent = date ? date.toLocaleTimeString() : "";
+
+    header.appendChild(username);
+    header.appendChild(ts);
+
+    const content = document.createElement('div');
+    content.className = 'bubble-content';
+    content.textContent = val.text || "";
+
+    bubble.appendChild(header);
+    bubble.appendChild(content);
+
+    msg.appendChild(avatar);
+    msg.appendChild(bubble);
+
+    messagesEl.appendChild(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text || !currentUsername) return;
+  chatRef.orderByChild("ts").on("child_added", snap => {
+    const val = snap.val();
+    addChatMessageToUI(val);
+  });
 
-    const now = new Date();
-    push(messagesRef, {
-      user: currentUsername,
-      text: text,
-      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  sendChat.addEventListener('click', () => {
+    const text = chatInput.value.trim();
+    if (!text || !myName) return;
+    chatRef.push({
+      name: myName,
+      text,
+      ts: Date.now()
     });
+    chatInput.value = '';
+  });
 
-    messageInput.value = "";
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat.click();
+  });
+
+  // ====== مشاركة رابط الفيديو عبر Firebase ======
+  const videoUrlRef = db.ref("rooms/" + ROOM_ID + "/videoUrl");
+
+  const video = document.getElementById('video');
+  const playPauseBtn = document.getElementById('playPause');
+  const volumeRange = document.getElementById('volume');
+  const qualitySelect = document.getElementById('quality');
+  const subsSelect = document.getElementById('subs');
+  const currentTimeEl = document.getElementById('currentTime');
+  const durationEl = document.getElementById('duration');
+  const fullscreenBtn = document.getElementById('fullscreen');
+  const statusEl = document.getElementById('status');
+  const newUrlInput = document.getElementById('newUrl');
+  const loadUrlBtn = document.getElementById('loadUrlBtn');
+
+  let hls = null;
+
+  function formatTime(sec) {
+    if (!sec || isNaN(sec)) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   }
 
-  sendButton.addEventListener("click", sendMessage);
+  function initPlayer(url) {
+    if (hls) {
+      hls.destroy();
+      hls = null;
+    }
+
+    if (!url) {
+      statusEl.textContent = "أدخل رابط HLS لبدء التشغيل.";
+      video.removeAttribute("src");
+      video.load();
+      return;
+    }
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
+        capLevelToPlayerSize: true
+      });
+
+      hls.loadSource(url);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+        qualitySelect.innerHTML = "";
+        const autoOption = document.createElement("option");
+        autoOption.value = "auto";
+        autoOption.textContent = "تلقائي";
+        autoOption.selected = true;
+        qualitySelect.appendChild(autoOption);
+
+        data.levels.forEach((level, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = level.height ? `${level.height}p` : `جودة ${index + 1}`;
+          qualitySelect.appendChild(option);
+        });
+
+        statusEl.textContent = "تم تحميل البث (مشترك للجميع).";
+        video.play();
+      });
+
+      hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_, data) => {
+        subsSelect.innerHTML = "<option value='off'>إيقاف</option>";
+        data.subtitleTracks.forEach((track, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = track.name || track.lang || `ترجمة ${index + 1}`;
+          subsSelect.appendChild(option);
+        });
+      });
+
+      subsSelect.onchange = () => {
+        const value = subsSelect.value;
+        hls.subtitleTrack = value === "off" ? -1 : parseInt(value, 10);
+      };
+
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        console.error("HLS error:", data);
+        if (data.fatal) {
+          statusEl.textContent = "خطأ في البث، قد يكون من الرابط أو من القيود على المصدر.";
+        }
+      });
+
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = url;
+      video.play();
+    } else {
+      statusEl.textContent = "المتصفح لا يدعم HLS.";
+    }
+  }
+
+  loadUrlBtn.addEventListener("click", () => {
+    const url = newUrlInput.value.trim();
+    if (!url.endsWith(".m3u8")) {
+      statusEl.textContent = "الرجاء إدخال رابط HLS صحيح (ينتهي بـ .m3u8).";
+      return;
+    }
+    statusEl.textContent = "جاري مشاركة الرابط وتحميله...";
+    videoUrlRef.set(url);
+  });
+
+  videoUrlRef.on("value", snap => {
+    const url = snap.val();
+    newUrlInput.value = url || "";
+    initPlayer(url || "");
+  });
+
+  playPauseBtn.addEventListener("click", () => {
+    if (video.paused) {
+      video.play();
+      playPauseBtn.textContent = "إيقاف";
+    } else {
+      video.pause();
+      playPauseBtn.textContent = "تشغيل";
+    }
+  });
+
+  video.addEventListener("play", () => playPauseBtn.textContent = "إيقاف");
+  video.addEventListener("pause", () => playPauseBtn.textContent = "تشغيل");
+
+  video.addEventListener("timeupdate", () => {
+    currentTimeEl.textContent = formatTime(video.currentTime);
+    durationEl.textContent = formatTime(video.duration);
+  });
+
+  volumeRange.addEventListener("input", () => video.volume = volumeRange.value);
+
+  fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) video.requestFullscreen();
+    else document.exitFullscreen();
+  });
 </script>
 
 </body>
