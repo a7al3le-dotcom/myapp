@@ -5,7 +5,6 @@
 <title>public-room</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
   * { box-sizing: border-box; }
@@ -16,81 +15,29 @@
     color: #e5e7eb;
   }
 
-  /* ===== المشغل ===== */
-  #player-container {
-    width: 100%;
-    background: #000;
-    aspect-ratio: 16/9;
-  }
-  #video-element, iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-
-  #controls {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    background: #0f172a;
-  }
-  #url-input {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #334155;
-    width: 250px;
-    background: #1e293b;
-    color: #e5e7eb;
-  }
-  #load-btn, #file-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background: #6366f1;
-    color: white;
-    cursor: pointer;
-  }
-  #twitter-selector {
-    display: flex;
-    gap: 5px;
-    padding: 5px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  #twitter-selector button {
-    padding: 4px 8px;
-    background: #334155;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-  }
-  #twitter-selector button.active {
-    background: #6366f1;
-  }
-
-  /* ===== الهيدر ===== */
+  /* الهيدر */
   .header {
-    height: 50px;
-    background: #0f172a;
-    border-bottom: 1px solid #1e293b;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 0 12px;
-    gap: 10px;
+    padding: 0 15px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(2,6,23,0.8);
+    backdrop-filter: blur(6px);
   }
+
   .online-pill {
-    background: #1e293b;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 999px;
+    background: #1e293b;
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    font-size: 14px;
   }
   .online-dot {
     width: 8px;
@@ -99,61 +46,107 @@
     border-radius: 999px;
   }
 
-  /* ===== الدردشة ===== */
+  /* المشغل */
+  #player-wrapper {
+    width: 800px;
+    max-width: 100%;
+    margin: 20px auto;
+  }
+  #player-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+  }
+  video, iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* أزرار التشغيل */
+  #controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px auto;
+  }
+  #url-input {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    background: #1e293b;
+    color: white;
+    width: 250px;
+  }
+  #load-btn, #file-btn {
+    background: none;
+    border: 1px solid #6366f1;
+    color: #6366f1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  #twitter-selector {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 5px;
+  }
+  #twitter-selector button {
+    background: none;
+    border: 1px solid #334155;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #twitter-selector button.active {
+    border-color: #6366f1;
+    color: #6366f1;
+  }
+
+  /* الدردشة */
   .chat {
-    padding: 12px;
-    height: calc(100vh - 50px - (100vw * 9/16) - 70px);
+    padding: 15px;
+    height: calc(100vh - 55px - 350px);
     overflow-y: auto;
   }
   .message {
-    display: flex;
-    gap: 10px;
     margin-bottom: 12px;
+    font-size: 15px;
   }
-  .avatar {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-  }
-  .bubble {
-    background: #0f172a;
-    padding: 8px 12px;
-    border-radius: 10px;
-    border: 1px solid #1e293b;
-    max-width: 85%;
-  }
-  .bubble-header {
-    display: flex;
-    gap: 6px;
-    font-size: 12px;
-    margin-bottom: 4px;
+  .name {
+    font-weight: bold;
+    color: #93c5fd;
   }
   .timestamp {
     color: #64748b;
+    font-size: 12px;
+    margin-right: 6px;
   }
 
+  /* مربع الإدخال */
   .input-area {
-    display: flex;
-    gap: 8px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(2,6,23,0.9);
     padding: 10px;
-    background: #0f172a;
-    border-top: 1px solid #1e293b;
+    display: flex;
+    gap: 10px;
   }
   .input-area input {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border-radius: 8px;
-    border: 1px solid #334155;
+    border: none;
     background: #1e293b;
-    color: #e5e7eb;
+    color: white;
   }
   .input-area button {
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 8px;
     border: none;
     background: #6366f1;
@@ -161,7 +154,7 @@
     cursor: pointer;
   }
 
-  /* ===== نافذة المتواجدين ===== */
+  /* نافذة المتواجدين */
   #membersOverlay {
     position: fixed;
     inset: 0;
@@ -173,101 +166,25 @@
     top: 0;
     right: -50%;
     width: 50%;
+    max-width: 320px;
     height: 100%;
     background: #0f172a;
-    border-left: 1px solid #1e293b;
-    padding: 15px;
+    padding: 20px;
     transition: 0.25s ease;
+    overflow-y: auto;
   }
   #membersPanel.open {
     right: 0;
   }
-  .member {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-  }
-  .member-avatar {
-    width: 28px;
-    height: 28px;
-    background: #1e293b;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .member-status-dot {
-    width: 8px;
-    height: 8px;
-    background: #22c55e;
-    border-radius: 999px;
-  }
 
-  /* ===== شاشة الدخول ===== */
-  #loginOverlay {
-    position: fixed;
-    inset: 0;
-    background: #020617;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #loginCard {
-    background: #0f172a;
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 350px;
-    border: 1px solid #1e293b;
-  }
-  #loginCard input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    background: #1e293b;
-    color: white;
-    margin-bottom: 10px;
-  }
-  #loginCard button {
-    width: 100%;
-    padding: 10px;
-    background: #6366f1;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
+  .member {
+    padding: 8px 0;
+    border-bottom: 1px solid #1e293b;
   }
 </style>
 </head>
 <body>
 
-<!-- شاشة الدخول -->
-<div id="loginOverlay">
-  <div id="loginCard">
-    <h3 style="margin:0 0 10px;">أدخل اسم المستخدم</h3>
-    <input id="loginName" type="text" placeholder="مثال: هـ..ــلآ">
-    <button id="loginBtn">دخول</button>
-    <div id="loginError" style="color:#f87171; font-size:12px; margin-top:6px;"></div>
-  </div>
-</div>
-
-<!-- المشغل -->
-<div id="player-container">
-  <video id="video-element" controls autoplay muted></video>
-</div>
-
-<div id="twitter-selector"></div>
-
-<div id="controls">
-  <input type="text" id="url-input" placeholder="أدخل رابط YouTube / Twitter / M3U8 / MP4">
-  <button id="load-btn">تشغيل</button>
-  <input type="file" id="file-input" accept="video/*" style="display:none;">
-  <button id="file-btn">رفع ملف</button>
-</div>
-
-<!-- الهيدر -->
 <div class="header">
   <div class="online-pill" id="openMembers">
     <div class="online-dot"></div>
@@ -275,7 +192,21 @@
   </div>
 </div>
 
-<!-- الدردشة -->
+<div id="player-wrapper">
+  <div id="player-container">
+    <video id="video-element" controls autoplay muted></video>
+  </div>
+</div>
+
+<div id="controls">
+  <input id="url-input" type="text" placeholder="رابط فيديو">
+  <button id="load-btn">تشغيل</button>
+  <input id="file-input" type="file" accept="video/*" style="display:none;">
+  <button id="file-btn">رفع ملف</button>
+</div>
+
+<div id="twitter-selector"></div>
+
 <div class="chat" id="messages"></div>
 
 <div class="input-area">
@@ -283,20 +214,16 @@
   <button id="sendChat">إرسال</button>
 </div>
 
-<!-- نافذة المتواجدين -->
 <div id="membersOverlay">
   <div id="membersPanel">
-    <h3 style="margin-top:0;">المتواجدون الآن</h3>
+    <h3>المتواجدون الآن</h3>
     <div id="membersList"></div>
   </div>
 </div>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* ===== Firebase ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
   authDomain: "mychat-2d881.firebaseapp.com",
@@ -306,65 +233,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const ROOM = "public-room";
 
-/* ===== الدخول ===== */
-const loginOverlay = document.getElementById("loginOverlay");
-const loginBtn = document.getElementById("loginBtn");
-const loginName = document.getElementById("loginName");
-const loginError = document.getElementById("loginError");
-
-let myName = null;
-let myPresenceRef = null;
-
-loginBtn.onclick = () => {
-  const name = loginName.value.trim();
-  if (!name) return loginError.textContent = "الرجاء إدخال اسم.";
-  if (name.length < 2) return loginError.textContent = "الاسم قصير جدًا.";
-
-  myName = name;
-  loginOverlay.style.display = "none";
-  startPresence();
-};
-
 /* ===== المتواجدون ===== */
-function startPresence() {
-  const presenceRef = db.ref(`rooms/${ROOM}/presence`);
-  const connectedRef = db.ref(".info/connected");
-  myPresenceRef = presenceRef.push();
-
-  connectedRef.on("value", snap => {
-    if (snap.val() === true) {
-      myPresenceRef.onDisconnect().remove();
-      myPresenceRef.set({ name: myName, ts: Date.now() });
-    }
-  });
-
-  presenceRef.on("value", snap => {
-    const count = snap.numChildren();
-    document.getElementById("onlineText").textContent = count + " متواجد الآن";
-    renderMembers(snap);
-  });
-}
-
-function renderMembers(snapshot) {
-  const list = document.getElementById("membersList");
-  list.innerHTML = "";
-  snapshot.forEach(child => {
-    const v = child.val();
-    const div = document.createElement("div");
-    div.className = "member";
-    div.innerHTML = `
-      <div class="member-avatar">${v.name.slice(0,2)}</div>
-      <div>${v.name}</div>
-      <div class="member-status-dot"></div>
-    `;
-    list.appendChild(div);
-  });
-}
-
-/* ===== نافذة المتواجدين ===== */
+const openMembers = document.getElementById("openMembers");
 const membersOverlay = document.getElementById("membersOverlay");
 const membersPanel = document.getElementById("membersPanel");
-document.getElementById("openMembers").onclick = () => {
+
+openMembers.onclick = () => {
   membersOverlay.style.display = "block";
   setTimeout(() => membersPanel.classList.add("open"), 10);
 };
@@ -375,120 +249,126 @@ membersOverlay.onclick = e => {
   }
 };
 
+const presenceRef = db.ref(`rooms/${ROOM}/presence`);
+const connectedRef = db.ref(".info/connected");
+let myPresence = presenceRef.push();
+let myName = "مستخدم";
+
+connectedRef.on("value", snap => {
+  if (snap.val() === true) {
+    myPresence.onDisconnect().remove();
+    myPresence.set({ name: myName, ts: Date.now() });
+  }
+});
+
+presenceRef.on("value", snap => {
+  document.getElementById("onlineText").textContent =
+    snap.numChildren() + " متواجد الآن";
+
+  const list = document.getElementById("membersList");
+  list.innerHTML = "";
+  snap.forEach(child => {
+    const v = child.val();
+    list.innerHTML += `<div class="member">${v.name}</div>`;
+  });
+});
+
 /* ===== الدردشة ===== */
-const messagesEl = document.getElementById("messages");
+const messages = document.getElementById("messages");
 const chatInput = document.getElementById("chatInput");
 const sendChat = document.getElementById("sendChat");
 const chatRef = db.ref(`rooms/${ROOM}/chat`);
 
 sendChat.onclick = () => {
   const text = chatInput.value.trim();
-  if (!text || !myName) return;
+  if (!text) return;
   chatRef.push({ name: myName, text, ts: Date.now() });
   chatInput.value = "";
 };
 
-chatRef.orderByChild("ts").on("child_added", snap => {
+chatRef.on("child_added", snap => {
   const v = snap.val();
-  const msg = document.createElement("div");
-  msg.className = "message";
-  msg.innerHTML = `
-    <div class="avatar">${v.name.slice(0,1)}</div>
-    <div class="bubble">
-      <div class="bubble-header">
-        <span>${v.name}</span>
-        <span class="timestamp">${new Date(v.ts).toLocaleTimeString()}</span>
-      </div>
+  messages.innerHTML += `
+    <div class="message">
+      <span class="name">${v.name}</span>
+      <span class="timestamp">${new Date(v.ts).toLocaleTimeString()}</span>
       <div>${v.text}</div>
     </div>
   `;
-  messagesEl.appendChild(msg);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  messages.scrollTop = messages.scrollHeight;
 });
 
 /* ===== المشغل ===== */
-const videoContainer = document.getElementById('player-container');
-const videoEl = document.getElementById('video-element');
-const urlInput = document.getElementById('url-input');
-const loadBtn = document.getElementById('load-btn');
-const fileInput = document.getElementById('file-input');
-const fileBtn = document.getElementById('file-btn');
-const twitterSelector = document.getElementById('twitter-selector');
+const videoEl = document.getElementById("video-element");
+const urlInput = document.getElementById("url-input");
+const loadBtn = document.getElementById("load-btn");
+const fileBtn = document.getElementById("file-btn");
+const fileInput = document.getElementById("file-input");
+const twitterSelector = document.getElementById("twitter-selector");
 
 function isYouTube(url){ return /youtube\.com|youtu\.be/.test(url); }
 function getYouTubeID(url){ const m=url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/); return m?m[1]:null; }
 function isTwitter(url){ return /twitter\.com|x\.com/.test(url); }
-function isDirectVideo(url){ return /\.(mp4|webm|ogg)$/i.test(url); }
+function isDirect(url){ return /\.(mp4|webm|ogg)$/i.test(url); }
 function isM3U8(url){ return /\.m3u8$/i.test(url); }
 
 loadBtn.onclick = async () => {
   const url = urlInput.value.trim();
   if (!url) return;
 
-  videoEl.pause();
   videoEl.src = "";
-  videoContainer.innerHTML = "";
-  videoContainer.appendChild(videoEl);
   twitterSelector.innerHTML = "";
 
   if (isYouTube(url)) {
     const id = getYouTubeID(url);
-    if (!id) return alert("رابط يوتيوب غير صالح");
-    const iframe = document.createElement("iframe");
-    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-    iframe.allow = "autoplay; encrypted-media";
-    iframe.allowFullscreen = true;
-    videoContainer.innerHTML = "";
-    videoContainer.appendChild(iframe);
+    videoEl.outerHTML = `
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1"></iframe>
+    `;
+    return;
   }
 
-  else if (isTwitter(url)) {
-    try {
-      const idMatch = url.match(/status\/(\d+)/);
-      if (!idMatch) return alert("رابط تويتر غير صالح");
-      const id = idMatch[1];
-      const resp = await fetch(`https://api.vxtwitter.com/i/status/${id}`);
-      const data = await resp.json();
-      if (!data.media_extended) return alert("لا يوجد فيديو");
-
-      data.media_extended.forEach((item,i)=>{
-        const btn=document.createElement("button");
-        btn.textContent=`المقطع ${i+1}`;
-        btn.onclick=()=>{
-          twitterSelector.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-          btn.classList.add("active");
-          videoEl.src=item.url;
-          videoEl.play();
-        };
-        twitterSelector.appendChild(btn);
-      });
-      twitterSelector.querySelector("button").click();
-    } catch(e){ alert("خطأ في تويتر"); }
+  if (isDirect(url)) {
+    videoEl.src = url;
+    videoEl.play();
+    return;
   }
 
-  else if (isM3U8(url)) {
+  if (isM3U8(url)) {
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(url);
       hls.attachMedia(videoEl);
       videoEl.play();
-    } else alert("M3U8 غير مدعوم");
+    }
+    return;
   }
 
-  else if (isDirectVideo(url)) {
-    videoEl.src = url;
-    videoEl.play();
-  }
+  if (isTwitter(url)) {
+    const id = url.match(/status\/(\d+)/)[1];
+    const res = await fetch(`https://api.vxtwitter.com/i/status/${id}`);
+    const data = await res.json();
 
-  else alert("نوع الرابط غير مدعوم");
+    data.media_extended.forEach((m,i)=>{
+      const btn = document.createElement("button");
+      btn.textContent = "مقطع " + (i+1);
+      btn.onclick = () => {
+        twitterSelector.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        videoEl.src = m.url;
+        videoEl.play();
+      };
+      twitterSelector.appendChild(btn);
+    });
+
+    twitterSelector.querySelector("button").click();
+  }
 };
 
 fileBtn.onclick = ()=>fileInput.click();
 fileInput.onchange = ()=>{
-  const file=fileInput.files[0];
+  const file = fileInput.files[0];
   if (!file) return;
-  const url=URL.createObjectURL(file);
-  videoEl.src=url;
+  videoEl.src = URL.createObjectURL(file);
   videoEl.play();
 };
 </script>
