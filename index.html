@@ -1,863 +1,496 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>public-room - مشغل + دردشة بأسلوب ديسكورد</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #020617;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .app {
-      width: 100%;
-      max-width: 1200px;
-      height: 100vh;
-      max-height: 900px;
-      background: #020617;
-      border-radius: 12px;
-      display: flex;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      position: relative;
-    }
-    @media (max-width: 900px) {
-      .app {
-        height: 100vh;
-        max-height: none;
-        border-radius: 0;
-      }
-    }
+<meta charset="UTF-8">
+<title>public-room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    /* شاشة الدخول */
-    .login-overlay {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-    .login-card {
-      background: #020617;
-      border-radius: 12px;
-      padding: 20px 18px;
-      width: 90%;
-      max-width: 360px;
-      border: 1px solid #1f2937;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    }
-    .login-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-    .login-sub {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .login-card label {
-      font-size: 13px;
-      margin-bottom: 4px;
-      display: block;
-    }
-    .login-card input {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #1f2937;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-    .login-card button {
-      width: 100%;
-      padding: 9px 0;
-      border-radius: 8px;
-      border: none;
-      background: #6366f1;
-      color: #e5e7eb;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    .login-error {
-      font-size: 12px;
-      color: #f97373;
-      min-height: 16px;
-      margin-top: 4px;
-    }
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Tajawal', sans-serif;
+    background: #020617;
+    color: #e5e7eb;
+  }
 
-    .sidebar {
-      width: 220px;
-      background: #020617;
-      border-inline-end: 1px solid #1f2937;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    @media (max-width: 800px) {
-      .sidebar {
-        position: absolute;
-        inset-block: 0;
-        inset-inline-start: 0;
-        transform: translateX(-100%);
-        transition: transform 0.2s ease;
-        z-index: 20;
-      }
-      .sidebar.open {
-        transform: translateX(0);
-      }
-    }
-    .server-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #9ca3af;
-      margin-bottom: 4px;
-    }
-    .channel {
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: #111827;
-      color: #e5e7eb;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-    .channel span.hash {
-      color: #6b7280;
-    }
+  /* ===== المشغل ===== */
+  #player-container {
+    width: 100%;
+    background: #000;
+    aspect-ratio: 16/9;
+  }
+  #video-element, iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
 
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: #020617;
-      position: relative;
-    }
-    .header {
-      height: 52px;
-      border-bottom: 1px solid #1f2937;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      background: #020617;
-      gap: 8px;
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-    }
-    .header-left .hash {
-      color: #6b7280;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: #9ca3af;
-    }
-    .online-pill {
-      background: #111827;
-      border-radius: 999px;
-      padding: 4px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .online-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #22c55e;
-    }
-    .user-pill {
-      background: #111827;
-      border-radius: 999px;
-      padding: 4px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-    }
-    .toggle-btn {
-      display: none;
-      border: none;
-      background: #111827;
-      color: #e5e7eb;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    @media (max-width: 800px) {
-      .toggle-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-    }
+  #controls {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #0f172a;
+  }
+  #url-input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    width: 250px;
+    background: #1e293b;
+    color: #e5e7eb;
+  }
+  #load-btn, #file-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #6366f1;
+    color: white;
+    cursor: pointer;
+  }
+  #twitter-selector {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  #twitter-selector button {
+    padding: 4px 8px;
+    background: #334155;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+  #twitter-selector button.active {
+    background: #6366f1;
+  }
 
-    .chat-layout {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-    }
-    .chat {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 10px 12px;
-      background: radial-gradient(circle at top left, #1e293b 0, #020617 45%);
-      min-width: 0;
-    }
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding-inline-end: 6px;
-    }
-    .message {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      align-items: flex-start;
-    }
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #0ea5e9, #6366f1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 600;
-      color: #e5e7eb;
-      flex-shrink: 0;
-    }
-    .bubble {
-      background: #020617;
-      border-radius: 10px;
-      padding: 8px 10px;
-      border: 1px solid #1f2937;
-      max-width: 100%;
-      font-size: 14px;
-    }
-    .bubble-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-    .username {
-      font-weight: 600;
-      font-size: 13px;
-    }
-    .timestamp {
-      font-size: 11px;
-      color: #6b7280;
-    }
-    .bubble-content {
-      margin-top: 4px;
-      word-wrap: break-word;
-    }
+  /* ===== الهيدر ===== */
+  .header {
+    height: 50px;
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 12px;
+    gap: 10px;
+  }
+  .online-pill {
+    background: #1e293b;
+    padding: 6px 12px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .online-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 999px;
+  }
 
-    .video-card {
-      background: #020617;
-      border-radius: 10px;
-      border: 1px solid #1f2937;
-      padding: 8px;
-    }
-    video {
-      width: 100%;
-      border-radius: 8px;
-      background: #000;
-      max-height: 260px;
-    }
-    @media (max-width: 600px) {
-      video {
-        max-height: 220px;
-      }
-    }
-    .video-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-top: 6px;
-      font-size: 12px;
-    }
-    .video-controls label {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .video-controls select,
-    .video-controls input[type="range"],
-    .video-controls button {
-      cursor: pointer;
-    }
-    .video-time {
-      margin-inline-start: auto;
-      white-space: nowrap;
-    }
-    .video-status {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #9ca3af;
-    }
-    .url-input-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 6px;
-      flex-wrap: nowrap;
-    }
-    .url-input-row input {
-      flex: 1;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #1f2937;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 12px;
-      min-width: 0;
-    }
-    .url-input-row button {
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: none;
-      background: #22c55e;
-      color: #020617;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+  /* ===== الدردشة ===== */
+  .chat {
+    padding: 12px;
+    height: calc(100vh - 50px - (100vw * 9/16) - 70px);
+    overflow-y: auto;
+  }
+  .message {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .bubble {
+    background: #0f172a;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+    max-width: 85%;
+  }
+  .bubble-header {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .timestamp {
+    color: #64748b;
+  }
 
-    .input-area {
-      border-top: 1px solid #1f2937;
-      padding: 8px 12px;
-      display: flex;
-      gap: 8px;
-      background: #020617;
-    }
-    .input-area input {
-      flex: 1;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #1f2937;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 14px;
-    }
-    .input-area button {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      background: #6366f1;
-      color: #e5e7eb;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+  .input-area {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+  }
+  .input-area input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e5e7eb;
+  }
+  .input-area button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #6366f1;
+    color: white;
+    cursor: pointer;
+  }
 
-    .members {
-      width: 220px;
-      border-inline-start: 1px solid #1f2937;
-      background: #020617;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    @media (max-width: 900px) {
-      .members {
-        display: none;
-      }
-    }
-    .member-title {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 4px;
-    }
-    .member {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-    }
-    .member-avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      background: #111827;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #e5e7eb;
-    }
-    .member-status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #22c55e;
-    }
-    .member-name {
-      flex: 1;
-    }
+  /* ===== نافذة المتواجدين ===== */
+  #membersOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+  }
+  #membersPanel {
+    position: absolute;
+    top: 0;
+    right: -50%;
+    width: 50%;
+    height: 100%;
+    background: #0f172a;
+    border-left: 1px solid #1e293b;
+    padding: 15px;
+    transition: 0.25s ease;
+  }
+  #membersPanel.open {
+    right: 0;
+  }
+  .member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .member-avatar {
+    width: 28px;
+    height: 28px;
+    background: #1e293b;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .member-status-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 999px;
+  }
 
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #020617;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1f2937;
-      border-radius: 999px;
-    }
-  </style>
+  /* ===== شاشة الدخول ===== */
+  #loginOverlay {
+    position: fixed;
+    inset: 0;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #loginCard {
+    background: #0f172a;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+    border: 1px solid #1e293b;
+  }
+  #loginCard input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+    margin-bottom: 10px;
+  }
+  #loginCard button {
+    width: 100%;
+    padding: 10px;
+    background: #6366f1;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
 
-<div class="app">
-
-  <!-- شاشة الدخول -->
-  <div class="login-overlay" id="loginOverlay">
-    <div class="login-card">
-      <div class="login-title">الدخول إلى public-room</div>
-      <div class="login-sub">اكتب اسم المستخدم الذي سيظهر للجميع في الغرفة.</div>
-      <label for="loginName">اسم المستخدم</label>
-      <input id="loginName" type="text" placeholder="مثال: هـ..ــلآ">
-      <button id="loginBtn">دخول إلى الغرفة</button>
-      <div class="login-error" id="loginError"></div>
-    </div>
-  </div>
-
-  <!-- الواجهة الرئيسية -->
-  <div class="sidebar" id="sidebar">
-    <div class="server-title">سيرفر المشاهدة</div>
-    <div class="channel">
-      <span class="hash">#</span>
-      <span>public-room</span>
-    </div>
-  </div>
-
-  <div class="main">
-    <div class="header">
-      <div class="header-left">
-        <button class="toggle-btn" id="toggleSidebar">القنوات</button>
-        <span class="hash">#</span>
-        <span>public-room</span>
-      </div>
-      <div class="header-right">
-        <div class="online-pill">
-          <div class="online-dot"></div>
-          <span id="onlineText">0 متواجد الآن</span>
-        </div>
-        <div class="user-pill">
-          <span>أنت:</span>
-          <span id="currentUserName">غير معروف</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="chat-layout">
-      <div class="chat">
-        <div class="messages" id="messages">
-          <!-- رسالة المشغّل -->
-          <div class="message" id="playerMessage">
-            <div class="avatar">هـ</div>
-            <div class="bubble" style="width:100%;">
-              <div class="bubble-header">
-                <span class="username">مشغّل البث</span>
-                <span class="timestamp">مشترك للجميع</span>
-              </div>
-              <div class="bubble-content">
-                <div class="video-card">
-                  <div class="url-input-row">
-                    <input id="newUrl" type="text" placeholder="أدخل رابط HLS (ينتهي بـ .m3u8)">
-                    <button id="loadUrlBtn">تشغيل</button>
-                  </div>
-
-                  <video id="video" crossorigin="anonymous"></video>
-
-                  <div class="video-controls">
-                    <button id="playPause">تشغيل</button>
-
-                    <label>الصوت
-                      <input id="volume" type="range" min="0" max="1" step="0.05" value="1">
-                    </label>
-
-                    <label>الجودة
-                      <select id="quality"></select>
-                    </label>
-
-                    <label>الترجمة
-                      <select id="subs">
-                        <option value="off">إيقاف</option>
-                      </select>
-                    </label>
-
-                    <span class="video-time">
-                      <span id="currentTime">0:00</span> / <span id="duration">--:--</span>
-                    </span>
-
-                    <button id="fullscreen">ملء الشاشة</button>
-                  </div>
-
-                  <div class="video-status" id="status">
-                    أدخل رابطًا لبدء التشغيل (مشترك بين الجميع في public-room).
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="input-area">
-          <input id="chatInput" type="text" placeholder="اكتب رسالة في الدردشة...">
-          <button id="sendChat">إرسال</button>
-        </div>
-      </div>
-
-      <div class="members" id="membersPanel">
-        <div class="member-title">المتواجدون في public-room</div>
-        <div id="membersList"></div>
-      </div>
-    </div>
+<!-- شاشة الدخول -->
+<div id="loginOverlay">
+  <div id="loginCard">
+    <h3 style="margin:0 0 10px;">أدخل اسم المستخدم</h3>
+    <input id="loginName" type="text" placeholder="مثال: هـ..ــلآ">
+    <button id="loginBtn">دخول</button>
+    <div id="loginError" style="color:#f87171; font-size:12px; margin-top:6px;"></div>
   </div>
 </div>
 
-<!-- HLS -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- المشغل -->
+<div id="player-container">
+  <video id="video-element" controls autoplay muted></video>
+</div>
 
-<!-- Firebase compat SDKs -->
+<div id="twitter-selector"></div>
+
+<div id="controls">
+  <input type="text" id="url-input" placeholder="أدخل رابط YouTube / Twitter / M3U8 / MP4">
+  <button id="load-btn">تشغيل</button>
+  <input type="file" id="file-input" accept="video/*" style="display:none;">
+  <button id="file-btn">رفع ملف</button>
+</div>
+
+<!-- الهيدر -->
+<div class="header">
+  <div class="online-pill" id="openMembers">
+    <div class="online-dot"></div>
+    <span id="onlineText">0 متواجد الآن</span>
+  </div>
+</div>
+
+<!-- الدردشة -->
+<div class="chat" id="messages"></div>
+
+<div class="input-area">
+  <input id="chatInput" type="text" placeholder="اكتب رسالة...">
+  <button id="sendChat">إرسال</button>
+</div>
+
+<!-- نافذة المتواجدين -->
+<div id="membersOverlay">
+  <div id="membersPanel">
+    <h3 style="margin-top:0;">المتواجدون الآن</h3>
+    <div id="membersList"></div>
+  </div>
+</div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  // ====== إعداد Firebase ======
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-    authDomain: "mychat-2d881.firebaseapp.com",
-    databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+/* ===== Firebase ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ROOM = "public-room";
 
-  const ROOM_ID = "public-room";
+/* ===== الدخول ===== */
+const loginOverlay = document.getElementById("loginOverlay");
+const loginBtn = document.getElementById("loginBtn");
+const loginName = document.getElementById("loginName");
+const loginError = document.getElementById("loginError");
 
-  // ====== شاشة الدخول ======
-  const loginOverlay = document.getElementById('loginOverlay');
-  const loginNameInput = document.getElementById('loginName');
-  const loginBtn = document.getElementById('loginBtn');
-  const loginError = document.getElementById('loginError');
-  const currentUserNameEl = document.getElementById('currentUserName');
+let myName = null;
+let myPresenceRef = null;
 
-  let myName = null;
-  let myPresenceRef = null;
+loginBtn.onclick = () => {
+  const name = loginName.value.trim();
+  if (!name) return loginError.textContent = "الرجاء إدخال اسم.";
+  if (name.length < 2) return loginError.textContent = "الاسم قصير جدًا.";
 
-  function startPresence() {
-    const presenceRef = db.ref("rooms/" + ROOM_ID + "/presence");
-    const connectedRef = db.ref(".info/connected");
-    myPresenceRef = presenceRef.push();
+  myName = name;
+  loginOverlay.style.display = "none";
+  startPresence();
+};
 
-    connectedRef.on("value", snap => {
-      if (snap.val() === true && myName) {
-        myPresenceRef.onDisconnect().remove();
-        myPresenceRef.set({
-          name: myName,
-          online: true,
-          ts: firebase.database.ServerValue.TIMESTAMP
-        });
-      }
-    });
+/* ===== المتواجدون ===== */
+function startPresence() {
+  const presenceRef = db.ref(`rooms/${ROOM}/presence`);
+  const connectedRef = db.ref(".info/connected");
+  myPresenceRef = presenceRef.push();
 
-    presenceRef.on("value", snap => {
-      const count = snap.numChildren();
-      document.getElementById('onlineText').textContent = count + " متواجد الآن";
-      renderMembers(snap);
-    });
+  connectedRef.on("value", snap => {
+    if (snap.val() === true) {
+      myPresenceRef.onDisconnect().remove();
+      myPresenceRef.set({ name: myName, ts: Date.now() });
+    }
+  });
+
+  presenceRef.on("value", snap => {
+    const count = snap.numChildren();
+    document.getElementById("onlineText").textContent = count + " متواجد الآن";
+    renderMembers(snap);
+  });
+}
+
+function renderMembers(snapshot) {
+  const list = document.getElementById("membersList");
+  list.innerHTML = "";
+  snapshot.forEach(child => {
+    const v = child.val();
+    const div = document.createElement("div");
+    div.className = "member";
+    div.innerHTML = `
+      <div class="member-avatar">${v.name.slice(0,2)}</div>
+      <div>${v.name}</div>
+      <div class="member-status-dot"></div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ===== نافذة المتواجدين ===== */
+const membersOverlay = document.getElementById("membersOverlay");
+const membersPanel = document.getElementById("membersPanel");
+document.getElementById("openMembers").onclick = () => {
+  membersOverlay.style.display = "block";
+  setTimeout(() => membersPanel.classList.add("open"), 10);
+};
+membersOverlay.onclick = e => {
+  if (e.target === membersOverlay) {
+    membersPanel.classList.remove("open");
+    setTimeout(() => membersOverlay.style.display = "none", 200);
+  }
+};
+
+/* ===== الدردشة ===== */
+const messagesEl = document.getElementById("messages");
+const chatInput = document.getElementById("chatInput");
+const sendChat = document.getElementById("sendChat");
+const chatRef = db.ref(`rooms/${ROOM}/chat`);
+
+sendChat.onclick = () => {
+  const text = chatInput.value.trim();
+  if (!text || !myName) return;
+  chatRef.push({ name: myName, text, ts: Date.now() });
+  chatInput.value = "";
+};
+
+chatRef.orderByChild("ts").on("child_added", snap => {
+  const v = snap.val();
+  const msg = document.createElement("div");
+  msg.className = "message";
+  msg.innerHTML = `
+    <div class="avatar">${v.name.slice(0,1)}</div>
+    <div class="bubble">
+      <div class="bubble-header">
+        <span>${v.name}</span>
+        <span class="timestamp">${new Date(v.ts).toLocaleTimeString()}</span>
+      </div>
+      <div>${v.text}</div>
+    </div>
+  `;
+  messagesEl.appendChild(msg);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+});
+
+/* ===== المشغل ===== */
+const videoContainer = document.getElementById('player-container');
+const videoEl = document.getElementById('video-element');
+const urlInput = document.getElementById('url-input');
+const loadBtn = document.getElementById('load-btn');
+const fileInput = document.getElementById('file-input');
+const fileBtn = document.getElementById('file-btn');
+const twitterSelector = document.getElementById('twitter-selector');
+
+function isYouTube(url){ return /youtube\.com|youtu\.be/.test(url); }
+function getYouTubeID(url){ const m=url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/); return m?m[1]:null; }
+function isTwitter(url){ return /twitter\.com|x\.com/.test(url); }
+function isDirectVideo(url){ return /\.(mp4|webm|ogg)$/i.test(url); }
+function isM3U8(url){ return /\.m3u8$/i.test(url); }
+
+loadBtn.onclick = async () => {
+  const url = urlInput.value.trim();
+  if (!url) return;
+
+  videoEl.pause();
+  videoEl.src = "";
+  videoContainer.innerHTML = "";
+  videoContainer.appendChild(videoEl);
+  twitterSelector.innerHTML = "";
+
+  if (isYouTube(url)) {
+    const id = getYouTubeID(url);
+    if (!id) return alert("رابط يوتيوب غير صالح");
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
+    iframe.allow = "autoplay; encrypted-media";
+    iframe.allowFullscreen = true;
+    videoContainer.innerHTML = "";
+    videoContainer.appendChild(iframe);
   }
 
-  function renderMembers(snapshot) {
-    const membersList = document.getElementById('membersList');
-    membersList.innerHTML = "";
-    snapshot.forEach(child => {
-      const val = child.val();
-      const div = document.createElement("div");
-      div.className = "member";
+  else if (isTwitter(url)) {
+    try {
+      const idMatch = url.match(/status\/(\d+)/);
+      if (!idMatch) return alert("رابط تويتر غير صالح");
+      const id = idMatch[1];
+      const resp = await fetch(`https://api.vxtwitter.com/i/status/${id}`);
+      const data = await resp.json();
+      if (!data.media_extended) return alert("لا يوجد فيديو");
 
-      const avatar = document.createElement("div");
-      avatar.className = "member-avatar";
-      avatar.textContent = (val.name || "?").slice(0,2);
-
-      const name = document.createElement("div");
-      name.className = "member-name";
-      name.textContent = val.name || "مستخدم";
-
-      const dot = document.createElement("div");
-      dot.className = "member-status-dot";
-
-      div.appendChild(avatar);
-      div.appendChild(name);
-      div.appendChild(dot);
-
-      membersList.appendChild(div);
-    });
+      data.media_extended.forEach((item,i)=>{
+        const btn=document.createElement("button");
+        btn.textContent=`المقطع ${i+1}`;
+        btn.onclick=()=>{
+          twitterSelector.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          videoEl.src=item.url;
+          videoEl.play();
+        };
+        twitterSelector.appendChild(btn);
+      });
+      twitterSelector.querySelector("button").click();
+    } catch(e){ alert("خطأ في تويتر"); }
   }
 
-  loginBtn.addEventListener('click', () => {
-    const name = loginNameInput.value.trim();
-    if (!name) {
-      loginError.textContent = "الرجاء إدخال اسم مستخدم.";
-      return;
-    }
-    if (name.length < 2) {
-      loginError.textContent = "الاسم قصير جدًا.";
-      return;
-    }
-    myName = name;
-    currentUserNameEl.textContent = myName;
-    loginOverlay.style.display = "none";
-    startPresence();
-  });
-
-  loginNameInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') loginBtn.click();
-  });
-
-  // ====== Sidebar للجوال ======
-  const sidebar = document.getElementById('sidebar');
-  const toggleSidebar = document.getElementById('toggleSidebar');
-  toggleSidebar.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
-
-  // ====== دردشة عبر Firebase ======
-  const messagesEl = document.getElementById('messages');
-  const chatInput = document.getElementById('chatInput');
-  const sendChat = document.getElementById('sendChat');
-  const chatRef = db.ref("rooms/" + ROOM_ID + "/chat");
-
-  function addChatMessageToUI(val) {
-    const msg = document.createElement('div');
-    msg.className = 'message';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = (val.name || "مستخدم").slice(0,1);
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-
-    const header = document.createElement('div');
-    header.className = 'bubble-header';
-
-    const username = document.createElement('span');
-    username.className = 'username';
-    username.textContent = val.name || "مستخدم";
-
-    const ts = document.createElement('span');
-    ts.className = 'timestamp';
-    const date = val.ts ? new Date(val.ts) : null;
-    ts.textContent = date ? date.toLocaleTimeString() : "";
-
-    header.appendChild(username);
-    header.appendChild(ts);
-
-    const content = document.createElement('div');
-    content.className = 'bubble-content';
-    content.textContent = val.text || "";
-
-    bubble.appendChild(header);
-    bubble.appendChild(content);
-
-    msg.appendChild(avatar);
-    msg.appendChild(bubble);
-
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  chatRef.orderByChild("ts").on("child_added", snap => {
-    const val = snap.val();
-    addChatMessageToUI(val);
-  });
-
-  sendChat.addEventListener('click', () => {
-    const text = chatInput.value.trim();
-    if (!text || !myName) return;
-    chatRef.push({
-      name: myName,
-      text,
-      ts: Date.now()
-    });
-    chatInput.value = '';
-  });
-
-  chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendChat.click();
-  });
-
-  // ====== مشاركة رابط الفيديو عبر Firebase ======
-  const videoUrlRef = db.ref("rooms/" + ROOM_ID + "/videoUrl");
-
-  const video = document.getElementById('video');
-  const playPauseBtn = document.getElementById('playPause');
-  const volumeRange = document.getElementById('volume');
-  const qualitySelect = document.getElementById('quality');
-  const subsSelect = document.getElementById('subs');
-  const currentTimeEl = document.getElementById('currentTime');
-  const durationEl = document.getElementById('duration');
-  const fullscreenBtn = document.getElementById('fullscreen');
-  const statusEl = document.getElementById('status');
-  const newUrlInput = document.getElementById('newUrl');
-  const loadUrlBtn = document.getElementById('loadUrlBtn');
-
-  let hls = null;
-
-  function formatTime(sec) {
-    if (!sec || isNaN(sec)) return "0:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  }
-
-  function initPlayer(url) {
-    if (hls) {
-      hls.destroy();
-      hls = null;
-    }
-
-    if (!url) {
-      statusEl.textContent = "أدخل رابط HLS لبدء التشغيل.";
-      video.removeAttribute("src");
-      video.load();
-      return;
-    }
-
+  else if (isM3U8(url)) {
     if (Hls.isSupported()) {
-      hls = new Hls({
-        enableWorker: true,
-        capLevelToPlayerSize: true
-      });
-
+      const hls = new Hls();
       hls.loadSource(url);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
-        qualitySelect.innerHTML = "";
-        const autoOption = document.createElement("option");
-        autoOption.value = "auto";
-        autoOption.textContent = "تلقائي";
-        autoOption.selected = true;
-        qualitySelect.appendChild(autoOption);
-
-        data.levels.forEach((level, index) => {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = level.height ? `${level.height}p` : `جودة ${index + 1}`;
-          qualitySelect.appendChild(option);
-        });
-
-        statusEl.textContent = "تم تحميل البث (مشترك للجميع).";
-        video.play();
-      });
-
-      hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_, data) => {
-        subsSelect.innerHTML = "<option value='off'>إيقاف</option>";
-        data.subtitleTracks.forEach((track, index) => {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = track.name || track.lang || `ترجمة ${index + 1}`;
-          subsSelect.appendChild(option);
-        });
-      });
-
-      subsSelect.onchange = () => {
-        const value = subsSelect.value;
-        hls.subtitleTrack = value === "off" ? -1 : parseInt(value, 10);
-      };
-
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        console.error("HLS error:", data);
-        if (data.fatal) {
-          statusEl.textContent = "خطأ في البث، قد يكون من الرابط أو من القيود على المصدر.";
-        }
-      });
-
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = url;
-      video.play();
-    } else {
-      statusEl.textContent = "المتصفح لا يدعم HLS.";
-    }
+      hls.attachMedia(videoEl);
+      videoEl.play();
+    } else alert("M3U8 غير مدعوم");
   }
 
-  loadUrlBtn.addEventListener("click", () => {
-    const url = newUrlInput.value.trim();
-    if (!url.endsWith(".m3u8")) {
-      statusEl.textContent = "الرجاء إدخال رابط HLS صحيح (ينتهي بـ .m3u8).";
-      return;
-    }
-    statusEl.textContent = "جاري مشاركة الرابط وتحميله...";
-    videoUrlRef.set(url);
-  });
+  else if (isDirectVideo(url)) {
+    videoEl.src = url;
+    videoEl.play();
+  }
 
-  videoUrlRef.on("value", snap => {
-    const url = snap.val();
-    newUrlInput.value = url || "";
-    initPlayer(url || "");
-  });
+  else alert("نوع الرابط غير مدعوم");
+};
 
-  playPauseBtn.addEventListener("click", () => {
-    if (video.paused) {
-      video.play();
-      playPauseBtn.textContent = "إيقاف";
-    } else {
-      video.pause();
-      playPauseBtn.textContent = "تشغيل";
-    }
-  });
-
-  video.addEventListener("play", () => playPauseBtn.textContent = "إيقاف");
-  video.addEventListener("pause", () => playPauseBtn.textContent = "تشغيل");
-
-  video.addEventListener("timeupdate", () => {
-    currentTimeEl.textContent = formatTime(video.currentTime);
-    durationEl.textContent = formatTime(video.duration);
-  });
-
-  volumeRange.addEventListener("input", () => video.volume = volumeRange.value);
-
-  fullscreenBtn.addEventListener("click", () => {
-    if (!document.fullscreenElement) video.requestFullscreen();
-    else document.exitFullscreen();
-  });
+fileBtn.onclick = ()=>fileInput.click();
+fileInput.onchange = ()=>{
+  const file=fileInput.files[0];
+  if (!file) return;
+  const url=URL.createObjectURL(file);
+  videoEl.src=url;
+  videoEl.play();
+};
 </script>
 
 </body>
