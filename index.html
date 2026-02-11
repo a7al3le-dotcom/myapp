@@ -6,6 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 
+<!-- YouTube API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<!-- HLS.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
   * { box-sizing: border-box; }
   body {
@@ -20,7 +25,7 @@
     height: 55px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start; /* لتغيير الزر لليمين */
     padding: 0 15px;
     position: sticky;
     top: 0;
@@ -30,6 +35,7 @@
   }
 
   .online-pill {
+    margin-left: auto; /* تحريك للجانب الأيمن */
     padding: 8px 14px;
     border-radius: 999px;
     background: #1e293b;
@@ -100,6 +106,7 @@
     padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s;
   }
   #twitter-selector button.active {
     border-color: #6366f1;
@@ -111,10 +118,17 @@
     padding: 15px;
     height: calc(100vh - 55px - 350px);
     overflow-y: auto;
+    transition: all 0.3s ease;
   }
   .message {
     margin-bottom: 12px;
     font-size: 15px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.3s forwards;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
   }
   .name {
     font-weight: bold;
@@ -160,6 +174,7 @@
     inset: 0;
     background: rgba(0,0,0,0.55);
     display: none;
+    z-index: 50;
   }
   #membersPanel {
     position: absolute;
@@ -220,9 +235,9 @@
     <div id="membersList"></div>
   </div>
 </div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
@@ -233,7 +248,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const ROOM = "public-room";
 
-/* ===== المتواجدون ===== */
+/* ======== المتواجدون ======== */
 const openMembers = document.getElementById("openMembers");
 const membersOverlay = document.getElementById("membersOverlay");
 const membersPanel = document.getElementById("membersPanel");
@@ -273,11 +288,27 @@ presenceRef.on("value", snap => {
   });
 });
 
-/* ===== الدردشة ===== */
+/* ======== الدردشة ======== */
 const messages = document.getElementById("messages");
 const chatInput = document.getElementById("chatInput");
 const sendChat = document.getElementById("sendChat");
 const chatRef = db.ref(`rooms/${ROOM}/chat`);
+
+function addMessage(msg){
+  messages.innerHTML += `
+    <div class="message">
+      <span class="name">${msg.name}</span>
+      <span class="timestamp">${new Date(msg.ts).toLocaleTimeString()}</span>
+      <div>${msg.text}</div>
+    </div>
+  `;
+  // عرض آخر 10 رسائل فقط
+  const allMessages = messages.querySelectorAll(".message");
+  if(allMessages.length>10){
+    allMessages[0].remove();
+  }
+  messages.scrollTop = messages.scrollHeight;
+}
 
 sendChat.onclick = () => {
   const text = chatInput.value.trim();
@@ -287,18 +318,10 @@ sendChat.onclick = () => {
 };
 
 chatRef.on("child_added", snap => {
-  const v = snap.val();
-  messages.innerHTML += `
-    <div class="message">
-      <span class="name">${v.name}</span>
-      <span class="timestamp">${new Date(v.ts).toLocaleTimeString()}</span>
-      <div>${v.text}</div>
-    </div>
-  `;
-  messages.scrollTop = messages.scrollHeight;
+  addMessage(snap.val());
 });
 
-/* ===== المشغل ===== */
+/* ======== المشغل + مزامنة الفيديو ======== */
 const videoEl = document.getElementById("video-element");
 const urlInput = document.getElementById("url-input");
 const loadBtn = document.getElementById("load-btn");
@@ -306,72 +329,161 @@ const fileBtn = document.getElementById("file-btn");
 const fileInput = document.getElementById("file-input");
 const twitterSelector = document.getElementById("twitter-selector");
 
+let videoStateRef = db.ref(`rooms/${ROOM}/videoState`);
+let isSyncing = false;
+let ytPlayer = null;
+let currentType = "video";
+let hls = null;
+
+/* ===== دوال مساعدة ===== */
 function isYouTube(url){ return /youtube\.com|youtu\.be/.test(url); }
 function getYouTubeID(url){ const m=url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/); return m?m[1]:null; }
 function isTwitter(url){ return /twitter\.com|x\.com/.test(url); }
 function isDirect(url){ return /\.(mp4|webm|ogg)$/i.test(url); }
 function isM3U8(url){ return /\.m3u8$/i.test(url); }
 
+function detectType(url){
+  if(isYouTube(url)) return "youtube";
+  if(isTwitter(url)) return "twitter";
+  if(isM3U8(url)) return "m3u8";
+  if(isDirect(url)) return "video";
+  return "unknown";
+}
+
+/* ===== دالة تحميل يوتيوب احترافية ===== */
+function loadYouTube(videoId){
+  currentType = "youtube";
+
+  document.getElementById("player-container").innerHTML =
+    `<div id="yt-player"></div>`;
+
+  ytPlayer = new YT.Player('yt-player', {
+    videoId: videoId,
+    playerVars: { autoplay: 1, rel: 0 },
+    events: {
+      onReady: () => {},
+      onStateChange: (event) => {
+        if(isSyncing) return;
+        if(event.data === YT.PlayerState.PLAYING){
+          videoStateRef.update({ playing:true, currentTime:ytPlayer.getCurrentTime(), updatedAt:Date.now() });
+        }
+        if(event.data === YT.PlayerState.PAUSED){
+          videoStateRef.update({ playing:false, currentTime:ytPlayer.getCurrentTime(), updatedAt:Date.now() });
+        }
+      }
+    }
+  });
+}
+
+/* ===== دالة تطبيق حالة الفيديو ===== */
+function applyState(state){
+  if(!state) return;
+  if(state.type==="youtube" && ytPlayer){
+    ytPlayer.seekTo(state.currentTime||0,true);
+    state.playing?ytPlayer.playVideo():ytPlayer.pauseVideo();
+  }
+  if(state.type==="video"){
+    const v = document.querySelector("#video-element");
+    if(!v) return;
+    v.currentTime = state.currentTime||0;
+    state.playing?v.play().catch(()=>{}):v.pause();
+  }
+  if(state.type==="m3u8" && videoEl){
+    if(!hls) hls = new Hls();
+    hls.loadSource(state.url);
+    hls.attachMedia(videoEl);
+    videoEl.currentTime = state.currentTime||0;
+    state.playing?videoEl.play():videoEl.pause();
+  }
+}
+
+/* ===== تحميل أي رابط ===== */
 loadBtn.onclick = async () => {
   const url = urlInput.value.trim();
-  if (!url) return;
+  if(!url) return;
 
   videoEl.src = "";
   twitterSelector.innerHTML = "";
 
-  if (isYouTube(url)) {
+  const type = detectType(url);
+  currentType = type;
+
+  if(type==="youtube"){
     const id = getYouTubeID(url);
-    videoEl.outerHTML = `
-      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1"></iframe>
-    `;
+    loadYouTube(id);
+    await videoStateRef.set({ url:url, type:"youtube", playing:true, currentTime:0, updatedAt:Date.now() });
     return;
   }
 
-  if (isDirect(url)) {
+  if(type==="video"){
     videoEl.src = url;
     videoEl.play();
+    await videoStateRef.set({ url:url, type:"video", playing:true, currentTime:0, updatedAt:Date.now() });
     return;
   }
 
-  if (isM3U8(url)) {
-    if (Hls.isSupported()) {
-      const hls = new Hls();
+  if(type==="m3u8"){
+    if(Hls.isSupported()){
+      if(hls) hls.destroy();
+      hls = new Hls();
       hls.loadSource(url);
       hls.attachMedia(videoEl);
       videoEl.play();
     }
+    await videoStateRef.set({ url:url, type:"m3u8", playing:true, currentTime:0, updatedAt:Date.now() });
     return;
   }
 
-  if (isTwitter(url)) {
+  if(type==="twitter"){
     const id = url.match(/status\/(\d+)/)[1];
     const res = await fetch(`https://api.vxtwitter.com/i/status/${id}`);
     const data = await res.json();
-
     data.media_extended.forEach((m,i)=>{
       const btn = document.createElement("button");
-      btn.textContent = "مقطع " + (i+1);
-      btn.onclick = () => {
+      btn.textContent = "مقطع "+(i+1);
+      btn.onclick=()=>{
         twitterSelector.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
         btn.classList.add("active");
-        videoEl.src = m.url;
+        videoEl.src=m.url;
         videoEl.play();
+        videoStateRef.set({ url:m.url, type:"video", playing:true, currentTime:0, updatedAt:Date.now() });
       };
       twitterSelector.appendChild(btn);
     });
-
     twitterSelector.querySelector("button").click();
   }
 };
 
-fileBtn.onclick = ()=>fileInput.click();
-fileInput.onchange = ()=>{
-  const file = fileInput.files[0];
-  if (!file) return;
-  videoEl.src = URL.createObjectURL(file);
+/* ===== رفع ملف ===== */
+fileBtn.onclick=()=>fileInput.click();
+fileInput.onchange=()=>{
+  const file=fileInput.files[0];
+  if(!file) return;
+  videoEl.src=URL.createObjectURL(file);
   videoEl.play();
+  videoStateRef.set({ url:videoEl.src, type:"video", playing:true, currentTime:0, updatedAt:Date.now() });
 };
-</script>
 
+/* ===== مزامنة تشغيل/إيقاف الفيديو ===== */
+document.addEventListener("play",e=>{
+  if(currentType==="video" && e.target.tagName==="VIDEO" && !isSyncing){
+    videoStateRef.update({ playing:true, currentTime:e.target.currentTime, updatedAt:Date.now() });
+  }
+},true);
+document.addEventListener("pause",e=>{
+  if(currentType==="video" && e.target.tagName==="VIDEO" && !isSyncing){
+    videoStateRef.update({ playing:false, currentTime:e.target.currentTime, updatedAt:Date.now() });
+  }
+},true);
+
+/* ===== الاستماع لجميع المستخدمين ===== */
+videoStateRef.on("value",snap=>{
+  const state = snap.val();
+  if(!state) return;
+  isSyncing = true;
+  applyState(state);
+  setTimeout(()=>isSyncing=false,500);
+});
+</script>
 </body>
 </html>
