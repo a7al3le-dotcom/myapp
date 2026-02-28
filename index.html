@@ -223,19 +223,7 @@
             font-weight: 600;
         }
 
-        /* شارة المتصلين (لو حاب تفصلها) */
-        #onlineList {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            border-radius: 999px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+        /* #onlineList - غير مستخدم في HTML حالياً */
 
         /* مودالات */
         #usersBox,
@@ -304,9 +292,12 @@
             background: rgba(5, 6, 12, 0.95);
             color: var(--text-main);
             font-family: 'Tajawal', sans-serif;
-            font-size: 14px;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
             box-sizing: border-box;
             margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         #videoUrlInput::placeholder {
@@ -983,6 +974,14 @@
                 return videos;
             }
 
+            // تحديث الأوقات لكل الرسائل بـ interval واحد مشترك (بدل interval لكل رسالة)
+            const messageTimestamps = new Map();
+            setInterval(() => {
+                messageTimestamps.forEach(({ timestamp, el }, key) => {
+                    updateTimeDisplay(key, timestamp, el);
+                });
+            }, 60000);
+
             function addMessageToUI(key, { user, text, time, timestamp }) {
                 const div = document.createElement("div");
                 div.className = "msg";
@@ -1000,13 +999,10 @@
       `;
 
                 div.appendChild(timeElement);
+                messageTimestamps.set(key, { timestamp, el: timeElement });
 
                 messagesDiv.appendChild(div);
                 scrollToBottom();
-
-                setInterval(() => {
-                    updateTimeDisplay(key, timestamp, timeElement);
-                }, 60000);
             }
 
             function updateTimeDisplay(key, timestamp, timeElement) {
