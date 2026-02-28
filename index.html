@@ -460,6 +460,7 @@
             width: 100%;
             background: #000;
             flex-grow: 1;
+            min-height: 320px;
         }
 
         .video-js .vjs-tech {
@@ -844,24 +845,18 @@
                         } else if (data.type === 'direct') {
                             createVideoPlayer(body, data.url, 'video/mp4', false);
                         } else if (data.type === 'twitter') {
-                            // أظهر تحميل
-                            body.innerHTML = `<div style="color:#aaa;padding:16px;text-align:center;font-size:13px;">⏳ جاري جلب الفيديو...</div>`;
+                            // ✨ حل جذري: embed فوراً ثم تحديث في الخلفية
+                            embedTwitterNative(body, data.id); // يظهر فوراً 100%
 
+                            // حاول جلب الفيديو المباشر في الخلفية (لو نجح يحسّن التجربة)
                             fetchTwitterVideos(data.id).then(videos => {
-                                console.log('[Twitter] videos found:', videos);
-                                if (videos && videos.length) {
+                                if (videos && videos.length && pinnedVideoPlayer.contains(body)) {
                                     currentVideosList = videos;
                                     currentVideoIndex = 0;
                                     createVideoPlayer(body, videos[0].url, 'video/mp4', false);
                                     if (videos.length > 1) createVideoSelector(body, videos);
-                                } else {
-                                    console.warn('[Twitter] APIs failed → native embed fallback');
-                                    embedTwitterNative(body, data.id);
                                 }
-                            }).catch(err => {
-                                console.error('[Twitter] fetch error:', err);
-                                embedTwitterNative(body, data.id);
-                            });
+                            }).catch(() => { }); // فشل صامت — embed موجود مسبقاً
                         }
 
                         addNotification(`${data.setBy} قام بتشغيل فيديو`);
@@ -871,26 +866,22 @@
                 });
             }
 
-            // دالة: embed التغريدة بشكل أصلي (fallback لما تفشل كل APIs)
+            // دالة: embed التغريدة عبر iframe رسمي من تويتر (الأضمن دائماً)
             function embedTwitterNative(container, tweetId) {
+                container.innerHTML = '';
                 container.style.background = '#15202b';
-                container.style.overflowY = 'auto';
-                container.style.padding = '8px';
-                container.innerHTML = `
-                    <blockquote class="twitter-tweet" data-theme="dark" data-lang="ar">
-                        <a href="https://twitter.com/i/status/${tweetId}"></a>
-                    </blockquote>`;
+                container.style.overflow = 'hidden';
 
-                // تحميل Twitter widget.js إذا لم يكن محملاً
-                if (window.twttr && window.twttr.widgets) {
-                    window.twttr.widgets.load(container);
-                } else {
-                    const script = document.createElement('script');
-                    script.async = true;
-                    script.src = 'https://platform.twitter.com/widgets.js';
-                    script.charset = 'utf-8';
-                    document.head.appendChild(script);
-                }
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '320px';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('scrolling', 'no')
+                container.appendChild(iframe);
             }
 
             function createVideoPlayer(container, videoSource, videoType, isYoutube) {
@@ -969,62 +960,76 @@
             async function fetchTwitterVideos(tweetId) {
                 const videos = [];
 
-                // محاولة 1: fxtwitter
+                // محاولة 1: fxtwitter (أدق API حالياً)
                 try {
-                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`);
+                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
                     if (fxRes.ok) {
                         const fxData = await fxRes.json();
                         const tweet = fxData.tweet || {};
                         const media = tweet.media || {};
 
-                        const mediaItems = Array.isArray(media.videos) ? media.videos
-                            : Array.isArray(media.all) ? media.all.filter(m => m.type === 'video' || m.type === 'gif')
-                                : [];
-
-                        mediaItems.forEach(v => {
-                            if (v && v.url) {
-                                videos.push({ url: v.url, thumb: v.thumbnail_url || '', type: v.type || 'video', provider: 'fxtwitter' });
-                            }
-                        });
+                        // هيكل 1: media.videos[]
+                        if (Array.isArray(media.videos)) {
+                            media.videos.forEach(v => {
+                                const src = v.url || (v.variants && v.variants[0]?.url);
+                                if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                            });
+                        }
+                        // هيكل 2: media.all[]
+                        if (!videos.length && Array.isArray(media.all)) {
+                            media.all.filter(v => v.type === 'video' || v.type === 'gif').forEach(v => {
+                                const src = v.url || (v.variants && v.variants[0]?.url);
+                                if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                            });
+                        }
+                        // هيكل 3: tweet.video
+                        if (!videos.length && tweet.video) {
+                            const v = tweet.video;
+                            const src = v.url || (v.variants && v.variants[0]?.url);
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                        }
                     }
-                } catch (e) { console.warn('fxtwitter error:', e); }
+                } catch (e) { console.warn('[fxtwitter]', e.message); }
 
                 if (videos.length) return videos;
 
-                // محاولة 2: vxtwitter
+                // محاولة 2: vxtwitter (تصحيح endpoint)
                 try {
-                    const vxRes = await fetch(`https://api.vxtwitter.com/i/status/${tweetId}`);
+                    const vxRes = await fetch(`https://api.vxtwitter.com/status/${tweetId}`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
                     if (vxRes.ok) {
                         const vxData = await vxRes.json();
-                        const mediaExt = vxData.media_extended || [];
-                        mediaExt.forEach(m => {
+                        (vxData.media_extended || []).forEach(m => {
                             if (m && (m.type === 'video' || m.type === 'gif') && m.url) {
-                                videos.push({ url: m.url, thumb: m.thumbnail_url || '', type: m.type, provider: 'vxtwitter' });
+                                videos.push({ url: m.url, type: 'video/mp4', provider: 'vxtwitter' });
                             }
                         });
                     }
-                } catch (e) { console.warn('vxtwitter error:', e); }
+                } catch (e) { console.warn('[vxtwitter]', e.message); }
 
                 if (videos.length) return videos;
 
-                // محاولة 3: cobalt.tools API
+                // محاولة 3: cobalt.tools v7
                 try {
-                    const cobaltRes = await fetch('https://api.cobalt.tools/', {
+                    const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
                         method: 'POST',
                         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url: `https://x.com/i/status/${tweetId}`, filenamePattern: 'basic', isAudioOnly: false })
+                        body: JSON.stringify({ url: `https://x.com/i/status/${tweetId}` })
                     });
                     if (cobaltRes.ok) {
                         const cobaltData = await cobaltRes.json();
                         if (cobaltData.url) {
-                            videos.push({ url: cobaltData.url, thumb: '', type: 'video', provider: 'cobalt' });
+                            videos.push({ url: cobaltData.url, type: 'video/mp4', provider: 'cobalt' });
                         } else if (Array.isArray(cobaltData.picker)) {
-                            cobaltData.picker.forEach(item => {
-                                if (item.url) videos.push({ url: item.url, thumb: item.thumb || '', type: 'video', provider: 'cobalt' });
+                            cobaltData.picker.forEach(p => {
+                                if (p.url) videos.push({ url: p.url, type: 'video/mp4', provider: 'cobalt' });
                             });
                         }
                     }
-                } catch (e) { console.warn('cobalt error:', e); }
+                } catch (e) { console.warn('[cobalt]', e.message); }
 
                 return videos;
             }
