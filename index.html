@@ -844,18 +844,24 @@
                         } else if (data.type === 'direct') {
                             createVideoPlayer(body, data.url, 'video/mp4', false);
                         } else if (data.type === 'twitter') {
-                            const videos = await fetchTwitterVideos(data.id);
-                            if (!videos || !videos.length) {
-                                body.innerHTML = `<p style="color:white;padding:10px;">تعذر جلب فيديو تويتر (قد يكون خاصاً أو محذوفاً أو خدمة الوسيط متوقفة).</p>`;
-                            } else {
-                                currentVideosList = videos;
-                                currentVideoIndex = 0;
-                                createVideoPlayer(body, videos[0].url, 'video/mp4', false);
+                            // أظهر تحميل
+                            body.innerHTML = `<div style="color:#aaa;padding:16px;text-align:center;font-size:13px;">⏳ جاري جلب الفيديو...</div>`;
 
-                                if (videos.length > 1) {
-                                    createVideoSelector(body, videos);
+                            fetchTwitterVideos(data.id).then(videos => {
+                                console.log('[Twitter] videos found:', videos);
+                                if (videos && videos.length) {
+                                    currentVideosList = videos;
+                                    currentVideoIndex = 0;
+                                    createVideoPlayer(body, videos[0].url, 'video/mp4', false);
+                                    if (videos.length > 1) createVideoSelector(body, videos);
+                                } else {
+                                    console.warn('[Twitter] APIs failed → native embed fallback');
+                                    embedTwitterNative(body, data.id);
                                 }
-                            }
+                            }).catch(err => {
+                                console.error('[Twitter] fetch error:', err);
+                                embedTwitterNative(body, data.id);
+                            });
                         }
 
                         addNotification(`${data.setBy} قام بتشغيل فيديو`);
@@ -863,6 +869,28 @@
                         pinnedVideoPlayer.style.display = 'none';
                     }
                 });
+            }
+
+            // دالة: embed التغريدة بشكل أصلي (fallback لما تفشل كل APIs)
+            function embedTwitterNative(container, tweetId) {
+                container.style.background = '#15202b';
+                container.style.overflowY = 'auto';
+                container.style.padding = '8px';
+                container.innerHTML = `
+                    <blockquote class="twitter-tweet" data-theme="dark" data-lang="ar">
+                        <a href="https://twitter.com/i/status/${tweetId}"></a>
+                    </blockquote>`;
+
+                // تحميل Twitter widget.js إذا لم يكن محملاً
+                if (window.twttr && window.twttr.widgets) {
+                    window.twttr.widgets.load(container);
+                } else {
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = 'https://platform.twitter.com/widgets.js';
+                    script.charset = 'utf-8';
+                    document.head.appendChild(script);
+                }
             }
 
             function createVideoPlayer(container, videoSource, videoType, isYoutube) {
