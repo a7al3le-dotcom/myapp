@@ -848,15 +848,34 @@
                             // ✨ حل جذري: embed فوراً ثم تحديث في الخلفية
                             embedTwitterNative(body, data.id); // يظهر فوراً 100%
 
-                            // حاول جلب الفيديو المباشر في الخلفية (لو نجح يحسّن التجربة)
-                            fetchTwitterVideos(data.id).then(videos => {
-                                if (videos && videos.length && pinnedVideoPlayer.contains(body)) {
-                                    currentVideosList = videos;
-                                    currentVideoIndex = 0;
-                                    createVideoPlayer(body, videos[0].url, 'video/mp4', false);
-                                    if (videos.length > 1) createVideoSelector(body, videos);
+                            // حاول جلب الفيديو المباشر في الخلفية
+                            const _twId = data.id;
+                            fetchTwitterVideos(_twId).then(videos => {
+                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
+                                currentVideosList = videos;
+                                currentVideoIndex = 0;
+                                // شغّل الفيديو، ولو فشل ارجع للـ embed
+                                const vEl = document.createElement('video-js');
+                                vEl.className = 'vjs-netflix-theme';
+                                body.innerHTML = '';
+                                body.appendChild(vEl);
+                                try {
+                                    const p = videojs(vEl, {
+                                        autoplay: true, muted: true, controls: true,
+                                        aspectRatio: '16:9', playsinline: true,
+                                        techOrder: ['html5'],
+                                        sources: [{ type: 'video/mp4', src: videos[0].url }]
+                                    });
+                                    videoPlayerInstance = p;
+                                    p.on('error', () => {
+                                        videoPlayerInstance = null;
+                                        embedTwitterNative(body, _twId); // fallback للـ embed
+                                    });
+                                } catch (e) {
+                                    embedTwitterNative(body, _twId);
                                 }
-                            }).catch(() => { }); // فشل صامت — embed موجود مسبقاً
+                                if (videos.length > 1) createVideoSelector(body, videos);
+                            }).catch(() => { }); // فشل صامت - embed موجود
                         }
 
                         addNotification(`${data.setBy} قام بتشغيل فيديو`);
