@@ -10,7 +10,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
+    <!-- hls.js لدعم M3U8 على Chrome/Android/Firefox -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
     <style>
         :root {
@@ -869,6 +871,26 @@
                 container.innerHTML = '';
                 container.appendChild(videoEl);
 
+                // HLS على المتصفحات غير Safari
+                const isHLS = videoType === 'application/x-mpegURL' || videoSource.includes('.m3u');
+                if (isHLS && !videoEl.canPlayType('application/vnd.apple.mpegurl') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hls = new Hls();
+                    const nativeVideo = document.createElement('video');
+                    nativeVideo.controls = true;
+                    nativeVideo.autoplay = true;
+                    nativeVideo.muted = true;
+                    nativeVideo.playsInline = true;
+                    nativeVideo.style.width = '100%';
+                    nativeVideo.style.height = '100%';
+                    nativeVideo.style.background = '#000';
+                    container.innerHTML = '';
+                    container.appendChild(nativeVideo);
+                    hls.loadSource(videoSource);
+                    hls.attachMedia(nativeVideo);
+                    videoPlayerInstance = { dispose: () => { hls.destroy(); nativeVideo.remove(); } };
+                    return;
+                }
+
                 let playerOptions = {
                     autoplay: true,
                     muted: true,
@@ -879,7 +901,14 @@
                     sources: [{ type: videoType, src: videoSource }]
                 };
 
-                videoPlayerInstance = videojs(videoEl, playerOptions);
+                try {
+                    videoPlayerInstance = videojs(videoEl, playerOptions);
+                    videoPlayerInstance.on('error', () => {
+                        container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ تعذّر تشغيل الفيديو. تحقق من الرابط أو جرب صيغة أخرى.</p>`;
+                    });
+                } catch (e) {
+                    container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ خطأ في تحميل المشغّل.</p>`;
+                }
             }
 
             function createVideoSelector(container, videos) {
@@ -912,6 +941,7 @@
             async function fetchTwitterVideos(tweetId) {
                 const videos = [];
 
+                // محاولة 1: fxtwitter
                 try {
                     const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`);
                     if (fxRes.ok) {
@@ -919,57 +949,54 @@
                         const tweet = fxData.tweet || {};
                         const media = tweet.media || {};
 
-                        if (Array.isArray(media.videos)) {
-                            media.videos.forEach(v => {
-                                if (v && v.url) {
-                                    videos.push({
-                                        url: v.url,
-                                        thumb: v.thumbnail_url || '',
-                                        type: v.type || 'video',
-                                        provider: 'fxtwitter'
-                                    });
-                                }
-                            });
-                        } else if (Array.isArray(media.all)) {
-                            media.all
-                                .filter(m => m.type === 'video' || m.type === 'gif')
-                                .forEach(v => {
-                                    if (v && v.url) {
-                                        videos.push({
-                                            url: v.url,
-                                            thumb: v.thumbnail_url || '',
-                                            type: v.type || 'video',
-                                            provider: 'fxtwitter'
-                                        });
-                                    }
-                                });
-                        }
-                    }
-                } catch (e) {
-                    console.warn('FixTweet error:', e);
-                }
+                        const mediaItems = Array.isArray(media.videos) ? media.videos
+                            : Array.isArray(media.all) ? media.all.filter(m => m.type === 'video' || m.type === 'gif')
+                                : [];
 
-                if (!videos.length) {
-                    try {
-                        const vxRes = await fetch(`https://api.vxtwitter.com/i/status/${tweetId}`);
-                        if (vxRes.ok) {
-                            const vxData = await vxRes.json();
-                            const mediaExt = vxData.media_extended || [];
-                            mediaExt.forEach(m => {
-                                if (m && m.url) {
-                                    videos.push({
-                                        url: m.url,
-                                        thumb: m.thumbnail_url || '',
-                                        type: m.type || 'video',
-                                        provider: 'vxtwitter'
-                                    });
-                                }
+                        mediaItems.forEach(v => {
+                            if (v && v.url) {
+                                videos.push({ url: v.url, thumb: v.thumbnail_url || '', type: v.type || 'video', provider: 'fxtwitter' });
+                            }
+                        });
+                    }
+                } catch (e) { console.warn('fxtwitter error:', e); }
+
+                if (videos.length) return videos;
+
+                // محاولة 2: vxtwitter
+                try {
+                    const vxRes = await fetch(`https://api.vxtwitter.com/i/status/${tweetId}`);
+                    if (vxRes.ok) {
+                        const vxData = await vxRes.json();
+                        const mediaExt = vxData.media_extended || [];
+                        mediaExt.forEach(m => {
+                            if (m && (m.type === 'video' || m.type === 'gif') && m.url) {
+                                videos.push({ url: m.url, thumb: m.thumbnail_url || '', type: m.type, provider: 'vxtwitter' });
+                            }
+                        });
+                    }
+                } catch (e) { console.warn('vxtwitter error:', e); }
+
+                if (videos.length) return videos;
+
+                // محاولة 3: cobalt.tools API
+                try {
+                    const cobaltRes = await fetch('https://api.cobalt.tools/', {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: `https://x.com/i/status/${tweetId}`, filenamePattern: 'basic', isAudioOnly: false })
+                    });
+                    if (cobaltRes.ok) {
+                        const cobaltData = await cobaltRes.json();
+                        if (cobaltData.url) {
+                            videos.push({ url: cobaltData.url, thumb: '', type: 'video', provider: 'cobalt' });
+                        } else if (Array.isArray(cobaltData.picker)) {
+                            cobaltData.picker.forEach(item => {
+                                if (item.url) videos.push({ url: item.url, thumb: item.thumb || '', type: 'video', provider: 'cobalt' });
                             });
                         }
-                    } catch (e) {
-                        console.warn('vxtwitter error:', e);
                     }
-                }
+                } catch (e) { console.warn('cobalt error:', e); }
 
                 return videos;
             }
@@ -1163,7 +1190,12 @@
             }
 
             function isDirectVideo(url) {
-                return /\.(mp4|webm|ogv)$/i.test(url);
+                if (!url) return false;
+                // تحقق من الامتداد الصريح
+                if (/\.(mp4|webm|ogv|mkv|avi|mov|flv|m4v)(\?.*)?$/i.test(url)) return true;
+                // روابط تحتوي على video في المسار وليست يوتيوب أو تويتر
+                if (/video/i.test(url) && !/(youtube|youtu\.be|twitter|x\.com)/i.test(url)) return true;
+                return false;
             }
 
             function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
