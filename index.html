@@ -1,364 +1,246 @@
 <!DOCTYPE html>
-<html lang="ar" hreflang="ar-sa" style="height: 100%;">
+<html lang="ar" style="height:100%">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <title>شات خاص</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات خاص</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-  <style>
-    body { margin: 0; font-family: 'Tajawal', sans-serif; overflow: hidden; }
-    #topButtons { position: fixed; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 1000; }
-    .btn { padding: 6px 12px; background: white; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; font-size: 14px; }
-    #usersBox, #editNameModal, #setVideoModal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: white; padding: 20px; border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1003; display: none;
-    }
-    #usersList { max-height: 200px; overflow-y: auto; }
-    #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
-    
-    #pinnedVideoPlayer {
-      position: fixed; top: 50px; left: 50px;
-      width: clamp(300px, 90vw, 450px);
-      background: #f0f0f0; border: 1px solid #ccc; border-radius: 8px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 998;
-      display: none;
-      flex-direction: column;
-    }
-    .video-header {
-      background-color: #337ab7; color: white;
-      padding: 5px 10px; border-top-left-radius: 7px; border-top-right-radius: 7px;
-      cursor: move;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-shrink: 0;
-      touch-action: none;
-    }
-    .video-body { 
-        width: 100%; 
-        background: #000; 
-    }
-    .video-body iframe, .video-body video { 
-        width: 100%; 
-        height: 100%; 
-        border: none; 
-        display: block; 
-    }
-    .close-pinned-video {
-      background: #d9534f; border: 1px solid #d43f3a; color: white;
-      border-radius: 50%; width: 22px; height: 22px;
-      cursor: pointer; font-size: 14px; line-height: 20px; text-align: center;
-    }
-    .video-selector {
-      display: flex; gap: 5px; padding: 5px; background: #e9ecef;
-      border-bottom-left-radius: 7px; border-bottom-right-radius: 7px;
-      flex-shrink: 0;
-    }
-    .video-selector button {
-      flex: 1; padding: 5px; font-size: 12px; background: #fff;
-      border: 1px solid #ccc; border-radius: 4px; cursor: pointer;
-    }
-    .video-selector button.active { background-color: #337ab7; color: white; border-color: #2e6da4; }
-
-    #messages { overflow-y: auto; padding: 10px; padding-bottom: 70px; background: #fff; direction: rtl; font-family: 'Tajawal', sans-serif; height: 100vh; box-sizing: border-box; }
-    .msg { display: flex; gap: 10px; margin: 6px 0; font-size: 15px; align-items: flex-start; }
-    .sys { text-align: center; color: gray; font-size: 12px; margin: 5px 0; }
-    .user { font-weight: bold; color: #3366cc; }
-    .time { font-size: 11px; color: gray; flex-shrink: 0; margin-right: auto; }
-    #inputArea { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; padding: 6px; background: #fafafa; z-index: 999; }
-    #messageInput { flex: 1; font-size: 16px; padding: 8px; border: 1px solid #ccc; outline: none; direction: rtl; }
-    #sendBtn { padding: 8px 12px; background: #f0f0f0; border: 1px solid #ccc; cursor: pointer; }
-  </style>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; font-family:'Tajawal',sans-serif; background:#fafafa; height:100%; }
+#topButtons { position:fixed; top:10px; right:10px; display:flex; gap:8px; z-index:1000; }
+.btn { padding:6px 12px; background:#fff; border:1px solid #ccc; border-radius:20px; cursor:pointer; font-size:14px; }
+#usersBox,#editNameModal,#setVideoModal {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:#fff; padding:20px; border-radius:8px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3); z-index:1003; display:none;
+}
+#usersList { max-height:200px; overflow-y:auto; }
+#overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; display:none; }
+#pinnedVideoPlayer {
+  position:fixed; top:50px; left:50px; width:clamp(300px,90vw,450px);
+  background:#000; border:1px solid #ccc; border-radius:8px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.4); z-index:998; display:none; flex-direction:column;
+}
+.video-header { background:#337ab7; color:#fff; padding:5px 10px; border-top-left-radius:7px; border-top-right-radius:7px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; touch-action:none; }
+.video-body { width:100%; background:#000; }
+.video-body iframe,.video-body video { width:100%; height:100%; border:none; display:block; }
+.close-pinned-video { background:#d9534f; border:1px solid #d43f3a; color:#fff; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:14px; line-height:20px; text-align:center; }
+.video-selector { display:flex; gap:5px; padding:5px; background:#e9ecef; border-bottom-left-radius:7px; border-bottom-right-radius:7px; flex-shrink:0; }
+.video-selector button { flex:1; padding:5px; font-size:12px; background:#fff; border:1px solid #ccc; border-radius:4px; cursor:pointer; }
+.video-selector button.active { background:#337ab7; color:#fff; border-color:#2e6da4; }
+#messages { overflow-y:auto; padding:10px; padding-bottom:70px; background:#fff; direction:rtl; height:100vh; font-family:'Tajawal',sans-serif; }
+.msg { display:flex; gap:10px; margin:6px 0; font-size:15px; align-items:flex-start; }
+.sys { text-align:center; color:gray; font-size:12px; margin:5px 0; }
+.user { font-weight:bold; color:#3366cc; }
+.time { font-size:11px; color:gray; flex-shrink:0; margin-right:auto; }
+#inputArea { position:fixed; bottom:0; left:0; right:0; display:flex; align-items:center; gap:8px; border-top:1px solid #ddd; padding:6px; background:#fafafa; z-index:999; }
+#messageInput { flex:1; font-size:16px; padding:8px; border:1px solid #ccc; outline:none; direction:rtl; }
+#sendBtn { padding:8px 12px; background:#f0f0f0; border:1px solid #ccc; cursor:pointer; }
+</style>
 </head>
 <body>
-    <div id="topButtons">
-        <div class="btn" id="setVideoBtn">📺 تثبيت فيديو</div>
-        <div class="btn" id="onlineListBtn">👥 <span id="count">0</span> متصل</div>
-        <div class="btn" id="changeNameBtn">✏️ غير اسمك</div>
-    </div>
-    <div id="pinnedVideoPlayer"></div>
-    <div id="setVideoModal">
-        <h4>تثبيت فيديو للجميع</h4>
-        <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4"/>
-        <button id="submitVideoUrlBtn">تثبيت</button>
-    </div>
-    <div id="usersBox"><h4>المتصلين الآن</h4><div id="usersList"></div></div>
-    <div id="editNameModal"><label for="newNameInput">تغيير اسم المستخدم:</label><input type="text" id="newNameInput" maxlength="20" /><button id="saveNameBtn">حفظ</button></div>
-    <div id="overlay"></div>
-    <div id="messages"></div>
-    <div id="inputArea"><input type="text" id="messageInput" placeholder="اكتب رسالتك..." /><button id="sendBtn">إرسال</button></div>
 
-  <script>
-     const firebaseConfig = {
-                apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-                authDomain: "mychat-2d881.firebaseapp.com",
-                databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
-            };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    
-    const myUserRef = db.ref("online").push();
-    myUserRef.onDisconnect().remove();
-    let username = "زائر_" + Math.floor(Math.random() * 1000);
-    myUserRef.set({ name: username });
+<div id="topButtons">
+  <div class="btn" id="setVideoBtn">📺 تثبيت فيديو</div>
+  <div class="btn" id="onlineListBtn">👥 <span id="count">0</span> متصل</div>
+  <div class="btn" id="changeNameBtn">✏️ غير اسمك</div>
+</div>
 
-    const onlineListBtn = document.getElementById("onlineListBtn");
-    const changeNameBtn = document.getElementById("changeNameBtn");
-    const setVideoBtn = document.getElementById("setVideoBtn");
-    const usersBox = document.getElementById("usersBox");
-    const usersList = document.getElementById("usersList");
-    const overlay = document.getElementById("overlay");
-    const count = document.getElementById("count");
-    const messagesDiv = document.getElementById("messages");
-    const messageInput = document.getElementById("messageInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const editNameModal = document.getElementById("editNameModal");
-    const newNameInput = document.getElementById("newNameInput");
-    const saveNameBtn = document.getElementById("saveNameBtn");
-    const setVideoModal = document.getElementById("setVideoModal");
-    const videoUrlInput = document.getElementById("videoUrlInput");
-    const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
-    const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
-    const onlineUsersCache = {}; 
+<div id="pinnedVideoPlayer"></div>
 
-    function makeDraggable(element, handle) {
-        let offsetX = 0, offsetY = 0;
-        let isDragging = false;
+<div id="setVideoModal">
+  <h4>تثبيت فيديو للجميع</h4>
+  <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4"/>
+  <button id="submitVideoUrlBtn">تثبيت</button>
+</div>
 
-        const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
-        const onDragStart = (e) => {
-            isDragging = true;
-            const pointer = getPointerPosition(e);
-            offsetX = pointer.clientX - element.offsetLeft;
-            offsetY = pointer.clientY - element.offsetTop;
-            document.addEventListener('mousemove', onDragMove);
-            document.addEventListener('touchmove', onDragMove, { passive: false });
-            document.addEventListener('mouseup', onDragEnd);
-            document.addEventListener('touchend', onDragEnd);
+<div id="usersBox">
+  <h4>المتصلين الآن</h4>
+  <div id="usersList"></div>
+</div>
+
+<div id="editNameModal">
+  <label for="newNameInput">تغيير اسم المستخدم:</label>
+  <input type="text" id="newNameInput" maxlength="20" />
+  <button id="saveNameBtn">حفظ</button>
+</div>
+
+<div id="overlay"></div>
+
+<div id="messages"></div>
+
+<div id="inputArea">
+  <input type="text" id="messageInput" placeholder="اكتب رسالتك..." />
+  <button id="sendBtn">إرسال</button>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const myUserRef = db.ref("online").push();
+myUserRef.onDisconnect().remove();
+let username = "زائر_" + Math.floor(Math.random()*1000);
+myUserRef.set({name: username});
+
+const onlineListBtn = document.getElementById("onlineListBtn");
+const changeNameBtn = document.getElementById("changeNameBtn");
+const setVideoBtn = document.getElementById("setVideoBtn");
+const usersBox = document.getElementById("usersBox");
+const usersList = document.getElementById("usersList");
+const overlay = document.getElementById("overlay");
+const count = document.getElementById("count");
+const messagesDiv = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const editNameModal = document.getElementById("editNameModal");
+const newNameInput = document.getElementById("newNameInput");
+const saveNameBtn = document.getElementById("saveNameBtn");
+const setVideoModal = document.getElementById("setVideoModal");
+const videoUrlInput = document.getElementById("videoUrlInput");
+const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
+const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
+const onlineUsersCache = {};
+
+function makeDraggable(element, handle){
+  let offsetX=0, offsetY=0, dragging=false;
+  const getPos = e => e.touches? e.touches[0]: e;
+  const start = e => {
+    dragging=true;
+    const pointer=getPos(e);
+    offsetX=pointer.clientX - element.offsetLeft;
+    offsetY=pointer.clientY - element.offsetTop;
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move,{passive:false});
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  };
+  const move=e=>{
+    if(!dragging) return;
+    e.preventDefault();
+    const pointer=getPos(e);
+    element.style.left=(pointer.clientX-offsetX)+'px';
+    element.style.top=(pointer.clientY-offsetY)+'px';
+  };
+  const end=()=>{
+    dragging=false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('mouseup', end);
+    document.removeEventListener('touchend', end);
+  };
+  handle.addEventListener('mousedown', start);
+  handle.addEventListener('touchstart', start,{passive:false});
+}
+
+function getYoutubeId(url){ return (url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)||[])[1]||null; }
+function getTweetId(url){ return (url.match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/)||[])[1]||null; }
+function isDirectVideo(url){ return /\.(mp4|webm|ogv)$/i.test(url); }
+
+function closeAllModals(){ usersBox.style.display='none'; editNameModal.style.display='none'; setVideoModal.style.display='none'; overlay.style.display='none'; }
+function updateUsername(newName){ if(!newName||newName===username) return; username=newName; myUserRef.update({name:newName}); }
+function addMessage(user,text,time){
+  const div=document.createElement('div'); div.className='msg';
+  const userSpan=document.createElement('span'); userSpan.className='user'; userSpan.textContent=user+': ';
+  const textSpan=document.createElement('span'); textSpan.textContent=text;
+  const timeSpan=document.createElement('span'); timeSpan.className='time'; timeSpan.textContent='('+time+')';
+  div.appendChild(userSpan); div.appendChild(textSpan); div.appendChild(timeSpan);
+  messagesDiv.appendChild(div); messagesDiv.scrollTop=messagesDiv.scrollHeight;
+}
+function sendMessage(){
+  const text=messageInput.value.trim(); if(!text) return;
+  const time=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  db.ref("messages").push().set({user:username,text,time});
+  messageInput.value='';
+}
+function showSystemMsg(text){ const div=document.createElement('div'); div.className='sys'; div.textContent=text; messagesDiv.appendChild(div); messagesDiv.scrollTop=messagesDiv.scrollHeight; }
+
+onlineListBtn.onclick=()=>{usersBox.style.display='block'; overlay.style.display='block';};
+changeNameBtn.onclick=()=>{editNameModal.style.display='block'; overlay.style.display='block'; newNameInput.value=username; newNameInput.focus();};
+setVideoBtn.onclick=()=>{setVideoModal.style.display='block'; overlay.style.display='block';};
+overlay.onclick=closeAllModals;
+sendBtn.onclick=sendMessage;
+messageInput.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
+saveNameBtn.onclick=()=>{const n=newNameInput.value.trim(); if(!n) return; updateUsername(n); closeAllModals();};
+submitVideoUrlBtn.onclick=()=>{
+  const url=videoUrlInput.value.trim(); if(!url) return;
+  const yt=getYoutubeId(url),tw=getTweetId(url);
+  if(yt) db.ref("pinned_video").set({type:'youtube',id:yt,setBy:username});
+  else if(tw) db.ref("pinned_video").set({type:'twitter',id:tw,setBy:username});
+  else if(url.toLowerCase().includes('.m3u')) db.ref("pinned_video").set({type:'m3u',url:url,setBy:username});
+  else if(isDirectVideo(url)) db.ref("pinned_video").set({type:'direct',url:url,setBy:username});
+  else { alert("الرابط غير مدعوم."); return; }
+  closeAllModals();
+};
+
+db.ref("online").on("child_added", snap=>{ const user=snap.val(), id=snap.key; onlineUsersCache[id]=user.name; if(id!==myUserRef.key) showSystemMsg(`📥 ${user.name} دخل الدردشة`); });
+db.ref("online").on("child_removed", snap=>{ const id=snap.key; const name=onlineUsersCache[id]||'مستخدم غادر'; delete onlineUsersCache[id]; showSystemMsg(`📤 ${name} غادر الدردشة`); });
+db.ref("online").on("child_changed", snap=>{ const id=snap.key; const newName=snap.val().name; const oldName=onlineUsersCache[id]; if(oldName!==newName){ showSystemMsg(`✏️ ${oldName} غير اسمه إلى ${newName}`); onlineUsersCache[id]=newName; } });
+
+db.ref("messages").limitToLast(50).on("child_added", snap=>{ const msg=snap.val(); addMessage(msg.user,msg.text,msg.time); });
+
+db.ref("pinned_video").on("value", async snap=>{
+  const data=snap.val();
+  pinnedVideoPlayer.innerHTML='';
+  if(!data){ pinnedVideoPlayer.style.display='none'; return; }
+  pinnedVideoPlayer.style.display='flex';
+  const header=document.createElement('div'); header.className='video-header'; header.innerHTML='<span>بث مباشر</span>';
+  const closeBtn=document.createElement('button'); closeBtn.className='close-pinned-video'; closeBtn.innerHTML='✖'; closeBtn.onclick=()=>db.ref("pinned_video").remove();
+  header.appendChild(closeBtn);
+  const body=document.createElement('div'); body.className='video-body';
+  pinnedVideoPlayer.appendChild(header); pinnedVideoPlayer.appendChild(body);
+  makeDraggable(pinnedVideoPlayer, header);
+
+  const createVideo=(src,aspect="16/9")=>{ const v=document.createElement('video'); v.src=src; v.controls=true; v.autoplay=true; v.muted=true; v.style.aspectRatio=aspect; v.setAttribute('playsinline',''); body.appendChild(v); return v; };
+
+  if(data.type==='youtube') body.innerHTML=`<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen style="aspect-ratio:16/9;"></iframe>`;
+  else if(data.type==='m3u'||data.type==='direct') createVideo(data.url);
+  else if(data.type==='twitter'){
+    try{
+      const res=await fetch(`https://api.vxtwitter.com/i/status/${data.id}`);
+      const json=await res.json();
+      const media=json.media_extended;
+      if(media&&media.length>0){
+        let selector; const play=(item,btn)=>{
+          body.innerHTML=''; createVideo(item.url,item.width/item.height);
+          if(selector){ selector.querySelectorAll('button').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); }
         };
-        const onDragMove = (e) => {
-            if (isDragging) {
-                e.preventDefault();
-                const pointer = getPointerPosition(e);
-                element.style.left = (pointer.clientX - offsetX) + "px";
-                element.style.top = (pointer.clientY - offsetY) + "px";
-            }
-        };
-        const onDragEnd = () => {
-            isDragging = false;
-            document.removeEventListener('mousemove', onDragMove);
-            document.removeEventListener('touchmove', onDragMove);
-            document.removeEventListener('mouseup', onDragEnd);
-            document.removeEventListener('touchend', onDragEnd);
-        };
-        handle.addEventListener('mousedown', onDragStart);
-        handle.addEventListener('touchstart', onDragStart, { passive: false });
-    }
-    
-    function getYoutubeVideoId(url) {
-        if (!url) return null;
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        return (url.match(regex) || [])[1] || null;
-    }
-    
-    function getTweetId(url) {
-        if (!url) return null;
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
-        return (url.match(regex) || [])[1] || null;
-    }
+        if(media.length>1){
+          selector=document.createElement('div'); selector.className='video-selector';
+          media.forEach((item,i)=>{
+            const b=document.createElement('button'); b.innerText=`المقطع ${i+1}`; b.onclick=()=>play(item,b); selector.appendChild(b);
+          });
+          pinnedVideoPlayer.appendChild(selector);
+          body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;font-size:14px;aspect-ratio:16/9;">اختر مقطعاً</div>`;
+        } else play(media[0],null);
+      } else body.innerHTML='<p style="color:white;padding:10px;">لم يتم العثور على فيديو في هذه التغريدة.</p>';
+    } catch(e){ console.error(e); body.innerHTML='<p style="color:white;padding:10px;">حدث خطأ أثناء جلب الفيديو.</p>'; }
+  }
+  showSystemMsg(`📺 قام ${data.setBy} بتشغيل محتوى جديد`);
+});
 
-    function isDirectVideo(url) {
-        return /\.(mp4|webm|ogv)$/.test(url);
-    }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAllModals(); });
 
-    function closeAllModals() {
-        usersBox.style.display = 'none';
-        editNameModal.style.display = 'none';
-        setVideoModal.style.display = 'none';
-        overlay.style.display = 'none';
-    }
-
-    function updateUsername(newName) {
-      if (!newName || newName === username) return;
-      username = newName;
-      myUserRef.update({ name: newName });
-    }
-
-    function addMessage(user, text, time) {
-      const div = document.createElement("div");
-      div.className = "msg";
-      div.innerHTML = `<span class="user">${user}: </span><span>${text}</span><span class="time">(${time})</span>`;
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      db.ref("messages").push().set({ user: username, text, time });
-      messageInput.value = "";
-    }
-
-    function showSystemMsg(text) {
-      const div = document.createElement("div");
-      div.className = "sys";
-      div.textContent = text;
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    function updateUsersList() {
-      db.ref("online").once("value", (snap) => {
-        const usersObject = snap.val() || {};
-        const users = Object.values(usersObject);
-        usersList.innerHTML = "";
-        users.forEach((user) => {
-          const userItem = document.createElement("div");
-          userItem.className = "user-item";
-          userItem.textContent = user.name;
-          usersList.appendChild(userItem);
-        });
-        count.textContent = users.length;
-      });
-    }
-
-    onlineListBtn.onclick = () => { usersBox.style.display = 'block'; overlay.style.display = 'block'; };
-    changeNameBtn.onclick = () => { editNameModal.style.display = 'block'; overlay.style.display = 'block'; newNameInput.value = username; newNameInput.focus(); };
-    setVideoBtn.onclick = () => { setVideoModal.style.display = 'block'; overlay.style.display = 'block'; };
-    overlay.onclick = closeAllModals;
-    sendBtn.onclick = sendMessage;
-    messageInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
-    saveNameBtn.onclick = () => { const newName = newNameInput.value.trim(); if (!newName) return; updateUsername(newName); closeAllModals(); };
-    
-    submitVideoUrlBtn.onclick = () => {
-        const url = videoUrlInput.value.trim(); if (!url) return;
-        const youtubeId = getYoutubeVideoId(url);
-        const tweetId = getTweetId(url);
-
-        if (youtubeId) { db.ref("pinned_video").set({ type: 'youtube', id: youtubeId, setBy: username }); }
-        else if (tweetId) { db.ref("pinned_video").set({ type: 'twitter', id: tweetId, setBy: username }); }
-        else if (url.toLowerCase().includes('.m3u')) { db.ref("pinned_video").set({ type: 'm3u', url: url, setBy: username }); }
-        else if (isDirectVideo(url)) {
-            db.ref("pinned_video").set({ type: 'direct', url: url, setBy: username });
-        }
-        else { alert("الرابط غير مدعوم."); return; }
-        closeAllModals();
-    };
-
-    db.ref("online").on("child_added", (snap) => {
-      const user = snap.val(); const userId = snap.key;
-      onlineUsersCache[userId] = user.name;
-      if (userId !== myUserRef.key) { showSystemMsg(`📥 ${user.name} دخل الدردشة`); }
-      updateUsersList();
-    });
-    db.ref("online").on("child_removed", (snap) => {
-      const userId = snap.key;
-      const departedUserName = onlineUsersCache[userId] || 'مستخدم غادر';
-      delete onlineUsersCache[userId];
-      showSystemMsg(`📤 ${departedUserName} غادر الدردشة`);
-      updateUsersList();
-    });
-    db.ref("online").on("child_changed", (snap) => {
-      const userId = snap.key; const newName = snap.val().name; const oldName = onlineUsersCache[userId];
-      if (oldName !== newName) {
-        showSystemMsg(`✏️ ${oldName} غير اسمه إلى ${newName}`);
-        onlineUsersCache[userId] = newName;
-        updateUsersList();
-      }
-    });
-    db.ref("messages").limitToLast(50).on("child_added", (snap) => {
-      const msg = snap.val();
-      addMessage(msg.user, msg.text, msg.time);
-    });
-
-    db.ref("pinned_video").on("value", async (snap) => {
-        const data = snap.val();
-        pinnedVideoPlayer.innerHTML = '';
-        if (data) {
-            pinnedVideoPlayer.style.display = 'flex';
-            const header = document.createElement('div');
-            header.className = 'video-header';
-            header.innerHTML = `<span>بث مباشر</span>`;
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-pinned-video';
-            closeBtn.innerHTML = '✖';
-            closeBtn.onclick = () => db.ref("pinned_video").remove();
-            header.appendChild(closeBtn);
-            const body = document.createElement('div');
-            body.className = 'video-body';
-            pinnedVideoPlayer.appendChild(header);
-            pinnedVideoPlayer.appendChild(body);
-            
-            makeDraggable(pinnedVideoPlayer, header);
-
-            const createAndAppendVideo = (src, aspectRatio = "16 / 9") => {
-                const video = document.createElement('video');
-                video.src = src;
-                video.controls = true;
-                video.autoplay = true;
-                video.muted = true;
-                video.style.aspectRatio = aspectRatio;
-                video.setAttribute('playsinline', '');
-                body.appendChild(video);
-                return video;
-            };
-
-            if (data.type === 'youtube') {
-                body.innerHTML = `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen style="aspect-ratio: 16 / 9;"></iframe>`;
-            } else if (data.type === 'm3u' || data.type === 'direct') {
-                createAndAppendVideo(data.url);
-            } else if (data.type === 'twitter') {
-                try {
-                    const response = await fetch(`https://api.vxtwitter.com/i/status/${data.id}`);
-                    const tweetData = await response.json();
-                    
-                    const mediaItems = tweetData.media_extended;
-                    if (mediaItems && mediaItems.length > 0) {
-                        const playMedia = (mediaItem, clickedButton) => {
-                            body.innerHTML = '';
-                            const aspectRatio = mediaItem.width / mediaItem.height;
-                            createAndAppendVideo(mediaItem.url, aspectRatio);
-                            if (selectorContainer) {
-                                selectorContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                                if (clickedButton) clickedButton.classList.add('active');
-                            }
-                        };
-
-                        let selectorContainer;
-                        if (mediaItems.length > 1) {
-                            selectorContainer = document.createElement('div');
-                            selectorContainer.className = 'video-selector';
-                            mediaItems.forEach((item, index) => {
-                                const button = document.createElement('button');
-                                button.innerText = `المقطع ${index + 1}`;
-                                button.onclick = () => playMedia(item, button);
-                                selectorContainer.appendChild(button);
-                            });
-                            pinnedVideoPlayer.appendChild(selectorContainer);
-                            body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;font-size:14px;aspect-ratio:16/9;">اختر مقطعاً</div>`;
-                        } else {
-                            playMedia(mediaItems[0], null);
-                        }
-                    } else {
-                        body.innerHTML = `<p style="color:white;padding:10px;">لم يتم العثور على فيديو في هذه التغريدة.</p>`;
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch Twitter video:", error);
-                    body.innerHTML = `<p style="color:white;padding:10px;">حدث خطأ أثناء جلب الفيديو.</p>`;
-                }
-            }
-            showSystemMsg(`📺 قام ${data.setBy} بتشغيل محتوى جديد`);
-        } else {
-            pinnedVideoPlayer.style.display = 'none';
-        }
-    });
-  </script>
+// تحديث قائمة المتصلين بشكل مستمر
+db.ref("online").on("value", snap=>{
+  const users=snap.val()? Object.values(snap.val()):[];
+  usersList.innerHTML='';
+  users.forEach(u=>{ const div=document.createElement('div'); div.className='user-item'; div.textContent=u.name; usersList.appendChild(div); });
+  count.textContent=users.length;
+});
+</script>
 </body>
 </html>
