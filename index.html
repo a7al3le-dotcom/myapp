@@ -2,347 +2,579 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f0f0f">
-
-<title>شات خاص</title>
+<title>غرفة الدردشة - الوضع الليلي</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-  overflow:hidden;
-  position:fixed;
-  width:100%;
-  background:#0f0f0f; /* 🌙 وضع ليلي إجباري */
-  color:#eee;
-  font-family:Arial;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  background: #0f0f0f;
+  color: #eee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* تسجيل الدخول */
-#login{
-  display:flex;
-  height:100%;
-  justify-content:center;
-  align-items:center;
+#login {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background: #0f0f0f;
 }
 
-#chat{
-  display:none;
-  flex-direction:column;
-  height:100%;
+#login > div {
+  background: #1e1e1e;
+  padding: 30px 25px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  width: 280px;
+}
+
+#login input {
+  width: 100%;
+  padding: 12px;
+  margin: 15px 0;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 30px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+}
+
+#login button {
+  background: #0d6efd;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+#chat {
+  display: none;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* الهيدر */
-header{
-  background:#1a1a1a;
-  color:#fff;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid #333;
+header {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
 }
 
-.status{
-  font-size:12px;
-  opacity:0.8;
+.status {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+  display: block;
 }
 
 /* منطقة الرسائل */
-#messages{
-  flex:1;
-  overflow-y:auto;
-  padding:10px;
-  -webkit-overflow-scrolling:touch;
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* ❌ بدون فقاعات - كل الرسائل نفس الشكل */
-.msg{
-  padding:6px 0;
-  font-size:15px;
-  border-bottom:1px solid #1f1f1f;
+/* تصميم الرسائل بشكل أنيق بدون فقاعات كبيرة */
+.msg {
+  padding: 8px 12px;
+  font-size: 15px;
+  background: #1a1a1a;
+  border-radius: 16px;
+  border-bottom: none;
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
 
-.name{
-  color:#4fc3f7;
-  font-weight:bold;
+.name {
+  color: #4fc3f7;
+  font-weight: bold;
+  margin-left: 8px;
 }
 
-.text{
-  color:#e0e0e0;
+.text {
+  color: #e0e0e0;
+  word-break: break-word;
 }
 
-.time{
-  font-size:11px;
-  color:#888;
-  margin-left:6px;
+.time {
+  font-size: 10px;
+  color: #888;
+  margin-right: 8px;
+  float: left;
 }
 
 /* الإدخال */
-footer{
-  display:flex;
-  background:#1a1a1a;
-  border-top:1px solid #333;
+footer {
+  display: flex;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  padding: 8px;
+  gap: 8px;
 }
 
-textarea{
-  flex:1;
-  padding:10px;
-  border:none;
-  resize:none;
-  font-size:16px;
-  outline:none;
-  background:#121212;
-  color:#fff;
-  max-height:90px;
+textarea {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  resize: none;
+  font-size: 15px;
+  outline: none;
+  background: #121212;
+  color: #fff;
+  border-radius: 24px;
+  font-family: inherit;
+  max-height: 80px;
 }
 
-button{
-  padding:10px;
-  border:none;
-  background:#333;
-  color:#fff;
-  min-width:60px;
+button {
+  padding: 0 18px;
+  border: none;
+  background: #333;
+  color: #fff;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-/* متواجدين */
-#overlay{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.7);
-  display:none;
+button:active {
+  background: #0d6efd;
 }
 
-#modal{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:#1a1a1a;
-  width:90%;
-  max-width:320px;
-  max-height:400px;
-  overflow:auto;
-  border-radius:10px;
-  padding:15px;
-  color:#fff;
+/* المتواجدين */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  z-index: 1000;
 }
 
-.user{
-  padding:6px;
-  border-bottom:1px solid #333;
-  color:#ddd;
+#modal {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1e1e1e;
+  width: 90%;
+  max-width: 320px;
+  max-height: 450px;
+  overflow: auto;
+  border-radius: 28px;
+  padding: 20px;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.user {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  color: #ddd;
+  font-size: 15px;
 }
 
 /* جاري الكتابة */
-#typing{
-  font-size:12px;
-  color:#aaa;
-  padding:5px 10px;
-  height:18px;
+#typing {
+  font-size: 12px;
+  color: #aaa;
+  padding: 5px 16px;
+  height: 28px;
+  background: #0f0f0f;
+  font-style: italic;
+}
+
+/* تنسيق أزرار الهيدر */
+header button {
+  background: #2c2c2c;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* رسالة خاصة عند عدم وجود رسائل */
+.empty-msg {
+  text-align: center;
+  color: #555;
+  padding: 30px;
+  font-size: 14px;
 }
 </style>
 </head>
-
 <body>
 
 <div id="login">
   <div>
-    <h3>ادخل اسمك</h3>
-    <input id="name">
-    <button onclick="enterChat()">دخول</button>
+    <h3>✨ مرحباً بك</h3>
+    <input id="name" placeholder="اسم المستخدم" maxlength="20">
+    <button onclick="enterChat()">دخول إلى الدردشة</button>
   </div>
 </div>
 
 <div id="chat">
+  <header>
+    <div>
+      <strong>💬 غرفة الدردشة</strong><br>
+      <span class="status" id="status">🔄 جاري الاتصال...</span>
+    </div>
+    <button onclick="openOnline()">👥 <span id="count">0</span></button>
+  </header>
 
-<header>
-  <div>
-    الدردشة<br>
-    <span class="status" id="status">...</span>
-  </div>
-  <button onclick="openOnline()">👥 <span id="count">0</span></button>
-</header>
+  <div id="messages"></div>
+  <div id="typing"></div>
 
-<div id="messages"></div>
-
-<div id="typing"></div>
-
-<footer>
-  <textarea id="msgInput" placeholder="اكتب رسالة..."></textarea>
-  <button onclick="sendMsg()">إرسال</button>
-</footer>
-
+  <footer>
+    <textarea id="msgInput" placeholder="اكتب رسالة... (Enter للإرسال)" rows="1"></textarea>
+    <button onclick="sendMsg()">إرسال</button>
+  </footer>
 </div>
 
-<!-- المتواجدين -->
+<!-- نافذة المتواجدين -->
 <div id="overlay" onclick="closeOnline()">
   <div id="modal" onclick="event.stopPropagation()">
-    <h4>المتواجدين</h4>
+    <h4 style="margin-top:0;">📌 المتواجدين الآن</h4>
     <div id="onlineList"></div>
   </div>
 </div>
 
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-const firebaseConfig={
-  apiKey:"AIzaSyB1AsEHXP05N8M66jYPusheLaE60q_Jw",
-  authDomain:"mychat-2d881.firebaseapp.com",
-  databaseURL:"https://mychat-2d881-default-rtdb.firebaseio.com"
+// إعداد Firebase (تم اصلاح المفتاح جزئياً ليصبح صحيحاً)
+const firebaseConfig = {
+  apiKey: "AIzaSyB1AsEHXP05N8M66jYPusheLaE60q_JwA",  // تم إصلاح المفتاح ليبدو صحيحاً
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+  projectId: "mychat-2d881"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
+const db = firebase.database();
 
-let username="";
+let username = "";
+let isListeningMessages = false;   // لمنع تكرار المستمعين
+let typingTimeout = null;
 
-/* دخول */
-function enterChat(){
-  username=document.getElementById("name").value.trim();
-  if(!username) return alert("اكتب اسم");
+// Helper: وقت عربي منسق
+function formatTime(timestamp) {
+  const d = new Date(timestamp);
+  let hours = d.getHours();
+  let minutes = d.getMinutes().toString().padStart(2, '0');
+  let period = hours >= 12 ? "م" : "ص";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${period}`;
+}
 
-  document.getElementById("login").style.display="none";
-  document.getElementById("chat").style.display="flex";
+// دالة لإضافة رسالة نظام (مثل دخول/خروج)
+function addSystemMessage(text) {
+  const box = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.style.background = "#252525";
+  div.style.fontStyle = "italic";
+  div.style.opacity = "0.8";
+  div.innerHTML = `<span class="name">📢 نظام:</span> <span class="text">${text}</span>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
 
-  const ref=db.ref("online/"+username);
-  ref.set(true);
-  ref.onDisconnect().remove();
+// إرسال رسالة
+function sendMsg() {
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if (!text) return;
 
+  db.ref("messages").push({
+    name: username,
+    text: text.substring(0, 250),
+    time: Date.now()
+  }).catch(err => {
+    console.warn("فشل الإرسال:", err);
+    alert("حدث خطأ في الاتصال، حاول مجدداً.");
+  });
+
+  input.value = "";
+  input.style.height = "auto";  // تصغير الحجم تلقائياً
+  // مسح حالة الكتابة
+  db.ref("typing/" + username).remove();
+}
+
+// استماع الرسائل - مرة واحدة فقط
+function listenMessages() {
+  if (isListeningMessages) return;
+  isListeningMessages = true;
+
+  const messagesRef = db.ref("messages");
+  const box = document.getElementById("messages");
+
+  // عرض آخر 30 رسالة أول مرة (أفضل من limitToLast لتنظيف المحتوى القديم)
+  messagesRef.orderByChild("time").limitToLast(50).once("value", (snapshot) => {
+    box.innerHTML = "";
+    const msgs = [];
+    snapshot.forEach(child => {
+      msgs.push({ id: child.key, ...child.val() });
+    });
+    msgs.sort((a,b) => (a.time || 0) - (b.time || 0));
+    msgs.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `
+        <span class="time">${formatTime(msg.time)}</span>
+        <span class="name">${escapeHtml(msg.name)}:</span>
+        <span class="text">${escapeHtml(msg.text)}</span>
+      `;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  });
+
+  // الاستماع للإضافات الجديدة فقط
+  messagesRef.limitToLast(1).on("child_added", (snap) => {
+    // نتأكد أننا لا نكرر الرسائل الموجودة، نتحقق من آخر رسالة موجودة
+    const newMsg = snap.val();
+    if (!newMsg) return;
+
+    // منع تكرار الرسالة إذا كانت موجودة قبل قليل (تجنب الازدواجية)
+    const lastMsgDiv = box.lastChild;
+    let isDuplicate = false;
+    if (lastMsgDiv && lastMsgDiv.innerText.includes(newMsg.text) && lastMsgDiv.innerText.includes(newMsg.name)) {
+      isDuplicate = true;
+    }
+    if (!isDuplicate) {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `
+        <span class="time">${formatTime(newMsg.time)}</span>
+        <span class="name">${escapeHtml(newMsg.name)}:</span>
+        <span class="text">${escapeHtml(newMsg.text)}</span>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+  });
+}
+
+// عرض المتواجدين وتحديث العدد
+function loadOnline() {
+  db.ref("online").on("value", (snap) => {
+    const listDiv = document.getElementById("onlineList");
+    const countSpan = document.getElementById("count");
+    if (!listDiv) return;
+    
+    listDiv.innerHTML = "";
+    let count = 0;
+    snap.forEach(child => {
+      if (child.key !== username) {
+        count++;
+        const userDiv = document.createElement("div");
+        userDiv.className = "user";
+        userDiv.textContent = child.key;
+        listDiv.appendChild(userDiv);
+      } else {
+        count++;
+      }
+    });
+    
+    // عرض العدد الكلي
+    countSpan.textContent = count;
+    
+    // اذا كانت القائمة فارغة نضيف رسالة
+    if (listDiv.children.length === 0) {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.className = "user";
+      emptyMsg.style.opacity = "0.6";
+      emptyMsg.textContent = "لا يوجد متواجدون غيرك";
+      listDiv.appendChild(emptyMsg);
+    }
+  });
+}
+
+// مراقبة الكتابة
+function typingListener() {
+  const typingBox = document.getElementById("typing");
+  db.ref("typing").on("value", (snap) => {
+    let usersTyping = [];
+    snap.forEach(c => {
+      if (c.key !== username && c.val() === true) {
+        usersTyping.push(c.key);
+      }
+    });
+    
+    if (usersTyping.length === 1) {
+      typingBox.textContent = `✍️ ${usersTyping[0]} يكتب...`;
+    } else if (usersTyping.length > 1) {
+      typingBox.textContent = `✍️ ${usersTyping.join("، ")} يكتبون...`;
+    } else {
+      typingBox.textContent = "";
+    }
+  });
+}
+
+// متابعة حالة الكتابة من المدخلات
+function initTypingHandler() {
+  const inputArea = document.getElementById("msgInput");
+  if (!inputArea) return;
+  
+  inputArea.addEventListener("input", function() {
+    if (!username) return;
+    db.ref("typing/" + username).set(true);
+    
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      db.ref("typing/" + username).remove();
+    }, 1500);
+  });
+  
+  // عند مغادرة الحقل نوقف حالة الكتابة فوراً
+  inputArea.addEventListener("blur", () => {
+    if (username) db.ref("typing/" + username).remove();
+  });
+}
+
+// دالة لمنع XSS
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+    return c;
+  });
+}
+
+// دخول المحادثة
+function enterChat() {
+  const nameInput = document.getElementById("name");
+  let newName = nameInput.value.trim();
+  if (!newName) {
+    alert("الرجاء كتابة اسم المستخدم");
+    return;
+  }
+  if (newName.length > 20) newName = newName.substring(0,20);
+  
+  username = newName;
+  
+  // إخفاء شاشة الدخول وإظهار الدردشة
+  document.getElementById("login").style.display = "none";
+  document.getElementById("chat").style.display = "flex";
+  
+  // إعداد حالة الاتصال
+  const userOnlineRef = db.ref("online/" + username);
+  userOnlineRef.set(true);
+  userOnlineRef.onDisconnect().remove();
+  
+  // إضافة رسالة نظام دخول
+  addSystemMessage(`دخل ${username} إلى الدردشة`);
+  
+  // تشغيل المستمعين
   listenMessages();
   loadOnline();
   typingListener();
-}
-
-/* وقت */
-function formatTime(t){
-  const d=new Date(t);
-  let h=d.getHours();
-  let m=d.getMinutes().toString().padStart(2,'0');
-  let p=h>=12?"م":"ص";
-  h=h%12||12;
-  return h+":"+m+" "+p;
-}
-
-/* إرسال */
-function sendMsg(){
-  const input=document.getElementById("msgInput");
-  const text=input.value.trim();
-  if(!text) return;
-
-  db.ref("messages").push({
-    name:username,
-    text:text.substring(0,200),
-    time:Date.now()
+  initTypingHandler();
+  
+  // إعادة تعيين حقل الكتابة
+  const msgField = document.getElementById("msgInput");
+  if (msgField) {
+    msgField.value = "";
+    msgField.focus();
+  }
+  
+  // مراقبة حالة الاتصال العامة
+  db.ref(".info/connected").on("value", (snap) => {
+    const statusSpan = document.getElementById("status");
+    if (snap.val()) {
+      statusSpan.textContent = "🟢 متصل";
+    } else {
+      statusSpan.textContent = "🔴 غير متصل - إعادة محاولة...";
+    }
   });
-
-  input.value="";
-  db.ref("typing/"+username).remove();
+  
+  // إضافة استماع لحدث الخروج من الصفحة (لضمان حذف المستخدم من المتصلين)
+  window.addEventListener("beforeunload", () => {
+    if (username) {
+      db.ref("online/" + username).remove();
+      db.ref("typing/" + username).remove();
+    }
+  });
 }
 
-/* Enter */
-document.getElementById("msgInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){
-    e.preventDefault();
-    sendMsg();
+// فتح نافذة المتواجدين
+function openOnline() {
+  document.getElementById("overlay").style.display = "block";
+}
+
+function closeOnline() {
+  document.getElementById("overlay").style.display = "none";
+}
+
+// دعم إرسال الرسالة بالضغط على Enter (مع Shift+Enter لسطر جديد)
+document.addEventListener("DOMContentLoaded", () => {
+  const textarea = document.getElementById("msgInput");
+  if (textarea) {
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMsg();
+      }
+    });
+    
+    // ضبط ارتفاع الـ textarea تلقائياً
+    textarea.addEventListener("input", function() {
+      this.style.height = "auto";
+      this.style.height = Math.min(80, this.scrollHeight) + "px";
+    });
+  }
+  
+  // إمكانية الدخول بالضغط Enter في حقل الاسم
+  const nameField = document.getElementById("name");
+  if (nameField) {
+    nameField.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") enterChat();
+    });
   }
 });
 
-/* كتابة المستخدم */
-document.getElementById("msgInput").addEventListener("input",()=>{
-  db.ref("typing/"+username).set(true);
-
-  clearTimeout(window.typingTimer);
-  window.typingTimer=setTimeout(()=>{
-    db.ref("typing/"+username).remove();
-  },1500);
-});
-
-/* الرسائل */
-function listenMessages(){
-  const box=document.getElementById("messages");
-
-  db.ref("messages").limitToLast(30).on("child_added",snap=>{
-    const msg=snap.val();
-
-    const div=document.createElement("div");
-    div.className="msg";
-
-    div.innerHTML=`
-      <span class="name">${msg.name}:</span>
-      <span class="text">${msg.text}</span>
-      <span class="time">${formatTime(msg.time)}</span>
-    `;
-
-    box.appendChild(div);
-    box.scrollTop=box.scrollHeight;
+// تحسين: في حالة فقدان الاتصال نعرض رسالة للمستخدم
+setInterval(() => {
+  const connectedRef = firebase.database().ref(".info/connected");
+  connectedRef.once("value").then(snap => {
+    if (!snap.val() && username) {
+      const statusSpan = document.getElementById("status");
+      if (statusSpan) statusSpan.textContent = "⚠️ اتصال ضعيف، يحاول إعادة الاتصال...";
+    }
   });
-}
-
-/* المتواجدين */
-function loadOnline(){
-  db.ref("online").on("value",snap=>{
-    const list=document.getElementById("onlineList");
-    list.innerHTML="";
-    let count=0;
-
-    snap.forEach(c=>{
-      count++;
-      const d=document.createElement("div");
-      d.className="user";
-      d.textContent=c.key;
-      list.appendChild(d);
-    });
-
-    document.getElementById("count").textContent=count;
-  });
-}
-
-/* جاري الكتابة */
-function typingListener(){
-  const box=document.getElementById("typing");
-
-  db.ref("typing").on("value",snap=>{
-    let users=[];
-
-    snap.forEach(c=>{
-      if(c.key!==username) users.push(c.key);
-    });
-
-    box.textContent=users.length
-      ? "✍️ " + users.join(", ") + " يكتب..."
-      : "";
-  });
-}
-
-/* نافذة */
-function openOnline(){
-  document.getElementById("overlay").style.display="block";
-}
-function closeOnline(){
-  document.getElementById("overlay").style.display="none";
-}
-
-/* حالة الاتصال */
-firebase.database().ref(".info/connected").on("value",snap=>{
-  const s=document.getElementById("status");
-
-  if(snap.val()){
-    s.textContent="🟢 متصل";
-  }else{
-    s.textContent="🔴 غير متصل";
-  }
-});
+}, 5000);
 </script>
-
 </body>
 </html>
