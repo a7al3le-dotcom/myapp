@@ -4,142 +4,156 @@
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#075e54">
+<meta name="theme-color" content="#0f0f0f">
 
-<title>الدردشة</title>
+<title>Chat</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html, body {
+html,body{
   margin:0;
   padding:0;
   height:100%;
-  overflow:hidden; /* ❌ يمنع تحريك الصفحة */
-  position:fixed;  /* 🔥 تثبيت كامل */
+  overflow:hidden;
+  position:fixed;
   width:100%;
-  background:#ece5dd;
+  background:#0f0f0f; /* 🌙 وضع ليلي إجباري */
+  color:#eee;
+  font-family:Arial;
 }
 
 /* تسجيل الدخول */
-#login {
+#login{
   display:flex;
   height:100%;
   justify-content:center;
   align-items:center;
 }
 
-/* الشات */
-#chat {
+#chat{
   display:none;
   flex-direction:column;
   height:100%;
 }
 
 /* الهيدر */
-header {
-  background:#075e54;
+header{
+  background:#1a1a1a;
   color:#fff;
   padding:10px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  border-bottom:1px solid #333;
 }
 
-.status {
+.status{
   font-size:12px;
-  opacity:0.9;
+  opacity:0.8;
 }
 
-/* الرسائل */
-#messages {
+/* منطقة الرسائل */
+#messages{
   flex:1;
   overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
   padding:10px;
+  -webkit-overflow-scrolling:touch;
 }
 
-/* الرسالة */
-.msg {
-  display:flex;
-  gap:6px;
-  background:#fff;
-  padding:6px 10px;
-  margin:4px 0;
-  border-radius:8px;
-  max-width:85%;
-  font-size:14px;
+/* ❌ بدون فقاعات - كل الرسائل نفس الشكل */
+.msg{
+  padding:6px 0;
+  font-size:15px;
+  border-bottom:1px solid #1f1f1f;
 }
 
-.me {
-  background:#dcf8c6;
-  margin-left:auto;
+.name{
+  color:#4fc3f7;
+  font-weight:bold;
 }
 
-.name { font-weight:bold; }
-.text { flex:1; }
-.time { font-size:11px; color:#666; white-space:nowrap; }
+.text{
+  color:#e0e0e0;
+}
+
+.time{
+  font-size:11px;
+  color:#888;
+  margin-left:6px;
+}
 
 /* الإدخال */
-footer {
+footer{
   display:flex;
-  background:#fff;
-  padding-bottom:env(safe-area-inset-bottom); /* iPhone fix */
+  background:#1a1a1a;
+  border-top:1px solid #333;
 }
 
-textarea {
+textarea{
   flex:1;
   padding:10px;
   border:none;
   resize:none;
   font-size:16px;
   outline:none;
+  background:#121212;
+  color:#fff;
   max-height:90px;
 }
 
-button {
+button{
   padding:10px;
   border:none;
-  background:#128c7e;
+  background:#333;
   color:#fff;
   min-width:60px;
 }
 
-/* نافذة المتواجدين */
-#overlay {
+/* متواجدين */
+#overlay{
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.5);
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.7);
   display:none;
 }
 
-#modal {
+#modal{
   position:absolute;
-  top:50%; left:50%;
+  top:50%;left:50%;
   transform:translate(-50%,-50%);
-  background:#fff;
+  background:#1a1a1a;
   width:90%;
   max-width:320px;
   max-height:400px;
   overflow:auto;
   border-radius:10px;
   padding:15px;
+  color:#fff;
 }
 
-.user {
+.user{
   padding:6px;
-  border-bottom:1px solid #eee;
+  border-bottom:1px solid #333;
+  color:#ddd;
+}
+
+/* جاري الكتابة */
+#typing{
+  font-size:12px;
+  color:#aaa;
+  padding:5px 10px;
+  height:18px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- تسجيل -->
 <div id="login">
   <div>
     <h3>ادخل اسمك</h3>
@@ -148,7 +162,6 @@ button {
   </div>
 </div>
 
-<!-- الشات -->
 <div id="chat">
 
 <header>
@@ -160,6 +173,8 @@ button {
 </header>
 
 <div id="messages"></div>
+
+<div id="typing"></div>
 
 <footer>
   <textarea id="msgInput" placeholder="اكتب رسالة..."></textarea>
@@ -180,14 +195,14 @@ button {
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyB1AsEHXP05N8M66jYPusheLaE60q_Jw",
-  authDomain: "mychat-2d881.firebaseapp.com",
-  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+const firebaseConfig={
+  apiKey:"AIzaSyB1AsEHXP05N8M66jYPusheLaE60q_Jw",
+  authDomain:"mychat-2d881.firebaseapp.com",
+  databaseURL:"https://mychat-2d881-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
 let username="";
 
@@ -205,6 +220,7 @@ function enterChat(){
 
   listenMessages();
   loadOnline();
+  typingListener();
 }
 
 /* وقت */
@@ -230,6 +246,7 @@ function sendMsg(){
   });
 
   input.value="";
+  db.ref("typing/"+username).remove();
 }
 
 /* Enter */
@@ -240,6 +257,16 @@ document.getElementById("msgInput").addEventListener("keydown",e=>{
   }
 });
 
+/* كتابة المستخدم */
+document.getElementById("msgInput").addEventListener("input",()=>{
+  db.ref("typing/"+username).set(true);
+
+  clearTimeout(window.typingTimer);
+  window.typingTimer=setTimeout(()=>{
+    db.ref("typing/"+username).remove();
+  },1500);
+});
+
 /* الرسائل */
 function listenMessages(){
   const box=document.getElementById("messages");
@@ -248,7 +275,7 @@ function listenMessages(){
     const msg=snap.val();
 
     const div=document.createElement("div");
-    div.className="msg "+(msg.name===username?"me":"");
+    div.className="msg";
 
     div.innerHTML=`
       <span class="name">${msg.name}:</span>
@@ -257,8 +284,7 @@ function listenMessages(){
     `;
 
     box.appendChild(div);
-
-    box.scrollTop=box.scrollHeight; /* ثابت بدون اهتزاز */
+    box.scrollTop=box.scrollHeight;
   });
 }
 
@@ -278,6 +304,23 @@ function loadOnline(){
     });
 
     document.getElementById("count").textContent=count;
+  });
+}
+
+/* جاري الكتابة */
+function typingListener(){
+  const box=document.getElementById("typing");
+
+  db.ref("typing").on("value",snap=>{
+    let users=[];
+
+    snap.forEach(c=>{
+      if(c.key!==username) users.push(c.key);
+    });
+
+    box.textContent=users.length
+      ? "✍️ " + users.join(", ") + " يكتب..."
+      : "";
   });
 }
 
