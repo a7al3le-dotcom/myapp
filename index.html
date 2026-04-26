@@ -2,13 +2,26 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#075e54">
+
 <title>شات خاص</title>
 
 <style>
-body { margin:0; font-family:Arial; background:#ece5dd; }
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
 
-#login, #chat { display:none; }
+body {
+  margin:0;
+  font-family:Arial;
+  background:#ece5dd;
+  overscroll-behavior:none;
+}
 
+/* تسجيل الدخول */
 #login {
   display:flex;
   height:100vh;
@@ -17,11 +30,12 @@ body { margin:0; font-family:Arial; background:#ece5dd; }
 }
 
 #chat {
-  display:flex;
+  display:none;
   flex-direction:column;
   height:100vh;
 }
 
+/* الهيدر */
 header {
   background:#075e54;
   color:#fff;
@@ -33,22 +47,26 @@ header {
 
 .status {
   font-size:12px;
+  opacity:0.9;
 }
 
+/* الرسائل */
 #messages {
   flex:1;
   overflow-y:auto;
   padding:10px;
+  -webkit-overflow-scrolling:touch;
 }
 
 .msg {
   display:flex;
-  gap:8px;
+  gap:6px;
   background:#fff;
   padding:6px 10px;
   margin:4px 0;
-  border-radius:6px;
+  border-radius:8px;
   max-width:85%;
+  font-size:14px;
 }
 
 .me {
@@ -58,17 +76,24 @@ header {
 
 .name { font-weight:bold; }
 .text { flex:1; }
-.time { font-size:11px; color:#666; }
+.time { font-size:11px; color:#666; white-space:nowrap; }
 
+/* الإدخال */
 footer {
   display:flex;
   background:#fff;
+  position:sticky;
+  bottom:0;
 }
 
-input {
+textarea {
   flex:1;
   padding:10px;
   border:none;
+  resize:none;
+  font-size:16px;
+  outline:none;
+  max-height:90px;
 }
 
 button {
@@ -76,7 +101,8 @@ button {
   border:none;
   background:#128c7e;
   color:#fff;
-  cursor:pointer;
+  min-width:60px;
+  font-size:16px;
 }
 
 /* نافذة المتواجدين */
@@ -93,7 +119,8 @@ button {
   top:50%; left:50%;
   transform:translate(-50%,-50%);
   background:#fff;
-  width:300px;
+  width:90%;
+  max-width:320px;
   max-height:400px;
   overflow:auto;
   border-radius:10px;
@@ -118,20 +145,22 @@ button {
 </div>
 
 <div id="chat">
-  <header>
-    <div>
-      الدردشة<br>
-      <span class="status" id="status">...</span>
-    </div>
-    <button onclick="openOnline()">👥 <span id="count">0</span></button>
-  </header>
 
-  <div id="messages"></div>
+<header>
+  <div>
+    الدردشة<br>
+    <span class="status" id="status">...</span>
+  </div>
+  <button onclick="openOnline()">👥 <span id="count">0</span></button>
+</header>
 
-  <footer>
-    <input id="msgInput" placeholder="اكتب رسالة...">
-    <button onclick="sendMsg()">إرسال</button>
-  </footer>
+<div id="messages"></div>
+
+<footer>
+  <textarea id="msgInput" placeholder="اكتب رسالة..."></textarea>
+  <button onclick="sendMsg()">إرسال</button>
+</footer>
+
 </div>
 
 <div id="overlay" onclick="closeOnline()">
@@ -146,7 +175,7 @@ button {
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_Jw",
+  apiKey: "AIzaSyB1AsEHXP05N8M66jYPusheLaE60q_Jw",
   authDomain: "mychat-2d881.firebaseapp.com",
   databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
 };
@@ -156,8 +185,6 @@ const db = firebase.database();
 
 let username="";
 let msgCount=0;
-
-document.getElementById("login").style.display="flex";
 
 /* دخول */
 function enterChat(){
@@ -175,7 +202,7 @@ function enterChat(){
   loadOnline();
 }
 
-/* الوقت */
+/* وقت */
 function formatTime(t){
   const d = new Date(t);
   let h = d.getHours();
@@ -208,7 +235,13 @@ document.getElementById("msgInput").addEventListener("keydown", e=>{
   }
 });
 
-/* الرسائل */
+/* تكبير الإدخال */
+document.getElementById("msgInput").addEventListener("input", function(){
+  this.style.height="auto";
+  this.style.height=this.scrollHeight+"px";
+});
+
+/* رسائل */
 function listenMessages(){
   const box = document.getElementById("messages");
 
@@ -216,16 +249,20 @@ function listenMessages(){
     const msg = snap.val();
 
     const div = document.createElement("div");
-    div.className = "msg " + (msg.name===username?"me":"");
+    div.className="msg " + (msg.name===username?"me":"");
 
-    div.innerHTML = `
+    div.innerHTML=`
       <span class="name">${msg.name}:</span>
       <span class="text">${msg.text}</span>
       <span class="time">${formatTime(msg.time)}</span>
     `;
 
     box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+
+    box.scrollTo({
+      top: box.scrollHeight,
+      behavior:"smooth"
+    });
 
     msgCount++;
     if(msgCount>30){
@@ -234,16 +271,16 @@ function listenMessages(){
   });
 }
 
-/* المتواجدين */
+/* متواجدين */
 function loadOnline(){
   db.ref("online").on("value", snap=>{
-    const list = document.getElementById("onlineList");
+    const list=document.getElementById("onlineList");
     list.innerHTML="";
     let count=0;
 
     snap.forEach(c=>{
       count++;
-      const div = document.createElement("div");
+      const div=document.createElement("div");
       div.className="user";
       div.textContent=c.key;
       list.appendChild(div);
@@ -261,28 +298,26 @@ function closeOnline(){
   document.getElementById("overlay").style.display="none";
 }
 
+/* إغلاق ESC */
 document.addEventListener("keydown", e=>{
   if(e.key==="Escape") closeOnline();
 });
 
-/* إعادة الاتصال (احترافي) */
-let retryCount = 0;
-let reconnectTimer;
+/* اتصال */
+let retry=0;
+let timer;
 
 firebase.database().ref(".info/connected").on("value", snap=>{
-  const s = document.getElementById("status");
+  const s=document.getElementById("status");
 
-  if(snap.val() === true){
-    retryCount = 0;
-    clearInterval(reconnectTimer);
-
-    s.textContent = "🟢 متصل";
-  } else {
-    s.textContent = "🔴 انقطع الاتصال";
-
-    reconnectTimer = setInterval(()=>{
-      retryCount++;
-      s.textContent = "🔄 إعادة الاتصال (" + retryCount + ")...";
+  if(snap.val()){
+    retry=0;
+    clearInterval(timer);
+    s.textContent="🟢 متصل";
+  }else{
+    timer=setInterval(()=>{
+      retry++;
+      s.textContent="🔄 إعادة الاتصال ("+retry+")...";
     },2000);
   }
 });
