@@ -6,33 +6,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#075e54">
 
-<title>شات خاص</title>
+<title>الدردشة</title>
 
 <style>
 * {
-  -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
   margin:0;
-  font-family:Arial;
+  padding:0;
+  height:100%;
+  overflow:hidden; /* ❌ يمنع تحريك الصفحة */
+  position:fixed;  /* 🔥 تثبيت كامل */
+  width:100%;
   background:#ece5dd;
-  overscroll-behavior:none;
 }
 
 /* تسجيل الدخول */
 #login {
   display:flex;
-  height:100vh;
+  height:100%;
   justify-content:center;
   align-items:center;
 }
 
+/* الشات */
 #chat {
   display:none;
   flex-direction:column;
-  height:100vh;
+  height:100%;
 }
 
 /* الهيدر */
@@ -54,10 +58,11 @@ header {
 #messages {
   flex:1;
   overflow-y:auto;
-  padding:10px;
   -webkit-overflow-scrolling:touch;
+  padding:10px;
 }
 
+/* الرسالة */
 .msg {
   display:flex;
   gap:6px;
@@ -82,8 +87,7 @@ header {
 footer {
   display:flex;
   background:#fff;
-  position:sticky;
-  bottom:0;
+  padding-bottom:env(safe-area-inset-bottom); /* iPhone fix */
 }
 
 textarea {
@@ -102,7 +106,6 @@ button {
   background:#128c7e;
   color:#fff;
   min-width:60px;
-  font-size:16px;
 }
 
 /* نافذة المتواجدين */
@@ -136,6 +139,7 @@ button {
 
 <body>
 
+<!-- تسجيل -->
 <div id="login">
   <div>
     <h3>ادخل اسمك</h3>
@@ -144,6 +148,7 @@ button {
   </div>
 </div>
 
+<!-- الشات -->
 <div id="chat">
 
 <header>
@@ -163,6 +168,7 @@ button {
 
 </div>
 
+<!-- المتواجدين -->
 <div id="overlay" onclick="closeOnline()">
   <div id="modal" onclick="event.stopPropagation()">
     <h4>المتواجدين</h4>
@@ -184,17 +190,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let username="";
-let msgCount=0;
 
 /* دخول */
 function enterChat(){
-  username = document.getElementById("name").value.trim();
+  username=document.getElementById("name").value.trim();
   if(!username) return alert("اكتب اسم");
 
   document.getElementById("login").style.display="none";
   document.getElementById("chat").style.display="flex";
 
-  const ref = db.ref("online/"+username);
+  const ref=db.ref("online/"+username);
   ref.set(true);
   ref.onDisconnect().remove();
 
@@ -204,52 +209,46 @@ function enterChat(){
 
 /* وقت */
 function formatTime(t){
-  const d = new Date(t);
-  let h = d.getHours();
-  let m = d.getMinutes().toString().padStart(2,'0');
-  let p = h>=12?"م":"ص";
-  h = h%12 || 12;
+  const d=new Date(t);
+  let h=d.getHours();
+  let m=d.getMinutes().toString().padStart(2,'0');
+  let p=h>=12?"م":"ص";
+  h=h%12||12;
   return h+":"+m+" "+p;
 }
 
 /* إرسال */
 function sendMsg(){
-  const input = document.getElementById("msgInput");
-  const text = input.value.trim();
+  const input=document.getElementById("msgInput");
+  const text=input.value.trim();
   if(!text) return;
 
   db.ref("messages").push({
-    name: username,
-    text: text.substring(0,200),
-    time: Date.now()
+    name:username,
+    text:text.substring(0,200),
+    time:Date.now()
   });
 
   input.value="";
 }
 
 /* Enter */
-document.getElementById("msgInput").addEventListener("keydown", e=>{
-  if(e.key==="Enter" && !e.shiftKey){
+document.getElementById("msgInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
     e.preventDefault();
     sendMsg();
   }
 });
 
-/* تكبير الإدخال */
-document.getElementById("msgInput").addEventListener("input", function(){
-  this.style.height="auto";
-  this.style.height=this.scrollHeight+"px";
-});
-
-/* رسائل */
+/* الرسائل */
 function listenMessages(){
-  const box = document.getElementById("messages");
+  const box=document.getElementById("messages");
 
-  db.ref("messages").limitToLast(30).on("child_added", snap=>{
-    const msg = snap.val();
+  db.ref("messages").limitToLast(30).on("child_added",snap=>{
+    const msg=snap.val();
 
-    const div = document.createElement("div");
-    div.className="msg " + (msg.name===username?"me":"");
+    const div=document.createElement("div");
+    div.className="msg "+(msg.name===username?"me":"");
 
     div.innerHTML=`
       <span class="name">${msg.name}:</span>
@@ -259,31 +258,23 @@ function listenMessages(){
 
     box.appendChild(div);
 
-    box.scrollTo({
-      top: box.scrollHeight,
-      behavior:"smooth"
-    });
-
-    msgCount++;
-    if(msgCount>30){
-      box.removeChild(box.firstChild);
-    }
+    box.scrollTop=box.scrollHeight; /* ثابت بدون اهتزاز */
   });
 }
 
-/* متواجدين */
+/* المتواجدين */
 function loadOnline(){
-  db.ref("online").on("value", snap=>{
+  db.ref("online").on("value",snap=>{
     const list=document.getElementById("onlineList");
     list.innerHTML="";
     let count=0;
 
     snap.forEach(c=>{
       count++;
-      const div=document.createElement("div");
-      div.className="user";
-      div.textContent=c.key;
-      list.appendChild(div);
+      const d=document.createElement("div");
+      d.className="user";
+      d.textContent=c.key;
+      list.appendChild(d);
     });
 
     document.getElementById("count").textContent=count;
@@ -298,27 +289,14 @@ function closeOnline(){
   document.getElementById("overlay").style.display="none";
 }
 
-/* إغلاق ESC */
-document.addEventListener("keydown", e=>{
-  if(e.key==="Escape") closeOnline();
-});
-
-/* اتصال */
-let retry=0;
-let timer;
-
-firebase.database().ref(".info/connected").on("value", snap=>{
+/* حالة الاتصال */
+firebase.database().ref(".info/connected").on("value",snap=>{
   const s=document.getElementById("status");
 
   if(snap.val()){
-    retry=0;
-    clearInterval(timer);
     s.textContent="🟢 متصل";
   }else{
-    timer=setInterval(()=>{
-      retry++;
-      s.textContent="🔄 إعادة الاتصال ("+retry+")...";
-    },2000);
+    s.textContent="🔴 غير متصل";
   }
 });
 </script>
