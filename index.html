@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#1e1f22">
 
 <title>Chat</title>
@@ -43,14 +43,14 @@ header{
   align-items:center;
 }
 
-/* chat */
+/* messages */
 #messages{
   flex:1;
   overflow:auto;
   padding:10px;
 }
 
-/* msg بدون فقاعة */
+/* msg */
 .msg{
   padding:6px 0;
   border-bottom:1px solid #2a2b2f;
@@ -82,67 +82,42 @@ button{
   color:#fff;
 }
 
-/* 🔥 نافذة المستخدمين */
-#overlay{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.6);
-  display:none;
-}
-
-#modal{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:90%;
-  max-width:300px;
-  background:#2b2d31;
-  border-radius:10px;
-  padding:10px;
-}
-
-.user{
-  padding:6px;
-  border-bottom:1px solid #3a3c41;
+/* typing */
+#typing{
+  font-size:12px;
+  color:#aaa;
+  padding:5px 10px;
+  height:20px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- login -->
 <div id="login">
   <div>
-    <h3>اسمك</h3>
+    <h3>ادخل اسمك</h3>
     <input id="name">
     <button onclick="enter()">دخول</button>
   </div>
 </div>
 
+<!-- app -->
 <div id="app">
 
 <header>
   💬 Chat
-  <button onclick="openUsers()">👥</button>
 </header>
 
 <div id="messages"></div>
-
 <div id="typing"></div>
 
 <footer>
-  <input id="msg">
+  <input id="msg" placeholder="اكتب رسالة...">
   <button onclick="send()">إرسال</button>
 </footer>
 
-</div>
-
-<!-- USERS MODAL -->
-<div id="overlay" onclick="closeUsers()">
-  <div id="modal" onclick="event.stopPropagation()">
-    <h4>المستخدمين</h4>
-    <div id="users"></div>
-  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -158,6 +133,7 @@ firebase.initializeApp({
 const db=firebase.database();
 
 let name="";
+let typingTimer;
 
 /* دخول */
 function enter(){
@@ -172,13 +148,14 @@ function enter(){
   ref.onDisconnect().remove();
 
   loadMessages();
-  loadUsers();
-  typingFix();
+  typingListener();
+  bindTyping();
+  bindEnter();
 }
 
 /* إرسال */
 function send(){
-  let msg=document.getElementById("msg").value;
+  let msg=document.getElementById("msg").value.trim();
   if(!msg) return;
 
   db.ref("messages").push({
@@ -188,17 +165,43 @@ function send(){
   });
 
   document.getElementById("msg").value="";
+
   db.ref("typing/"+name).remove();
+}
+
+/* Enter للإرسال */
+function bindEnter(){
+  document.getElementById("msg").addEventListener("keydown",e=>{
+    if(e.key==="Enter" && !e.shiftKey){
+      e.preventDefault();
+      send();
+    }
+  });
+}
+
+/* كتابة */
+function bindTyping(){
+  const input=document.getElementById("msg");
+
+  input.addEventListener("input",()=>{
+    db.ref("typing/"+name).set(Date.now());
+
+    clearTimeout(typingTimer);
+
+    typingTimer=setTimeout(()=>{
+      db.ref("typing/"+name).remove();
+    },1200);
+  });
 }
 
 /* رسائل */
 function loadMessages(){
   const box=document.getElementById("messages");
 
-  db.ref("messages").limitToLast(50).on("child_added",s=>{
-    let m=s.val();
+  db.ref("messages").limitToLast(50).on("child_added",snap=>{
+    const m=snap.val();
 
-    let div=document.createElement("div");
+    const div=document.createElement("div");
     div.className="msg";
 
     div.innerHTML=`
@@ -211,54 +214,23 @@ function loadMessages(){
   });
 }
 
-/* 👥 المستخدمين (Modal) */
-function openUsers(){
-  document.getElementById("overlay").style.display="block";
-}
-function closeUsers(){
-  document.getElementById("overlay").style.display="none";
-}
+/* typing (الإصلاح الحقيقي) */
+function typingListener(){
+  db.ref("typing").on("value",snap=>{
+    let users=[];
+    const now=Date.now();
 
-function loadUsers(){
-  db.ref("online").on("value",s=>{
-    let box=document.getElementById("users");
-    box.innerHTML="";
+    snap.forEach(c=>{
+      const t=c.val();
 
-    s.forEach(c=>{
-      let d=document.createElement("div");
-      d.className="user";
-      d.textContent=c.key;
-      box.appendChild(d);
-    });
-  });
-}
-
-/* ✍️ إصلاح “يكتب الآن” */
-function typingFix(){
-  const input=document.getElementById("msg");
-
-  input.addEventListener("input",()=>{
-
-    db.ref("typing/"+name).set({
-      t:Date.now()   // مهم: بيانات حقيقية
-    });
-
-    clearTimeout(window.typingTimer);
-
-    window.typingTimer=setTimeout(()=>{
-      db.ref("typing/"+name).remove();
-    },1200);
-  });
-
-  db.ref("typing").on("value",s=>{
-    let arr=[];
-
-    s.forEach(c=>{
-      if(c.key!==name) arr.push(c.key);
+      // تجاهل القديم
+      if(now - t < 3000 && c.key !== name){
+        users.push(c.key);
+      }
     });
 
     document.getElementById("typing").textContent =
-      arr.length ? "✍️ " + arr.join(", ") + " يكتب..." : "";
+      users.length ? "✍️ " + users.join(", ") + " يكتب..." : "";
   });
 }
 </script>
