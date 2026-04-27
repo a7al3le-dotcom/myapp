@@ -43,10 +43,37 @@
             background: radial-gradient(circle at top left, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.9) 100%);
             scroll-behavior: smooth;
         }
-        .msg { margin: 8px 0; display: flex; gap: 10px; align-items: center; direction: ltr; text-align: left; font-size: 15px; }
-        .sys { text-align: center; color: var(--text-muted); font-size: 12px; margin: 10px auto; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 999px; }
-        .user { font-weight: bold; color: var(--accent); }
-        .time { font-size: 11px; color: var(--text-muted); min-width: 32px; text-align: right; }
+        /* تنسيق الرسائل كما في الملف الأصلي */
+        .msg {
+            margin: 8px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            direction: ltr;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+        .user {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .time {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+        .sys {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin: 10px auto;
+            background: rgba(255,255,255,0.03);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
         #inputArea {
             display: flex;
             gap: 8px;
@@ -210,14 +237,23 @@
             touch-action: none;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .close-pinned-video {
             background: var(--danger);
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            color: white;
+            z-index: 10;
+            pointer-events: auto;
         }
         .resize-handle {
             position: absolute;
@@ -246,7 +282,6 @@
         }
         .video-selector-btn.active { background: #e50914; }
 
-        /* مؤشر الكتابة */
         #typingIndicator {
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(12px);
@@ -259,7 +294,6 @@
             margin-bottom: 5px;
             direction: ltr;
             text-align: right;
-            transition: opacity 0.2s;
         }
         .typing-wrapper {
             display: flex;
@@ -272,6 +306,7 @@
             #pinnedVideoPlayer { left: 50%; transform: translateX(-50%); width: 94vw; }
             #topButtons { right: 8px; top: 8px; }
             #sendBtn { padding: 0 14px; }
+            .close-pinned-video { width: 32px; height: 32px; font-size: 20px; }
         }
     </style>
 </head>
@@ -382,19 +417,29 @@
             setTimeout(() => { if(div.parentNode) div.remove(); }, 5000);
         }
         
+        // إضافة رسالة بنفس تنسيق الملف الأصلي
         function addMessageToUI(key, { user, text, timestamp }) {
             const div = document.createElement("div");
             div.className = "msg";
             div.id = `msg-${key}`;
+            
+            const userSpan = document.createElement("span");
+            userSpan.className = "user";
+            userSpan.textContent = escapeHtml(user);
+            
+            const textSpan = document.createElement("span");
+            textSpan.style.flex = "1";
+            textSpan.style.wordBreak = "break-word";
+            textSpan.textContent = escapeHtml(text);
+            
             const timeSpan = document.createElement("span");
             timeSpan.className = "time";
             timeSpan.id = `time-${key}`;
-            const contentSpan = document.createElement("span");
-            contentSpan.style.flex = "1";
-            contentSpan.style.wordBreak = "break-word";
-            contentSpan.innerHTML = `<span class="user">${escapeHtml(user)}</span> ${escapeHtml(text)}`;
-            div.appendChild(contentSpan);
+            
+            div.appendChild(userSpan);
+            div.appendChild(textSpan);
             div.appendChild(timeSpan);
+            
             messagesDiv.appendChild(div);
             messageTimestamps.set(key, { timestamp, element: timeSpan });
             updateTimeDisplay(key, timestamp, timeSpan);
@@ -410,7 +455,6 @@
         // ========== Typing Indicator ==========
         function initTypingIndicator() {
             typingRef = db.ref("typing");
-            // عند كتابة المستخدم الحالي
             let isTyping = false;
             messageInput.addEventListener("input", (e) => {
                 const text = e.target.value;
@@ -425,7 +469,6 @@
                     typingTimeout = setTimeout(() => {
                         if (isTyping && messageInput.value.length === 0) stopTyping();
                         else if (isTyping) {
-                            // تجديد حالة الكتابة
                             typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
                         }
                     }, 1000);
@@ -450,30 +493,22 @@
                 }
                 if (typingTimeout) clearTimeout(typingTimeout);
             }
-            // عند إرسال الرسالة نتوقف عن الكتابة
-            const originalSubmit = document.getElementById("inputArea").onsubmit;
-            document.getElementById("inputArea").addEventListener("submit", () => {
-                stopTyping();
-            });
-            // مراقبة الكتابة من الآخرين
-            let typingUsers = new Map(); // متغير محلي لحفظ الأسماء
+            document.getElementById("inputArea").addEventListener("submit", () => { stopTyping(); });
+            
+            let typingUsers = new Map();
             typingRef.on("child_added", (snap) => {
                 const name = snap.key;
                 if (name === username) return;
                 const data = snap.val();
-                if (data && data.time) {
-                    typingUsers.set(name, data.time);
-                    updateTypingDisplay();
-                }
+                if (data && data.time) typingUsers.set(name, data.time);
+                updateTypingDisplay();
             });
             typingRef.on("child_changed", (snap) => {
                 const name = snap.key;
                 if (name === username) return;
                 const data = snap.val();
-                if (data && data.time) {
-                    typingUsers.set(name, data.time);
-                    updateTypingDisplay();
-                }
+                if (data && data.time) typingUsers.set(name, data.time);
+                updateTypingDisplay();
             });
             typingRef.on("child_removed", (snap) => {
                 const name = snap.key;
@@ -481,12 +516,11 @@
                 typingUsers.delete(name);
                 updateTypingDisplay();
             });
-            // حذف التايم أوت القديم (انتهاء صلاحية الكتابة)
             setInterval(() => {
                 const now = Date.now() + serverTimeOffset;
                 let changed = false;
                 for (let [name, ts] of typingUsers.entries()) {
-                    if (now - ts > 3000) { // 3 ثواني تأخير
+                    if (now - ts > 3000) {
                         typingUsers.delete(name);
                         changed = true;
                     }
@@ -498,7 +532,6 @@
                 const names = Array.from(typingUsers.keys());
                 if (names.length === 0) {
                     typingWrapper.style.display = "none";
-                    typingIndicator.textContent = "";
                     return;
                 }
                 typingWrapper.style.display = "flex";
@@ -508,7 +541,6 @@
                 else msg = `عدة أشخاص يكتبون...`;
                 typingIndicator.textContent = msg;
             }
-            // عند قطع الاتصال، حذف حالة الكتابة لهذا المستخدم
             typingRef.child(username).onDisconnect().remove();
         }
         
@@ -522,7 +554,7 @@
                     const media = data.tweet?.media?.videos || [];
                     for(let v of media) if(v.url) videos.push({ url: v.url, type: 'video/mp4' });
                 }
-            } catch(e) { console.warn("fxtwitter error", e); }
+            } catch(e) { console.warn(e); }
             if(videos.length) return videos;
             try {
                 const res = await fetch(`https://api.vxtwitter.com/status/${tweetId}`);
@@ -534,7 +566,7 @@
                         }
                     }
                 }
-            } catch(e) { console.warn("vxtwitter error", e); }
+            } catch(e) { console.warn(e); }
             return videos;
         }
         
@@ -625,6 +657,8 @@
             let startX, startY, startLeft, startTop, isDragging = false;
             const getPos = (e) => e.touches ? e.touches[0] : e;
             function onStart(e) {
+                // منع السحب إذا كان الهدف هو زر الإغلاق
+                if(e.target.classList && e.target.classList.contains('close-pinned-video')) return;
                 e.preventDefault();
                 isDragging = true;
                 const pos = getPos(e);
@@ -749,9 +783,8 @@
                 messagesRef.push({ user: username, text: text, timestamp: firebase.database.ServerValue.TIMESTAMP });
                 messageInput.value = "";
                 scrollToBottom();
-                // إيقاف مؤشر الكتابة فور الإرسال
                 if (typingRef) typingRef.child(username).remove();
-                if (window.typingTimeout) clearTimeout(window.typingTimeout);
+                if (typingTimeout) clearTimeout(typingTimeout);
             };
             
             messagesRef.limitToLast(100).on("child_added", snap => {
@@ -805,10 +838,13 @@
                 const header = document.createElement('div');
                 header.className = 'video-header';
                 header.innerHTML = `<span>بث - ${escapeHtml(data.setBy)}</span>`;
-                const closeBtn = document.createElement('div');
+                const closeBtn = document.createElement('button');
                 closeBtn.className = 'close-pinned-video';
-                closeBtn.innerText = '✖';
-                closeBtn.onclick = () => pinnedVideoRef.remove();
+                closeBtn.innerHTML = '✖';
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    pinnedVideoRef.remove();
+                };
                 header.appendChild(closeBtn);
                 const body = document.createElement('div');
                 body.className = 'video-body';
@@ -850,7 +886,6 @@
                 addNotification(`${data.setBy} قام بتشغيل فيديو`);
             });
             
-            // بدء مؤشر الكتابة
             initTypingIndicator();
         }
         
