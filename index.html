@@ -76,7 +76,7 @@
         }
 
         ::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
@@ -103,20 +103,20 @@
 
         #loginContainer {
             background: var(--bg-secondary);
-            padding: 40px 32px;
+            padding: 32px 24px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             border: 1px solid var(--border);
             transition: background var(--transition), border var(--transition);
         }
 
         #loginContainer h2 {
             text-align: center;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             background: linear-gradient(135deg, var(--accent), #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -126,13 +126,13 @@
         #loginContainer .subtitle {
             text-align: center;
             color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
 
         #loginContainer .input-group {
             position: relative;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         #loginContainer .input-group i {
@@ -141,17 +141,17 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            font-size: 16px;
+            font-size: 15px;
         }
 
         #loginContainer input {
             width: 100%;
-            padding: 14px 44px 14px 16px;
+            padding: 12px 40px 12px 14px;
             border: 2px solid var(--border);
             border-radius: var(--radius-sm);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 15px;
+            font-size: 14px;
             transition: border var(--transition), background var(--transition);
             direction: rtl;
         }
@@ -168,19 +168,19 @@
 
         #loginBtn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: var(--accent);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: background var(--transition), transform 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         #loginBtn:hover {
@@ -192,17 +192,16 @@
 
         #loginError {
             color: var(--red);
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
-            margin-top: 10px;
-            min-height: 20px;
+            margin-top: 8px;
+            min-height: 18px;
         }
 
         /* ===== CHAT SCREEN ===== */
         #chatScreen {
             display: none;
             height: 100vh;
-            display: none;
             flex-direction: column;
             background: var(--bg-primary);
             transition: background var(--transition);
@@ -216,7 +215,7 @@
         #topBar {
             height: var(--header-height);
             background: var(--bg-secondary);
-            padding: 0 16px;
+            padding: 0 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -224,40 +223,46 @@
             flex-shrink: 0;
             transition: background var(--transition), border var(--transition);
             z-index: 10;
+            gap: 6px;
         }
 
         #topBar .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-primary);
         }
 
         #topBar .brand i {
             color: var(--accent);
-            font-size: 20px;
+            font-size: 18px;
+        }
+
+        #topBar .brand span {
+            display: inline-block;
         }
 
         #topBar .actions {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         #topBar .actions button {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             transition: background var(--transition), color var(--transition);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            white-space: nowrap;
         }
 
         #topBar .actions button:hover {
@@ -268,25 +273,26 @@
         #topBar .actions button .badge {
             background: var(--accent);
             color: #fff;
-            font-size: 11px;
+            font-size: 10px;
             border-radius: 50%;
-            padding: 1px 7px;
-            min-width: 20px;
+            padding: 0 5px;
+            min-width: 18px;
             text-align: center;
+            line-height: 18px;
         }
 
         #myStatus {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
+            gap: 5px;
+            font-size: 12px;
             color: var(--text-secondary);
         }
 
         #myStatus .dot {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--green);
             animation: pulse-dot 2s infinite;
@@ -311,8 +317,8 @@
             background: var(--yellow);
             color: #000;
             text-align: center;
-            padding: 8px;
-            font-size: 13px;
+            padding: 6px;
+            font-size: 12px;
             font-weight: 600;
             z-index: 20;
             display: none;
@@ -344,7 +350,7 @@
             right: 0;
             bottom: 0;
             overflow-y: auto;
-            padding: 12px 16px 16px;
+            padding: 8px 12px 12px;
             display: flex;
             flex-direction: column-reverse;
             scroll-behavior: smooth;
@@ -352,8 +358,8 @@
 
         /* ===== MESSAGE ===== */
         .message-wrapper {
-            animation: fadeInUp 0.3s ease;
-            margin-bottom: 6px;
+            animation: fadeInUp 0.25s ease;
+            margin-bottom: 4px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -376,8 +382,8 @@
         }
 
         .message-bubble {
-            max-width: 88%;
-            padding: 8px 14px;
+            max-width: 90%;
+            padding: 6px 12px;
             word-wrap: break-word;
             position: relative;
             transition: background var(--transition), border var(--transition);
@@ -386,14 +392,14 @@
         .message-bubble .msg-header {
             display: flex;
             align-items: baseline;
-            gap: 8px;
-            margin-bottom: 2px;
+            gap: 6px;
+            margin-bottom: 1px;
             flex-wrap: wrap;
         }
 
         .message-bubble .msg-name {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--accent);
         }
 
@@ -405,18 +411,18 @@
         }
 
         .message-bubble .msg-role-icon {
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .message-bubble .msg-time {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-muted);
             direction: ltr;
             unicode-bidi: embed;
         }
 
         .message-bubble .msg-text {
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1.5;
             word-break: break-word;
         }
@@ -431,7 +437,7 @@
 
         /* ===== MEDIA ===== */
         .msg-media {
-            margin-top: 6px;
+            margin-top: 4px;
             border-radius: var(--radius-sm);
             overflow: hidden;
             max-width: 100%;
@@ -441,7 +447,7 @@
 
         .msg-media img {
             max-width: 100%;
-            max-height: 300px;
+            max-height: 260px;
             border-radius: var(--radius-sm);
             display: block;
             transition: transform 0.2s;
@@ -477,7 +483,7 @@
 
         .msg-media .yt-thumb img {
             width: 100%;
-            max-height: 200px;
+            max-height: 160px;
             object-fit: cover;
         }
 
@@ -488,13 +494,13 @@
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.7);
             color: #fff;
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             transition: background 0.2s;
         }
 
@@ -502,11 +508,11 @@
             background: rgba(255, 0, 0, 0.8);
         }
 
-        /* ===== MESSAGE ACTIONS (hover) ===== */
+        /* ===== MESSAGE ACTIONS ===== */
         .message-actions {
             display: flex;
-            gap: 4px;
-            margin-top: 4px;
+            gap: 3px;
+            margin-top: 3px;
             opacity: 0;
             transition: opacity 0.2s;
             justify-content: flex-end;
@@ -521,14 +527,15 @@
             background: var(--bg-tertiary);
             border: none;
             color: var(--text-secondary);
-            padding: 2px 8px;
+            padding: 1px 6px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: background var(--transition), color var(--transition);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
+            line-height: 20px;
         }
 
         .message-actions button:hover {
@@ -544,23 +551,23 @@
         /* ===== REACTIONS ===== */
         .msg-reactions {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: wrap;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         .msg-reactions .reaction {
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            padding: 0 6px;
+            font-size: 13px;
             cursor: pointer;
             transition: background 0.2s, transform 0.15s;
             display: flex;
             align-items: center;
-            gap: 3px;
-            line-height: 22px;
+            gap: 2px;
+            line-height: 20px;
             user-select: none;
         }
 
@@ -570,7 +577,7 @@
         }
 
         .msg-reactions .reaction .count {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
         }
 
@@ -583,17 +590,17 @@
         .reaction-picker {
             display: none;
             position: absolute;
-            bottom: calc(100% + 8px);
+            bottom: calc(100% + 6px);
             left: 0;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 6px 8px;
+            padding: 4px 6px;
             box-shadow: var(--shadow);
             z-index: 30;
-            gap: 4px;
+            gap: 2px;
             flex-wrap: wrap;
-            max-width: 220px;
+            max-width: 180px;
         }
 
         .reaction-picker.show {
@@ -603,26 +610,26 @@
         .reaction-picker button {
             background: transparent;
             border: none;
-            font-size: 22px;
-            padding: 2px 6px;
+            font-size: 18px;
+            padding: 2px 4px;
             border-radius: 4px;
             cursor: pointer;
             transition: background 0.15s;
-            line-height: 1.4;
+            line-height: 1.2;
         }
 
         .reaction-picker button:hover {
             background: var(--bg-hover);
-            transform: scale(1.15);
+            transform: scale(1.1);
         }
 
         /* ===== SYSTEM MESSAGES ===== */
         .system-message {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            padding: 8px 0;
-            margin: 4px 0;
+            padding: 6px 0;
+            margin: 3px 0;
             width: 100%;
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
@@ -634,9 +641,9 @@
         /* ===== TYPING ===== */
         #typingStatus {
             position: fixed;
-            bottom: calc(var(--input-height) + 8px);
-            padding: 4px 20px;
-            font-size: 13px;
+            bottom: calc(var(--input-height) + 6px);
+            padding: 2px 16px;
+            font-size: 12px;
             color: var(--text-secondary);
             right: 0;
             left: 0;
@@ -644,18 +651,18 @@
             animation: fadeIn 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             justify-content: flex-start;
         }
 
         #typingStatus .typing-dots {
             display: inline-flex;
-            gap: 3px;
+            gap: 2px;
         }
 
         #typingStatus .typing-dots span {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             background: var(--text-muted);
             border-radius: 50%;
             animation: typingBounce 1.4s infinite both;
@@ -686,17 +693,17 @@
             height: var(--input-height);
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            padding: 8px 12px;
+            padding: 6px 10px;
             flex-shrink: 0;
             transition: background var(--transition), border var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         #inputBox .input-actions {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             flex-shrink: 0;
         }
 
@@ -704,11 +711,11 @@
             background: transparent;
             border: none;
             color: var(--text-muted);
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             transition: background var(--transition), color var(--transition);
             display: flex;
             align-items: center;
@@ -727,12 +734,12 @@
         #messageInput {
             flex: 1;
             border: none;
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: var(--radius-full);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 15px;
-            min-height: 40px;
+            font-size: 14px;
+            min-height: 34px;
             transition: background var(--transition), box-shadow var(--transition);
             direction: rtl;
         }
@@ -747,14 +754,14 @@
         }
 
         #sendBtn {
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             border: none;
             border-radius: 50%;
             background: var(--accent);
             color: #fff;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             transition: background var(--transition), transform 0.15s;
             flex-shrink: 0;
             display: flex;
@@ -773,19 +780,20 @@
         #emojiPicker {
             display: none;
             position: absolute;
-            bottom: calc(var(--input-height) + 8px);
-            left: 12px;
+            bottom: calc(var(--input-height) + 6px);
+            left: 10px;
+            right: 10px;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 12px;
+            padding: 10px;
             z-index: 30;
-            max-height: 280px;
+            max-height: 220px;
             overflow-y: auto;
-            width: 300px;
+            display: none;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 3px;
         }
 
         #emojiPicker.show {
@@ -795,17 +803,17 @@
         #emojiPicker button {
             background: transparent;
             border: none;
-            font-size: 26px;
-            padding: 4px;
+            font-size: 22px;
+            padding: 3px;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.15s;
-            line-height: 1.4;
+            line-height: 1.2;
         }
 
         #emojiPicker button:hover {
             background: var(--bg-hover);
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         /* ===== OVERLAY / POPUPS ===== */
@@ -822,7 +830,7 @@
             animation: fadeIn 0.25s;
             justify-content: center;
             align-items: flex-start;
-            padding-top: 70px;
+            padding-top: 60px;
         }
 
         #overlay.show {
@@ -834,7 +842,7 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             width: 92%;
-            max-width: 380px;
+            max-width: 360px;
             max-height: 70vh;
             overflow: hidden;
             border: 1px solid var(--border);
@@ -859,7 +867,7 @@
         }
 
         .popup-header {
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -868,20 +876,20 @@
         }
 
         .popup-header h4 {
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .popup-header button {
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 4px;
+            padding: 3px;
             border-radius: 4px;
             transition: background 0.2s, color 0.2s;
         }
@@ -892,7 +900,7 @@
         }
 
         .popup-body {
-            padding: 12px 18px;
+            padding: 10px 16px;
             overflow-y: auto;
             flex: 1;
         }
@@ -900,11 +908,11 @@
         .popup-body .user-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 10px;
+            gap: 8px;
+            padding: 6px 8px;
             border-radius: var(--radius-sm);
             transition: background 0.2s;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .popup-body .user-item:hover {
@@ -912,8 +920,8 @@
         }
 
         .popup-body .user-item .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--green);
             flex-shrink: 0;
@@ -924,9 +932,9 @@
         }
 
         .popup-body .user-item .user-role {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 10px;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
             background: var(--bg-tertiary);
             color: var(--text-muted);
         }
@@ -943,30 +951,30 @@
         .popup-body .empty-state {
             text-align: center;
             color: var(--text-muted);
-            padding: 20px 0;
-            font-size: 14px;
+            padding: 16px 0;
+            font-size: 13px;
         }
 
         .popup-footer {
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-top: 1px solid var(--border);
             flex-shrink: 0;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
         .popup-footer button {
-            padding: 8px 16px;
+            padding: 6px 14px;
             border: none;
             border-radius: var(--radius-sm);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: background var(--transition), transform 0.15s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .popup-footer button:active {
@@ -994,13 +1002,13 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            padding: 6px;
+            padding: 4px;
             border-radius: 50%;
             transition: background var(--transition), color var(--transition);
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1011,24 +1019,60 @@
             color: var(--text-primary);
         }
 
-        /* ===== EDIT MODE ===== */
-        .editing-indicator {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-right: 8px;
+        /* ===== SEARCH ===== */
+        #searchBox {
+            display: none;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+            gap: 6px;
+            align-items: center;
         }
 
-        /* ===== LOADING / EMPTY ===== */
+        #searchBox.show {
+            display: flex;
+        }
+
+        #searchBox input {
+            flex: 1;
+            border: none;
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        #searchBox input:focus {
+            outline: none;
+        }
+
+        #searchBox .close-search {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px;
+        }
+
+        .highlight {
+            background: rgba(88, 101, 242, 0.3);
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+
+        /* ===== LOADING ===== */
         .loading-state {
             text-align: center;
             color: var(--text-muted);
-            padding: 30px 0;
-            font-size: 14px;
+            padding: 24px 0;
+            font-size: 13px;
         }
 
         .loading-state i {
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 8px;
             display: block;
             animation: spin 1.5s linear infinite;
         }
@@ -1039,24 +1083,24 @@
             }
         }
 
-        /* ===== NEW MESSAGE INDICATOR ===== */
+        /* ===== NEW MSG INDICATOR ===== */
         #newMsgIndicator {
             position: absolute;
-            bottom: 80px;
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--accent);
             color: #fff;
-            padding: 6px 16px;
+            padding: 4px 14px;
             border-radius: var(--radius-full);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             z-index: 5;
             display: none;
             animation: fadeIn 0.3s;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
         }
 
@@ -1064,15 +1108,39 @@
             display: flex;
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* ===== LIGHTBOX ===== */
+        #lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 16px;
+        }
+
+        #lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        /* ===== RESPONSIVE - ANDROID & SMALL SCREENS ===== */
         @media (max-width: 600px) {
             :root {
-                --header-height: 50px;
-                --input-height: 58px;
+                --header-height: 48px;
+                --input-height: 54px;
             }
 
             #loginContainer {
-                padding: 28px 20px;
+                padding: 24px 18px;
+                max-width: 340px;
             }
 
             #topBar .brand span {
@@ -1084,87 +1152,254 @@
             }
 
             #topBar .actions button .badge {
-                min-width: 18px;
-                font-size: 10px;
-                padding: 0 5px;
+                min-width: 16px;
+                font-size: 9px;
+                line-height: 16px;
+                padding: 0 4px;
+            }
+
+            #topBar .actions button {
+                padding: 2px 6px;
+                font-size: 12px;
+            }
+
+            #myStatus {
+                font-size: 11px;
             }
 
             .message-bubble {
                 max-width: 94%;
-                padding: 6px 12px;
+                padding: 5px 10px;
             }
 
             .message-bubble .msg-text {
-                font-size: 14px;
+                font-size: 13px;
+            }
+
+            .message-bubble .msg-name {
+                font-size: 12px;
+            }
+
+            .message-bubble .msg-time {
+                font-size: 8px;
             }
 
             #emojiPicker {
-                width: 260px;
-                left: 4px;
-                right: 4px;
-                max-height: 220px;
+                width: auto;
+                left: 6px;
+                right: 6px;
+                max-height: 180px;
+                padding: 8px;
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            #emojiPicker button {
+                font-size: 20px;
+                padding: 2px;
             }
 
             .popup {
                 max-width: 96%;
-                max-height: 80vh;
+                max-height: 75vh;
             }
 
             #typingStatus {
-                font-size: 12px;
-                padding: 2px 16px;
+                font-size: 11px;
+                padding: 2px 12px;
+                bottom: calc(var(--input-height) + 4px);
             }
 
             #inputBox {
-                padding: 6px 8px;
+                padding: 4px 8px;
                 gap: 4px;
             }
 
             #messageInput {
-                font-size: 14px;
-                padding: 8px 12px;
-                min-height: 36px;
+                font-size: 13px;
+                padding: 6px 12px;
+                min-height: 30px;
             }
 
             #sendBtn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
+                width: 34px;
+                height: 34px;
+                font-size: 14px;
             }
 
-            .msg-media .yt-thumb img {
-                max-height: 140px;
+            #inputBox .input-actions button {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
             }
 
             .msg-media img {
                 max-height: 200px;
             }
 
+            .msg-media .yt-thumb img {
+                max-height: 120px;
+            }
+
+            .msg-media .yt-thumb .play-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
             .message-actions {
                 opacity: 1;
+            }
+
+            .message-actions button {
+                font-size: 10px;
+                padding: 0 5px;
+                line-height: 18px;
+            }
+
+            .msg-reactions .reaction {
+                font-size: 12px;
+                line-height: 18px;
+                padding: 0 5px;
+            }
+
+            #newMsgIndicator {
+                font-size: 11px;
+                padding: 3px 12px;
+                bottom: 60px;
+            }
+
+            .popup-body .user-item {
+                font-size: 12px;
+                padding: 5px 6px;
+            }
+
+            .reaction-picker {
+                max-width: 150px;
+            }
+            .reaction-picker button {
+                font-size: 16px;
+                padding: 1px 3px;
+            }
+
+            #searchBox input {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            #connectionStatus {
+                font-size: 11px;
+                padding: 4px;
             }
         }
 
         @media (max-width: 400px) {
-            #loginContainer {
-                padding: 20px 16px;
+            :root {
+                --header-height: 44px;
+                --input-height: 48px;
             }
 
-            #topBar {
-                padding: 0 10px;
+            #loginContainer {
+                padding: 18px 14px;
+                max-width: 300px;
+            }
+
+            #loginContainer h2 {
+                font-size: 20px;
+            }
+            #loginContainer .subtitle {
+                font-size: 12px;
+            }
+            #loginContainer input {
+                font-size: 13px;
+                padding: 10px 36px 10px 12px;
+            }
+            #loginBtn {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #topBar .brand i {
+                font-size: 16px;
             }
             #topBar .actions button {
+                font-size: 11px;
+                padding: 2px 4px;
+            }
+            #topBar .actions button .badge {
+                min-width: 14px;
+                font-size: 8px;
+                line-height: 14px;
+            }
+
+            .message-bubble {
                 padding: 4px 8px;
+                max-width: 96%;
+            }
+            .message-bubble .msg-text {
                 font-size: 12px;
+            }
+            .message-bubble .msg-name {
+                font-size: 11px;
+            }
+            .message-bubble .msg-time {
+                font-size: 7px;
+            }
+
+            #messageInput {
+                font-size: 12px;
+                padding: 5px 10px;
+                min-height: 26px;
+            }
+            #sendBtn {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            #inputBox .input-actions button {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+            }
+
+            #emojiPicker {
+                padding: 6px;
+                grid-template-columns: repeat(5, 1fr);
+                max-height: 150px;
+            }
+            #emojiPicker button {
+                font-size: 18px;
+            }
+
+            .msg-media img {
+                max-height: 160px;
+            }
+            .msg-media .yt-thumb img {
+                max-height: 100px;
+            }
+            .msg-media .yt-thumb .play-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
             }
 
             .popup-body .user-item {
-                font-size: 13px;
-                padding: 6px 8px;
+                font-size: 11px;
+                padding: 4px 6px;
+            }
+            .popup-footer button {
+                font-size: 11px;
+                padding: 4px 10px;
             }
 
-            .message-bubble .msg-header {
-                font-size: 12px;
+            #typingStatus {
+                font-size: 10px;
+                bottom: calc(var(--input-height) + 2px);
+                padding: 0 10px;
+            }
+            #newMsgIndicator {
+                font-size: 10px;
+                padding: 2px 10px;
+                bottom: 50px;
             }
         }
 
@@ -1181,7 +1416,7 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -1189,7 +1424,6 @@
             }
         }
 
-        /* ===== ACCESSIBILITY ===== */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -1200,54 +1434,10 @@
             }
         }
 
-        /* Focus-visible */
         button:focus-visible,
         input:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
-        }
-
-        /* ===== SEARCH ===== */
-        #searchBox {
-            display: none;
-            padding: 8px 12px;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border);
-            gap: 8px;
-            align-items: center;
-        }
-
-        #searchBox.show {
-            display: flex;
-        }
-
-        #searchBox input {
-            flex: 1;
-            border: none;
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            background: var(--bg-input);
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        #searchBox input:focus {
-            outline: none;
-        }
-
-        #searchBox .close-search {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 18px;
-            padding: 4px;
-        }
-
-        .highlight {
-            background: rgba(88, 101, 242, 0.3);
-            border-radius: 2px;
-            padding: 0 2px;
         }
     </style>
 </head>
@@ -1375,8 +1565,8 @@
         </div>
 
         <!-- LIGHTBOX -->
-        <div id="lightbox" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100;justify-content:center;align-items:center;cursor:pointer;padding:20px;" onclick="closeLightbox()">
-            <img id="lightboxImg" style="max-width:95%;max-height:95%;border-radius:8px;object-fit:contain;" />
+        <div id="lightbox" onclick="closeLightbox()">
+            <img id="lightboxImg" />
         </div>
     </div>
 
@@ -1395,20 +1585,18 @@
         //  STATE
         // ============================================================
         let username = "";
-        let role = "user"; // admin | mod | user
+        let role = "user";
         let lastMessageKey = null;
         let isScrolledUp = false;
         let hasNewMessages = false;
         let editingKey = null;
         let editingText = "";
 
-        // Listeners
         let msgListener = null;
         let typingListener = null;
         let onlineListener = null;
         let connListener = null;
 
-        // DOM refs
         const $ = id => document.getElementById(id);
         const usernameInput = $('usernameInput');
         const loginScreen = $('loginScreen');
@@ -1460,7 +1648,6 @@
             localStorage.setItem('theme', darkTheme ? 'dark' : 'light');
         }
 
-        // Load saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
             darkTheme = false;
@@ -1568,7 +1755,6 @@
             setTimeout(() => messageInput.focus(), 400);
         }
 
-        // Enter key on login
         usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
         // ============================================================
@@ -1604,13 +1790,11 @@
                 db.ref('messages').off('child_removed', msgListener);
                 db.ref('messages').off('child_changed', msgListener);
             }
-            // Clear messages but keep loading state
             messages.innerHTML = '<div class="loading-state" id="loadingState"><i class="fas fa-spinner"></i> جارٍ تحميل الرسائل...</div>';
 
             const chatRef = db.ref('messages');
             let firstLoad = true;
 
-            // Child added
             msgListener = chatRef.limitToLast(100).on('child_added', snap => {
                 const data = snap.val();
                 if (!data) return;
@@ -1621,7 +1805,6 @@
                     if (ls) ls.remove();
                     firstLoad = false;
                 }
-                // Check if we need to show "new messages" indicator
                 if (isScrolledUp && data.user !== username) {
                     hasNewMessages = true;
                     newMsgIndicator.classList.add('show');
@@ -1629,13 +1812,11 @@
                 }
             });
 
-            // Child removed (delete)
             chatRef.on('child_removed', snap => {
                 const el = document.querySelector(`[data-key="${snap.key}"]`);
                 if (el) el.remove();
             });
 
-            // Child changed (edit)
             chatRef.on('child_changed', snap => {
                 const data = snap.val();
                 if (!data) return;
@@ -1652,16 +1833,13 @@
                 }
             });
 
-            // Initial scroll
             setTimeout(() => { messages.scrollTop = 0; }, 200);
         }
 
         function renderMessage(data, key) {
-            // Remove loading state if exists
             const ls = $('loadingState');
             if (ls) ls.remove();
 
-            // Check for system messages (join/leave)
             if (data.system) {
                 const div = document.createElement('div');
                 div.className = 'system-message';
@@ -1679,7 +1857,6 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
 
-            // Header
             const header = document.createElement('div');
             header.className = 'msg-header';
 
@@ -1704,13 +1881,11 @@
 
             bubble.appendChild(header);
 
-            // Text
             const textDiv = document.createElement('div');
             textDiv.className = 'msg-text';
             textDiv.innerHTML = parseMessageText(data.text);
             bubble.appendChild(textDiv);
 
-            // Media
             if (data.mediaType && data.mediaId) {
                 const mediaDiv = document.createElement('div');
                 mediaDiv.className = 'msg-media';
@@ -1722,7 +1897,7 @@
                     img.onclick = (e) => { e.stopPropagation();
                         openLightbox(data.mediaId); };
                     img.onerror = () => { mediaDiv.innerHTML =
-                        '<span style="color:var(--text-muted);font-size:13px;">⚠️ تعذر تحميل الصورة</span>'; };
+                            '<span style="color:var(--text-muted);font-size:12px;">⚠️ تعذر تحميل الصورة</span>'; };
                     mediaDiv.appendChild(img);
                 } else if (data.mediaType === 'youtube') {
                     const thumb = document.createElement('div');
@@ -1742,7 +1917,7 @@
                         const iframe = document.createElement('iframe');
                         iframe.src = `https://www.youtube.com/embed/${data.mediaId}?autoplay=1&rel=0`;
                         iframe.allow =
-                        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
                         iframe.allowFullscreen = true;
                         wrapper2.appendChild(iframe);
                         mediaDiv.innerHTML = '';
@@ -1754,14 +1929,13 @@
                     a.href = data.mediaId;
                     a.target = '_blank';
                     a.rel = 'noopener';
-                    a.style.cssText = 'color:var(--accent);text-decoration:underline;font-size:14px;';
+                    a.style.cssText = 'color:var(--accent);text-decoration:underline;font-size:13px;';
                     a.textContent = '📁 تحميل الملف';
                     mediaDiv.appendChild(a);
                 }
                 bubble.appendChild(mediaDiv);
             }
 
-            // Reactions
             if (data.reactions) {
                 const reacDiv = document.createElement('div');
                 reacDiv.className = 'msg-reactions';
@@ -1782,11 +1956,9 @@
                 bubble.appendChild(reacDiv);
             }
 
-            // Actions (hover)
             const actions = document.createElement('div');
             actions.className = 'message-actions';
 
-            // Reaction picker trigger
             const reactBtn = document.createElement('button');
             reactBtn.innerHTML = '<i class="fas fa-smile"></i>';
             reactBtn.title = 'إضافة تفاعل';
@@ -1794,7 +1966,6 @@
                 toggleReactionPicker(key, reactBtn); };
             actions.appendChild(reactBtn);
 
-            // Edit (own messages)
             if (data.user === username) {
                 const editBtn = document.createElement('button');
                 editBtn.innerHTML = '<i class="fas fa-edit"></i>';
@@ -1804,7 +1975,6 @@
                 actions.appendChild(editBtn);
             }
 
-            // Delete (own or admin)
             if (data.user === username || role === 'admin' || role === 'mod') {
                 const delBtn = document.createElement('button');
                 delBtn.className = 'danger';
@@ -1820,26 +1990,21 @@
             wrapper.appendChild(bubble);
             messages.insertBefore(wrapper, messages.firstChild);
 
-            // Auto-scroll if not scrolled up
             if (!isScrolledUp) {
                 setTimeout(() => { messages.scrollTop = 0; }, 50);
             }
         }
 
         function parseMessageText(text) {
-            // Auto-link URLs
             let html = escapeHtml(text);
-            // YouTube links
             html = html.replace(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/g,
                 (match, id) => {
                     return `<a href="#" onclick="event.preventDefault();embedYoutube('${id}')">▶️ YouTube</a>`;
                 });
-            // Image links
             html = html.replace(/(https?:\/\/\S+\.(jpg|jpeg|png|gif|webp|bmp|svg))/gi,
                 (match) => {
                     return `<a href="#" onclick="event.preventDefault();openLightbox('${match}')">🖼️ صورة</a>`;
                 });
-            // Regular links
             html = html.replace(/(https?:\/\/[^\s]+)/g,
                 (match) => {
                     return `<a href="${match}" target="_blank" rel="noopener">${match}</a>`;
@@ -1854,7 +2019,6 @@
             let text = messageInput.value.trim();
             if (!text || !username) return;
 
-            // If editing
             if (editingKey) {
                 db.ref('messages/' + editingKey).update({
                     text: text,
@@ -1884,7 +2048,6 @@
             closeEmojiPicker();
         }
 
-        // Enter key
         messageInput.addEventListener('keydown', e => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -1902,7 +2065,6 @@
             messageInput.focus();
             messageInput.placeholder = '✏️ تعديل الرسالة...';
             sendBtn.innerHTML = '<i class="fas fa-check"></i>';
-            // Cancel edit on escape
             const escHandler = (e) => {
                 if (e.key === 'Escape') {
                     cancelEdit();
@@ -1910,7 +2072,6 @@
                 }
             };
             document.addEventListener('keydown', escHandler);
-            // Also cancel on blur after a delay
             setTimeout(() => {
                 const blurHandler = () => {
                     if (editingKey) cancelEdit();
@@ -1933,7 +2094,6 @@
         // ============================================================
         function deleteMessage(key) {
             if (!key) return;
-            // Check if user has permission
             db.ref('messages/' + key).once('value', snap => {
                 const data = snap.val();
                 if (!data) return;
@@ -1984,7 +2144,6 @@
                     picker.appendChild(b);
                 });
                 btn.parentElement.appendChild(picker);
-                // Close on outside click
                 document.addEventListener('click', function closePicker(ev) {
                     if (!picker.contains(ev.target) && ev.target !== btn) {
                         picker.classList.remove('show');
@@ -2039,7 +2198,6 @@
                 const names = Object.keys(users);
                 onlineCount.textContent = names.length;
 
-                // Online list
                 let html = '';
                 if (names.length === 0) {
                     html = '<div class="empty-state">لا يوجد متصلون</div>';
@@ -2064,7 +2222,6 @@
                 }
                 onlineUsersList.innerHTML = html;
 
-                // Admin panel
                 if (role === 'admin' || role === 'mod') {
                     let adminHtml = '';
                     if (names.length === 0) {
@@ -2121,7 +2278,6 @@
             adminPopup.classList.remove('show');
         }
 
-        // Click outside popup closes it
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closePopup();
         });
@@ -2187,7 +2343,6 @@
             lightboxImg.src = '';
         }
 
-        // ESC to close lightbox
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 if (lightbox.style.display === 'flex') closeLightbox();
@@ -2223,7 +2378,6 @@
                 if (text.toLowerCase().includes(query.toLowerCase())) {
                     el.innerHTML = highlightText(text, query);
                     found++;
-                    // Scroll to first match
                     if (found === 1) {
                         el.closest('.message-wrapper')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
                     }
@@ -2269,7 +2423,7 @@
         }
 
         // ============================================================
-        //  YOUTUBE EMBED (inline)
+        //  YOUTUBE EMBED
         // ============================================================
         function embedYoutube(id) {
             const wrapper = document.createElement('div');
@@ -2280,17 +2434,14 @@
                 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
             iframe.allowFullscreen = true;
             wrapper.appendChild(iframe);
-            // Find the message that contains this link and replace
             const activeEl = document.activeElement;
             const msgText = activeEl?.closest?.('.message-bubble')?.querySelector?.('.msg-text');
             if (msgText) {
-                // Find the link inside
                 const links = msgText.querySelectorAll('a');
                 links.forEach(a => {
                     if (a.textContent === '▶️ YouTube') {
                         const parent = a.parentElement;
                         if (parent) {
-                            // Replace the link with the player
                             const container = document.createElement('div');
                             container.className = 'msg-media';
                             container.appendChild(wrapper);
@@ -2309,7 +2460,6 @@
             if (confirm('هل تريد تسجيل الخروج؟')) {
                 db.ref('onlineUsers/' + encodeURIComponent(username)).remove();
                 db.ref('typing/' + encodeURIComponent(username)).remove();
-                // Cleanup listeners
                 if (msgListener) db.ref('messages').off('child_added', msgListener);
                 if (typingListener) db.ref('typing').off('value', typingListener);
                 if (onlineListener) db.ref('onlineUsers').off('value', onlineListener);
@@ -2335,9 +2485,8 @@
         }
 
         // ============================================================
-        //  INIT
+        //  VISIBILITY CHANGE
         // ============================================================
-        // Handle visibility change - update online status
         document.addEventListener('visibilitychange', () => {
             if (!username) return;
             if (document.hidden) {
@@ -2348,16 +2497,16 @@
             }
         });
 
-        // Prevent zoom on double-tap (iOS)
+        // ============================================================
+        //  PREVENT ZOOM ON DOUBLE TAP (iOS)
+        // ============================================================
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
             if (now - (document.lastTouch || 0) < 300) e.preventDefault();
             document.lastTouch = now;
         }, { passive: false });
 
-        console.log('🚀 شات متطور جاهز!');
-        console.log('📌 استخدم /help للمساعدة');
+        console.log('✅ شات متطور جاهز - تم تحسين حجم العناصر للاندرويد والايفون');
     </script>
-
 </body>
 </html>
