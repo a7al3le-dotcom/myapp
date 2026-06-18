@@ -2,844 +2,937 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>شات خاص — تصميم أنيق</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
-    </script>
-
+    <title>شات خاص</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
     <style>
-        /* ===== RESET & BASE ===== */
-        * {
+        :root {
+            --bg-main: #05060a;
+            --bg-grad-1: #151624;
+            --bg-grad-2: #020307;
+            --text-main: #ffffff;
+            --text-muted: #a7aec4;
+            --accent: #ffd54a;
+            --accent-soft: #ffe788;
+            --danger: #e53935;
+        }
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
-        }
-
-        body {
-            background: #0e0e12;
-            color: #f0f0f0;
-            height: 100vh;
             overflow: hidden;
-            touch-action: pan-y;
+            position: fixed;
+            width: 100%;
         }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a22;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #d4af37, #b8962e);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #e8c84a;
-        }
-
-        /* ===== LOGIN SCREEN ===== */
-        #loginScreen {
-            height: 100vh;
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: radial-gradient(circle at top, var(--bg-grad-1) 0%, rgba(5,6,10,0.95) 50%, var(--bg-grad-2) 100%);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: radial-gradient(ellipse at 50% 30%, #1e1e2a 0%, #0e0e12 75%);
             position: relative;
-            overflow: hidden;
         }
-
-        #loginScreen::before {
-            content: '';
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
-            top: -100px;
-            right: -100px;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        #loginScreen::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(74, 124, 247, 0.06) 0%, transparent 70%);
-            bottom: -80px;
-            left: -80px;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        #loginContainer {
-            background: rgba(26, 26, 34, 0.75);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            padding: 40px 32px 36px;
-            border-radius: 24px;
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(212, 175, 55, 0.08);
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             width: 100%;
-            max-width: 400px;
+            backdrop-filter: blur(16px);
             position: relative;
-            z-index: 2;
-            transition: transform 0.3s ease, box-shadow 0.4s ease;
         }
-
-        #loginContainer:hover {
-            box-shadow: 0 24px 72px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(212, 175, 55, 0.12);
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.9) 100%);
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
-
-        #loginScreen h2 {
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 8px;
+        .msg {
+            margin: 8px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            direction: ltr;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+        .user {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .time {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+        .sys {
             text-align: center;
-            background: linear-gradient(135deg, #d4af37 0%, #f0d060 50%, #d4af37 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 0.5px;
-        }
-
-        #loginScreen .subtitle {
-            text-align: center;
-            font-size: 14px;
-            color: #787888;
-            margin-bottom: 28px;
-            font-weight: 300;
-            letter-spacing: 0.3px;
-        }
-
-        #loginScreen input {
-            padding: 14px 18px;
-            margin-bottom: 16px;
-            width: 100%;
-            border: 1.5px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.04);
-            color: #f0f0f0;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-
-        #loginScreen input:focus {
-            outline: none;
-            border-color: rgba(212, 175, 55, 0.4);
-            background: rgba(255, 255, 255, 0.07);
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.06);
-        }
-
-        #loginScreen input::placeholder {
-            color: #5a5a6a;
-            font-weight: 300;
-        }
-
-        #loginScreen button {
-            padding: 14px 20px;
-            width: 100%;
-            background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-            color: #0e0e12;
-            border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            letter-spacing: 0.3px;
-            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
-        }
-
-        #loginScreen button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.25);
-        }
-
-        #loginScreen button:active {
-            transform: scale(0.97);
-            box-shadow: 0 2px 12px rgba(212, 175, 55, 0.1);
-        }
-
-        /* ===== CHAT SCREEN ===== */
-        #chatScreen {
-            display: none;
-            height: 100vh;
-            background: radial-gradient(ellipse at 50% 0%, #1a1a26 0%, #0e0e12 80%);
-            position: relative;
-        }
-
-        /* ===== TOP BAR ===== */
-        #topBar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(22, 22, 30, 0.82);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 14px 20px;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 20;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
-            height: 64px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        #myStatus {
-            color: #43b581;
-            font-weight: 600;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #myStatus::before {
-            content: '●';
-            font-size: 10px;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        #onlineBtn,
-        #adminBtn {
-            cursor: pointer;
-            color: #c8c8d8;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        #onlineBtn:hover,
-        #adminBtn:hover {
-            background: rgba(212, 175, 55, 0.08);
-            border-color: rgba(212, 175, 55, 0.15);
-            color: #f0f0f0;
-            transform: translateY(-1px);
-        }
-
-        #onlineBtn:active,
-        #adminBtn:active {
-            transform: scale(0.96);
-        }
-
-        #onlineBtn .badge {
-            background: linear-gradient(135deg, #d4af37, #b8962e);
-            color: #0e0e12;
-            border-radius: 40px;
-            padding: 0 10px;
+            color: var(--text-muted);
             font-size: 12px;
-            font-weight: 700;
-            min-width: 20px;
-            text-align: center;
+            margin: 10px auto;
+            background: rgba(255,255,255,0.03);
+            padding: 4px 10px;
+            border-radius: 999px;
         }
-
-        /* ===== POPUP OVERLAY ===== */
+        #inputArea {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.7));
+            border-top: 1px solid rgba(255,255,255,0.04);
+            position: relative;
+            z-index: 10;
+        }
+        #messageInput {
+            flex: 1;
+            font-size: 16px;
+            height: 44px;
+            padding: 0 15px;
+            border-radius: 999px;
+            background: rgba(10,11,20,0.95);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+        #sendBtn {
+            height: 44px;
+            padding: 0 22px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        #topButtons {
+            position: fixed;
+            top: calc(10px + env(safe-area-inset-top));
+            right: calc(10px + env(safe-area-inset-right));
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+        .btn {
+            padding: 6px 12px;
+            background: rgba(10,11,20,0.95);
+            border-radius: 999px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .btn .count-text { font-size: 13px; margin-right: 4px; color: var(--accent-soft); font-weight: 600; }
+        #usersBox, #setVideoModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at top, #181a28 0%, #05060b 55%);
+            padding: 20px;
+            border-radius: 18px;
+            z-index: 1003;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        #usersList .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        .status-green { background-color: #2ecc71; }
+        .status-yellow { background-color: #f1c40f; }
+        .status-gray { background-color: #7f8c8d; }
+        #videoUrlInput {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(5,6,12,0.95);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        #submitVideoUrlBtn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
             display: none;
-            z-index: 30;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        #onlinePopup,
-        #adminPopup {
-            background: rgba(26, 26, 34, 0.92);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            width: 90%;
-            max-width: 360px;
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 24px 20px 20px;
-            border-radius: 24px;
-            border: 1px solid rgba(212, 175, 55, 0.10);
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
-            position: absolute;
-            top: 80px;
-            right: 5%;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        #onlinePopup h4,
-        #adminPopup h4 {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-align: center;
-            background: linear-gradient(135deg, #d4af37, #f0d060);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
-            letter-spacing: 0.3px;
-        }
-
-        .user,
-        .admin-user {
-            font-size: 14px;
-            margin-bottom: 6px;
-            padding: 10px 14px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .user:hover,
-        .admin-user:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .user.you {
-            background: rgba(212, 175, 55, 0.08);
-            border-right: 3px solid #d4af37;
-        }
-
-        .admin-user.admin span {
-            color: #d4af37;
-            font-weight: 600;
-        }
-        .admin-user.mod span {
-            color: #4a7cf7;
-            font-weight: 600;
-        }
-
-        #adminPopup button {
-            margin-top: 16px;
-            padding: 12px 20px;
-            width: 100%;
-            background: rgba(255, 70, 70, 0.08);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 70, 70, 0.12);
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #adminPopup button:hover {
-            background: rgba(255, 70, 70, 0.15);
-            border-color: rgba(255, 70, 70, 0.25);
-            transform: translateY(-1px);
-        }
-
-        /* ===== MESSAGES (بدون مربعات) ===== */
-        .messages {
-            position: absolute;
-            top: 64px;
-            bottom: 80px;          /* مسافة كافية فوق مربع الإدخال */
-            width: 100%;
-            overflow-y: auto;
-            padding: 16px 18px 20px;
-            display: flex;
-            flex-direction: column-reverse;
-            scroll-behavior: smooth;
-            z-index: 10;
-        }
-
-        .message {
-            margin-bottom: 12px;
-            animation: messageIn 0.35s ease;
-            max-width: 95%;
-            word-wrap: break-word;
-            text-align: right;
-            padding: 6px 0;        /* بدون خلفية أو مربع */
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            backdrop-filter: none;
-            align-self: flex-end;
-        }
-
-        @keyframes messageIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message .name {
-            font-weight: 700;
-            font-size: 14px;
-            margin-left: 6px;
-            background: linear-gradient(135deg, #d4af37, #f0d060);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: inline-block;
-        }
-
-        .message .text {
-            font-size: 15px;
-            display: inline;
-            color: #e8e8f0;
-            line-height: 1.6;
-            background: transparent;
-        }
-
-        .message .time {
-            font-size: 10px;
-            color: #5a5a6a;
-            margin-right: 8px;
-            direction: ltr;
-            display: inline;
-            font-weight: 400;
-            letter-spacing: 0.2px;
-        }
-
-        /* ===== TYPING ===== */
-        #typingStatus {
-            position: fixed;
-            bottom: 78px;
-            padding: 6px 18px;
-            font-size: 13px;
-            color: #787888;
-            margin: 0 16px;
-            right: 0;
-            animation: fadeIn 0.3s ease;
-            font-weight: 300;
-            letter-spacing: 0.2px;
-            background: rgba(14, 14, 18, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            padding: 6px 18px;
-            z-index: 15;
-        }
-
-        /* ===== INPUT BOX ===== */
-        .input-box {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: rgba(22, 22, 30, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(212, 175, 55, 0.06);
-            padding: 12px 0 16px;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.2);
-            z-index: 25;           /* أعلى من الرسائل */
-        }
-
-        .input-row {
-            display: flex;
-            padding: 0 14px;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .input-row input {
-            flex: 1;
-            border: 1.5px solid rgba(255, 255, 255, 0.05);
-            padding: 14px 20px;
-            border-radius: 40px;
-            background: rgba(255, 255, 255, 0.04);
-            color: #f0f0f0;
-            font-size: 15px;
-            min-height: 48px;
-            transition: all 0.3s ease;
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
         }
-
-        .input-row input:focus {
-            outline: none;
-            border-color: rgba(212, 175, 55, 0.25);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.04);
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top, #181a28 0%, rgba(5,6,10,0.96) 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
         }
-
-        .input-row input::placeholder {
-            color: #5a5a6a;
-            font-weight: 300;
+        #loginBox {
+            background: rgba(5,6,12,0.98);
+            padding: 26px;
+            border-radius: 22px;
+            text-align: center;
+            min-width: 280px;
+            border: 1px solid rgba(255,255,255,0.06);
         }
-
-        .input-row button {
+        #usernameInput {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 999px;
+            font-size: 16px;
+            background: rgba(3,4,10,0.96);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-sizing: border-box;
+        }
+        #loginBtn {
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            padding: 10px 26px;
+            border-radius: 999px;
+            font-weight: 600;
             border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
-            color: #0e0e12;
             cursor: pointer;
+        }
+        /* فيديو مثبت - مركز على الجوال */
+        #pinnedVideoPlayer {
+            position: fixed;
+            top: calc(60px + env(safe-area-inset-top));
+            left: 10px;
+            width: 360px;
+            max-width: calc(100% - 20px);
+            background: #000;
+            border-radius: 16px;
+            box-shadow: 0 26px 80px rgba(0,0,0,0.9);
+            z-index: 998;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transition: none;
+        }
+        .video-header {
+            background: #151623;
+            padding: 6px 10px;
+            cursor: move;
+            touch-action: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-pinned-video {
+            background: var(--danger);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
             font-size: 20px;
-            flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.12);
+            font-weight: bold;
+            border: none;
+            color: white;
+            z-index: 10;
+            pointer-events: auto;
         }
-
-        .input-row button:hover {
-            transform: scale(1.04) translateY(-2px);
-            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
+        .resize-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            bottom: 0;
+            right: 0;
+            cursor: nwse-resize;
+            z-index: 10;
         }
-
-        .input-row button:active {
-            transform: scale(0.92);
-            box-shadow: 0 2px 12px rgba(212, 175, 55, 0.08);
+        .video-js.vjs-netflix-theme .vjs-control-bar { background: none; }
+        .video-selector-bar {
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            background: #111;
+            overflow-x: auto;
         }
+        .video-selector-btn {
+            background: #222;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+        .video-selector-btn.active { background: #e50914; }
 
-        /* ===== CONNECTION STATUS ===== */
-        #connectionStatus {
-            position: fixed;
-            top: 64px;
-            width: 100%;
-            background: rgba(212, 175, 55, 0.12);
+        #typingIndicator {
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            color: #f0d060;
-            text-align: center;
-            padding: 10px 16px;
+            color: #ffd54a;
             font-size: 13px;
-            z-index: 15;
-            display: none;
-            font-weight: 500;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
-            letter-spacing: 0.3px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            direction: ltr;
+            text-align: right;
+        }
+        .typing-wrapper {
+            display: flex;
+            justify-content: flex-start;
+            padding-right: 15px;
+            min-height: 32px;
         }
 
-        /* ===== LOADING ===== */
-        .loading {
-            text-align: center;
-            padding: 30px 20px;
-            color: #5a5a6a;
-            font-size: 14px;
-            font-weight: 300;
-            letter-spacing: 0.3px;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            #loginContainer { padding: 30px 20px 28px; border-radius: 20px; }
-            #loginScreen h2 { font-size: 22px; }
-            #topBar { padding: 10px 14px; height: 58px; }
-            #onlineBtn, #adminBtn { padding: 6px 12px; font-size: 12px; }
-            .message { padding: 4px 0; }
-            .message .text { font-size: 14px; }
-            .input-row input { padding: 12px 16px; font-size: 14px; min-height: 44px; }
-            .input-row button { width: 44px; height: 44px; font-size: 18px; }
-            #onlinePopup, #adminPopup { padding: 20px 16px 16px; top: 70px; max-height: 60vh; }
-            .messages { bottom: 76px; padding: 12px 12px 16px; }
-        }
-
-        @media (max-width: 380px) {
-            #topBar { flex-wrap: wrap; height: auto; min-height: 54px; gap: 6px; padding: 8px 12px; }
-            #myStatus { font-size: 12px; }
-            #onlineBtn, #adminBtn { font-size: 11px; padding: 4px 10px; }
-            .messages { top: 70px; bottom: 72px; }
-            .input-box { padding: 8px 0 12px; }
+        /* تحسينات الجوال */
+        @media (max-width: 600px) {
+            #pinnedVideoPlayer {
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 94vw;
+                top: calc(70px + env(safe-area-inset-top));
+            }
+            #topButtons {
+                right: 8px;
+                top: 8px;
+            }
+            #sendBtn {
+                padding: 0 14px;
+            }
+            .close-pinned-video {
+                width: 36px;
+                height: 36px;
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
-
-    <!-- ===== LOGIN ===== -->
-    <div id="loginScreen">
-        <div id="loginContainer">
-            <h2>✦ شات خاص</h2>
-            <p class="subtitle">تواصل بأناقة</p>
-            <input id="usernameInput" placeholder="اسمك (حرفين على الأقل)" autocomplete="off">
-            <button onclick="login()" id="loginBtn">دخول إلى الشات</button>
-        </div>
+<div id="loginScreen">
+    <div id="loginBox">
+        <h2>👋 أهلاً بك في الدردشة</h2>
+        <input type="text" id="usernameInput" placeholder="اسمك (بدون / # . $ [ ])" maxlength="15">
+        <button id="loginBtn">دخول</button>
     </div>
-
-    <!-- ===== CHAT ===== -->
-    <div id="chatScreen">
-
-        <!-- TOP BAR -->
-        <div id="topBar">
-            <span id="myStatus">متصل</span>
-            <span id="onlineBtn">👥 المتصلون <span class="badge" id="onlineCount">0</span></span>
-            <span id="adminBtn">⚙️ لوحة التحكم</span>
-        </div>
-
-        <!-- CONNECTION STATUS -->
-        <div id="connectionStatus">🔄 جاري إعادة الاتصال…</div>
-
-        <!-- POPUPS -->
-        <div id="overlay" onclick="closePopup()">
-            <div id="onlinePopup" onclick="event.stopPropagation()">
-                <h4>👥 المتصلون الآن</h4>
-                <div id="onlineUsersList"></div>
-            </div>
-            <div id="adminPopup" onclick="event.stopPropagation()">
-                <h4>⚙️ لوحة التحكم</h4>
-                <div id="adminUsersList"></div>
-                <button onclick="clearChat()">🗑️ مسح الشات</button>
-            </div>
-        </div>
-
-        <!-- MESSAGES -->
-        <div class="messages" id="messages">
-            <div class="loading">جارٍ تحميل الرسائل…</div>
-        </div>
-        <div id="typingStatus"></div>
-
-        <!-- INPUT -->
-        <div class="input-box">
-            <div class="input-row">
-                <input id="messageInput" placeholder="اكتب رسالة أو رابط يوتيوب / صورة" autocomplete="off">
-                <button onclick="send()" id="sendBtn">➤</button>
-            </div>
-        </div>
-
+</div>
+<div id="chat-container" style="display: none;">
+    <div id="topButtons">
+        <div class="btn" id="setVideoBtn">📺</div>
+        <div class="btn" id="onlineListBtn">👥 <span id="count" class="count-text">0</span></div>
     </div>
-
-    <script>
-        // ===== FIREBASE =====
+    <div id="pinnedVideoPlayer"></div>
+    <div id="setVideoModal"><h4>تثبيت فيديو</h4><input type="text" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، m3u8، mp4..." /><button id="submitVideoUrlBtn">تثبيت</button></div>
+    <div id="usersBox"><h4>المتصلين</h4><div id="usersList"></div></div>
+    <div id="overlay"></div>
+    <div id="messages"></div>
+    <div class="typing-wrapper" id="typingWrapper" style="display: none;"><div id="typingIndicator"></div></div>
+    <form id="inputArea">
+        <button type="submit" id="sendBtn">إرسال</button>
+        <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
+    </form>
+</div>
+<script>
+    (function(){
+        // ========== إعدادات Firebase ==========
         const firebaseConfig = {
             apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+            authDomain: "mychat-2d881.firebaseapp.com",
             databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        // ===== GLOBALS =====
-        let username = "";
-        let role = "";
-        let messageListeners = [],
-            typingListeners = [],
-            onlineListeners = [],
-            connectionListeners = [];
-        let lastMessageKey = null,
-            isScrolledUp = false;
-
-        // ===== DOM =====
-        const usernameInput = document.getElementById("usernameInput");
-        const loginScreen = document.getElementById("loginScreen");
-        const chatScreen = document.getElementById("chatScreen");
+        
+        let username = '';
+        let userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
+        let serverTimeOffset = 0;
+        let videoPlayerInstance = null;
+        let currentVideoIndex = 0, currentVideosList = [];
+        const messageTimestamps = new Map();
+        let typingTimeout = null;
+        
+        // عناصر DOM
+        const loginScreen = document.getElementById('loginScreen');
+        const usernameInput = document.getElementById('usernameInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const chatContainer = document.getElementById('chat-container');
+        const messagesDiv = document.getElementById("messages");
         const messageInput = document.getElementById("messageInput");
-        const messages = document.getElementById("messages");
-        const typingStatus = document.getElementById("typingStatus");
-        const onlineCount = document.getElementById("onlineCount");
-        const onlineUsersList = document.getElementById("onlineUsersList");
-        const adminUsersList = document.getElementById("adminUsersList");
+        const onlineListBtn = document.getElementById("onlineListBtn");
+        const setVideoBtn = document.getElementById("setVideoBtn");
+        const usersBox = document.getElementById("usersBox");
+        const setVideoModal = document.getElementById("setVideoModal");
+        const videoUrlInput = document.getElementById("videoUrlInput");
+        const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
+        const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
         const overlay = document.getElementById("overlay");
-        const onlineBtn = document.getElementById("onlineBtn");
-        const adminBtn = document.getElementById("adminBtn");
-        const connectionStatus = document.getElementById("connectionStatus");
-
-        // ===== ROLES =====
-        const ROLE_CONFIG = {
-            "Mod": { role: "admin" },
-            "Admin": { role: "admin" },
-            "User": { role: "user" }
-        };
-
-        // ===== UTILITY =====
-        function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div');
-            d.textContent = text; return d.innerHTML; }
-
-        function formatTime(ts) { const d = new Date(ts); return d.toLocaleTimeString('ar-SA', { hour: '2-digit',
-                minute: '2-digit', hour12: true }); }
-
-        // ===== LOGIN =====
-        function login() {
-            const raw = usernameInput.value.trim();
-            if (!raw || raw.length < 2) { alert("الرجاء إدخال اسم صحيح (حرفين على الأقل)"); return; }
-            username = escapeHtml(raw);
-            role = ROLE_CONFIG[username]?.role || "user";
-
-            loginScreen.style.display = "none";
-            chatScreen.style.display = "block";
-            loadMessages();
-            setupConnection();
-            setTimeout(() => { messageInput.focus(); }, 300);
+        const typingWrapper = document.getElementById("typingWrapper");
+        const typingIndicator = document.getElementById("typingIndicator");
+        
+        // ========== دوال مساعدة ==========
+        function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+        function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+        
+        function getYoutubeVideoId(url) {
+            if(!url) return null;
+            const regex = /(?:youtube\.com\/shorts\/|youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
         }
-
-        // ===== CONNECTION =====
-        function setupConnection() {
-            const connectedRef = db.ref(".info/connected");
-            const connListener = connectedRef.on("value", (snap) => {
-                if (snap.val()) {
-                    connectionStatus.style.display = "none";
-                    const onlineRef = db.ref("onlineUsers/" + encodeURIComponent(username));
-                    onlineRef.set({ name: username, status: "online", lastActive: Date.now() });
-                    onlineRef.onDisconnect().remove();
-                    const typingRef = db.ref("typing/" + encodeURIComponent(username));
-                    typingRef.onDisconnect().remove();
-                    connectionListeners.push(connListener);
-                } else {
-                    connectionStatus.style.display = "block";
-                }
-            });
-            setupOnlineUsers();
-            setupTyping();
+        function getTweetId(url) {
+            if(!url) return null;
+            const match = url.match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/);
+            return match ? match[1] : null;
         }
-
-        // ===== MESSAGES =====
-        function loadMessages() {
-            cleanupListeners();
-            const chatRef = db.ref("messages");
-            const listener = chatRef.limitToLast(50).on("child_added", (snap) => {
-                const data = snap.val();
-                if (!data) return;
-                lastMessageKey = snap.key;
-                renderMessage(data);
-            });
-            messageListeners.push(listener);
+        function isDirectVideo(url) { 
+            return /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url) || (url.includes('video') && !url.includes('youtube') && !url.includes('twitter'));
         }
-
-        function renderMessage(data) {
+        
+        function updateTimeDisplay(key, timestamp, timeElement) {
+            if(!timestamp) return;
+            const now = Date.now() + serverTimeOffset;
+            const diffMs = now - timestamp;
+            const diffSec = Math.floor(diffMs/1000);
+            let text = "";
+            if(diffSec < 5) text = "الآن";
+            else if(diffSec < 60) text = "ثواني";
+            else if(diffSec < 120) text = "د1";
+            else if(diffSec < 3600) text = `د${Math.floor(diffSec/60)}`;
+            else if(diffSec < 86400) text = `س${Math.floor(diffSec/3600)}`;
+            else if(diffSec < 604800) text = `ي${Math.floor(diffSec/86400)}`;
+            else if(diffSec < 2592000) text = `أ${Math.floor(diffSec/604800)}`;
+            else if(diffSec < 31536000) text = `ش${Math.floor(diffSec/2592000)}`;
+            else text = `ع${Math.floor(diffSec/31536000)}`;
+            if(timeElement) timeElement.textContent = text;
+        }
+        
+        function addNotification(text) {
             const div = document.createElement("div");
-            div.className = "message";
-            const roleTag = ROLE_CONFIG[data.user]?.role === "admin" ? "✦" : data.user === "Mod" ? "◆" : "";
-            div.innerHTML =
-                `<span class="name">${escapeHtml(data.user)} ${roleTag}</span><span class="text">${escapeHtml(data.text)}</span><span class="time">${formatTime(data.time)}</span>`;
-            messages.insertBefore(div, messages.firstChild);
-            if (!isScrolledUp) { setTimeout(() => { messages.scrollTop = 0; }, 100); }
+            div.className = "sys";
+            div.textContent = text;
+            messagesDiv.appendChild(div);
+            scrollToBottom();
+            setTimeout(() => { if(div.parentNode) div.remove(); }, 5000);
         }
-
-        // ===== SEND =====
-        function extractMedia(text) {
-            const yt = text.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-            if (yt) return { type: "youtube", id: yt[1] };
-            const mp4 = text.match(/https?:\/\/\S+\.(mp4|webm|ogg)/i);
-            if (mp4) return { type: "file", id: mp4[0] };
-            const img = text.match(/https?:\/\/\S+\.(jpg|jpeg|png|gif|webp)/i);
-            if (img) return { type: "image", id: img[0] };
-            return null;
+        
+        function addMessageToUI(key, { user, text, timestamp }) {
+            const div = document.createElement("div");
+            div.className = "msg";
+            div.id = `msg-${key}`;
+            
+            const userSpan = document.createElement("span");
+            userSpan.className = "user";
+            userSpan.textContent = escapeHtml(user);
+            
+            const textSpan = document.createElement("span");
+            textSpan.style.flex = "1";
+            textSpan.style.wordBreak = "break-word";
+            textSpan.textContent = escapeHtml(text);
+            
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "time";
+            timeSpan.id = `time-${key}`;
+            
+            div.appendChild(userSpan);
+            div.appendChild(textSpan);
+            div.appendChild(timeSpan);
+            
+            messagesDiv.appendChild(div);
+            messageTimestamps.set(key, { timestamp, element: timeSpan });
+            updateTimeDisplay(key, timestamp, timeSpan);
+            scrollToBottom();
         }
-
-        function send() {
-            const text = messageInput.value.trim();
-            if (!text || !username) return;
-            const media = extractMedia(text);
-            const chatRef = db.ref("messages");
-            chatRef.push({ user: username, text: text, mediaType: media ? media.type : null, mediaId: media ? media.id :
-                    null, time: Date.now() });
-            messageInput.value = "";
-            db.ref("typing/" + encodeURIComponent(username)).remove();
-            messageInput.focus();
-        }
-
-        // ===== TYPING =====
-        function setupTyping() {
-            const typingRef = db.ref("typing");
-            messageInput.addEventListener("input", () => {
-                if (!username) return;
-                const ref = db.ref("typing/" + encodeURIComponent(username));
-                ref.set(Date.now());
-                clearTimeout(window.typingTimeout);
-                window.typingTimeout = setTimeout(() => { ref.remove(); }, 2000);
+        
+        setInterval(() => {
+            messageTimestamps.forEach(({ timestamp, element }, key) => {
+                updateTimeDisplay(key, timestamp, element);
             });
-            const listener = typingRef.on("value", (snap) => {
-                const data = snap.val() || {};
-                const now = Date.now();
-                const active = Object.keys(data).filter(k => decodeURIComponent(k) !== username && (now - data[k] <
-                    2000));
-                typingStatus.textContent = active.length === 0 ? "" : active.map(k => decodeURIComponent(k)).join(
-                    ", ") + " يكتب الآن…";
-            });
-            typingListeners.push(listener);
-        }
-
-        // ===== ONLINE USERS =====
-        function setupOnlineUsers() {
-            const onlineRef = db.ref("onlineUsers");
-            const listener = onlineRef.on("value", (snap) => {
-                const users = snap.val() || {};
-                const names = Object.keys(users);
-                onlineCount.textContent = names.length;
-                onlineUsersList.innerHTML = names.map(k => {
-                    const u = users[k];
-                    const isYou = u.name === username;
-                    return `<div class="user ${isYou?'you':''}">🟢 ${escapeHtml(u.name)} ${isYou?'(أنت)':''}</div>`;
-                }).join('');
-
-                if (role === "admin") {
-                    adminUsersList.innerHTML = names.map(k => {
-                        const u = users[k];
-                        const r = ROLE_CONFIG[u.name]?.role || "user";
-                        return `<div class="admin-user ${r}"><span>${escapeHtml(u.name)}</span></div>`;
-                    }).join('');
+        }, 60000);
+        
+        // ========== Typing Indicator ==========
+        function initTypingIndicator() {
+            typingRef = db.ref("typing");
+            let isTyping = false;
+            messageInput.addEventListener("input", (e) => {
+                const text = e.target.value;
+                if (text.length > 0 && !isTyping) {
+                    isTyping = true;
+                    typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                    if (typingTimeout) clearTimeout(typingTimeout);
+                } else if (text.length === 0 && isTyping) {
+                    stopTyping();
+                } else {
+                    if (typingTimeout) clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        if (isTyping && messageInput.value.length === 0) stopTyping();
+                        else if (isTyping) {
+                            typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                        }
+                    }, 1000);
                 }
             });
-            onlineListeners.push(listener);
+            messageInput.addEventListener("keydown", () => {
+                if (!isTyping && messageInput.value.length > 0) {
+                    isTyping = true;
+                    typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                }
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    if (isTyping && messageInput.value.length > 0) {
+                        typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                    } else if (isTyping && messageInput.value.length === 0) stopTyping();
+                }, 1200);
+            });
+            function stopTyping() {
+                if (isTyping) {
+                    isTyping = false;
+                    typingRef.child(username).remove();
+                }
+                if (typingTimeout) clearTimeout(typingTimeout);
+            }
+            document.getElementById("inputArea").addEventListener("submit", () => { stopTyping(); });
+            
+            let typingUsers = new Map();
+            typingRef.on("child_added", (snap) => {
+                const name = snap.key;
+                if (name === username) return;
+                const data = snap.val();
+                if (data && data.time) typingUsers.set(name, data.time);
+                updateTypingDisplay();
+            });
+            typingRef.on("child_changed", (snap) => {
+                const name = snap.key;
+                if (name === username) return;
+                const data = snap.val();
+                if (data && data.time) typingUsers.set(name, data.time);
+                updateTypingDisplay();
+            });
+            typingRef.on("child_removed", (snap) => {
+                const name = snap.key;
+                if (name === username) return;
+                typingUsers.delete(name);
+                updateTypingDisplay();
+            });
+            setInterval(() => {
+                const now = Date.now() + serverTimeOffset;
+                let changed = false;
+                for (let [name, ts] of typingUsers.entries()) {
+                    if (now - ts > 3000) {
+                        typingUsers.delete(name);
+                        changed = true;
+                    }
+                }
+                if (changed) updateTypingDisplay();
+            }, 2000);
+            
+            function updateTypingDisplay() {
+                const names = Array.from(typingUsers.keys());
+                if (names.length === 0) {
+                    typingWrapper.style.display = "none";
+                    return;
+                }
+                typingWrapper.style.display = "flex";
+                let msg = "";
+                if (names.length === 1) msg = `${names[0]} يكتب...`;
+                else if (names.length === 2) msg = `${names[0]} و ${names[1]} يكتبان...`;
+                else msg = `عدة أشخاص يكتبون...`;
+                typingIndicator.textContent = msg;
+            }
+            typingRef.child(username).onDisconnect().remove();
         }
-
-        // ===== SCROLL =====
-        messages.addEventListener('scroll', () => {
-            const st = messages.scrollTop,
-                sh = messages.scrollHeight,
-                ch = messages.clientHeight;
-            isScrolledUp = st < sh - ch - 100;
-        });
-
-        // ===== POPUPS =====
-        onlineBtn.onclick = () => { overlay.style.display = "block";
-            document.getElementById('onlinePopup').style.display = "block";
-            document.getElementById('adminPopup').style.display = "none"; };
-        adminBtn.onclick = () => {
-            if (role === "admin") { overlay.style.display = "block";
-                document.getElementById('adminPopup').style.display = "block";
-                document.getElementById('onlinePopup').style.display = "none"; }
-        };
-
-        function closePopup() { overlay.style.display = "none"; }
-
-        // ===== CLEAR =====
-        function clearChat() { if (role === "admin") db.ref("messages").remove(); }
-
-        // ===== ENTER =====
-        messageInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault();
-                send(); } });
-
-        // ===== CLEANUP =====
-        function cleanupListeners() {
-            messageListeners.forEach(l => { if (l) db.ref("messages").off("child_added", l); });
-            typingListeners.forEach(l => { if (l) db.ref("typing").off("value", l); });
-            onlineListeners.forEach(l => { if (l) db.ref("onlineUsers").off("value", l); });
-            connectionListeners.forEach(l => { if (l) db.ref(".info/connected").off("value", l); });
-            messageListeners = [];
-            typingListeners = [];
-            onlineListeners = [];
-            connectionListeners = [];
+        
+        // ========== فيديو تويتر ==========
+        async function fetchTwitterVideos(tweetId) {
+            const videos = [];
+            try {
+                const res = await fetch(`https://api.fxtwitter.com/status/${tweetId}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    const media = data.tweet?.media?.videos || [];
+                    for(let v of media) if(v.url) videos.push({ url: v.url, type: 'video/mp4' });
+                }
+            } catch(e) { console.warn(e); }
+            if(videos.length) return videos;
+            try {
+                const res = await fetch(`https://api.vxtwitter.com/status/${tweetId}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data.media_extended) {
+                        for(let m of data.media_extended) {
+                            if((m.type === 'video' || m.type === 'gif') && m.url) videos.push({ url: m.url, type: 'video/mp4' });
+                        }
+                    }
+                }
+            } catch(e) { console.warn(e); }
+            return videos;
         }
-    </script>
-
+        
+        function embedTwitterNative(container, tweetId) {
+            container.innerHTML = '';
+            container.style.background = '#15202b';
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.minHeight = '320px';
+            iframe.style.border = 'none';
+            iframe.setAttribute('allowfullscreen', 'true');
+            container.appendChild(iframe);
+            if(!window.twttr) {
+                const script = document.createElement('script');
+                script.src = 'https://platform.twitter.com/widgets.js';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+        }
+        
+        function createVideoPlayer(container, source, type, isYoutube=false) {
+            container.innerHTML = '';
+            const isHLS = (type === 'application/x-mpegURL' || source.includes('.m3u8') || source.includes('.m3u'));
+            const videoTest = document.createElement('video');
+            const supportsNativeHLS = !!(videoTest.canPlayType('application/vnd.apple.mpegurl') || videoTest.canPlayType('application/x-mpegURL'));
+            if(isHLS && !supportsNativeHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                const vid = document.createElement('video');
+                vid.controls = true;
+                vid.autoplay = true;
+                vid.muted = true;
+                vid.playsInline = true;
+                vid.style.width = '100%';
+                vid.style.height = '100%';
+                container.appendChild(vid);
+                const hls = new Hls();
+                hls.loadSource(source);
+                hls.attachMedia(vid);
+                videoPlayerInstance = { dispose: () => { hls.destroy(); vid.remove(); } };
+                return;
+            }
+            const videoEl = document.createElement('video-js');
+            videoEl.className = 'vjs-netflix-theme';
+            container.appendChild(videoEl);
+            const playerOptions = {
+                autoplay: true,
+                muted: true,
+                controls: true,
+                aspectRatio: '16:9',
+                playsinline: true,
+                techOrder: isYoutube ? ['youtube'] : ['html5'],
+                sources: [{ type, src: source }]
+            };
+            try {
+                const player = videojs(videoEl, playerOptions);
+                videoPlayerInstance = player;
+                player.on('error', () => {
+                    container.innerHTML = '<p style="padding:12px;color:#ff6b6b;">⚠️ فشل تشغيل الفيديو</p>';
+                });
+            } catch(e) {
+                container.innerHTML = '<p style="color:#ff6b6b;">خطأ في المشغل</p>';
+            }
+        }
+        
+        function createVideoSelector(container, videos) {
+            const bar = document.createElement('div');
+            bar.className = 'video-selector-bar';
+            videos.forEach((v, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'video-selector-btn' + (idx===0 ? ' active' : '');
+                btn.textContent = `مقطع ${idx+1}`;
+                btn.onclick = () => {
+                    if(idx !== currentVideoIndex && videoPlayerInstance) {
+                        currentVideoIndex = idx;
+                        videoPlayerInstance.src({ src: v.url, type: 'video/mp4' });
+                        videoPlayerInstance.play();
+                        bar.querySelectorAll('.video-selector-btn').forEach(b=>b.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
+                };
+                bar.appendChild(btn);
+            });
+            container.appendChild(bar);
+        }
+        
+        function makeDraggable(element, handle) {
+            let startX, startY, startLeft, startTop, isDragging = false;
+            const getPos = (e) => e.touches ? e.touches[0] : e;
+            function onStart(e) {
+                if(e.target.classList && e.target.classList.contains('close-pinned-video')) return;
+                e.preventDefault();
+                isDragging = true;
+                const pos = getPos(e);
+                startX = pos.clientX;
+                startY = pos.clientY;
+                startLeft = element.offsetLeft;
+                startTop = element.offsetTop;
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('touchend', onEnd);
+            }
+            function onMove(e) {
+                if(!isDragging) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                let newLeft = startLeft + (pos.clientX - startX);
+                let newTop = startTop + (pos.clientY - startY);
+                // منع الخروج عن الشاشة
+                if(window.innerWidth <= 600) {
+                    // على الجوال، نمنع السحب الأفقي لأن الفيديو متمركز تلقائياً
+                    return;
+                }
+                newLeft = Math.min(window.innerWidth - element.offsetWidth, Math.max(0, newLeft));
+                newTop = Math.min(window.innerHeight - element.offsetHeight, Math.max(0, newTop));
+                element.style.left = newLeft + 'px';
+                element.style.top = newTop + 'px';
+                element.style.right = 'auto';
+                element.style.bottom = 'auto';
+            }
+            function onEnd() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('mouseup', onEnd);
+                document.removeEventListener('touchend', onEnd);
+            }
+            handle.addEventListener('mousedown', onStart);
+            handle.addEventListener('touchstart', onStart, { passive: false });
+        }
+        
+        function makeResizable(element, handle) {
+            let startW, startH, startX, startY;
+            const getPos = (e) => e.touches ? e.touches[0] : e;
+            function onStart(e) {
+                e.preventDefault();
+                startW = element.offsetWidth;
+                startH = element.offsetHeight;
+                const pos = getPos(e);
+                startX = pos.clientX;
+                startY = pos.clientY;
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('touchend', onEnd);
+            }
+            function onMove(e) {
+                e.preventDefault();
+                const pos = getPos(e);
+                let newW = startW + (pos.clientX - startX);
+                let newH = startH + (pos.clientY - startY);
+                if(newW > 280) element.style.width = newW + 'px';
+                if(newH > 200) element.style.height = newH + 'px';
+            }
+            function onEnd() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('touchmove', onMove);
+            }
+            handle.addEventListener('mousedown', onStart);
+            handle.addEventListener('touchstart', onStart, { passive: false });
+        }
+        
+        function closeAllModals() {
+            usersBox.style.display = 'none';
+            setVideoModal.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+        
+        function renderUsersList(users) {
+            const list = document.getElementById("usersList");
+            list.innerHTML = '';
+            const now = Date.now() + serverTimeOffset;
+            for(let u in users) {
+                const last = users[u].lastActive || 0;
+                let statusClass = 'status-gray';
+                const diff = now - last;
+                if(diff < 30000) statusClass = 'status-green';
+                else if(diff < 60000) statusClass = 'status-yellow';
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                div.innerHTML = `<span class="status-indicator ${statusClass}"></span><span>${escapeHtml(u)}</span>`;
+                list.appendChild(div);
+            }
+        }
+        
+        // ========== بدء الدردشة ==========
+        function startChat() {
+            loginScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            
+            db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
+            userRef = db.ref("online/" + username);
+            messagesRef = db.ref("messages");
+            onlineRef = db.ref("online");
+            pinnedVideoRef = db.ref("pinned_video");
+            
+            userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+            userRef.onDisconnect().remove();
+            setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 60000);
+            
+            db.ref('.info/connected').on('value', (snap) => {
+                if(snap.val() === true) addNotification("✅ اتصلت بالخادم");
+                else addNotification("⚠️ فقد الاتصال ...");
+            });
+            
+            setInterval(() => {
+                const now = Date.now() + serverTimeOffset;
+                onlineRef.once('value', snap => {
+                    snap.forEach(child => { if(now - child.val().lastActive > 90000) child.ref.remove(); });
+                });
+            }, 60000);
+            
+            document.getElementById("inputArea").onsubmit = (e) => {
+                e.preventDefault();
+                const text = messageInput.value.trim();
+                if(!text) return;
+                messagesRef.push({ user: username, text: text, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                messageInput.value = "";
+                scrollToBottom();
+                if (typingRef) typingRef.child(username).remove();
+                if (typingTimeout) clearTimeout(typingTimeout);
+            };
+            
+            messagesRef.limitToLast(100).on("child_added", snap => {
+                const val = snap.val();
+                if(val.timestamp) addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: val.timestamp });
+                else addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: Date.now() + serverTimeOffset });
+            });
+            messagesRef.on("child_removed", snap => {
+                messageTimestamps.delete(snap.key);
+                const el = document.getElementById(`msg-${snap.key}`);
+                if(el) el.remove();
+            });
+            
+            onlineRef.on("value", snap => {
+                document.getElementById("count").innerText = snap.numChildren();
+                renderUsersList(snap.val() || {});
+            });
+            
+            onlineListBtn.onclick = () => { usersBox.style.display = 'block'; overlay.style.display = 'block'; };
+            setVideoBtn.onclick = () => { setVideoModal.style.display = 'block'; overlay.style.display = 'block'; };
+            overlay.onclick = closeAllModals;
+            
+            submitVideoUrlBtn.onclick = async () => {
+                const url = videoUrlInput.value.trim();
+                if(!url) return;
+                const youtubeId = getYoutubeVideoId(url);
+                const tweetId = getTweetId(url);
+                if(youtubeId) {
+                    await pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
+                } else if(tweetId) {
+                    await pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
+                } else if(url.includes('.m3u8') || url.includes('.m3u')) {
+                    await pinnedVideoRef.set({ type: 'm3u', url: url, setBy: username });
+                } else if(isDirectVideo(url)) {
+                    await pinnedVideoRef.set({ type: 'direct', url: url, setBy: username });
+                } else {
+                    alert("رابط غير مدعوم");
+                    return;
+                }
+                videoUrlInput.value = "";
+                closeAllModals();
+            };
+            
+            pinnedVideoRef.on("value", async (snap) => {
+                if(videoPlayerInstance) { videoPlayerInstance.dispose(); videoPlayerInstance = null; }
+                pinnedVideoPlayer.innerHTML = '';
+                currentVideosList = [];
+                const data = snap.val();
+                if(!data) { pinnedVideoPlayer.style.display = 'none'; return; }
+                pinnedVideoPlayer.style.display = 'flex';
+                const header = document.createElement('div');
+                header.className = 'video-header';
+                header.innerHTML = `<span>بث - ${escapeHtml(data.setBy)}</span>`;
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-pinned-video';
+                closeBtn.innerHTML = '✖';
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    pinnedVideoRef.remove();
+                };
+                header.appendChild(closeBtn);
+                const body = document.createElement('div');
+                body.className = 'video-body';
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                pinnedVideoPlayer.appendChild(header);
+                pinnedVideoPlayer.appendChild(body);
+                pinnedVideoPlayer.appendChild(resizeHandle);
+                makeDraggable(pinnedVideoPlayer, header);
+                makeResizable(pinnedVideoPlayer, resizeHandle);
+                
+                if(data.type === 'youtube') {
+                    createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`, 'video/youtube', true);
+                } else if(data.type === 'm3u') {
+                    createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
+                } else if(data.type === 'direct') {
+                    createVideoPlayer(body, data.url, 'video/mp4', false);
+                } else if(data.type === 'twitter') {
+                    embedTwitterNative(body, data.id);
+                    const videos = await fetchTwitterVideos(data.id);
+                    if(videos.length) {
+                        currentVideosList = videos;
+                        currentVideoIndex = 0;
+                        const vid = document.createElement('video');
+                        vid.controls = true;
+                        vid.autoplay = true;
+                        vid.muted = true;
+                        vid.playsInline = true;
+                        vid.style.width = '100%';
+                        vid.style.height = '100%';
+                        vid.src = videos[0].url;
+                        body.innerHTML = '';
+                        body.appendChild(vid);
+                        videoPlayerInstance = { dispose: () => { vid.src = ''; vid.remove(); } };
+                        if(videos.length > 1) createVideoSelector(body, videos);
+                        vid.onerror = () => embedTwitterNative(body, data.id);
+                    }
+                }
+                addNotification(`${data.setBy} قام بتشغيل فيديو`);
+            });
+            
+            initTypingIndicator();
+        }
+        
+        function attemptLogin() {
+            let raw = usernameInput.value.trim();
+            if(!raw) { alert("الرجاء إدخال اسم"); return; }
+            if(/[.#$[\]/]/.test(raw)) { alert("لا يُسمح بأحرف خاصة: . # $ [ ] /"); return; }
+            if(raw.length < 2) { alert("الاسم قصير جداً"); return; }
+            username = raw;
+            startChat();
+        }
+        loginBtn.onclick = attemptLogin;
+        usernameInput.onkeypress = (e) => { if(e.key === 'Enter') attemptLogin(); };
+    })();
+</script>
 </body>
 </html>
