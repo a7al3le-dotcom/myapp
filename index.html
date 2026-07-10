@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>شات خاص   </title>
+    <title>شات خاص </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -230,22 +230,17 @@
             display: flex; align-items: center; justify-content: center; padding: 0 7px;
         }
 
-        /* ============ مشغل فيديو ============ */
+        /* ============ مشغل فيديو متطور ============ */
         #pinnedVideoPlayer {
             position: fixed;
             top: calc(80px + env(safe-area-inset-top));
             left: 20px;
-            width: 400px; max-width: calc(100vw - 40px); min-width: 280px;
+            width: 420px; max-width: calc(100vw - 40px); min-width: 300px;
             background: #0a0a14; border-radius: var(--radius);
             box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
             z-index: 998; display: none; flex-direction: column;
             overflow: visible;
-            animation: playerIn 0.4s cubic-bezier(0.4,0,0.2,1);
             transition: none;
-        }
-        @keyframes playerIn {
-            from { opacity: 0; transform: translateX(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
         }
 
         .player-header {
@@ -258,15 +253,26 @@
             border-radius: var(--radius) var(--radius) 0 0; z-index: 5;
         }
         .player-dots { display: flex; gap: 7px; }
-        .player-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .player-dot { width: 10px; height: 10px; border-radius: 50%; transition: transform 0.2s; }
         .player-dot.red { background: var(--danger); }
         .player-dot.yellow { background: var(--warning); }
         .player-dot.green { background: var(--success); }
+        .player-dot:hover { transform: scale(1.3); }
+
+        .player-actions { display: flex; align-items: center; gap: 8px; }
+        .player-action-btn {
+            background: rgba(255,255,255,0.06); border: none; color: #ccc;
+            width: 26px; height: 26px; border-radius: 6px; cursor: pointer;
+            font-size: 12px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .player-action-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .player-action-btn.pip-btn:hover { background: rgba(84,160,255,0.2); color: var(--info); }
 
         .close-player {
             background: rgba(255,107,107,0.15); border: none; color: var(--danger);
-            width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-            font-size: 14px; display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+            font-size: 13px; display: flex; align-items: center; justify-content: center;
             transition: all 0.2s ease; flex-shrink: 0;
         }
         .close-player:hover { background: var(--danger); color: #fff; transform: rotate(90deg); }
@@ -274,13 +280,13 @@
         .player-body {
             position: relative; background: #000;
             border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
-            min-height: 170px;
+            min-height: 180px;
         }
         .resize-grip {
-            position: absolute; width: 14px; height: 14px;
+            position: absolute; width: 16px; height: 16px;
             bottom: 4px; right: 4px; cursor: nwse-resize; z-index: 20;
             opacity: 0; transition: opacity 0.2s;
-            background: rgba(255,255,255,0.25); border-radius: 3px;
+            background: rgba(255,255,255,0.2); border-radius: 3px;
         }
         #pinnedVideoPlayer:hover .resize-grip { opacity: 1; }
 
@@ -302,7 +308,7 @@
         }
         .video-tab:hover:not(.active) { background: rgba(255,255,255,0.08); color: #fff; }
 
-        /* ============ مشغل Netflix ============ */
+        /* ============ مشغل Netflix متطور ============ */
         .nplayer { position: relative; width: 100%; background: #000; display: flex; flex-direction: column; }
         .nplayer-video-wrap {
             position: relative; width: 100%; aspect-ratio: 16/9; background: #0a0a0a;
@@ -341,25 +347,25 @@
             transform: scale(1.05); box-shadow: 0 4px 20px rgba(108,92,231,0.5);
         }
 
-        /* شريط التحكم */
+        /* شريط التحكم المتطور */
         .nplayer-controls {
             position: absolute; bottom: 0; left: 0; right: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
-            padding: 35px 12px 8px; opacity: 0;
+            padding: 40px 14px 10px; opacity: 0;
             transition: opacity 0.4s ease; pointer-events: none; z-index: 4;
         }
         .nplayer-controls.show { opacity: 1; pointer-events: auto; }
 
         .nprogress {
-            position: relative; width: 100%; height: 5px;
-            background: rgba(255,255,255,0.12); border-radius: 3px;
+            position: relative; width: 100%; height: 6px;
+            background: rgba(255,255,255,0.1); border-radius: 3px;
             margin-bottom: 10px; cursor: pointer;
             transition: height 0.2s;
         }
-        .nprogress:hover { height: 7px; }
+        .nprogress:hover { height: 8px; }
         .nprogress-buffer {
             position: absolute; top: 0; left: 0; height: 100%;
-            background: rgba(255,255,255,0.2); border-radius: 3px;
+            background: rgba(255,255,255,0.18); border-radius: 3px;
         }
         .nprogress-filled {
             position: absolute; top: 0; left: 0; height: 100%;
@@ -367,10 +373,11 @@
             transition: width 0.1s linear;
         }
         .nprogress-filled::after {
-            content: ''; position: absolute; right: -5px; top: 50%;
-            transform: translateY(-50%); width: 10px; height: 10px;
+            content: ''; position: absolute; right: -6px; top: 50%;
+            transform: translateY(-50%); width: 12px; height: 12px;
             background: var(--accent-light); border-radius: 50%;
             opacity: 0; transition: opacity 0.2s;
+            box-shadow: 0 0 10px rgba(162,155,254,0.6);
         }
         .nprogress:hover .nprogress-filled::after { opacity: 1; }
 
@@ -389,31 +396,39 @@
             font-family: 'Tajawal', sans-serif;
         }
         .ncontrols-row button:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+        .ncontrols-row button.active-btn { color: var(--accent-light); }
         .ntime {
-            font-size: 12px; color: #ccc; min-width: 90px; direction: ltr;
+            font-size: 12px; color: #ccc; min-width: 95px; direction: ltr;
             font-family: 'SF Mono', monospace; letter-spacing: 0.5px;
         }
         .nvolume-group { display: flex; align-items: center; gap: 5px; }
         .nvolume-slider {
             width: 50px; height: 4px; -webkit-appearance: none; appearance: none;
             background: rgba(255,255,255,0.2); border-radius: 2px;
-            outline: none; cursor: pointer;
+            outline: none; cursor: pointer; transition: width 0.2s;
         }
+        .nvolume-group:hover .nvolume-slider { width: 70px; }
         .nvolume-slider::-webkit-slider-thumb {
             -webkit-appearance: none; width: 12px; height: 12px;
             border-radius: 50%; background: var(--accent-light); cursor: pointer;
+            box-shadow: 0 0 8px rgba(162,155,254,0.5);
         }
         .ndropdown { position: relative; }
         .ndropdown-menu {
-            position: absolute; bottom: 40px; right: 0;
+            position: absolute; bottom: 42px; right: 0;
             background: rgba(20,20,35,0.98); backdrop-filter: blur(20px);
-            border-radius: 12px; padding: 6px 0; min-width: 90px; display: none;
+            border-radius: 12px; padding: 6px 0; min-width: 100px; display: none;
             border: 1px solid rgba(255,255,255,0.08);
             box-shadow: 0 12px 40px rgba(0,0,0,0.8); z-index: 25;
+            animation: dropdownIn 0.2s ease;
+        }
+        @keyframes dropdownIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .ndropdown-menu button {
             display: block; background: none; border: none; color: #ccc;
-            padding: 8px 18px; width: 100%; text-align: right;
+            padding: 8px 20px; width: 100%; text-align: right;
             font-size: 13px; cursor: pointer; font-family: 'Tajawal', sans-serif;
             transition: all 0.2s; white-space: nowrap;
         }
@@ -424,6 +439,13 @@
         }
         .nfullscreen { margin-right: auto; font-size: 20px !important; }
 
+        .nplayer-watermark {
+            position: absolute; top: 10px; right: 10px;
+            color: rgba(255,255,255,0.3); font-size: 10px;
+            pointer-events: none; z-index: 3;
+            letter-spacing: 1px;
+        }
+
         /* ============ نوافذ منبثقة ============ */
         #usersBox, #setVideoModal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -431,11 +453,6 @@
             z-index: 1003; display: none; max-height: 80vh; width: 92%; max-width: 440px;
             overflow-y: auto; border: 1px solid var(--border);
             box-shadow: var(--shadow-lg);
-            animation: modalPop 0.35s cubic-bezier(0.4,0,0.2,1);
-        }
-        @keyframes modalPop {
-            from { opacity: 0; transform: translate(-50%,-50%) scale(0.92); }
-            to { opacity: 1; transform: translate(-50%,-50%) scale(1); }
         }
         .modal-title { text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: 700; color: var(--accent-light); }
         .modal-input {
@@ -520,19 +537,21 @@
             to { opacity: 0; transform: translateY(-20px) scale(0.95); }
         }
 
-        /* ============ شاشة الدخول ============ */
+        /* ============ شاشة الدخول - تظهر في المنتصف مباشرة ============ */
         #loginScreen {
             position: fixed; inset: 0;
             background: radial-gradient(ellipse at center, #1a1a30 0%, #0a0a16 70%);
-            display: flex; justify-content: center; align-items: center; z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10000;
         }
         #loginBox {
-            background: rgba(20,20,32,0.98); padding: 44px 36px;
-            border-radius: var(--radius-xl); text-align: center;
+            background: rgba(20,20,32,0.98);
+            padding: 44px 36px;
+            border-radius: var(--radius-xl);
+            text-align: center;
             width: 90%; max-width: 380px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-lg), 0 0 80px rgba(108,92,231,0.06);
-            animation: modalPop 0.6s cubic-bezier(0.4,0,0.2,1);
         }
         .login-icon { font-size: 56px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
         @keyframes float {
@@ -589,6 +608,7 @@
 <body>
     <div class="gradient-bar"></div>
 
+    <!-- ✅ شاشة الدخول تظهر في المنتصف مباشرة بدون animation -->
     <div id="loginScreen">
         <div id="loginBox">
             <div class="login-icon">💬</div>
@@ -611,7 +631,10 @@
             <div class="player-header">
                 <div class="player-dots"><span class="player-dot red"></span><span class="player-dot yellow"></span><span class="player-dot green"></span></div>
                 <span>مشغل الفيديو</span>
-                <button class="close-player">✕</button>
+                <div class="player-actions">
+                    <button class="player-action-btn pip-btn" title="صورة داخل صورة">⿻</button>
+                    <button class="close-player">✕</button>
+                </div>
             </div>
             <div class="player-body"></div>
             <div class="resize-grip"></div>
@@ -660,7 +683,8 @@
             const limiter=new RateLimiter();
             const esc=s=>{const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;};
             const sanitize=s=>s.replace(/<[^>]*>/g,'').replace(/javascript:/gi,'').substring(0,500);
-            const avatarBg=()=>`linear-gradient(135deg, ${['#6c5ce7','#54a0ff','#00d2a0','#ff6b6b','#feca57','#a29bfe'][Math.floor(Math.random()*6)]}, ${['#5b4cdb','#2e86de','#00b894','#ee5a5a','#f39c12','#6c5ce7'][Math.floor(Math.random()*6)]})`;
+            const avatarColors=['#6c5ce7','#54a0ff','#00d2a0','#ff6b6b','#feca57','#a29bfe','#ff9ff3','#48dbfb'];
+            const avatarBg=()=>{const c=avatarColors[Math.floor(Math.random()*avatarColors.length)];return `linear-gradient(135deg, ${c}, ${c}dd)`;};
             const init=(n)=>n.substring(0,2).toUpperCase();
             const scrollBottom=()=>{requestAnimationFrame(()=>{messagesDiv.scrollTop=messagesDiv.scrollHeight;});};
             const ytId=u=>(u||'').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1]||null;
@@ -675,7 +699,6 @@
                 const w=document.createElement('div');w.className='msg-wrapper';w.id=`msg-${key}`;
                 w.innerHTML=`<div class="msg-avatar" style="background:${avatarBg()}">${init(user)}</div><div class="msg-content"><div class="msg-header"><span class="msg-user">${esc(user)}</span><span class="msg-time">${fmtTime(timestamp)}</span></div><div class="msg-text">${esc(text)}</div></div>`;
                 messagesDiv.appendChild(w);
-                // ✅ تمرير تلقائي فوري
                 scrollBottom();
                 if(messagesDiv.children.length>MSG_LIMIT+30){const f=messagesDiv.firstElementChild;if(f&&!f.classList.contains('sys-msg'))f.remove();}
             }
@@ -697,8 +720,13 @@
                 const L=[];const on=(el,ev,h)=>{el.addEventListener(ev,h);L.push({el,ev,h});};
                 const isHLS=type==='application/x-mpegURL'||source.includes('.m3u8');
                 const wr=document.createElement('div');wr.className='nplayer';
+                // ✅ علامة مائية
+                const wm=document.createElement('div');wm.className='nplayer-watermark';wm.textContent='● LIVE';wr.appendChild(wm);
                 const vw=document.createElement('div');vw.className='nplayer-video-wrap';
-                const vid=document.createElement('video');vid.playsInline=true;vw.appendChild(vid);
+                const vid=document.createElement('video');vid.playsInline=true;
+                // ✅ دعم صورة داخل صورة
+                vid.disablePictureInPicture=false;
+                vw.appendChild(vid);
                 const ld=document.createElement('div');ld.className='nplayer-loading';ld.innerHTML='<div class="spinner"></div><span>جاري التحميل...</span>';vw.appendChild(ld);
                 const er=document.createElement('div');er.className='nplayer-error';er.innerHTML='<span class="err-icon">⚠️</span><span>فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>';vw.appendChild(er);
                 wr.appendChild(vw);
@@ -709,38 +737,48 @@
                 const inp=document.createElement('input');inp.type='range';inp.min=0;inp.max=100;inp.value=0;inp.className='nprogress-input';
                 pb.appendChild(buf);pb.appendChild(fill);pb.appendChild(inp);
                 const row=document.createElement('div');row.className='ncontrols-row';
-                const playB=document.createElement('button');playB.innerHTML='▶';
-                const rew=document.createElement('button');rew.innerHTML='⏪';
-                const fwd=document.createElement('button');fwd.innerHTML='⏩';
+                const playB=document.createElement('button');playB.innerHTML='▶';playB.title='تشغيل/إيقاف';
+                const rew=document.createElement('button');rew.innerHTML='⏪';rew.title='رجوع 10 ثواني';
+                const fwd=document.createElement('button');fwd.innerHTML='⏩';fwd.title='تقدم 10 ثواني';
                 const volG=document.createElement('div');volG.className='nvolume-group';
-                const volB=document.createElement('button');volB.innerHTML='🔊';
-                const volS=document.createElement('input');volS.type='range';volS.min=0;volS.max=1;volS.step=0.05;volS.value=1;volS.className='nvolume-slider';
+                const volB=document.createElement('button');volB.innerHTML='🔊';volB.title='كتم الصوت';
+                const volS=document.createElement('input');volS.type='range';volS.min=0;volS.max=1;volS.step=0.05;volS.value=1;volS.className='nvolume-slider';volS.title='مستوى الصوت';
                 volG.appendChild(volB);volG.appendChild(volS);
                 const timeD=document.createElement('span');timeD.className='ntime';timeD.textContent='00:00 / 00:00';
                 const spM=document.createElement('div');spM.className='ndropdown';
-                const spB=document.createElement('button');spB.textContent='1x';
+                const spB=document.createElement('button');spB.textContent='1x';spB.title='سرعة التشغيل';
                 const spD=document.createElement('div');spD.className='ndropdown-menu';
-                [0.5,0.75,1,1.25,1.5,2].forEach(s=>{const b=document.createElement('button');b.textContent=s+'x';if(s===1)b.classList.add('sel');b.onclick=e=>{e.stopPropagation();vid.playbackRate=s;spB.textContent=s+'x';spD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');spD.style.display='none';};spD.appendChild(b);});
+                [0.25,0.5,0.75,1,1.25,1.5,2].forEach(s=>{const b=document.createElement('button');b.textContent=s+'x';if(s===1)b.classList.add('sel');b.onclick=e=>{e.stopPropagation();vid.playbackRate=s;spB.textContent=s+'x';spD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');spD.style.display='none';};spD.appendChild(b);});
                 spM.appendChild(spB);spM.appendChild(spD);
                 const qM=document.createElement('div');qM.className='ndropdown';
-                const qB=document.createElement('button');qB.textContent='تلقائي';
+                const qB=document.createElement('button');qB.textContent='HD';qB.title='الجودة';
                 const qD=document.createElement('div');qD.className='ndropdown-menu';
                 qM.appendChild(qB);qM.appendChild(qD);
-                const fsB=document.createElement('button');fsB.className='nfullscreen';fsB.innerHTML='⛶';
-                row.appendChild(playB);row.appendChild(rew);row.appendChild(fwd);row.appendChild(volG);row.appendChild(timeD);row.appendChild(spM);row.appendChild(qM);row.appendChild(fsB);
+                // ✅ زر لقطة شاشة
+                const ssB=document.createElement('button');ssB.innerHTML='📷';ssB.title='لقطة شاشة';
+                const fsB=document.createElement('button');fsB.className='nfullscreen';fsB.innerHTML='⛶';fsB.title='ملء الشاشة';
+                row.appendChild(playB);row.appendChild(rew);row.appendChild(fwd);row.appendChild(volG);row.appendChild(timeD);row.appendChild(spM);row.appendChild(qM);row.appendChild(ssB);row.appendChild(fsB);
                 ct.appendChild(pb);ct.appendChild(row);wr.appendChild(ct);container.appendChild(wr);
                 let hls=null,retries=0,ctTimeout;
-                function showCt(s){if(s){ct.classList.add('show');clearTimeout(ctTimeout);ctTimeout=setTimeout(()=>{if(!vid.paused)ct.classList.remove('show');},3000);}else{ct.classList.remove('show');clearTimeout(ctTimeout);}}
-                on(vw,'mousemove',()=>showCt(true));on(vw,'touchstart',()=>showCt(true));on(vid,'play',()=>showCt(true));on(vid,'pause',()=>showCt(true));
-                function loadStream(url){ld.style.display='flex';er.style.display='none';if(hls){hls.destroy();hls=null;}if(isHLS&&Hls.isSupported()){hls=new Hls({enableWorker:true,lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(vid);hls.on(Hls.Events.MANIFEST_PARSED,()=>{ld.style.display='none';fillQuality(hls.levels);vid.play().catch(()=>{});});hls.on(Hls.Events.LEVEL_SWITCHED,(e,d)=>{const lv=hls.levels[d.level];if(lv)qB.textContent=lv.height?lv.height+'p':'HD';});hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){if(retries<2){retries++;ld.innerHTML=`<div class="spinner"></div><span>إعادة (${retries}/2)...</span>`;setTimeout(()=>loadStream(url),1000);}else{ld.style.display='none';er.style.display='flex';}}});}else{vid.src=url;vid.play().catch(()=>{});ld.style.display='none';}}
-                function fillQuality(levels){qD.innerHTML='';const aB=document.createElement('button');aB.textContent='تلقائي';aB.classList.add('sel');aB.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=-1;qB.textContent='تلقائي';qD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));aB.classList.add('sel');qD.style.display='none';};qD.appendChild(aB);if(levels)levels.forEach((lv,i)=>{const h=lv.height?lv.height+'p':'HD';const b=document.createElement('button');b.textContent=h;b.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=i;qB.textContent=h;qD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');qD.style.display='none';};qD.appendChild(b);});}
+                function showCt(s){if(s){ct.classList.add('show');clearTimeout(ctTimeout);ctTimeout=setTimeout(()=>{if(!vid.paused)ct.classList.remove('show');},3500);}else{ct.classList.remove('show');clearTimeout(ctTimeout);}}
+                on(vw,'mousemove',()=>showCt(true));on(vw,'touchstart',()=>showCt(true));on(vw,'dblclick',()=>{document.fullscreenElement?document.exitFullscreen():container.closest('#pinnedVideoPlayer').requestFullscreen().catch(()=>{});});
+                on(vid,'play',()=>{showCt(true);playB.innerHTML='⏸';wm.style.display='block';});
+                on(vid,'pause',()=>{playB.innerHTML='▶';wm.style.display='none';});
+                on(vid,'waiting',()=>{ld.style.display='flex';});
+                on(vid,'canplay',()=>{ld.style.display='none';});
+                function loadStream(url){ld.style.display='flex';er.style.display='none';if(hls){hls.destroy();hls=null;}if(isHLS&&Hls.isSupported()){hls=new Hls({enableWorker:true,lowLatencyMode:true,debug:false});hls.loadSource(url);hls.attachMedia(vid);hls.on(Hls.Events.MANIFEST_PARSED,()=>{ld.style.display='none';fillQuality(hls.levels);vid.play().catch(()=>{});});hls.on(Hls.Events.LEVEL_SWITCHED,(e,d)=>{const lv=hls.levels[d.level];if(lv)qB.textContent=lv.height?lv.height+'p':'HD';});hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){if(retries<3){retries++;ld.innerHTML=`<div class="spinner"></div><span>إعادة (${retries}/3)...</span>`;setTimeout(()=>loadStream(url),1500);}else{ld.style.display='none';er.style.display='flex';}}});}else{vid.src=url;vid.play().catch(()=>{});ld.style.display='none';}}
+                function fillQuality(levels){qD.innerHTML='';const aB=document.createElement('button');aB.textContent='تلقائي';aB.classList.add('sel');aB.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=-1;qB.textContent='تلقائي';qD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));aB.classList.add('sel');qD.style.display='none';};qD.appendChild(aB);if(levels&&levels.length)levels.forEach((lv,i)=>{const h=lv.height?lv.height+'p':(lv.bitrate?Math.round(lv.bitrate/1000)+'k':'HD');const b=document.createElement('button');b.textContent=h;b.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=i;qB.textContent=h;qD.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');qD.style.display='none';};qD.appendChild(b);});if(!levels||!levels.length){const nb=document.createElement('button');nb.textContent='لا تتوفر جودات';nb.disabled=true;qD.appendChild(nb);}}
                 function updProgress(){if(vid.duration&&!isNaN(vid.duration)){const p=(vid.currentTime/vid.duration)*100;fill.style.width=p+'%';inp.value=p;if(vid.buffered.length){const be=vid.buffered.end(vid.buffered.length-1);buf.style.width=((be/vid.duration)*100)+'%';}const f=t=>{if(isNaN(t))return'00:00';const m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};timeD.textContent=f(vid.currentTime)+' / '+f(vid.duration);}}
                 on(vid,'timeupdate',updProgress);on(vid,'progress',updProgress);on(vid,'loadedmetadata',()=>{ld.style.display='none';updProgress();});
-                playB.onclick=()=>{vid.paused?vid.play().catch(()=>{}):vid.pause();};on(vid,'play',()=>playB.innerHTML='⏸');on(vid,'pause',()=>playB.innerHTML='▶');
+                // ✅ اختصارات لوحة المفاتيح
+                on(document,'keydown',e=>{if(!currentPlayer||currentPlayer.video!==vid)return;switch(e.key){case' ':e.preventDefault();vid.paused?vid.play().catch(()=>{}):vid.pause();break;case'ArrowLeft':e.preventDefault();vid.currentTime=Math.max(0,vid.currentTime-5);break;case'ArrowRight':e.preventDefault();vid.currentTime=Math.min(vid.duration||0,vid.currentTime+5);break;case'ArrowUp':e.preventDefault();vid.volume=Math.min(1,vid.volume+0.1);break;case'ArrowDown':e.preventDefault();vid.volume=Math.max(0,vid.volume-0.1);break;case'f':e.preventDefault();document.fullscreenElement?document.exitFullscreen():container.closest('#pinnedVideoPlayer').requestFullscreen().catch(()=>{});break;case'm':e.preventDefault();vid.muted=!vid.muted;break;}});
+                playB.onclick=()=>{vid.paused?vid.play().catch(()=>{}):vid.pause();};
                 rew.onclick=()=>vid.currentTime=Math.max(0,vid.currentTime-10);fwd.onclick=()=>vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);
                 volB.onclick=()=>{vid.muted=!vid.muted;volB.innerHTML=vid.muted?'🔇':(vid.volume>0.5?'🔊':'🔉');};volS.oninput=()=>{vid.volume=+volS.value;vid.muted=false;volB.innerHTML=vid.volume>0.5?'🔊':'🔉';};on(vid,'volumechange',()=>{volS.value=vid.volume;volB.innerHTML=vid.muted?'🔇':(vid.volume>0.5?'🔊':'🔉');});
                 inp.oninput=()=>fill.style.width=inp.value+'%';inp.onchange=()=>{if(vid.duration)vid.currentTime=(+inp.value/100)*vid.duration;};pb.addEventListener('click',e=>{if(e.target===inp)return;const r=pb.getBoundingClientRect();if(vid.duration)vid.currentTime=((e.clientX-r.left)/r.width)*vid.duration;});
                 spB.onclick=e=>{e.stopPropagation();spD.style.display=spD.style.display==='block'?'none':'block';qD.style.display='none';};qB.onclick=e=>{e.stopPropagation();qD.style.display=qD.style.display==='block'?'none':'block';spD.style.display='none';};document.addEventListener('click',()=>{spD.style.display='none';qD.style.display='none';});
+                // ✅ لقطة شاشة
+                ssB.onclick=()=>{try{const canvas=document.createElement('canvas');canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;canvas.getContext('2d').drawImage(vid,0,0);const link=document.createElement('a');link.download=`screenshot-${Date.now()}.png`;link.href=canvas.toDataURL();link.click();showToast('📷 تم حفظ لقطة الشاشة','success');}catch(e){showToast('❌ فشل التقاط اللقطة','error');}};
                 fsB.onclick=()=>{document.fullscreenElement?document.exitFullscreen():container.closest('#pinnedVideoPlayer').requestFullscreen().catch(()=>{});};
                 er.querySelector('.retry-btn').onclick=()=>{retries=0;loadStream(source);};
                 loadStream(source);currentPlayer={video:vid,hls,container:wr};playerListeners=L;return currentPlayer;
@@ -749,8 +787,8 @@
             async function fetchTwVids(tid){let vids=[];try{const r=await fetch(`https://api.fxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();for(let v of(d.tweet?.media?.videos||[]))if(v.url)vids.push({url:v.url,type:'video/mp4'});}}catch(e){}if(vids.length)return vids;try{const r=await fetch(`https://api.vxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();if(d.media_extended)for(let m of d.media_extended)if((m.type==='video'||m.type==='gif')&&m.url)vids.push({url:m.url,type:'video/mp4'});}}catch(e){}return vids;}
             function embedTw(container,tid){container.innerHTML=`<iframe src="https://platform.twitter.com/embed/Tweet.html?id=${tid}&theme=dark&lang=ar" style="width:100%;height:100%;min-height:320px;border:none;" allowfullscreen></iframe>`;if(!window.twttr){const s=document.createElement('script');s.src='https://platform.twitter.com/widgets.js';s.async=true;document.head.appendChild(s);}}
 
-            function makeDraggable(el,handle){let sx,sy,sl,st,dragging=false;const gp=e=>e.touches?.[0]||e;handle.addEventListener('mousedown',e=>{if(e.target.closest('.close-player'))return;e.preventDefault();dragging=true;sx=e.clientX;sy=e.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});handle.addEventListener('touchstart',e=>{if(e.target.closest('.close-player'))return;e.preventDefault();dragging=true;const p=gp(e);sx=p.clientX;sy=p.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!dragging)return;e.preventDefault();const p=gp(e);let nl=sl+p.clientX-sx,nt=st+p.clientY-sy;nl=Math.max(0,Math.min(nl,window.innerWidth-el.offsetWidth));nt=Math.max(0,Math.min(nt,window.innerHeight-el.offsetHeight));el.style.left=nl+'px';el.style.top=nt+'px';}function up(){dragging=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
-            function makeResizable(el,handle){let sw,sh,sx,sy,resizing=false;const gp=e=>e.touches?.[0]||e;handle.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();resizing=true;sw=el.offsetWidth;sh=el.offsetHeight;sx=e.clientX;sy=e.clientY;el.style.transition='none';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});handle.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();resizing=true;sw=el.offsetWidth;sh=el.offsetHeight;const p=gp(e);sx=p.clientX;sy=p.clientY;el.style.transition='none';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!resizing)return;e.preventDefault();const p=gp(e);el.style.width=Math.max(260,sw+p.clientX-sx)+'px';el.style.height=Math.max(170,sh+p.clientY-sy)+'px';}function up(){resizing=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
+            function makeDraggable(el,handle){let sx,sy,sl,st,dragging=false;const gp=e=>e.touches?.[0]||e;handle.addEventListener('mousedown',e=>{if(e.target.closest('.close-player')||e.target.closest('.player-action-btn'))return;e.preventDefault();dragging=true;sx=e.clientX;sy=e.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});handle.addEventListener('touchstart',e=>{if(e.target.closest('.close-player')||e.target.closest('.player-action-btn'))return;e.preventDefault();dragging=true;const p=gp(e);sx=p.clientX;sy=p.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!dragging)return;e.preventDefault();const p=gp(e);let nl=sl+p.clientX-sx,nt=st+p.clientY-sy;nl=Math.max(0,Math.min(nl,window.innerWidth-el.offsetWidth));nt=Math.max(0,Math.min(nt,window.innerHeight-el.offsetHeight));el.style.left=nl+'px';el.style.top=nt+'px';}function up(){dragging=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
+            function makeResizable(el,handle){let sw,sh,sx,sy,resizing=false;const gp=e=>e.touches?.[0]||e;handle.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();resizing=true;sw=el.offsetWidth;sh=el.offsetHeight;sx=e.clientX;sy=e.clientY;el.style.transition='none';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});handle.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();resizing=true;sw=el.offsetWidth;sh=el.offsetHeight;const p=gp(e);sx=p.clientX;sy=p.clientY;el.style.transition='none';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!resizing)return;e.preventDefault();const p=gp(e);el.style.width=Math.max(300,sw+p.clientX-sx)+'px';el.style.height=Math.max(180,sh+p.clientY-sy)+'px';}function up(){resizing=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
 
             function closeModals(){usersBox.style.display='none';setVideoModal.style.display='none';overlay.style.display='none';}
             function renderUsers(users){const list=$('usersList');list.innerHTML='';const now=Date.now()+serverTimeOffset;if(!users||!Object.keys(users).length){list.innerHTML='<div style="text-align:center;color:#888;padding:20px;">لا يوجد متصلين</div>';return;}for(let u in users){const d=now-(users[u].lastActive||0);let cls='offline';if(d<30000)cls='online';else if(d<60000)cls='idle';const row=document.createElement('div');row.className='user-row';row.innerHTML=`<span class="status-dot ${cls}"></span><span>${esc(u)}</span>${u===username?'<span style="color:var(--accent-light);font-size:11px;">(أنت)</span>':''}`;list.appendChild(row);}}
@@ -764,7 +802,6 @@
                 db.ref('.info/connected').on('value',s=>showToast(s.val()?'✅ متصل بالخادم':'⚠️ فقدان الاتصال',s.val()?'success':'error'));
                 setInterval(()=>{const now=Date.now()+serverTimeOffset;onlineRef.once('value',s=>s.forEach(c=>{if(now-(c.val().lastActive||0)>120000)c.ref.remove();}));},60000);
                 $('inputArea').onsubmit=e=>{e.preventDefault();const txt=sanitize(messageInput.value.trim());if(!txt||!limiter.canSend())return;messagesRef.push({user:username,text:txt,timestamp:firebase.database.ServerValue.TIMESTAMP}).catch(()=>showToast('❌ فشل الإرسال','error'));messageInput.value='';messageInput.focus();if(typingRef)typingRef.child(username).remove();clearTimeout(typingTimeout);};
-                // ✅ التمرير التلقائي عند استقبال رسالة جديدة
                 messagesRef.limitToLast(MSG_LIMIT).on('child_added',s=>{const v=s.val();if(v?.user&&v?.text){addMsg(s.key,{user:v.user,text:v.text,timestamp:v.timestamp||Date.now()+serverTimeOffset});}});
                 messagesRef.on('child_removed',s=>{const el=document.getElementById(`msg-${s.key}`);if(el)el.remove();});
                 onlineRef.on('value',s=>{$('count').innerText=s.numChildren();renderUsers(s.val()||{});});
@@ -775,13 +812,15 @@
                 pinnedVideoRef.on('value',async s=>{
                     if(currentPlayer){playerListeners.forEach(({el,ev,h})=>el.removeEventListener(ev,h));playerListeners=[];if(currentPlayer.hls){currentPlayer.hls.destroy();currentPlayer.hls=null;}if(currentPlayer.video){currentPlayer.video.pause();currentPlayer.video.src='';}currentPlayer=null;}
                     const data=s.val();if(!data){pinnedVideoPlayer.style.display='none';pinnedVideoPlayer.querySelector('.player-body').innerHTML='';return;}
-                    pinnedVideoPlayer.innerHTML=`<div class="player-header"><div class="player-dots"><span class="player-dot red"></span><span class="player-dot yellow"></span><span class="player-dot green"></span></div><span>مشغل - ${esc(data.setBy||'')}</span><button class="close-player">✕</button></div><div class="player-body"></div><div class="resize-grip"></div>`;
+                    pinnedVideoPlayer.innerHTML=`<div class="player-header"><div class="player-dots"><span class="player-dot red"></span><span class="player-dot yellow"></span><span class="player-dot green"></span></div><span>مشغل - ${esc(data.setBy||'')}</span><div class="player-actions"><button class="player-action-btn pip-btn" title="صورة داخل صورة">⿻</button><button class="close-player">✕</button></div></div><div class="player-body"></div><div class="resize-grip"></div>`;
                     pinnedVideoPlayer.style.display='flex';
                     pinnedVideoPlayer.querySelector('.close-player').onclick=e=>{e.stopPropagation();pinnedVideoRef.remove();pinnedVideoPlayer.style.display='none';};
+                    // ✅ زر PiP
+                    pinnedVideoPlayer.querySelector('.pip-btn').onclick=e=>{e.stopPropagation();if(currentPlayer?.video&&document.pictureInPictureEnabled){if(document.pictureInPictureElement){document.exitPictureInPicture();}else{currentPlayer.video.requestPictureInPicture().catch(()=>{});}}};
                     makeDraggable(pinnedVideoPlayer,pinnedVideoPlayer.querySelector('.player-header'));
                     makeResizable(pinnedVideoPlayer,pinnedVideoPlayer.querySelector('.resize-grip'));
                     const body=pinnedVideoPlayer.querySelector('.player-body');
-                    try{if(data.type==='youtube')body.innerHTML=`<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media" allowfullscreen></iframe>`;else if(data.type==='m3u'||data.type==='direct')createPlayer(body,data.url,data.type==='m3u'?'application/x-mpegURL':'video/mp4');else if(data.type==='twitter'){const vids=await fetchTwVids(data.id);if(vids.length){createPlayer(body,vids[0].url,'video/mp4');if(vids.length>1){const bar=document.createElement('div');bar.className='video-tabs';vids.forEach((v,i)=>{const btn=document.createElement('button');btn.className='video-tab'+(i===0?' active':'');btn.textContent=`مقطع ${i+1}`;btn.onclick=()=>{body.innerHTML='';createPlayer(body,v.url,'video/mp4');bar.querySelectorAll('.video-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');};bar.appendChild(btn);});body.appendChild(bar);}}else embedTw(body,data.id);}showToast(`🎬 ${esc(data.setBy||'')} شغّل فيديو`,'info');}catch(e){showToast('❌ فشل التشغيل','error');}
+                    try{if(data.type==='youtube')body.innerHTML=`<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>`;else if(data.type==='m3u'||data.type==='direct')createPlayer(body,data.url,data.type==='m3u'?'application/x-mpegURL':'video/mp4');else if(data.type==='twitter'){const vids=await fetchTwVids(data.id);if(vids.length){createPlayer(body,vids[0].url,'video/mp4');if(vids.length>1){const bar=document.createElement('div');bar.className='video-tabs';vids.forEach((v,i)=>{const btn=document.createElement('button');btn.className='video-tab'+(i===0?' active':'');btn.textContent=`مقطع ${i+1}`;btn.onclick=()=>{body.innerHTML='';createPlayer(body,v.url,'video/mp4');bar.querySelectorAll('.video-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');};bar.appendChild(btn);});body.appendChild(bar);}}else embedTw(body,data.id);}showToast(`🎬 ${esc(data.setBy||'')} شغّل فيديو`,'info');}catch(e){showToast('❌ فشل التشغيل','error');}
                 });
                 initTyping();messageInput.focus();
             }
