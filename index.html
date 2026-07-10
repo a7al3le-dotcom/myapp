@@ -98,6 +98,7 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 15px; flex-shrink: 0;
             background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            color: #fff;
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
             position: relative;
         }
@@ -110,7 +111,7 @@
 
         .msg-body { flex: 1; min-width: 0; }
         .msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
-        .msg-name { font-weight: 700; font-size: 13px; color: var(--text-primary); }
+        .msg-name { font-weight: 700; font-size: 13px; color: var(--text-secondary); }
         .msg-time {
             font-size: 10px; color: var(--text-muted);
             padding: 1px 8px; border-radius: 10px;
@@ -215,7 +216,7 @@
             background: #08080f; border-radius: var(--radius-lg);
             box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(124, 58, 237, 0.12);
             z-index: 998; display: none; flex-direction: column;
-            overflow: visible; transition: none;
+            overflow: visible;
         }
 
         .player-topbar {
@@ -314,7 +315,6 @@
         }
         .vp-error-panel button:hover { transform: scale(1.04); box-shadow: 0 4px 18px rgba(124, 58, 237, 0.5); }
 
-        /* لوحة التحكم */
         .vp-dashboard {
             position: absolute; bottom: 0; left: 0; right: 0;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.2) 70%, transparent 100%);
@@ -540,10 +540,13 @@
         /* ============ تجاوب ============ */
         @media (max-width: 600px) {
             #pinnedVideoPlayer {
-                left: 50% !important; top: calc(75px + env(safe-area-inset-top)) !important;
-                transform: translateX(-50%) !important;
-                width: 92vw !important; max-width: none !important;
-                right: auto !important; bottom: auto !important;
+                position: fixed !important;
+                left: 4vw !important;
+                top: 80px !important;
+                width: 92vw !important;
+                right: auto !important;
+                bottom: auto !important;
+                transform: none !important;
             }
             #topButtons { right: 4px; top: 6px; gap: 5px; }
             .pill-btn { height: 36px; padding: 0 10px; font-size: 11px; }
@@ -619,156 +622,954 @@
 
     <script>
         (function(){
-            const firebaseConfig = {apiKey:"AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",authDomain:"mychat-2d881.firebaseapp.com",databaseURL:"https://mychat-2d881-default-rtdb.firebaseio.com"};
-            try{firebase.initializeApp(firebaseConfig);}catch(e){}
-            const db=firebase.database();
-            let username='',userRef,messagesRef,onlineRef,pinnedVideoRef,typingRef,serverTimeOffset=0,activePlayer=null,activeListeners=[],typingTimer=null;
-            const MSG_CAP=120;
-            const $=id=>document.getElementById(id);
-            const msgPanel=$('messages'),msgField=$('messageInput'),toastStack=$('toastStack'),videoDock=$('pinnedVideoPlayer'),shade=$('overlay'),userModal=$('usersBox'),videoModal=$('setVideoModal'),videoField=$('videoUrlInput'),typeBox=$('typingWrapper'),typeText=$('typingText');
+            // ============ Firebase Configuration ============
+            const firebaseConfig = {
+                apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+                authDomain: "mychat-2d881.firebaseapp.com",
+                databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+            };
+            try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+            const db = firebase.database();
 
-            function toast(msg,kind='msg'){const e=document.createElement('div');e.className=`toast ${kind}`;e.textContent=msg;toastStack.appendChild(e);setTimeout(()=>e.remove(),3600);}
-            class Guard{constructor(max=5,win=7000){this.hits=[];this.max=max;this.win=win;}check(){const n=Date.now();this.hits=this.hits.filter(t=>n-t<this.win);if(this.hits.length>=this.max){toast('⏳ تمهل قليلاً','warn');return false;}this.hits.push(n);return true;}}
-            const guard=new Guard();
-            const esc=s=>{const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;};
-            const clean=s=>s.replace(/<[^>]*>/g,'').replace(/javascript:/gi,'').substring(0,500);
-            const avColors=['#7c3aed','#3b82f6','#10b981','#ef4444','#f59e0b','#a78bfa','#ec4899','#06b6d4'];
-            const avGrad=()=>{const c=avColors[Math.floor(Math.random()*avColors.length)];return`linear-gradient(135deg,${c},${c}cc)`;};
-            const abbr=n=>n.substring(0,2).toUpperCase();
-            const toBottom=()=>requestAnimationFrame(()=>{msgPanel.scrollTop=msgPanel.scrollHeight;});
-            const ytCode=u=>(u||'').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1]||null;
-            const twCode=u=>(u||'').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1]||null;
-            const extractUrl=t=>{const m=t.match(/(https?:\/\/[^\s]+)/g);return m?m[0].replace(/[،،؛]+$/,''):null;};
-            const classify=u=>{if(ytCode(u))return{kind:'youtube',id:ytCode(u)};if(twCode(u))return{kind:'twitter',id:twCode(u)};if(/\.(m3u8|m3u)(\?.*)?$/i.test(u))return{kind:'hls',url:u};if(/\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u))return{kind:'direct',url:u};return{kind:'unknown'};};
-            const timeAgo=ts=>{if(!ts)return'';const s=Math.floor((Date.now()+serverTimeOffset-ts)/1000);if(s<5)return'الآن';if(s<60)return'ثواني';if(s<3600)return`د${Math.floor(s/60)}`;if(s<86400)return`س${Math.floor(s/3600)}`;return`ي${Math.floor(s/86400)}`;};
+            // ============ Global State ============
+            let username = '', userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
+            let serverTimeOffset = 0;
+            let activePlayer = null;
+            let typingTimer = null;
+            const MSG_CAP = 120;
 
-            function note(text){const d=document.createElement('div');d.className='sys-badge';d.textContent=text;msgPanel.appendChild(d);toBottom();setTimeout(()=>d.remove(),5500);}
+            // ============ DOM Elements ============
+            const $ = id => document.getElementById(id);
+            const msgPanel = $('messages');
+            const msgField = $('messageInput');
+            const toastStack = $('toastStack');
+            const videoDock = $('pinnedVideoPlayer');
+            const shade = $('overlay');
+            const userModal = $('usersBox');
+            const videoModal = $('setVideoModal');
+            const videoField = $('videoUrlInput');
+            const typeBox = $('typingWrapper');
+            const typeText = $('typingText');
 
-            function renderMsg(key,{user,text,timestamp}){
-                const w=document.createElement('div');w.className='msg-row';w.id=`m-${key}`;
-                w.innerHTML=`<div class="msg-avatar" style="background:${avGrad()}">${abbr(user)}</div><div class="msg-body"><div class="msg-meta"><span class="msg-name">${esc(user)}</span><span class="msg-time">${timeAgo(timestamp)}</span></div><div class="msg-text">${esc(text)}</div></div>`;
-                msgPanel.appendChild(w);toBottom();
-                if(msgPanel.children.length>MSG_CAP+40){const f=msgPanel.firstElementChild;if(f&&!f.classList.contains('sys-badge'))f.remove();}
+            // ============ Utility Functions ============
+            function toast(msg, kind = 'msg') {
+                const el = document.createElement('div');
+                el.className = `toast ${kind}`;
+                el.textContent = msg;
+                toastStack.appendChild(el);
+                setTimeout(() => el.remove(), 3600);
             }
 
-            function initTyping(){
-                typingRef=db.ref("typing");let active=false;const pool=new Map();
-                msgField.addEventListener('input',()=>{if(msgField.value&&!active){active=true;typingRef.child(username).set({t:firebase.database.ServerValue.TIMESTAMP});}else if(!msgField.value&&active)end();});
-                function end(){if(active){active=false;typingRef.child(username).remove();}clearTimeout(typingTimer);}
-                $('inputArea').addEventListener('submit',end);
-                typingRef.on('child_added',s=>{if(s.key!==username&&s.val()?.t)pool.set(s.key,s.val().t);refresh();});
-                typingRef.on('child_removed',s=>{pool.delete(s.key);refresh();});
-                setInterval(()=>{const n=Date.now()+serverTimeOffset;let c=false;pool.forEach((t,k)=>{if(n-t>4000){pool.delete(k);c=true;}});if(c)refresh();},2000);
-                function refresh(){const names=[...pool.keys()];if(!names.length){typeBox.style.display='none';return;}typeBox.style.display='flex';typeText.textContent=names.length===1?`${names[0]} يكتب`:`${names.length} يكتبون`;}
+            class RateLimiter {
+                constructor(max = 5, window = 7000) {
+                    this.hits = [];
+                    this.max = max;
+                    this.window = window;
+                }
+                check() {
+                    const now = Date.now();
+                    this.hits = this.hits.filter(t => now - t < this.window);
+                    if (this.hits.length >= this.max) {
+                        toast('⏳ تمهل قليلاً', 'warn');
+                        return false;
+                    }
+                    this.hits.push(now);
+                    return true;
+                }
+            }
+            const limiter = new RateLimiter();
+
+            const esc = s => {
+                const d = document.createElement('div');
+                d.textContent = s || '';
+                return d.innerHTML;
+            };
+
+            const clean = s => s.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').substring(0, 500);
+
+            const abbr = n => n.substring(0, 2).toUpperCase();
+
+            const toBottom = () => {
+                requestAnimationFrame(() => {
+                    msgPanel.scrollTop = msgPanel.scrollHeight;
+                });
+            };
+
+            const ytCode = u => (u || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1] || null;
+            const twCode = u => (u || '').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1] || null;
+            const extractUrl = t => {
+                const m = t.match(/(https?:\/\/[^\s]+)/g);
+                return m ? m[0].replace(/[،،؛]+$/, '') : null;
+            };
+
+            const classify = u => {
+                if (ytCode(u)) return { kind: 'youtube', id: ytCode(u) };
+                if (twCode(u)) return { kind: 'twitter', id: twCode(u) };
+                if (/\.(m3u8|m3u)(\?.*)?$/i.test(u)) return { kind: 'hls', url: u };
+                if (/\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u)) return { kind: 'direct', url: u };
+                return { kind: 'unknown' };
+            };
+
+            const timeAgo = ts => {
+                if (!ts) return '';
+                const s = Math.floor((Date.now() + serverTimeOffset - ts) / 1000);
+                if (s < 5) return 'الآن';
+                if (s < 60) return 'ثواني';
+                if (s < 3600) return `د${Math.floor(s / 60)}`;
+                if (s < 86400) return `س${Math.floor(s / 3600)}`;
+                return `ي${Math.floor(s / 86400)}`;
+            };
+
+            // ============ Message Rendering ============
+            function note(text) {
+                const d = document.createElement('div');
+                d.className = 'sys-badge';
+                d.textContent = text;
+                msgPanel.appendChild(d);
+                toBottom();
+                setTimeout(() => d.remove(), 5500);
+            }
+
+            function renderMsg(key, { user, text, timestamp }) {
+                const w = document.createElement('div');
+                w.className = 'msg-row';
+                w.id = `m-${key}`;
+                w.innerHTML = `
+                    <div class="msg-avatar">${abbr(user)}</div>
+                    <div class="msg-body">
+                        <div class="msg-meta">
+                            <span class="msg-name">${esc(user)}</span>
+                            <span class="msg-time">${timeAgo(timestamp)}</span>
+                        </div>
+                        <div class="msg-text">${esc(text)}</div>
+                    </div>
+                `;
+                msgPanel.appendChild(w);
+                toBottom();
+
+                // Cleanup old messages (UI only)
+                while (msgPanel.children.length > MSG_CAP + 40) {
+                    const first = msgPanel.firstElementChild;
+                    if (first && !first.classList.contains('sys-badge')) {
+                        first.remove();
+                    } else if (first) {
+                        // Skip system badges, try next
+                        let next = first.nextElementSibling;
+                        while (next && next.classList.contains('sys-badge')) {
+                            next = next.nextElementSibling;
+                        }
+                        if (next) next.remove();
+                        else break;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            // ============ Typing Indicator ============
+            function initTyping() {
+                typingRef = db.ref("typing");
+                let active = false;
+                const pool = new Map();
+
+                msgField.addEventListener('input', () => {
+                    if (msgField.value && !active) {
+                        active = true;
+                        typingRef.child(username).set({ t: firebase.database.ServerValue.TIMESTAMP });
+                    } else if (!msgField.value && active) {
+                        endTyping();
+                    }
+                });
+
+                function endTyping() {
+                    if (active) {
+                        active = false;
+                        typingRef.child(username).remove();
+                    }
+                    clearTimeout(typingTimer);
+                }
+
+                $('inputArea').addEventListener('submit', endTyping);
+
+                typingRef.on('child_added', s => {
+                    if (s.key !== username && s.val()?.t) {
+                        pool.set(s.key, s.val().t);
+                        refreshTyping();
+                    }
+                });
+
+                typingRef.on('child_removed', s => {
+                    pool.delete(s.key);
+                    refreshTyping();
+                });
+
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    let changed = false;
+                    pool.forEach((t, k) => {
+                        if (now - t > 4000) {
+                            pool.delete(k);
+                            changed = true;
+                        }
+                    });
+                    if (changed) refreshTyping();
+                }, 2000);
+
+                function refreshTyping() {
+                    const names = [...pool.keys()];
+                    if (!names.length) {
+                        typeBox.style.display = 'none';
+                        return;
+                    }
+                    typeBox.style.display = 'flex';
+                    typeText.textContent = names.length === 1 ? `${names[0]} يكتب` : `${names.length} يكتبون`;
+                }
+
                 typingRef.child(username).onDisconnect().remove();
             }
 
-            function buildPlayer(stage,src,mime){
-                if(activePlayer){activeListeners.forEach(({el,ev,h})=>el.removeEventListener(ev,h));activeListeners=[];if(activePlayer.hls){activePlayer.hls.destroy();activePlayer.hls=null;}if(activePlayer.video){activePlayer.video.pause();activePlayer.video.src='';}activePlayer=null;}
-                const reg=[];const on=(el,ev,h)=>{el.addEventListener(ev,h);reg.push({el,ev,h});};
-                const hlsMode=mime==='application/x-mpegURL'||src.includes('.m3u8');
-                const core=document.createElement('div');core.className='vp-core';
-                const vp=document.createElement('div');vp.className='vp-viewport';
-                const vid=document.createElement('video');vid.playsInline=true;vid.disablePictureInPicture=false;vp.appendChild(vid);
-                const spin=document.createElement('div');spin.className='vp-spinner-wrap';spin.innerHTML='<div class="vp-spinner"></div><span>تحميل...</span>';vp.appendChild(spin);
-                const err=document.createElement('div');err.className='vp-error-panel';err.innerHTML='<span class="err-sym">⚠</span><span>تعذر التشغيل</span><button class="retry-trigger">إعادة</button>';vp.appendChild(err);
-                core.appendChild(vp);
-                const dash=document.createElement('div');dash.className='vp-dashboard';
-                const track=document.createElement('div');track.className='vp-track';
-                const buf=document.createElement('div');buf.className='vp-track-buf';
-                const fill=document.createElement('div');fill.className='vp-track-fill';
-                const seek=document.createElement('input');seek.type='range';seek.min=0;seek.max=100;seek.value=0;seek.className='vp-track-seek';
-                track.appendChild(buf);track.appendChild(fill);track.appendChild(seek);
-                const row=document.createElement('div');row.className='vp-ctrl-row';
-                const playBtn=document.createElement('button');playBtn.innerHTML='▶';playBtn.title='تشغيل/إيقاف (Space)';
-                const rew=document.createElement('button');rew.innerHTML='⏪';rew.title='-10s (←)';
-                const fwd=document.createElement('button');fwd.innerHTML='⏩';fwd.title='+10s (→)';
-                const audG=document.createElement('div');audG.className='vp-audio-group';
-                const audBtn=document.createElement('button');audBtn.innerHTML='🔊';audBtn.title='كتم (M)';
-                const audS=document.createElement('input');audS.type='range';audS.min=0;audS.max=1;audS.step=0.05;audS.value=1;audS.className='vp-audio-slider';
-                audG.appendChild(audBtn);audG.appendChild(audS);
-                const tCode=document.createElement('span');tCode.className='vp-timecode';tCode.textContent='00:00 / 00:00';
-                const spM=document.createElement('div');spM.className='vp-dropdown';
-                const spBtn=document.createElement('button');spBtn.textContent='1x';spBtn.title='السرعة';
-                const spList=document.createElement('div');spList.className='vp-dropdown-menu';
-                [0.25,0.5,0.75,1,1.25,1.5,2].forEach(s=>{const b=document.createElement('button');b.textContent=s+'x';if(s===1)b.classList.add('sel');b.onclick=e=>{e.stopPropagation();vid.playbackRate=s;spBtn.textContent=s+'x';spList.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');spList.style.display='none';};spList.appendChild(b);});
-                spM.appendChild(spBtn);spM.appendChild(spList);
-                const qM=document.createElement('div');qM.className='vp-dropdown';
-                const qBtn=document.createElement('button');qBtn.textContent='HD';qBtn.title='الجودة';
-                const qList=document.createElement('div');qList.className='vp-dropdown-menu';
-                qM.appendChild(qBtn);qM.appendChild(qList);
-                const fsBtn=document.createElement('button');fsBtn.className='vp-fs-btn';fsBtn.innerHTML='⛶';fsBtn.title='ملء الشاشة (F)';
-                row.appendChild(playBtn);row.appendChild(rew);row.appendChild(fwd);row.appendChild(audG);row.appendChild(tCode);row.appendChild(spM);row.appendChild(qM);row.appendChild(fsBtn);
-                dash.appendChild(track);dash.appendChild(row);core.appendChild(dash);stage.appendChild(core);
-                let hls=null,attempts=0,dashTimer;
-                function toggleDash(s){if(s){dash.classList.add('active');clearTimeout(dashTimer);dashTimer=setTimeout(()=>{if(!vid.paused)dash.classList.remove('active');},3500);}else{dash.classList.remove('active');clearTimeout(dashTimer);}}
-                on(vp,'mousemove',()=>toggleDash(true));on(vp,'touchstart',()=>toggleDash(true));on(vp,'dblclick',()=>{document.fullscreenElement?document.exitFullscreen():videoDock.requestFullscreen().catch(()=>{});});
-                on(vid,'play',()=>{toggleDash(true);playBtn.innerHTML='⏸';});
-                on(vid,'pause',()=>{playBtn.innerHTML='▶';});
-                on(vid,'waiting',()=>{spin.style.display='flex';});
-                on(vid,'canplay',()=>{spin.style.display='none';});
-                function load(url){spin.style.display='flex';err.style.display='none';if(hls){hls.destroy();hls=null;}if(hlsMode&&Hls.isSupported()){hls=new Hls({enableWorker:true,lowLatencyMode:true,debug:false});hls.loadSource(url);hls.attachMedia(vid);hls.on(Hls.Events.MANIFEST_PARSED,()=>{spin.style.display='none';fillQualities(hls.levels);vid.play().catch(()=>{});});hls.on(Hls.Events.LEVEL_SWITCHED,(e,d)=>{const lv=hls.levels[d.level];if(lv)qBtn.textContent=lv.height?lv.height+'p':'HD';});hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){if(attempts<3){attempts++;spin.innerHTML=`<div class="vp-spinner"></div><span>محاولة ${attempts}/3</span>`;setTimeout(()=>load(url),1500);}else{spin.style.display='none';err.style.display='flex';}}});}else{vid.src=url;vid.play().catch(()=>{});spin.style.display='none';}}
-                function fillQualities(levels){qList.innerHTML='';const aB=document.createElement('button');aB.textContent='تلقائي';aB.classList.add('sel');aB.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=-1;qBtn.textContent='تلقائي';qList.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));aB.classList.add('sel');qList.style.display='none';};qList.appendChild(aB);if(levels&&levels.length)levels.forEach((lv,i)=>{const h=lv.height?lv.height+'p':(lv.bitrate?Math.round(lv.bitrate/1000)+'k':'HD');const b=document.createElement('button');b.textContent=h;b.onclick=e=>{e.stopPropagation();if(hls)hls.currentLevel=i;qBtn.textContent=h;qList.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');qList.style.display='none';};qList.appendChild(b);});}
-                function tick(){if(vid.duration&&!isNaN(vid.duration)){const p=(vid.currentTime/vid.duration)*100;fill.style.width=p+'%';seek.value=p;if(vid.buffered.length){const be=vid.buffered.end(vid.buffered.length-1);buf.style.width=((be/vid.duration)*100)+'%';}const f=t=>{if(isNaN(t))return'00:00';const m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};tCode.textContent=f(vid.currentTime)+' / '+f(vid.duration);}}
-                on(vid,'timeupdate',tick);on(vid,'progress',tick);on(vid,'loadedmetadata',()=>{spin.style.display='none';tick();});
-                on(document,'keydown',e=>{if(!activePlayer||activePlayer.video!==vid)return;switch(e.key){case' ':e.preventDefault();vid.paused?vid.play().catch(()=>{}):vid.pause();break;case'ArrowLeft':e.preventDefault();vid.currentTime=Math.max(0,vid.currentTime-5);break;case'ArrowRight':e.preventDefault();vid.currentTime=Math.min(vid.duration||0,vid.currentTime+5);break;case'ArrowUp':e.preventDefault();vid.volume=Math.min(1,vid.volume+0.1);break;case'ArrowDown':e.preventDefault();vid.volume=Math.max(0,vid.volume-0.1);break;case'f':e.preventDefault();document.fullscreenElement?document.exitFullscreen():videoDock.requestFullscreen().catch(()=>{});break;case'm':e.preventDefault();vid.muted=!vid.muted;break;}});
-                playBtn.onclick=()=>{vid.paused?vid.play().catch(()=>{}):vid.pause();};
-                rew.onclick=()=>vid.currentTime=Math.max(0,vid.currentTime-10);fwd.onclick=()=>vid.currentTime=Math.min(vid.duration||0,vid.currentTime+10);
-                audBtn.onclick=()=>{vid.muted=!vid.muted;audBtn.innerHTML=vid.muted?'🔇':(vid.volume>0.5?'🔊':'🔉');};audS.oninput=()=>{vid.volume=+audS.value;vid.muted=false;audBtn.innerHTML=vid.volume>0.5?'🔊':'🔉';};on(vid,'volumechange',()=>{audS.value=vid.volume;audBtn.innerHTML=vid.muted?'🔇':(vid.volume>0.5?'🔊':'🔉');});
-                seek.oninput=()=>fill.style.width=seek.value+'%';seek.onchange=()=>{if(vid.duration)vid.currentTime=(+seek.value/100)*vid.duration;};track.addEventListener('click',e=>{if(e.target===seek)return;const r=track.getBoundingClientRect();if(vid.duration)vid.currentTime=((e.clientX-r.left)/r.width)*vid.duration;});
-                spBtn.onclick=e=>{e.stopPropagation();spList.style.display=spList.style.display==='block'?'none':'block';qList.style.display='none';};qBtn.onclick=e=>{e.stopPropagation();qList.style.display=qList.style.display==='block'?'none':'block';spList.style.display='none';};document.addEventListener('click',()=>{spList.style.display='none';qList.style.display='none';});
-                fsBtn.onclick=()=>{document.fullscreenElement?document.exitFullscreen():videoDock.requestFullscreen().catch(()=>{});};
-                err.querySelector('.retry-trigger').onclick=()=>{attempts=0;load(src);};
-                load(src);activePlayer={video:vid,hls,container:core};activeListeners=reg;return activePlayer;
+            // ============ Video Player Class ============
+            class VideoPlayer {
+                constructor(stage, src, mime) {
+                    this.stage = stage;
+                    this.src = src;
+                    this.mime = mime;
+                    this.listeners = [];
+                    this.hls = null;
+                    this.video = null;
+                    this.container = null;
+                    this.dashTimer = null;
+                    this.attempts = 0;
+                    this.init();
+                }
+
+                init() {
+                    this.stage.innerHTML = '';
+                    const hlsMode = this.mime === 'application/x-mpegURL' || this.src.includes('.m3u8');
+
+                    // Build DOM
+                    const core = document.createElement('div');
+                    core.className = 'vp-core';
+
+                    const vp = document.createElement('div');
+                    vp.className = 'vp-viewport';
+
+                    const vid = document.createElement('video');
+                    vid.playsInline = true;
+                    vid.disablePictureInPicture = false;
+                    vp.appendChild(vid);
+
+                    const spin = document.createElement('div');
+                    spin.className = 'vp-spinner-wrap';
+                    spin.innerHTML = '<div class="vp-spinner"></div><span>تحميل...</span>';
+                    vp.appendChild(spin);
+
+                    const err = document.createElement('div');
+                    err.className = 'vp-error-panel';
+                    err.innerHTML = '<span class="err-sym">⚠</span><span>تعذر التشغيل</span><button class="retry-trigger">إعادة</button>';
+                    vp.appendChild(err);
+
+                    core.appendChild(vp);
+
+                    // Dashboard
+                    const dash = document.createElement('div');
+                    dash.className = 'vp-dashboard';
+
+                    const track = document.createElement('div');
+                    track.className = 'vp-track';
+                    const buf = document.createElement('div');
+                    buf.className = 'vp-track-buf';
+                    const fill = document.createElement('div');
+                    fill.className = 'vp-track-fill';
+                    const seek = document.createElement('input');
+                    seek.type = 'range';
+                    seek.min = 0;
+                    seek.max = 100;
+                    seek.value = 0;
+                    seek.className = 'vp-track-seek';
+                    track.appendChild(buf);
+                    track.appendChild(fill);
+                    track.appendChild(seek);
+
+                    const row = document.createElement('div');
+                    row.className = 'vp-ctrl-row';
+
+                    const playBtn = document.createElement('button');
+                    playBtn.innerHTML = '▶';
+                    const rew = document.createElement('button');
+                    rew.innerHTML = '⏪';
+                    const fwd = document.createElement('button');
+                    fwd.innerHTML = '⏩';
+
+                    const audG = document.createElement('div');
+                    audG.className = 'vp-audio-group';
+                    const audBtn = document.createElement('button');
+                    audBtn.innerHTML = '🔊';
+                    const audS = document.createElement('input');
+                    audS.type = 'range';
+                    audS.min = 0;
+                    audS.max = 1;
+                    audS.step = 0.05;
+                    audS.value = 1;
+                    audS.className = 'vp-audio-slider';
+                    audG.appendChild(audBtn);
+                    audG.appendChild(audS);
+
+                    const tCode = document.createElement('span');
+                    tCode.className = 'vp-timecode';
+                    tCode.textContent = '00:00 / 00:00';
+
+                    // Speed menu
+                    const spM = document.createElement('div');
+                    spM.className = 'vp-dropdown';
+                    const spBtn = document.createElement('button');
+                    spBtn.textContent = '1x';
+                    const spList = document.createElement('div');
+                    spList.className = 'vp-dropdown-menu';
+                    [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2].forEach(s => {
+                        const b = document.createElement('button');
+                        b.textContent = s + 'x';
+                        if (s === 1) b.classList.add('sel');
+                        this.on(b, 'click', (e) => {
+                            e.stopPropagation();
+                            vid.playbackRate = s;
+                            spBtn.textContent = s + 'x';
+                            spList.querySelectorAll('button').forEach(x => x.classList.remove('sel'));
+                            b.classList.add('sel');
+                            spList.style.display = 'none';
+                        });
+                        spList.appendChild(b);
+                    });
+                    spM.appendChild(spBtn);
+                    spM.appendChild(spList);
+
+                    // Quality menu
+                    const qM = document.createElement('div');
+                    qM.className = 'vp-dropdown';
+                    const qBtn = document.createElement('button');
+                    qBtn.textContent = 'HD';
+                    const qList = document.createElement('div');
+                    qList.className = 'vp-dropdown-menu';
+                    qM.appendChild(qBtn);
+                    qM.appendChild(qList);
+
+                    const fsBtn = document.createElement('button');
+                    fsBtn.className = 'vp-fs-btn';
+                    fsBtn.innerHTML = '⛶';
+
+                    row.appendChild(playBtn);
+                    row.appendChild(rew);
+                    row.appendChild(fwd);
+                    row.appendChild(audG);
+                    row.appendChild(tCode);
+                    row.appendChild(spM);
+                    row.appendChild(qM);
+                    row.appendChild(fsBtn);
+
+                    dash.appendChild(track);
+                    dash.appendChild(row);
+                    core.appendChild(dash);
+                    this.stage.appendChild(core);
+
+                    this.video = vid;
+                    this.container = core;
+
+                    // Dashboard toggle
+                    const toggleDash = (s) => {
+                        if (s) {
+                            dash.classList.add('active');
+                            clearTimeout(this.dashTimer);
+                            this.dashTimer = setTimeout(() => {
+                                if (!vid.paused) dash.classList.remove('active');
+                            }, 3500);
+                        } else {
+                            dash.classList.remove('active');
+                            clearTimeout(this.dashTimer);
+                        }
+                    };
+
+                    this.on(vp, 'mousemove', () => toggleDash(true));
+                    this.on(vp, 'touchstart', () => toggleDash(true));
+                    this.on(vp, 'dblclick', () => {
+                        document.fullscreenElement ? document.exitFullscreen() : videoDock.requestFullscreen().catch(() => {});
+                    });
+
+                    this.on(vid, 'play', () => { toggleDash(true); playBtn.innerHTML = '⏸'; });
+                    this.on(vid, 'pause', () => { playBtn.innerHTML = '▶'; });
+                    this.on(vid, 'waiting', () => { spin.style.display = 'flex'; });
+                    this.on(vid, 'canplay', () => { spin.style.display = 'none'; });
+
+                    // Load source
+                    const load = (url) => {
+                        spin.style.display = 'flex';
+                        err.style.display = 'none';
+                        if (this.hls) {
+                            this.hls.destroy();
+                            this.hls = null;
+                        }
+                        if (hlsMode && Hls.isSupported()) {
+                            this.hls = new Hls({ enableWorker: true, lowLatencyMode: true, debug: false });
+                            this.hls.loadSource(url);
+                            this.hls.attachMedia(vid);
+                            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                spin.style.display = 'none';
+                                this.fillQualities(qList, qBtn, this.hls.levels);
+                                vid.play().catch(() => {});
+                            });
+                            this.hls.on(Hls.Events.LEVEL_SWITCHED, (e, d) => {
+                                const lv = this.hls.levels[d.level];
+                                if (lv) qBtn.textContent = lv.height ? lv.height + 'p' : 'HD';
+                            });
+                            this.hls.on(Hls.Events.ERROR, (e, d) => {
+                                if (d.fatal) {
+                                    if (this.attempts < 3) {
+                                        this.attempts++;
+                                        spin.innerHTML = `<div class="vp-spinner"></div><span>محاولة ${this.attempts}/3</span>`;
+                                        setTimeout(() => load(url), 1500);
+                                    } else {
+                                        spin.style.display = 'none';
+                                        err.style.display = 'flex';
+                                    }
+                                }
+                            });
+                        } else {
+                            vid.src = url;
+                            vid.play().catch(() => {});
+                            spin.style.display = 'none';
+                        }
+                    };
+
+                    // Time update
+                    const tick = () => {
+                        if (vid.duration && !isNaN(vid.duration)) {
+                            const p = (vid.currentTime / vid.duration) * 100;
+                            fill.style.width = p + '%';
+                            seek.value = p;
+                            if (vid.buffered.length) {
+                                const be = vid.buffered.end(vid.buffered.length - 1);
+                                buf.style.width = ((be / vid.duration) * 100) + '%';
+                            }
+                            const fmt = t => {
+                                if (isNaN(t)) return '00:00';
+                                const m = Math.floor(t / 60), s = Math.floor(t % 60);
+                                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                            };
+                            tCode.textContent = fmt(vid.currentTime) + ' / ' + fmt(vid.duration);
+                        }
+                    };
+
+                    this.on(vid, 'timeupdate', tick);
+                    this.on(vid, 'progress', tick);
+                    this.on(vid, 'loadedmetadata', () => { spin.style.display = 'none'; tick(); });
+
+                    // Keyboard controls
+                    this.on(document, 'keydown', (e) => {
+                        if (!activePlayer || activePlayer.video !== vid) return;
+                        switch (e.key) {
+                            case ' ': e.preventDefault(); vid.paused ? vid.play().catch(() => {}) : vid.pause(); break;
+                            case 'ArrowLeft': e.preventDefault(); vid.currentTime = Math.max(0, vid.currentTime - 5); break;
+                            case 'ArrowRight': e.preventDefault(); vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 5); break;
+                            case 'ArrowUp': e.preventDefault(); vid.volume = Math.min(1, vid.volume + 0.1); break;
+                            case 'ArrowDown': e.preventDefault(); vid.volume = Math.max(0, vid.volume - 0.1); break;
+                            case 'f': e.preventDefault(); document.fullscreenElement ? document.exitFullscreen() : videoDock.requestFullscreen().catch(() => {}); break;
+                            case 'm': e.preventDefault(); vid.muted = !vid.muted; break;
+                        }
+                    });
+
+                    // Button handlers
+                    playBtn.onclick = () => { vid.paused ? vid.play().catch(() => {}) : vid.pause(); };
+                    rew.onclick = () => { vid.currentTime = Math.max(0, vid.currentTime - 10); };
+                    fwd.onclick = () => { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10); };
+                    audBtn.onclick = () => { vid.muted = !vid.muted; audBtn.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉'); };
+                    audS.oninput = () => { vid.volume = +audS.value; vid.muted = false; audBtn.innerHTML = vid.volume > 0.5 ? '🔊' : '🔉'; };
+                    this.on(vid, 'volumechange', () => {
+                        audS.value = vid.volume;
+                        audBtn.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉');
+                    });
+
+                    seek.oninput = () => { fill.style.width = seek.value + '%'; };
+                    seek.onchange = () => { if (vid.duration) vid.currentTime = (+seek.value / 100) * vid.duration; };
+                    track.addEventListener('click', (e) => {
+                        if (e.target === seek) return;
+                        const r = track.getBoundingClientRect();
+                        if (vid.duration) vid.currentTime = ((e.clientX - r.left) / r.width) * vid.duration;
+                    });
+
+                    spBtn.onclick = (e) => { e.stopPropagation(); spList.style.display = spList.style.display === 'block' ? 'none' : 'block'; qList.style.display = 'none'; };
+                    qBtn.onclick = (e) => { e.stopPropagation(); qList.style.display = qList.style.display === 'block' ? 'none' : 'block'; spList.style.display = 'none'; };
+
+                    // Close dropdowns on outside click
+                    const closeDropdowns = (e) => {
+                        if (!spM.contains(e.target) && !qM.contains(e.target)) {
+                            spList.style.display = 'none';
+                            qList.style.display = 'none';
+                        }
+                    };
+                    this.on(document, 'click', closeDropdowns);
+
+                    fsBtn.onclick = () => { document.fullscreenElement ? document.exitFullscreen() : videoDock.requestFullscreen().catch(() => {}); };
+                    err.querySelector('.retry-trigger').onclick = () => { this.attempts = 0; load(this.src); };
+
+                    load(this.src);
+                }
+
+                fillQualities(qList, qBtn, levels) {
+                    qList.innerHTML = '';
+                    const aB = document.createElement('button');
+                    aB.textContent = 'تلقائي';
+                    aB.classList.add('sel');
+                    aB.onclick = (e) => {
+                        e.stopPropagation();
+                        if (this.hls) this.hls.currentLevel = -1;
+                        qBtn.textContent = 'تلقائي';
+                        qList.querySelectorAll('button').forEach(x => x.classList.remove('sel'));
+                        aB.classList.add('sel');
+                        qList.style.display = 'none';
+                    };
+                    qList.appendChild(aB);
+
+                    if (levels && levels.length) {
+                        levels.forEach((lv, i) => {
+                            const h = lv.height ? lv.height + 'p' : (lv.bitrate ? Math.round(lv.bitrate / 1000) + 'k' : 'HD');
+                            const b = document.createElement('button');
+                            b.textContent = h;
+                            b.onclick = (e) => {
+                                e.stopPropagation();
+                                if (this.hls) this.hls.currentLevel = i;
+                                qBtn.textContent = h;
+                                qList.querySelectorAll('button').forEach(x => x.classList.remove('sel'));
+                                b.classList.add('sel');
+                                qList.style.display = 'none';
+                            };
+                            qList.appendChild(b);
+                        });
+                    }
+                }
+
+                on(el, ev, handler) {
+                    el.addEventListener(ev, handler);
+                    this.listeners.push({ el, ev, handler });
+                }
+
+                destroy() {
+                    // Remove all listeners
+                    this.listeners.forEach(({ el, ev, handler }) => {
+                        el.removeEventListener(ev, handler);
+                    });
+                    this.listeners = [];
+
+                    // Destroy HLS
+                    if (this.hls) {
+                        this.hls.destroy();
+                        this.hls = null;
+                    }
+
+                    // Clear video
+                    if (this.video) {
+                        this.video.pause();
+                        this.video.src = '';
+                        this.video = null;
+                    }
+
+                    clearTimeout(this.dashTimer);
+                    this.stage.innerHTML = '';
+                }
             }
 
-            async function fetchTwMedia(tid){let vids=[];try{const r=await fetch(`https://api.fxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();for(let v of(d.tweet?.media?.videos||[]))if(v.url)vids.push({url:v.url,mime:'video/mp4'});}}catch(e){}if(vids.length)return vids;try{const r=await fetch(`https://api.vxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();if(d.media_extended)for(let m of d.media_extended)if((m.type==='video'||m.type==='gif')&&m.url)vids.push({url:m.url,mime:'video/mp4'});}}catch(e){}return vids;}
-            function embedTw(stage,tid){stage.innerHTML=`<iframe src="https://platform.twitter.com/embed/Tweet.html?id=${tid}&theme=dark&lang=ar" style="width:100%;height:100%;min-height:320px;border:none;" allowfullscreen></iframe>`;if(!window.twttr){const s=document.createElement('script');s.src='https://platform.twitter.com/widgets.js';s.async=true;document.head.appendChild(s);}}
+            // ============ Drag and Resize ============
+            function makeDraggable(el, bar) {
+                let sx, sy, sl, st, on = false;
+                const gp = e => e.touches?.[0] || e;
 
-            function dragElement(el,bar){let sx,sy,sl,st,on=false;const gp=e=>e.touches?.[0]||e;bar.addEventListener('mousedown',e=>{if(e.target.closest('.player-close')||e.target.closest('.player-tool'))return;e.preventDefault();on=true;sx=e.clientX;sy=e.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});bar.addEventListener('touchstart',e=>{if(e.target.closest('.player-close')||e.target.closest('.player-tool'))return;e.preventDefault();on=true;const p=gp(e);sx=p.clientX;sy=p.clientY;sl=el.offsetLeft;st=el.offsetTop;el.style.transition='none';el.style.right='auto';el.style.bottom='auto';el.style.left=sl+'px';el.style.top=st+'px';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!on)return;e.preventDefault();const p=gp(e);let nl=sl+p.clientX-sx,nt=st+p.clientY-sy;nl=Math.max(0,Math.min(nl,window.innerWidth-el.offsetWidth));nt=Math.max(0,Math.min(nt,window.innerHeight-el.offsetHeight));el.style.left=nl+'px';el.style.top=nt+'px';}function up(){on=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
-            function resizeElement(el,grip){let sw,sh,sx,sy,on=false;const gp=e=>e.touches?.[0]||e;grip.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();on=true;sw=el.offsetWidth;sh=el.offsetHeight;sx=e.clientX;sy=e.clientY;el.style.transition='none';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);});grip.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();on=true;sw=el.offsetWidth;sh=el.offsetHeight;const p=gp(e);sx=p.clientX;sy=p.clientY;el.style.transition='none';document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);},{passive:false});function mv(e){if(!on)return;e.preventDefault();const p=gp(e);el.style.width=Math.max(290,sw+p.clientX-sx)+'px';el.style.height=Math.max(170,sh+p.clientY-sy)+'px';}function up(){on=false;el.style.transition='';document.removeEventListener('mousemove',mv);document.removeEventListener('touchmove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);}}
+                const start = (e) => {
+                    if (e.target.closest('.player-close') || e.target.closest('.player-tool')) return;
+                    e.preventDefault();
+                    on = true;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    sl = el.offsetLeft;
+                    st = el.offsetTop;
+                    el.style.transition = 'none';
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = sl + 'px';
+                    el.style.top = st + 'px';
+                };
 
-            function dismissModals(){userModal.style.display='none';videoModal.style.display='none';shade.style.display='none';}
-            function renderUsers(users){const list=$('usersList');list.innerHTML='';const now=Date.now()+serverTimeOffset;if(!users||!Object.keys(users).length){list.innerHTML='<div style="text-align:center;color:#666;padding:20px;">لا أحد هنا</div>';return;}for(let u in users){const d=now-(users[u].lastActive||0);let s='off';if(d<30000)s='on';else if(d<60000)s='idle';const row=document.createElement('div');row.className='user-row';row.innerHTML=`<span class="live-dot ${s}"></span><span>${esc(u)}</span>${u===username?'<span style="color:var(--accent-light);font-size:10px;">· أنت</span>':''}`;list.appendChild(row);}}
+                const move = (e) => {
+                    if (!on) return;
+                    e.preventDefault();
+                    const p = gp(e);
+                    let nl = sl + p.clientX - sx;
+                    let nt = st + p.clientY - sy;
+                    nl = Math.max(0, Math.min(nl, window.innerWidth - el.offsetWidth));
+                    nt = Math.max(0, Math.min(nt, window.innerHeight - el.offsetHeight));
+                    el.style.left = nl + 'px';
+                    el.style.top = nt + 'px';
+                };
 
-            function launchChat(){
-                $('loginScreen').style.display='none';$('chat-container').style.display='flex';
-                db.ref('.info/serverTimeOffset').on('value',s=>serverTimeOffset=s.val()||0);
-                userRef=db.ref('online/'+username);messagesRef=db.ref('messages');onlineRef=db.ref('online');pinnedVideoRef=db.ref('pinned_video');
-                userRef.set({lastActive:firebase.database.ServerValue.TIMESTAMP});userRef.onDisconnect().remove();
-                setInterval(()=>userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}),30000);
-                db.ref('.info/connected').on('value',s=>toast(s.val()?'✓ متصل':'✗ انقطع الاتصال',s.val()?'ok':'err'));
-                setInterval(()=>{const now=Date.now()+serverTimeOffset;onlineRef.once('value',s=>s.forEach(c=>{if(now-(c.val().lastActive||0)>120000)c.ref.remove();}));},60000);
-                $('inputArea').onsubmit=e=>{e.preventDefault();const txt=clean(msgField.value.trim());if(!txt||!guard.check())return;messagesRef.push({user:username,text:txt,timestamp:firebase.database.ServerValue.TIMESTAMP}).catch(()=>toast('فشل الإرسال','err'));msgField.value='';msgField.focus();if(typingRef)typingRef.child(username).remove();clearTimeout(typingTimer);};
-                messagesRef.limitToLast(MSG_CAP).on('child_added',s=>{const v=s.val();if(v?.user&&v?.text)renderMsg(s.key,{user:v.user,text:v.text,timestamp:v.timestamp||Date.now()+serverTimeOffset});});
-                messagesRef.on('child_removed',s=>{const el=document.getElementById(`m-${s.key}`);if(el)el.remove();});
-                onlineRef.on('value',s=>{$('count').innerText=s.numChildren();renderUsers(s.val()||{});});
-                $('onlineListBtn').onclick=()=>{userModal.style.display='block';shade.style.display='block';};
-                $('setVideoBtn').onclick=()=>{videoModal.style.display='block';shade.style.display='block';};
-                shade.onclick=dismissModals;document.addEventListener('keydown',e=>{if(e.key==='Escape')dismissModals();});
-                $('submitVideoUrlBtn').onclick=async()=>{const raw=videoField.value.trim();if(!raw){toast('أدخل رابطاً','warn');return;}try{const u=extractUrl(raw)||raw;const m=classify(u);if(m.kind==='unknown'){toast('رابط غير مدعوم','warn');return;}await pinnedVideoRef.set({...m,setBy:username});videoField.value='';dismissModals();toast('✓ تم التشغيل','ok');}catch(e){toast('فشل','err');}};
-                pinnedVideoRef.on('value',async s=>{
-                    if(activePlayer){activeListeners.forEach(({el,ev,h})=>el.removeEventListener(ev,h));activeListeners=[];if(activePlayer.hls){activePlayer.hls.destroy();activePlayer.hls=null;}if(activePlayer.video){activePlayer.video.pause();activePlayer.video.src='';}activePlayer=null;}
-                    const data=s.val();if(!data){videoDock.style.display='none';videoDock.querySelector('.player-stage').innerHTML='';return;}
-                    videoDock.innerHTML=`<div class="player-topbar"><div class="player-dots"><i></i><i></i><i></i></div><span>مشغل · ${esc(data.setBy||'')}</span><div class="player-actions"><button class="player-tool" title="لقطة">📷</button><button class="player-tool pip" title="صورة مصغرة">⿻</button><button class="player-close">✕</button></div></div><div class="player-stage"></div><div class="player-grip"></div>`;
-                    videoDock.style.display='flex';
-                    videoDock.querySelector('.player-close').onclick=e=>{e.stopPropagation();pinnedVideoRef.remove();videoDock.style.display='none';};
-                    const ssBtn=videoDock.querySelector('.player-tool:not(.pip)');
-                    const pipBtn=videoDock.querySelector('.player-tool.pip');
-                    ssBtn.onclick=e=>{e.stopPropagation();if(activePlayer?.video){try{const c=document.createElement('canvas');c.width=activePlayer.video.videoWidth;c.height=activePlayer.video.videoHeight;c.getContext('2d').drawImage(activePlayer.video,0,0);const a=document.createElement('a');a.download=`frame-${Date.now()}.png`;a.href=c.toDataURL();a.click();toast('📷 تم','ok');}catch(ex){toast('فشل','err');}}};
-                    pipBtn.onclick=e=>{e.stopPropagation();if(activePlayer?.video&&document.pictureInPictureEnabled){if(document.pictureInPictureElement){document.exitPictureInPicture();}else{activePlayer.video.requestPictureInPicture().catch(()=>{});}}};
-                    dragElement(videoDock,videoDock.querySelector('.player-topbar'));
-                    resizeElement(videoDock,videoDock.querySelector('.player-grip'));
-                    const stage=videoDock.querySelector('.player-stage');
-                    try{if(data.kind==='youtube')stage.innerHTML=`<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>`;else if(data.kind==='hls'||data.kind==='direct')buildPlayer(stage,data.url,data.kind==='hls'?'application/x-mpegURL':'video/mp4');else if(data.kind==='twitter'){const vids=await fetchTwMedia(data.id);if(vids.length){buildPlayer(stage,vids[0].url,vids[0].mime);if(vids.length>1){const bar=document.createElement('div');bar.className='clip-strip';vids.forEach((v,i)=>{const btn=document.createElement('button');btn.className='clip-chip'+(i===0?' active':'');btn.textContent=`مقطع ${i+1}`;btn.onclick=()=>{stage.innerHTML='';buildPlayer(stage,v.url,v.mime);bar.querySelectorAll('.clip-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');};bar.appendChild(btn);});stage.appendChild(bar);}}else embedTw(stage,data.id);}toast(`🎬 ${esc(data.setBy||'')} شغّل`,'msg');}catch(e){toast('فشل التشغيل','err');}
+                const end = () => {
+                    on = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('touchmove', move);
+                    document.removeEventListener('mouseup', end);
+                    document.removeEventListener('touchend', end);
+                };
+
+                bar.addEventListener('mousedown', start);
+                bar.addEventListener('touchstart', start, { passive: false });
+                document.addEventListener('mousemove', move);
+                document.addEventListener('touchmove', move, { passive: false });
+                document.addEventListener('mouseup', end);
+                document.addEventListener('touchend', end);
+            }
+
+            function makeResizable(el, grip) {
+                let sw, sh, sx, sy, on = false;
+                const gp = e => e.touches?.[0] || e;
+
+                const start = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    on = true;
+                    sw = el.offsetWidth;
+                    sh = el.offsetHeight;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    el.style.transition = 'none';
+                };
+
+                const move = (e) => {
+                    if (!on) return;
+                    e.preventDefault();
+                    const p = gp(e);
+                    const nw = Math.max(290, sw + p.clientX - sx);
+                    const nh = Math.max(170, sh + p.clientY - sy);
+                    el.style.width = nw + 'px';
+                    el.style.height = nh + 'px';
+                };
+
+                const end = () => {
+                    on = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('touchmove', move);
+                    document.removeEventListener('mouseup', end);
+                    document.removeEventListener('touchend', end);
+                };
+
+                grip.addEventListener('mousedown', start);
+                grip.addEventListener('touchstart', start, { passive: false });
+                document.addEventListener('mousemove', move);
+                document.addEventListener('touchmove', move, { passive: false });
+                document.addEventListener('mouseup', end);
+                document.addEventListener('touchend', end);
+            }
+
+            // ============ Twitter API ============
+            async function fetchTwMedia(tid) {
+                let vids = [];
+                try {
+                    const r = await fetch(`https://api.fxtwitter.com/status/${tid}`);
+                    if (r.ok) {
+                        const d = await r.json();
+                        for (let v of (d.tweet?.media?.videos || [])) {
+                            if (v.url) vids.push({ url: v.url, mime: 'video/mp4' });
+                        }
+                    }
+                } catch (e) {}
+                if (vids.length) return vids;
+                try {
+                    const r = await fetch(`https://api.vxtwitter.com/status/${tid}`);
+                    if (r.ok) {
+                        const d = await r.json();
+                        if (d.media_extended) {
+                            for (let m of d.media_extended) {
+                                if ((m.type === 'video' || m.type === 'gif') && m.url) {
+                                    vids.push({ url: m.url, mime: 'video/mp4' });
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {}
+                return vids;
+            }
+
+            function embedTw(stage, tid) {
+                stage.innerHTML = `<iframe src="https://platform.twitter.com/embed/Tweet.html?id=${esc(tid)}&theme=dark&lang=ar" style="width:100%;height:100%;min-height:320px;border:none;" allowfullscreen></iframe>`;
+                if (!window.twttr) {
+                    const s = document.createElement('script');
+                    s.src = 'https://platform.twitter.com/widgets.js';
+                    s.async = true;
+                    document.head.appendChild(s);
+                }
+            }
+
+            // ============ Modal Management ============
+            function dismissModals() {
+                userModal.style.display = 'none';
+                videoModal.style.display = 'none';
+                shade.style.display = 'none';
+            }
+
+            function renderUsers(users) {
+                const list = $('usersList');
+                list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset;
+                if (!users || !Object.keys(users).length) {
+                    list.innerHTML = '<div style="text-align:center;color:#666;padding:20px;">لا أحد هنا</div>';
+                    return;
+                }
+                for (let u in users) {
+                    const d = now - (users[u].lastActive || 0);
+                    let s = 'off';
+                    if (d < 30000) s = 'on';
+                    else if (d < 60000) s = 'idle';
+                    const row = document.createElement('div');
+                    row.className = 'user-row';
+                    row.innerHTML = `<span class="live-dot ${s}"></span><span>${esc(u)}</span>${u === username ? '<span style="color:var(--accent-light);font-size:10px;">· أنت</span>' : ''}`;
+                    list.appendChild(row);
+                }
+            }
+
+            // ============ Chat Launch ============
+            function launchChat() {
+                $('loginScreen').style.display = 'none';
+                $('chat-container').style.display = 'flex';
+
+                // Server time sync
+                db.ref('.info/serverTimeOffset').on('value', s => { serverTimeOffset = s.val() || 0; });
+
+                // Refs
+                userRef = db.ref('online/' + username);
+                messagesRef = db.ref('messages');
+                onlineRef = db.ref('online');
+                pinnedVideoRef = db.ref('pinned_video');
+
+                // Online status
+                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                userRef.onDisconnect().remove();
+                setInterval(() => userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }), 30000);
+
+                // Connection state
+                db.ref('.info/connected').on('value', s => {
+                    toast(s.val() ? '✓ متصل' : '✗ انقطع الاتصال', s.val() ? 'ok' : 'err');
                 });
-                initTyping();msgField.focus();
+
+                // Cleanup stale users
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', s => {
+                        s.forEach(c => {
+                            if (now - (c.val().lastActive || 0) > 120000) c.ref.remove();
+                        });
+                    });
+                }, 60000);
+
+                // Message sending
+                $('inputArea').onsubmit = e => {
+                    e.preventDefault();
+                    const txt = clean(msgField.value.trim());
+                    if (!txt || !limiter.check()) return;
+                    messagesRef.push({
+                        user: username,
+                        text: txt,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(() => toast('فشل الإرسال', 'err'));
+                    msgField.value = '';
+                    msgField.focus();
+                    if (typingRef) typingRef.child(username).remove();
+                    clearTimeout(typingTimer);
+                };
+
+                // Message listeners
+                messagesRef.limitToLast(MSG_CAP).on('child_added', s => {
+                    const v = s.val();
+                    if (v?.user && v?.text) {
+                        renderMsg(s.key, { user: v.user, text: v.text, timestamp: v.timestamp || Date.now() + serverTimeOffset });
+                    }
+                });
+
+                messagesRef.on('child_removed', s => {
+                    const el = document.getElementById(`m-${s.key}`);
+                    if (el) el.remove();
+                });
+
+                // Online users
+                onlineRef.on('value', s => {
+                    $('count').innerText = s.numChildren();
+                    renderUsers(s.val() || {});
+                });
+
+                // Button handlers
+                $('onlineListBtn').onclick = () => { userModal.style.display = 'block'; shade.style.display = 'block'; };
+                $('setVideoBtn').onclick = () => { videoModal.style.display = 'block'; shade.style.display = 'block'; };
+                shade.onclick = dismissModals;
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') dismissModals(); });
+
+                // Video URL submission
+                $('submitVideoUrlBtn').onclick = async () => {
+                    const raw = videoField.value.trim();
+                    if (!raw) { toast('أدخل رابطاً', 'warn'); return; }
+                    try {
+                        const u = extractUrl(raw) || raw;
+                        const m = classify(u);
+                        if (m.kind === 'unknown') { toast('رابط غير مدعوم', 'warn'); return; }
+                        await pinnedVideoRef.set({ ...m, setBy: username });
+                        videoField.value = '';
+                        dismissModals();
+                        toast('✓ تم التشغيل', 'ok');
+                    } catch (e) {
+                        toast('فشل', 'err');
+                    }
+                };
+
+                // Pinned video listener
+                pinnedVideoRef.on('value', async s => {
+                    // Destroy existing player
+                    if (activePlayer) {
+                        activePlayer.destroy();
+                        activePlayer = null;
+                    }
+
+                    const data = s.val();
+                    if (!data) {
+                        videoDock.style.display = 'none';
+                        videoDock.querySelector('.player-stage').innerHTML = '';
+                        return;
+                    }
+
+                    // Rebuild player UI
+                    videoDock.innerHTML = `
+                        <div class="player-topbar">
+                            <div class="player-dots"><i></i><i></i><i></i></div>
+                            <span>مشغل · ${esc(data.setBy || '')}</span>
+                            <div class="player-actions">
+                                <button class="player-tool" title="لقطة">📷</button>
+                                <button class="player-tool pip" title="صورة مصغرة">⿻</button>
+                                <button class="player-close">✕</button>
+                            </div>
+                        </div>
+                        <div class="player-stage"></div>
+                        <div class="player-grip"></div>
+                    `;
+                    videoDock.style.display = 'flex';
+
+                    // Close button
+                    videoDock.querySelector('.player-close').onclick = (e) => {
+                        e.stopPropagation();
+                        pinnedVideoRef.remove();
+                        videoDock.style.display = 'none';
+                    };
+
+                    // Screenshot button
+                    const ssBtn = videoDock.querySelector('.player-tool:not(.pip)');
+                    ssBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (activePlayer?.video) {
+                            try {
+                                const c = document.createElement('canvas');
+                                c.width = activePlayer.video.videoWidth;
+                                c.height = activePlayer.video.videoHeight;
+                                c.getContext('2d').drawImage(activePlayer.video, 0, 0);
+                                const a = document.createElement('a');
+                                a.download = `frame-${Date.now()}.png`;
+                                a.href = c.toDataURL();
+                                a.click();
+                                toast('📷 تم', 'ok');
+                            } catch (ex) {
+                                toast('فشل', 'err');
+                            }
+                        }
+                    };
+
+                    // PiP button
+                    const pipBtn = videoDock.querySelector('.player-tool.pip');
+                    pipBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (activePlayer?.video && document.pictureInPictureEnabled) {
+                            if (document.pictureInPictureElement) {
+                                document.exitPictureInPicture();
+                            } else {
+                                activePlayer.video.requestPictureInPicture().catch(() => {});
+                            }
+                        }
+                    };
+
+                    // Make draggable and resizable
+                    makeDraggable(videoDock, videoDock.querySelector('.player-topbar'));
+                    makeResizable(videoDock, videoDock.querySelector('.player-grip'));
+
+                    const stage = videoDock.querySelector('.player-stage');
+
+                    try {
+                        if (data.kind === 'youtube') {
+                            stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${esc(data.id)}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>`;
+                        } else if (data.kind === 'hls' || data.kind === 'direct') {
+                            activePlayer = new VideoPlayer(stage, data.url, data.kind === 'hls' ? 'application/x-mpegURL' : 'video/mp4');
+                        } else if (data.kind === 'twitter') {
+                            const vids = await fetchTwMedia(data.id);
+                            if (vids.length) {
+                                activePlayer = new VideoPlayer(stage, vids[0].url, vids[0].mime);
+                                if (vids.length > 1) {
+                                    const bar = document.createElement('div');
+                                    bar.className = 'clip-strip';
+                                    vids.forEach((v, i) => {
+                                        const btn = document.createElement('button');
+                                        btn.className = 'clip-chip' + (i === 0 ? ' active' : '');
+                                        btn.textContent = `مقطع ${i + 1}`;
+                                        btn.onclick = () => {
+                                            if (activePlayer) activePlayer.destroy();
+                                            stage.innerHTML = '';
+                                            activePlayer = new VideoPlayer(stage, v.url, v.mime);
+                                            bar.querySelectorAll('.clip-chip').forEach(b => b.classList.remove('active'));
+                                            btn.classList.add('active');
+                                        };
+                                        bar.appendChild(btn);
+                                    });
+                                    stage.appendChild(bar);
+                                }
+                            } else {
+                                embedTw(stage, data.id);
+                            }
+                        }
+                        toast(`🎬 ${esc(data.setBy || '')} شغّل`, 'msg');
+                    } catch (e) {
+                        toast('فشل التشغيل', 'err');
+                    }
+                });
+
+                initTyping();
+                msgField.focus();
             }
 
-            function tryLogin(){const raw=usernameInput.value.trim();if(!raw)return toast('أدخل اسماً','warn');if(/[.#$[\]/]/.test(raw))return toast('أحرف ممنوعة','warn');if(raw.length<2)return toast('الاسم قصير','warn');if(raw.length>15)return toast('الاسم طويل','warn');username=raw;launchChat();}
-            $('loginBtn').onclick=tryLogin;usernameInput.onkeypress=e=>{if(e.key==='Enter')tryLogin();};
-            window.addEventListener('beforeunload',()=>{if(activePlayer?.hls)activePlayer.hls.destroy();if(userRef)userRef.remove();if(typingRef&&username)typingRef.child(username).remove();});
+            // ============ Login ============
+            function tryLogin() {
+                const raw = usernameInput.value.trim();
+                if (!raw) return toast('أدخل اسماً', 'warn');
+                if (/[.#$[\]/]/.test(raw)) return toast('أحرف ممنوعة', 'warn');
+                if (raw.length < 2) return toast('الاسم قصير', 'warn');
+                if (raw.length > 15) return toast('الاسم طويل', 'warn');
+                username = raw;
+                launchChat();
+            }
+
+            $('loginBtn').onclick = tryLogin;
+            usernameInput.onkeypress = e => { if (e.key === 'Enter') tryLogin(); };
+
+            // Cleanup on unload
+            window.addEventListener('beforeunload', () => {
+                if (activePlayer) {
+                    activePlayer.destroy();
+                    activePlayer = null;
+                }
+                if (userRef) userRef.remove();
+                if (typingRef && username) typingRef.child(username).remove();
+            });
         })();
     </script>
 </body>
-</html>
+        </html>
