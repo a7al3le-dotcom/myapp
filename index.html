@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
     <style>
         :root {
             --bg-main: #05060a;
@@ -18,6 +17,7 @@
             --accent: #ffd54a;
             --accent-soft: #ffe788;
             --danger: #e53935;
+            --success: #2ecc71;
             --ctrl-bg: rgba(0, 0, 0, 0.75);
         }
         * {
@@ -86,6 +86,13 @@
             background: rgba(255, 255, 255, 0.03);
             padding: 4px 10px;
             border-radius: 999px;
+            animation: fadeInOut 5s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
         }
         #inputArea {
             display: flex;
@@ -116,6 +123,11 @@
             font-weight: 600;
             cursor: pointer;
             border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #sendBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 213, 74, 0.3);
         }
         #topButtons {
             position: fixed;
@@ -132,6 +144,10 @@
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.06);
             color: #fff;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
         }
         .btn .count-text {
             font-size: 13px;
@@ -153,6 +169,11 @@
             max-height: 80vh;
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.06);
+            animation: modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
         #usersList .user-item {
             display: flex;
@@ -160,6 +181,10 @@
             gap: 8px;
             padding: 6px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+        }
+        #usersList .user-item:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         .status-indicator {
             width: 10px;
@@ -167,12 +192,15 @@
             border-radius: 50%;
             display: inline-block;
             margin-left: 8px;
+            box-shadow: 0 0 8px currentColor;
         }
         .status-green {
             background-color: #2ecc71;
+            box-shadow: 0 0 12px rgba(46, 204, 113, 0.5);
         }
         .status-yellow {
             background-color: #f1c40f;
+            box-shadow: 0 0 12px rgba(241, 196, 15, 0.5);
         }
         .status-gray {
             background-color: #7f8c8d;
@@ -186,6 +214,7 @@
             font-size: 16px;
             margin-bottom: 10px;
             box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         #submitVideoUrlBtn {
             padding: 8px 18px;
@@ -195,6 +224,10 @@
             border: none;
             cursor: pointer;
             color: #000;
+            transition: transform 0.2s;
+        }
+        #submitVideoUrlBtn:hover {
+            transform: scale(1.05);
         }
         #overlay {
             position: fixed;
@@ -226,6 +259,7 @@
             text-align: center;
             min-width: 280px;
             border: 1px solid rgba(255, 255, 255, 0.06);
+            animation: modalIn 0.5s ease-out;
         }
         #usernameInput {
             width: 100%;
@@ -237,6 +271,11 @@
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        #usernameInput:focus {
+            border-color: var(--accent);
+            outline: none;
         }
         #loginBtn {
             background: linear-gradient(135deg, var(--accent), #ffe178);
@@ -246,9 +285,13 @@
             border: none;
             cursor: pointer;
             color: #000;
+            transition: transform 0.2s;
+        }
+        #loginBtn:hover {
+            transform: scale(1.05);
         }
 
-        /* ===== مشغل Netflix ===== */
+        /* ===== مشغل Netflix المحسن ===== */
         #pinnedVideoPlayer {
             position: fixed;
             top: calc(60px + env(safe-area-inset-top));
@@ -263,6 +306,11 @@
             flex-direction: column;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         .video-header {
             background: rgba(0, 0, 0, 0.8);
@@ -294,6 +342,10 @@
             color: white;
             z-index: 10;
             pointer-events: auto;
+            transition: transform 0.2s;
+        }
+        .close-pinned-video:hover {
+            transform: scale(1.1);
         }
         .resize-handle {
             position: absolute;
@@ -303,6 +355,31 @@
             right: 0;
             cursor: nwse-resize;
             z-index: 10;
+        }
+        .video-selector-bar {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            flex-wrap: wrap;
+        }
+        .video-selector-btn {
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        .video-selector-btn.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+        }
+        .video-selector-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* داخل المشغل */
@@ -341,6 +418,19 @@
             font-size: 16px;
             pointer-events: none;
         }
+        .nplayer-loading::after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         .nplayer-error {
             pointer-events: auto;
             background: rgba(0, 0, 0, 0.85);
@@ -354,6 +444,11 @@
             border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
+            pointer-events: auto;
+            transition: transform 0.2s;
+        }
+        .nplayer-error button:hover {
+            transform: scale(1.05);
         }
 
         /* شريط التحكم السفلي */
@@ -400,6 +495,7 @@
             border-radius: 2px;
             width: 0%;
             z-index: 2;
+            transition: width 0.1s linear;
         }
         .nprogress-input {
             position: absolute;
@@ -500,6 +596,7 @@
             font-size: 14px;
             cursor: pointer;
             font-family: inherit;
+            transition: background 0.2s;
         }
         .nspeed-dropdown button:hover,
         .nquality-dropdown button:hover {
@@ -563,7 +660,7 @@
         <div id="usersBox"><h4>المتصلين</h4><div id="usersList"></div></div>
         <div id="overlay"></div>
         <div id="messages"></div>
-        <div class="typing-wrapper" id="typingWrapper" style="display: none;"><div id="typingIndicator"></div></div>
+        <div class="typing-wrapper" id="typingWrapper" style="display: none; padding: 5px 15px; color: var(--text-muted); font-size: 12px;"><div id="typingIndicator"></div></div>
         <form id="inputArea">
             <button type="submit" id="sendBtn">إرسال</button>
             <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
@@ -571,7 +668,7 @@
     </div>
     <script>
         (function() {
-            // ========== Firebase ==========
+            // ========== تكوين Firebase ==========
             const firebaseConfig = {
                 apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
                 authDomain: "mychat-2d881.firebaseapp.com",
@@ -585,8 +682,10 @@
             let serverTimeOffset = 0;
             const messageTimestamps = new Map();
             let typingTimeout = null;
+            let currentPlayer = null; // مرجع لمشغل Netflix
+            let playerEventListeners = new Map(); // لتتبع event listeners
 
-            // DOM
+            // ========== مراجع DOM ==========
             const loginScreen = document.getElementById('loginScreen');
             const usernameInput = document.getElementById('usernameInput');
             const loginBtn = document.getElementById('loginBtn');
@@ -604,17 +703,52 @@
             const typingWrapper = document.getElementById("typingWrapper");
             const typingIndicator = document.getElementById("typingIndicator");
 
-            let currentPlayer = null; // مرجع لمشغل Netflix
+            // ========== نظام Rate Limiting ==========
+            const rateLimiter = {
+                messages: [],
+                maxMessages: 5,
+                timeWindow: 10000, // 10 ثواني
+
+                canSend() {
+                    const now = Date.now();
+                    this.messages = this.messages.filter(t => now - t < this.timeWindow);
+                    if (this.messages.length >= this.maxMessages) {
+                        addNotification("⚠️ يرجى الانتظار قليلاً قبل إرسال رسالة أخرى");
+                        return false;
+                    }
+                    this.messages.push(now);
+                    return true;
+                }
+            };
 
             // ========== دوال مساعدة ==========
-            function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, function(m) { if (m === '&')
-                    return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+            function escapeHtml(str) {
+                if (!str) return "";
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
 
-            function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+            function sanitizeInput(input) {
+                // إزالة HTML tags
+                input = input.replace(/<[^>]*>/g, '');
+                // منع XSS
+                input = input.replace(/javascript:/gi, '');
+                input = input.replace(/on\w+=/gi, '');
+                // تحديد طول
+                input = input.substring(0, 500);
+                return input;
+            }
+
+            function scrollToBottom() {
+                requestAnimationFrame(() => {
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                });
+            }
 
             function getYoutubeVideoId(url) {
                 if (!url) return null;
-                const regex = /(?:youtube\.com\/shorts\/|youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                const regex = /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
                 const match = url.match(regex);
                 return match ? match[1] : null;
             }
@@ -626,8 +760,24 @@
             }
 
             function isDirectVideo(url) {
-                return /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url) || (url.includes('video') && !url.includes('youtube') &&
-                    !url.includes('twitter'));
+                return /\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(url) || (url.includes('video') && !url.includes('youtube') &&
+                    !url.includes('twitter') && !url.includes('tiktok'));
+            }
+
+            function detectMediaType(url) {
+                const patterns = {
+                    youtube: /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i,
+                    twitter: /(?:twitter|x)\.com\/\w+\/status\/(\d+)/i,
+                    tiktok: /tiktok\.com\/@[\w.-]+\/video\/(\d+)/i,
+                    instagram: /instagram\.com\/(?:p|reel)\/([\w-]+)/i,
+                    directVideo: /\.(mp4|webm|mov|mkv|avi)(\?.*)?$/i,
+                    hls: /\.(m3u8|m3u)(\?.*)?$/i
+                };
+
+                for (let [type, pattern] of Object.entries(patterns)) {
+                    if (pattern.test(url)) return type;
+                }
+                return 'unknown';
             }
 
             function extractCleanUrl(text) {
@@ -636,6 +786,19 @@
                 let raw = matches[0];
                 raw = raw.replace(/[،،؛\u0600-\u06FF]+$/, '').trim();
                 return raw;
+            }
+
+            async function expandShortUrl(url) {
+                if (url.includes('t.co') || url.includes('bit.ly') || url.includes('tinyurl.com')) {
+                    try {
+                        const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+                        return response.url;
+                    } catch (e) {
+                        console.warn('فشل توسيع الرابط:', e);
+                        return url;
+                    }
+                }
+                return url;
             }
 
             function updateTimeDisplay(key, timestamp, timeElement) {
@@ -686,33 +849,45 @@
                 messageTimestamps.set(key, { timestamp, element: timeSpan });
                 updateTimeDisplay(key, timestamp, timeSpan);
                 scrollToBottom();
+
+                // تنظيف تلقائي للرسائل القديمة (اختياري)
+                if (messagesDiv.children.length > 200) {
+                    const oldestMsg = messagesDiv.firstElementChild;
+                    if (oldestMsg) oldestMsg.remove();
+                }
             }
 
+            // تحديث الوقت كل دقيقة
             setInterval(() => {
                 messageTimestamps.forEach(({ timestamp, element }, key) => {
                     updateTimeDisplay(key, timestamp, element);
                 });
             }, 60000);
 
-            // ========== Typing ==========
+            // ========== نظام الكتابة (Typing Indicator) ==========
             function initTypingIndicator() {
                 typingRef = db.ref("typing");
                 let isTyping = false;
+
                 messageInput.addEventListener("input", (e) => {
                     const text = e.target.value;
                     if (text.length > 0 && !isTyping) {
                         isTyping = true;
                         typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
                         if (typingTimeout) clearTimeout(typingTimeout);
-                    } else if (text.length === 0 && isTyping) { stopTyping(); } else {
+                    } else if (text.length === 0 && isTyping) {
+                        stopTyping();
+                    } else if (isTyping) {
                         if (typingTimeout) clearTimeout(typingTimeout);
                         typingTimeout = setTimeout(() => {
                             if (isTyping && messageInput.value.length === 0) stopTyping();
-                            else if (isTyping) { typingRef.child(username).set({ time: firebase.database
-                                    .ServerValue.TIMESTAMP }); }
+                            else if (isTyping) {
+                                typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                            }
                         }, 1000);
                     }
                 });
+
                 messageInput.addEventListener("keydown", () => {
                     if (!isTyping && messageInput.value.length > 0) {
                         isTyping = true;
@@ -720,17 +895,22 @@
                     }
                     if (typingTimeout) clearTimeout(typingTimeout);
                     typingTimeout = setTimeout(() => {
-                        if (isTyping && messageInput.value.length > 0) { typingRef.child(username).set({ time: firebase
-                                .database.ServerValue.TIMESTAMP }); } else if (isTyping && messageInput.value
-                            .length === 0) stopTyping();
+                        if (isTyping && messageInput.value.length > 0) {
+                            typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
+                        } else if (isTyping && messageInput.value.length === 0) {
+                            stopTyping();
+                        }
                     }, 1200);
                 });
 
                 function stopTyping() {
-                    if (isTyping) { isTyping = false;
-                        typingRef.child(username).remove(); }
+                    if (isTyping) {
+                        isTyping = false;
+                        typingRef.child(username).remove();
+                    }
                     if (typingTimeout) clearTimeout(typingTimeout);
                 }
+
                 document.getElementById("inputArea").addEventListener("submit", () => { stopTyping(); });
 
                 let typingUsers = new Map();
@@ -741,6 +921,7 @@
                     if (data && data.time) typingUsers.set(name, data.time);
                     updateTypingDisplay();
                 });
+
                 typingRef.on("child_changed", (snap) => {
                     const name = snap.key;
                     if (name === username) return;
@@ -748,25 +929,33 @@
                     if (data && data.time) typingUsers.set(name, data.time);
                     updateTypingDisplay();
                 });
+
                 typingRef.on("child_removed", (snap) => {
                     const name = snap.key;
                     if (name === username) return;
                     typingUsers.delete(name);
                     updateTypingDisplay();
                 });
+
+                // تنظيف المستخدمين المنتهية صلاحيتهم
                 setInterval(() => {
                     const now = Date.now() + serverTimeOffset;
                     let changed = false;
                     for (let [name, ts] of typingUsers.entries()) {
-                        if (now - ts > 3000) { typingUsers.delete(name);
-                            changed = true; }
+                        if (now - ts > 3000) {
+                            typingUsers.delete(name);
+                            changed = true;
+                        }
                     }
                     if (changed) updateTypingDisplay();
                 }, 2000);
 
                 function updateTypingDisplay() {
                     const names = Array.from(typingUsers.keys());
-                    if (names.length === 0) { typingWrapper.style.display = "none"; return; }
+                    if (names.length === 0) {
+                        typingWrapper.style.display = "none";
+                        return;
+                    }
                     typingWrapper.style.display = "flex";
                     let msg = "";
                     if (names.length === 1) msg = `${names[0]} يكتب...`;
@@ -774,21 +963,51 @@
                     else msg = `عدة أشخاص يكتبون...`;
                     typingIndicator.textContent = msg;
                 }
+
                 typingRef.child(username).onDisconnect().remove();
             }
 
-            // ========== مشغل Netflix الجديد ==========
-            function createNetflixPlayer(container, source, type) {
-                // تنظيف أي مشغل سابق
+            // ========== تنظيف المشغل ==========
+            function cleanupPlayer() {
                 if (currentPlayer) {
                     try {
-                        if (currentPlayer.hls) currentPlayer.hls.destroy();
-                        if (currentPlayer.video) { currentPlayer.video.pause();
-                            currentPlayer.video.src = ''; }
-                    } catch (e) {}
+                        // إزالة event listeners المسجلة
+                        if (playerEventListeners.has(currentPlayer)) {
+                            const listeners = playerEventListeners.get(currentPlayer);
+                            listeners.forEach(({ element, event, handler }) => {
+                                element.removeEventListener(event, handler);
+                            });
+                            playerEventListeners.delete(currentPlayer);
+                        }
+
+                        // إيقاف وتنظيف HLS
+                        if (currentPlayer.hls) {
+                            currentPlayer.hls.destroy();
+                            currentPlayer.hls = null;
+                        }
+
+                        // إيقاف الفيديو
+                        if (currentPlayer.video) {
+                            currentPlayer.video.pause();
+                            currentPlayer.video.src = '';
+                            currentPlayer.video.load();
+                        }
+
+                        // إزالة من DOM
+                        if (currentPlayer.container && currentPlayer.container.parentNode) {
+                            currentPlayer.container.parentNode.innerHTML = '';
+                        }
+                    } catch (e) {
+                        console.warn('خطأ في تنظيف المشغل:', e);
+                    }
                     currentPlayer = null;
                 }
-                container.innerHTML = '';
+            }
+
+            // ========== مشغل Netflix المحسن ==========
+            function createNetflixPlayer(container, source, type) {
+                // تنظيف أي مشغل سابق
+                cleanupPlayer();
 
                 const isHLS = (type === 'application/x-mpegURL' || source.includes('.m3u8') || source.includes('.m3u'));
 
@@ -811,8 +1030,7 @@
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'nplayer-error';
                 errorDiv.style.display = 'none';
-                errorDiv.innerHTML =
-                    `<span>⚠️ فشل التشغيل</span><button id="nplayer-retry">إعادة المحاولة</button>`;
+                errorDiv.innerHTML = `<span>⚠️ فشل التشغيل</span><button id="nplayer-retry-btn">إعادة المحاولة</button>`;
                 videoWrap.appendChild(errorDiv);
 
                 wrapper.appendChild(videoWrap);
@@ -889,7 +1107,7 @@
                         video.playbackRate = s;
                         speedBtn.textContent = s + 'x';
                         speedDropdown.querySelectorAll('button').forEach(btn => btn.classList.remove(
-                        'active'));
+                            'active'));
                         b.classList.add('active');
                         speedDropdown.style.display = 'none';
                     };
@@ -927,10 +1145,16 @@
                 container.appendChild(wrapper);
 
                 // المتغيرات
-                let isDraggingProgress = false;
                 let hlsInstance = null;
                 let retryCount = 0;
                 const MAX_RETRY = 2;
+                const eventListeners = [];
+
+                // دالة مساعدة لتسجيل event listeners
+                function addTrackedEventListener(element, event, handler) {
+                    element.addEventListener(event, handler);
+                    eventListeners.push({ element, event, handler });
+                }
 
                 // ===== دالة إظهار/إخفاء التحكم =====
                 let controlsTimeout = null;
@@ -948,10 +1172,10 @@
                     }
                 }
 
-                videoWrap.addEventListener('mousemove', () => { showControls(true); });
-                videoWrap.addEventListener('touchstart', () => { showControls(true); });
-                video.addEventListener('play', () => { showControls(true); });
-                video.addEventListener('pause', () => { showControls(true); });
+                addTrackedEventListener(videoWrap, 'mousemove', () => { showControls(true); });
+                addTrackedEventListener(videoWrap, 'touchstart', () => { showControls(true); });
+                addTrackedEventListener(video, 'play', () => { showControls(true); });
+                addTrackedEventListener(video, 'pause', () => { showControls(true); });
 
                 // ===== تشغيل HLS =====
                 function loadStream(url) {
@@ -961,6 +1185,7 @@
                         hlsInstance.destroy();
                         hlsInstance = null;
                     }
+
                     if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
                         hlsInstance = new Hls({
                             enableWorker: true,
@@ -970,9 +1195,10 @@
                         hlsInstance.attachMedia(video);
                         hlsInstance.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
                             loadingDiv.style.display = 'none';
-                            // ملء قائمة الجودة
                             populateQualityMenu(hlsInstance.levels);
-                            video.play().catch(() => {});
+                            video.play().catch(() => {
+                                console.warn('التشغيل التلقائي ممنوع من المتصفح');
+                            });
                         });
                         hlsInstance.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
                             const level = hlsInstance.levels[data.level];
@@ -985,8 +1211,9 @@
                             if (data.fatal) {
                                 if (retryCount < MAX_RETRY) {
                                     retryCount++;
-                                    loadingDiv.innerHTML = `<span>🔄 إعادة المحاولة (${retryCount}/${MAX_RETRY})...</span>`;
-                                    loadStream(url);
+                                    loadingDiv.innerHTML =
+                                        `<span>🔄 إعادة المحاولة (${retryCount}/${MAX_RETRY})...</span>`;
+                                    setTimeout(() => loadStream(url), 1000);
                                 } else {
                                     loadingDiv.style.display = 'none';
                                     errorDiv.style.display = 'flex';
@@ -1000,16 +1227,16 @@
                         video.play().catch(() => {});
                         loadingDiv.style.display = 'none';
                     } else {
+                        // تحميل مباشر للفيديو
+                        video.src = url;
+                        video.play().catch(() => {});
                         loadingDiv.style.display = 'none';
-                        errorDiv.style.display = 'flex';
-                        errorDiv.querySelector('span').textContent = '⚠️ المتصفح لا يدعم HLS';
                     }
                 }
 
                 // ===== قائمة الجودة =====
                 function populateQualityMenu(levels) {
                     qualityDropdown.innerHTML = '';
-                    // زر تلقائي
                     const autoBtn = document.createElement('button');
                     autoBtn.textContent = 'تلقائي';
                     autoBtn.dataset.level = '-1';
@@ -1028,7 +1255,7 @@
 
                     if (!levels || levels.length === 0) {
                         const noBtn = document.createElement('button');
-                        noBtn.textContent = 'لا تتوفر';
+                        noBtn.textContent = 'لا تتوفر جودات';
                         noBtn.disabled = true;
                         qualityDropdown.appendChild(noBtn);
                         return;
@@ -1046,7 +1273,7 @@
                                 qualityBtn.textContent = h;
                             }
                             qualityDropdown.querySelectorAll('button').forEach(b => b.classList.remove(
-                            'active'));
+                                'active'));
                             btn.classList.add('active');
                             qualityDropdown.style.display = 'none';
                         };
@@ -1056,7 +1283,7 @@
 
                 // ===== تحديث شريط التقدم =====
                 function updateProgress() {
-                    if (video.duration) {
+                    if (video.duration && !isNaN(video.duration)) {
                         const pct = (video.currentTime / video.duration) * 100;
                         played.style.width = pct + '%';
                         inputRange.value = pct;
@@ -1068,6 +1295,7 @@
                         }
                         // الوقت
                         const format = (t) => {
+                            if (isNaN(t)) return '00:00';
                             const m = Math.floor(t / 60);
                             const s = Math.floor(t % 60);
                             return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
@@ -1077,41 +1305,43 @@
                 }
 
                 // ===== أحداث الفيديو =====
-                video.addEventListener('timeupdate', updateProgress);
-                video.addEventListener('progress', updateProgress);
-                video.addEventListener('loadedmetadata', () => {
+                addTrackedEventListener(video, 'timeupdate', updateProgress);
+                addTrackedEventListener(video, 'progress', updateProgress);
+                addTrackedEventListener(video, 'loadedmetadata', () => {
                     loadingDiv.style.display = 'none';
                     updateProgress();
                 });
 
                 // ===== أزرار التحكم =====
                 playBtn.onclick = () => {
-                    if (video.paused) { video.play(); } else { video.pause(); }
+                    if (video.paused) { video.play().catch(() => {}); } else { video.pause(); }
                 };
-                video.addEventListener('play', () => { playBtn.innerHTML = '⏸'; });
-                video.addEventListener('pause', () => { playBtn.innerHTML = '▶'; });
+                addTrackedEventListener(video, 'play', () => { playBtn.innerHTML = '⏸'; });
+                addTrackedEventListener(video, 'pause', () => { playBtn.innerHTML = '▶'; });
 
                 rewindBtn.onclick = () => { video.currentTime = Math.max(0, video.currentTime - 10); };
-                forwardBtn.onclick = () => { video.currentTime = Math.min(video.duration, video.currentTime + 10); };
+                forwardBtn.onclick = () => { video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); };
 
-                volBtn.onclick = () => { video.muted = !video.muted;
-                    volBtn.innerHTML = video.muted ? '🔇' : '🔊'; };
-                volSlider.oninput = () => { video.volume = parseFloat(volSlider.value);
+                volBtn.onclick = () => {
+                    video.muted = !video.muted;
+                    volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
+                };
+                volSlider.oninput = () => {
+                    video.volume = parseFloat(volSlider.value);
                     video.muted = false;
-                    volBtn.innerHTML = '🔊'; };
-                video.addEventListener('volumechange', () => {
+                    volBtn.innerHTML = video.volume > 0.5 ? '🔊' : '🔉';
+                };
+                addTrackedEventListener(video, 'volumechange', () => {
                     volSlider.value = video.volume;
                     volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
                 });
 
                 // شريط التقدم
                 inputRange.oninput = () => {
-                    isDraggingProgress = true;
                     const val = parseFloat(inputRange.value);
                     played.style.width = val + '%';
                 };
                 inputRange.onchange = () => {
-                    isDraggingProgress = false;
                     if (video.duration) {
                         video.currentTime = (parseFloat(inputRange.value) / 100) * video.duration;
                     }
@@ -1139,17 +1369,26 @@
                     speedDropdown.style.display = 'none';
                 };
 
+                // إغلاق القوائم عند النقر خارجها
+                document.addEventListener('click', () => {
+                    speedDropdown.style.display = 'none';
+                    qualityDropdown.style.display = 'none';
+                });
+
                 // ملء الشاشة
                 fsBtn.onclick = () => {
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
                     } else {
-                        container.closest('#pinnedVideoPlayer').requestFullscreen().catch(() => {});
+                        container.closest('#pinnedVideoPlayer').requestFullscreen().catch((err) => {
+                            console.warn('فشل تفعيل ملء الشاشة:', err);
+                        });
                     }
                 };
 
-                // إعادة المحاولة
-                document.getElementById('nplayer-retry').onclick = () => {
+                // زر إعادة المحاولة
+                const retryBtn = errorDiv.querySelector('#nplayer-retry-btn');
+                retryBtn.onclick = () => {
                     retryCount = 0;
                     loadStream(source);
                 };
@@ -1159,8 +1398,8 @@
 
                 // حفظ المراجع
                 currentPlayer = { video, hls: hlsInstance, container: wrapper };
+                playerEventListeners.set(currentPlayer, eventListeners);
 
-                // تنظيف عند الإزالة
                 return currentPlayer;
             }
 
@@ -1175,7 +1414,7 @@
                         for (let v of media)
                             if (v.url) videos.push({ url: v.url, type: 'video/mp4' });
                     }
-                } catch (e) { console.warn(e); }
+                } catch (e) { console.warn('خطأ في جلب فيديوهات تويتر:', e); }
                 if (videos.length) return videos;
                 try {
                     const res = await fetch(`https://api.vxtwitter.com/status/${tweetId}`);
@@ -1188,7 +1427,7 @@
                             }
                         }
                     }
-                } catch (e) { console.warn(e); }
+                } catch (e) { console.warn('خطأ في جلب فيديوهات تويتر (v2):', e); }
                 return videos;
             }
 
@@ -1286,6 +1525,8 @@
                 function onEnd() {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+                    document.removeEventListener('touchend', onEnd);
                 }
                 handle.addEventListener('mousedown', onStart);
                 handle.addEventListener('touchstart', onStart, { passive: false });
@@ -1302,6 +1543,10 @@
                 const list = document.getElementById("usersList");
                 list.innerHTML = '';
                 const now = Date.now() + serverTimeOffset;
+                if (!users || Object.keys(users).length === 0) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:10px;">لا يوجد متصلين حالياً</div>';
+                    return;
+                }
                 for (let u in users) {
                     const last = users[u].lastActive || 0;
                     let statusClass = 'status-gray';
@@ -1329,103 +1574,140 @@
 
                 userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
                 userRef.onDisconnect().remove();
-                setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 60000);
+                setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
 
                 db.ref('.info/connected').on('value', (snap) => {
                     if (snap.val() === true) addNotification("✅ اتصلت بالخادم");
                     else addNotification("⚠️ فقد الاتصال ...");
                 });
 
+                // تنظيف المستخدمين غير النشطين
                 setInterval(() => {
                     const now = Date.now() + serverTimeOffset;
                     onlineRef.once('value', snap => {
-                        snap.forEach(child => { if (now - child.val().lastActive > 90000) child.ref.remove(); });
+                        snap.forEach(child => {
+                            const lastActive = child.val().lastActive || 0;
+                            if (now - lastActive > 120000) { // دقيقتين
+                                child.ref.remove();
+                            }
+                        });
                     });
                 }, 60000);
 
+                // إرسال الرسائل
                 document.getElementById("inputArea").onsubmit = (e) => {
                     e.preventDefault();
-                    const text = messageInput.value.trim();
+                    const text = sanitizeInput(messageInput.value.trim());
                     if (!text) return;
-                    messagesRef.push({ user: username, text: text, timestamp: firebase.database.ServerValue
-                            .TIMESTAMP });
+                    if (!rateLimiter.canSend()) return;
+
+                    messagesRef.push({
+                        user: username,
+                        text: text,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(err => {
+                        console.error('خطأ في إرسال الرسالة:', err);
+                        addNotification("⚠️ فشل إرسال الرسالة، حاول مرة أخرى");
+                    });
+
                     messageInput.value = "";
                     scrollToBottom();
                     if (typingRef) typingRef.child(username).remove();
                     if (typingTimeout) clearTimeout(typingTimeout);
                 };
 
+                // استقبال الرسائل
                 messagesRef.limitToLast(100).on("child_added", snap => {
                     const val = snap.val();
-                    if (val.timestamp) addMessageToUI(snap.key, { user: val.user, text: val.text,
-                        timestamp: val.timestamp });
-                    else addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: Date.now() +
-                            serverTimeOffset });
+                    if (val && val.user && val.text) {
+                        const timestamp = val.timestamp || Date.now() + serverTimeOffset;
+                        addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: timestamp });
+                    }
                 });
+
                 messagesRef.on("child_removed", snap => {
                     messageTimestamps.delete(snap.key);
                     const el = document.getElementById(`msg-${snap.key}`);
                     if (el) el.remove();
                 });
 
+                // تحديث قائمة المتصلين
                 onlineRef.on("value", snap => {
-                    document.getElementById("count").innerText = snap.numChildren();
+                    const count = snap.numChildren();
+                    document.getElementById("count").innerText = count;
                     renderUsersList(snap.val() || {});
                 });
 
-                onlineListBtn.onclick = () => { usersBox.style.display = 'block';
-                    overlay.style.display = 'block'; };
-                setVideoBtn.onclick = () => { setVideoModal.style.display = 'block';
-                    overlay.style.display = 'block'; };
+                // أزرار النوافذ
+                onlineListBtn.onclick = () => {
+                    usersBox.style.display = 'block';
+                    overlay.style.display = 'block';
+                };
+                setVideoBtn.onclick = () => {
+                    setVideoModal.style.display = 'block';
+                    overlay.style.display = 'block';
+                };
                 overlay.onclick = closeAllModals;
 
+                // إغلاق النوافذ بمفتاح Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') closeAllModals();
+                });
+
+                // تثبيت الفيديو
                 submitVideoUrlBtn.onclick = async () => {
                     const raw = videoUrlInput.value.trim();
                     if (!raw) return;
-                    const cleanUrl = extractCleanUrl(raw) || raw;
-                    const youtubeId = getYoutubeVideoId(cleanUrl);
-                    const tweetId = getTweetId(cleanUrl);
 
-                    if (youtubeId) {
-                        await pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
-                    } else if (tweetId) {
-                        await pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
-                    } else if (cleanUrl.includes('.m3u8') || cleanUrl.includes('.m3u')) {
-                        await pinnedVideoRef.set({ type: 'm3u', url: cleanUrl, setBy: username });
-                    } else if (isDirectVideo(cleanUrl)) {
-                        await pinnedVideoRef.set({ type: 'direct', url: cleanUrl, setBy: username });
-                    } else {
-                        alert("رابط غير مدعوم. تأكد من أنه رابط يوتيوب، تويتر، m3u8، أو فيديو مباشر.");
-                        return;
+                    try {
+                        const cleanUrl = extractCleanUrl(raw) || raw;
+                        const expandedUrl = await expandShortUrl(cleanUrl);
+                        const youtubeId = getYoutubeVideoId(expandedUrl);
+                        const tweetId = getTweetId(expandedUrl);
+
+                        if (youtubeId) {
+                            await pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
+                        } else if (tweetId) {
+                            await pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
+                        } else if (expandedUrl.includes('.m3u8') || expandedUrl.includes('.m3u')) {
+                            await pinnedVideoRef.set({ type: 'm3u', url: expandedUrl, setBy: username });
+                        } else if (isDirectVideo(expandedUrl)) {
+                            await pinnedVideoRef.set({ type: 'direct', url: expandedUrl, setBy: username });
+                        } else {
+                            addNotification("⚠️ رابط غير مدعوم. تأكد من أنه رابط يوتيوب، تويتر، m3u8، أو فيديو مباشر.");
+                            return;
+                        }
+                        videoUrlInput.value = "";
+                        closeAllModals();
+                        addNotification("✅ تم تثبيت الفيديو بنجاح");
+                    } catch (error) {
+                        console.error('خطأ في تثبيت الفيديو:', error);
+                        addNotification("⚠️ فشل تثبيت الفيديو، تحقق من الرابط");
                     }
-                    videoUrlInput.value = "";
-                    closeAllModals();
                 };
 
                 // ===== مراقبة الفيديو المثبت =====
                 pinnedVideoRef.on("value", async (snap) => {
                     // تنظيف المشغل القديم
-                    if (currentPlayer) {
-                        try {
-                            if (currentPlayer.hls) currentPlayer.hls.destroy();
-                            if (currentPlayer.video) { currentPlayer.video.pause();
-                                currentPlayer.video.src = ''; }
-                        } catch (e) {}
-                        currentPlayer = null;
-                    }
+                    cleanupPlayer();
                     pinnedVideoPlayer.innerHTML = '';
                     const data = snap.val();
-                    if (!data) { pinnedVideoPlayer.style.display = 'none'; return; }
+
+                    if (!data) {
+                        pinnedVideoPlayer.style.display = 'none';
+                        return;
+                    }
 
                     pinnedVideoPlayer.style.display = 'flex';
                     const header = document.createElement('div');
                     header.className = 'video-header';
-                    header.innerHTML = `<span>بث - ${escapeHtml(data.setBy)}</span>`;
+                    header.innerHTML = `<span>🎬 بث - ${escapeHtml(data.setBy || 'مجهول')}</span>`;
                     const closeBtn = document.createElement('button');
                     closeBtn.className = 'close-pinned-video';
                     closeBtn.innerHTML = '✖';
                     closeBtn.onclick = (e) => {
                         e.stopPropagation();
+                        cleanupPlayer();
                         pinnedVideoRef.remove();
                     };
                     header.appendChild(closeBtn);
@@ -1441,58 +1723,96 @@
                     makeResizable(pinnedVideoPlayer, resizeHandle);
 
                     // تشغيل المحتوى
-                    if (data.type === 'youtube') {
-                        // يوتيوب: نستخدم iframe بسيط لأن HLS لا يدعمه
-                        body.innerHTML =
-                            `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;border-radius:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-                        currentPlayer = { video: null, hls: null };
-                    } else if (data.type === 'm3u' || data.type === 'direct') {
-                        const mime = data.type === 'direct' ? 'video/mp4' : 'application/x-mpegURL';
-                        createNetflixPlayer(body, data.url, mime);
-                    } else if (data.type === 'twitter') {
-                        embedTwitterNative(body, data.id);
-                        const videos = await fetchTwitterVideos(data.id);
-                        if (videos.length > 0) {
-                            // نعيد بناء المشغل بالفيديو الأول
-                            body.innerHTML = '';
-                            createNetflixPlayer(body, videos[0].url, 'video/mp4');
-                            // إضافة محدد للمقاطع
-                            if (videos.length > 1) {
-                                const bar = document.createElement('div');
-                                bar.className = 'video-selector-bar';
-                                videos.forEach((v, idx) => {
-                                    const btn = document.createElement('button');
-                                    btn.className = 'video-selector-btn' + (idx === 0 ? ' active' : '');
-                                    btn.textContent = `مقطع ${idx+1}`;
-                                    btn.onclick = () => {
-                                        body.innerHTML = '';
-                                        createNetflixPlayer(body, v.url, 'video/mp4');
-                                        bar.querySelectorAll('.video-selector-btn').forEach(b => b
-                                            .classList.remove('active'));
-                                        btn.classList.add('active');
-                                    };
-                                    bar.appendChild(btn);
-                                });
-                                body.appendChild(bar);
+                    try {
+                        if (data.type === 'youtube') {
+                            body.innerHTML =
+                                `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;border-radius:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                            currentPlayer = { video: null, hls: null, container: body };
+                        } else if (data.type === 'm3u' || data.type === 'direct') {
+                            const mime = data.type === 'm3u' ? 'application/x-mpegURL' : 'video/mp4';
+                            createNetflixPlayer(body, data.url, mime);
+                        } else if (data.type === 'twitter') {
+                            embedTwitterNative(body, data.id);
+                            const videos = await fetchTwitterVideos(data.id);
+                            if (videos.length > 0) {
+                                body.innerHTML = '';
+                                createNetflixPlayer(body, videos[0].url, 'video/mp4');
+                                if (videos.length > 1) {
+                                    const bar = document.createElement('div');
+                                    bar.className = 'video-selector-bar';
+                                    videos.forEach((v, idx) => {
+                                        const btn = document.createElement('button');
+                                        btn.className = 'video-selector-btn' + (idx === 0 ? ' active' :
+                                            '');
+                                        btn.textContent = `🎥 مقطع ${idx+1}`;
+                                        btn.onclick = () => {
+                                            body.innerHTML = '';
+                                            createNetflixPlayer(body, v.url, 'video/mp4');
+                                            bar.querySelectorAll('.video-selector-btn').forEach(
+                                                b => b.classList.remove('active'));
+                                            btn.classList.add('active');
+                                        };
+                                        bar.appendChild(btn);
+                                    });
+                                    body.appendChild(bar);
+                                }
                             }
                         }
+                        addNotification(`${escapeHtml(data.setBy || 'مجهول')} قام بتشغيل فيديو`);
+                    } catch (error) {
+                        console.error('خطأ في تشغيل الفيديو:', error);
+                        addNotification("⚠️ فشل تشغيل الفيديو");
                     }
-                    addNotification(`${data.setBy} قام بتشغيل فيديو`);
                 });
 
                 initTypingIndicator();
             }
 
+            // ========== تسجيل الدخول ==========
             function attemptLogin() {
                 let raw = usernameInput.value.trim();
-                if (!raw) { alert("الرجاء إدخال اسم"); return; }
-                if (/[.#$[\]/]/.test(raw)) { alert("لا يُسمح بأحرف خاصة: . # $ [ ] /"); return; }
-                if (raw.length < 2) { alert("الاسم قصير جداً"); return; }
+                if (!raw) {
+                    addNotification("⚠️ الرجاء إدخال اسم");
+                    alert("الرجاء إدخال اسم");
+                    return;
+                }
+                if (/[.#$[\]/]/.test(raw)) {
+                    alert("لا يُسمح بأحرف خاصة: . # $ [ ] /");
+                    return;
+                }
+                if (raw.length < 2) {
+                    alert("الاسم قصير جداً");
+                    return;
+                }
+                if (raw.length > 15) {
+                    alert("الاسم طويل جداً (الحد الأقصى 15 حرف)");
+                    return;
+                }
                 username = raw;
                 startChat();
             }
+
             loginBtn.onclick = attemptLogin;
-            usernameInput.onkeypress = (e) => { if (e.key === 'Enter') attemptLogin(); };
+            usernameInput.onkeypress = (e) => {
+                if (e.key === 'Enter') attemptLogin();
+            };
+
+            // ========== تنظيف عند مغادرة الصفحة ==========
+            window.addEventListener('beforeunload', () => {
+                cleanupPlayer();
+                if (userRef) userRef.remove();
+                if (typingRef && username) typingRef.child(username).remove();
+            });
+
+            // ========== معالجة الأخطاء العامة ==========
+            window.addEventListener('error', (e) => {
+                console.error('خطأ عام:', e.error);
+            });
+
+            window.addEventListener('unhandledrejection', (e) => {
+                console.error('Promise rejection:', e.reason);
+            });
+
         })();
     </script>
 </body>
