@@ -47,6 +47,9 @@
             font-family: 'Tajawal', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -70,321 +73,329 @@
 
         #chat-container { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
 
+        /* ============ شريط علوي فاخر ============ */
+        #topBar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+        }
+        .top-brand {
+            font-size: 18px; font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-light), #c4b5fd);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -0.5px;
+        }
+        .top-actions { display: flex; gap: 8px; align-items: center; }
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-medium);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .icon-btn:hover {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+            transform: translateY(-1px);
+        }
+        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .badge {
+            position: absolute; top: -4px; right: -4px;
+            min-width: 18px; height: 18px; border-radius: 9px;
+            background: var(--accent); color: #fff;
+            font-size: 10px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; border: 2px solid var(--bg-primary);
+        }
+
+        /* ============ مشغل الفيديو العلوي ============ */
+        #videoPlayer {
+            position: fixed;
+            top: 56px;
+            left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 800px;
+            z-index: 999;
+            display: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #000;
+        }
+        #videoPlayer.minimized {
+            width: 200px !important;
+            border-radius: 14px;
+            left: auto;
+            right: 12px;
+            transform: none;
+        }
+        #videoPlayer.minimized .player-controls-bar,
+        #videoPlayer.minimized .player-top-overlay { display: none; }
+        #videoPlayer.minimized .player-screen { border-radius: 14px; cursor: pointer; }
+
+        .player-wrapper { position: relative; width: 100%; }
+        .player-screen {
+            position: relative; width: 100%; aspect-ratio: 16/9;
+            background: #000; cursor: pointer;
+            overflow: hidden;
+        }
+        .player-screen video,
+        .player-screen iframe {
+            width: 100%; height: 100%;
+            border: none; object-fit: contain;
+            display: block;
+        }
+
+        /* Overlay علوي */
+        .player-top-overlay {
+            position: absolute; top: 0; left: 0; right: 0;
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #videoPlayer:hover .player-top-overlay { opacity: 1; }
+        .player-title-group { display: flex; align-items: center; gap: 8px; }
+        .live-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 10px; font-weight: 700; color: #fca5a5;
+        }
+        .live-dot-mini {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--danger);
+            animation: livePulse 1.5s infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--danger); }
+            50% { opacity: 0.5; box-shadow: 0 0 12px var(--danger); }
+        }
+        .player-title-text { font-size: 12px; color: #ddd; font-weight: 600; }
+
+        .player-top-btns { display: flex; gap: 6px; }
+        .player-icon-sm {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; transition: all 0.2s;
+        }
+        .player-icon-sm:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
+        .player-icon-sm.close-btn:hover { background: rgba(239, 68, 68, 0.6); border-color: var(--danger); }
+
+        /* Spinner */
+        .player-spinner {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.7); z-index: 4;
+        }
+        .spinner-ring {
+            width: 36px; height: 36px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-light);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* شريط التحكم السفلي */
+        .player-controls-bar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 28px 12px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
+            z-index: 5; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #videoPlayer:hover .player-controls-bar { opacity: 1; }
+
+        .progress-track {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.15);
+            border-radius: 2px; cursor: pointer; margin-bottom: 10px;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent);
+            border-radius: 2px; width: 0%;
+            position: relative; transition: width 0.08s linear;
+        }
+        .progress-thumb {
+            position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+            width: 12px; height: 12px; background: #fff;
+            border-radius: 50%; opacity: 0; transition: opacity 0.2s;
+        }
+        .progress-track:hover .progress-thumb { opacity: 1; }
+
+        .ctrl-row {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .ctrl-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: transparent; border: none; color: #fff;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s;
+            font-size: 14px;
+        }
+        .ctrl-btn:hover { background: rgba(255,255,255,0.1); }
+        .ctrl-btn svg { width: 18px; height: 18px; fill: #fff; }
+        .ctrl-btn.play-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.1); }
+        .ctrl-btn.play-btn:hover { background: var(--accent); }
+
+        .time-display {
+            font-size: 12px; color: #ccc; font-family: 'SF Mono', 'Cascadia Code', monospace;
+            direction: ltr; min-width: 85px; text-align: center;
+        }
+        .spacer { flex: 1; }
+
+        .volume-group { display: flex; align-items: center; gap: 2px; }
+        .volume-slider {
+            width: 0; overflow: hidden; transition: width 0.2s;
+            -webkit-appearance: none; appearance: none;
+            height: 3px; background: rgba(255,255,255,0.2);
+            border-radius: 2px; outline: none; cursor: pointer;
+        }
+        .volume-group:hover .volume-slider { width: 50px; }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px;
+            border-radius: 50%; background: #fff; cursor: pointer;
+        }
+
+        /* إيماءة التكبير والتصغير */
+        .pinch-indicator {
+            position: absolute; inset: 0; pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; opacity: 0; transition: opacity 0.3s;
+        }
+        .pinch-indicator.active { opacity: 1; }
+        .pinch-icon {
+            font-size: 40px; color: #fff;
+            background: rgba(0,0,0,0.6); border-radius: 50%;
+            width: 60px; height: 60px; display: flex;
+            align-items: center; justify-content: center;
+            animation: pinchPop 0.3s ease;
+        }
+        @keyframes pinchPop {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         /* ============ منطقة الرسائل ============ */
         #messages {
-            flex: 1; overflow-y: auto; padding: 65px 16px 16px;
+            flex: 1; overflow-y: auto; padding: 70px 16px 16px;
             scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-            display: flex; flex-direction: column; gap: 1px;
+            display: flex; flex-direction: column; gap: 2px;
+            transition: padding-top 0.4s ease;
         }
+        #messages.player-active { padding-top: 280px; }
         #messages::-webkit-scrollbar { width: 4px; }
         #messages::-webkit-scrollbar-track { background: transparent; }
         #messages::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.2); border-radius: 10px; }
 
         /* ============ رسالة ============ */
         .msg-row {
-            display: flex; gap: 8px; padding: 6px 14px; border-radius: var(--radius-sm);
-            transition: background var(--transition); position: relative;
-            animation: rowIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; gap: 8px; padding: 7px 14px; border-radius: var(--radius-sm);
+            transition: background var(--transition);
+            animation: rowIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .msg-row:hover { background: rgba(124, 58, 237, 0.02); }
         @keyframes rowIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .msg-body { flex: 1; min-width: 0; display: flex; gap: 8px; align-items: baseline; }
-        .msg-name { 
-            font-weight: 700; font-size: 13px; color: var(--accent-light); 
+        .msg-body { flex: 1; min-width: 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+        .msg-name {
+            font-weight: 700; font-size: 13px; color: var(--accent-light);
             white-space: nowrap; flex-shrink: 0;
         }
         .msg-text {
-            font-size: 14px; line-height: 1.5; word-break: break-word;
+            font-size: 14px; line-height: 1.55; word-break: break-word;
             direction: rtl; text-align: right; color: var(--text-primary);
-            opacity: 0.9; flex: 1;
+            opacity: 0.92; flex: 1; min-width: 0;
         }
         .msg-time {
             font-size: 10px; color: var(--text-muted);
             white-space: nowrap; flex-shrink: 0; margin-right: auto;
+            opacity: 0.7;
         }
 
-        /* رسالة نظام */
         .sys-badge {
-            text-align: center; font-size: 11px; margin: 10px auto;
+            text-align: center; font-size: 11px; margin: 8px auto;
             padding: 6px 18px; border-radius: 20px;
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(139, 92, 246, 0.04));
-            border: 1px solid rgba(124, 58, 237, 0.2);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(139, 92, 246, 0.03));
+            border: 1px solid rgba(124, 58, 237, 0.15);
             color: var(--accent-light); max-width: fit-content;
             backdrop-filter: blur(8px);
             animation: badgeIn 0.4s ease, badgeOut 0.4s ease 5s forwards;
         }
         @keyframes badgeIn {
-            from { opacity: 0; transform: translateY(-12px) scale(0.9); }
+            from { opacity: 0; transform: translateY(-10px) scale(0.9); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes badgeOut { to { opacity: 0; transform: translateY(-8px); } }
 
         /* ============ شريط الإدخال ============ */
         #inputArea {
-            display: flex; gap: 10px; padding: 12px 16px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            background: rgba(10, 10, 15, 0.92); backdrop-filter: blur(30px);
+            display: flex; gap: 10px; padding: 10px 14px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border-top: 1px solid var(--border-subtle); z-index: 10;
+            align-items: center;
         }
         #messageInput {
-            flex: 1; font-size: 14px; height: 48px; padding: 0 20px;
-            border-radius: 24px; background: rgba(255, 255, 255, 0.03);
+            flex: 1; font-size: 14px; height: 46px; padding: 0 18px;
+            border-radius: 23px; background: rgba(255, 255, 255, 0.03);
             border: 2px solid var(--border-medium); color: var(--text-primary);
             font-family: 'Tajawal', sans-serif; transition: all var(--transition);
             outline: none;
         }
         #messageInput:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.06), 0 0 20px rgba(124, 58, 237, 0.08);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05), 0 0 20px rgba(124, 58, 237, 0.06);
         }
-        #messageInput::placeholder { color: rgba(255, 255, 255, 0.2); }
+        #messageInput::placeholder { color: rgba(255, 255, 255, 0.18); }
 
         #sendBtn {
-            height: 48px; width: 48px; border-radius: 50%;
+            width: 46px; height: 46px; border-radius: 50%;
             background: linear-gradient(135deg, var(--accent), var(--accent-glow));
-            color: #fff; font-weight: 700; cursor: pointer; border: none;
-            font-family: 'Tajawal', sans-serif; font-size: 18px;
-            transition: all var(--transition); flex-shrink: 0;
-            box-shadow: 0 4px 18px rgba(124, 58, 237, 0.35);
+            color: #fff; cursor: pointer; border: none;
+            font-size: 18px; transition: all var(--transition); flex-shrink: 0;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
             display: flex; align-items: center; justify-content: center;
         }
-        #sendBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124, 58, 237, 0.5); }
-        #sendBtn:active { transform: scale(0.95); }
-
-        /* ============ أزرار علوية ============ */
-        #topButtons {
-            position: fixed;
-            top: calc(10px + env(safe-area-inset-top));
-            right: calc(10px + env(safe-area-inset-right));
-            display: flex; gap: 8px; z-index: 1000;
-        }
-        .pill-btn {
-            height: 42px; padding: 0 16px;
-            background: var(--glass); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 21px; cursor: pointer;
-            border: 1px solid var(--border-medium); color: #fff;
-            font-size: 13px; display: flex; align-items: center; gap: 8px;
-            transition: all var(--transition);
-            font-family: 'Tajawal', sans-serif; font-weight: 500;
-        }
-        .pill-btn:hover {
-            background: rgba(124, 58, 237, 0.1); border-color: var(--border-glow);
-            box-shadow: var(--shadow-glow); transform: translateY(-1px);
-        }
-        .pill-btn svg { width: 18px; height: 18px; }
-        .count-badge {
-            background: var(--accent); color: #fff;
-            font-size: 10px; font-weight: 700;
-            min-width: 20px; height: 20px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; padding: 0 5px;
-        }
-
-        /* ============ مشغل فيديو هرمي (PiP) ============ */
-        #pipPlayer {
-            position: fixed;
-            bottom: 100px;
-            right: 16px;
-            width: 340px;
-            max-width: calc(100vw - 32px);
-            z-index: 999;
-            display: none;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(124, 58, 237, 0.3);
-            background: #000;
-            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
-            cursor: move;
-        }
-        #pipPlayer.minimized {
-            width: 180px;
-            border-radius: 12px;
-        }
-        #pipPlayer.minimized .pip-controls,
-        #pipPlayer.minimized .pip-header { display: none; }
-        #pipPlayer.minimized .pip-video-wrap { border-radius: 12px; }
-
-        .pip-video-wrap {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-        }
-        .pip-video-wrap video,
-        .pip-video-wrap iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            object-fit: contain;
-        }
-        .pip-header {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            padding: 8px 12px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 3;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        #pipPlayer:hover .pip-header { opacity: 1; }
-        .pip-title {
-            font-size: 11px; color: #fff; font-weight: 600;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .pip-title .live-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--danger); animation: pulseDot 2s infinite;
-        }
-        @keyframes pulseDot {
-            0%, 100% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.3); }
-            50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.8); }
-        }
-        .pip-actions {
-            display: flex; gap: 4px;
-        }
-        .pip-btn {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: rgba(0,0,0,0.6); border: none; color: #fff;
-            cursor: pointer; font-size: 12px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-        .pip-btn:hover { background: rgba(124, 58, 237, 0.6); transform: scale(1.1); }
-        .pip-btn.close:hover { background: rgba(239, 68, 68, 0.8); }
-
-        .pip-controls {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 30px 10px 8px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            display: flex; align-items: center; gap: 8px;
-            z-index: 3;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        #pipPlayer:hover .pip-controls { opacity: 1; }
-
-        .pip-progress {
-            flex: 1; height: 3px; background: rgba(255,255,255,0.2);
-            border-radius: 2px; cursor: pointer; position: relative;
-        }
-        .pip-progress-fill {
-            height: 100%; background: var(--accent);
-            border-radius: 2px; width: 0%;
-            transition: width 0.1s linear;
-        }
-        .pip-time {
-            font-size: 10px; color: #ccc; font-family: monospace;
-            direction: ltr; min-width: 40px; text-align: center;
-        }
-        .pip-spinner {
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.7); z-index: 2;
-        }
-        .pip-spinner-inner {
-            width: 24px; height: 24px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ============ المشغل الكبير ============ */
-        #bigPlayer {
-            position: fixed; inset: 0;
-            background: #000; z-index: 10000;
-            display: none; flex-direction: column;
-        }
-        #bigPlayer.active { display: flex; }
-
-        .big-header {
-            padding: 16px 20px;
-            display: flex; justify-content: space-between;
-            align-items: center;
-            position: absolute; top: 0; left: 0; right: 0;
-            z-index: 5;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
-        #bigPlayer:hover .big-header { opacity: 1; }
-        .big-title { font-size: 16px; font-weight: 700; color: #fff; }
-
-        .big-video-wrap {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            background: #000;
-        }
-        .big-video-wrap video,
-        .big-video-wrap iframe {
-            max-width: 100%; max-height: 100%;
-            width: 100%; height: 100%;
-            object-fit: contain; border: none;
-        }
-
-        .big-controls-wrap {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 40px 20px 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            opacity: 0; transition: opacity 0.3s; z-index: 5;
-        }
-        #bigPlayer:hover .big-controls-wrap { opacity: 1; }
-
-        .big-progress {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.2);
-            border-radius: 2px; cursor: pointer; margin-bottom: 12px;
-            position: relative;
-        }
-        .big-progress-fill {
-            height: 100%; background: var(--accent); border-radius: 2px;
-            width: 0%; transition: width 0.1s linear;
-        }
-        .big-ctrl-row {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .big-ctrl-row button {
-            background: none; border: none; color: #fff;
-            cursor: pointer; padding: 8px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; width: 40px; height: 40px;
-        }
-        .big-ctrl-row button:hover { background: rgba(255,255,255,0.1); }
-        .big-ctrl-row button svg { width: 20px; height: 20px; fill: #fff; }
-        .big-time {
-            font-size: 13px; color: #ccc; font-family: monospace;
-            direction: ltr; min-width: 100px;
-        }
-        .big-spacer { flex: 1; }
+        #sendBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5); }
+        #sendBtn:active { transform: scale(0.94); }
 
         /* ============ نوافذ منبثقة ============ */
         #usersBox, #setVideoModal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: var(--bg-card); padding: 24px; border-radius: var(--radius-xl);
-            z-index: 1003; display: none; max-height: 80vh; width: 92%; max-width: 420px;
+            z-index: 1003; display: none; max-height: 80vh; width: 92%; max-width: 400px;
             overflow-y: auto; border: 1px solid var(--border-medium);
-            box-shadow: var(--shadow-lg);
-            animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg), 0 0 60px rgba(124, 58, 237, 0.08);
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes modalIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        .modal-title { text-align: center; margin-bottom: 18px; font-size: 18px; font-weight: 700; color: var(--accent-light); }
+        .modal-title { text-align: center; margin-bottom: 16px; font-size: 17px; font-weight: 700; color: var(--accent-light); }
         .modal-input {
             width: 100%; padding: 12px 16px; border-radius: var(--radius-md);
             background: rgba(255, 255, 255, 0.02); color: #fff; font-size: 14px;
-            margin-bottom: 12px; border: 2px solid var(--border-medium);
+            margin-bottom: 10px; border: 2px solid var(--border-medium);
             font-family: 'Tajawal', sans-serif; transition: all var(--transition); outline: none;
         }
-        .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.06); }
+        .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05); }
         .modal-btn {
             width: 100%; padding: 12px; border-radius: var(--radius-md);
             background: linear-gradient(135deg, var(--accent), var(--accent-glow));
@@ -392,27 +403,27 @@
             font-family: 'Tajawal', sans-serif; font-size: 15px;
             transition: all var(--transition);
         }
-        .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4); }
+        .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4); }
 
         .user-row {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 12px; border-radius: var(--radius-sm);
-            transition: all var(--transition);
+            transition: background 0.2s;
         }
         .user-row:hover { background: rgba(255, 255, 255, 0.02); }
         .status-dot {
             width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
         }
-        .status-dot.on { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+        .status-dot.on { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
 
         #overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65);
             z-index: 1001; display: none;
-            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
         }
 
         /* ============ مؤشر الكتابة ============ */
-        #typingWrapper { display: none; padding: 5px 20px; color: var(--text-secondary); font-size: 11px; }
+        #typingWrapper { display: none; padding: 6px 20px; color: var(--text-secondary); font-size: 11px; }
         #typingIndicator { display: flex; align-items: center; gap: 6px; }
         .typing-wave { display: inline-flex; gap: 2px; margin-right: 4px; }
         .typing-wave b {
@@ -428,25 +439,25 @@
 
         /* ============ Toast ============ */
         .toast-stack {
-            position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
             z-index: 10001; display: flex; flex-direction: column; gap: 6px;
             pointer-events: none;
         }
         .toast {
             background: rgba(24, 24, 37, 0.96); backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border-medium); border-radius: 22px;
-            padding: 10px 22px; color: #fff; font-size: 12px;
+            border: 1px solid var(--border-medium); border-radius: 20px;
+            padding: 10px 20px; color: #fff; font-size: 12px;
             pointer-events: auto;
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 3.2s forwards;
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
             box-shadow: var(--shadow-sm); white-space: nowrap; font-weight: 500;
         }
         .toast.ok { border-left: 3px solid var(--success); }
         .toast.err { border-left: 3px solid var(--danger); }
         .toast.warn { border-left: 3px solid var(--warning); }
         .toast.msg { border-left: 3px solid var(--info); }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-25px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes toastOut { to { opacity: 0; transform: translateY(-15px) scale(0.95); } }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-12px) scale(0.95); } }
 
         /* ============ شاشة الدخول ============ */
         #loginScreen {
@@ -459,20 +470,20 @@
             background: rgba(18, 18, 26, 0.98); padding: 40px 34px;
             border-radius: var(--radius-xl); text-align: center;
             width: 90%; max-width: 360px;
-            border: 1px solid rgba(124, 58, 237, 0.12);
-            box-shadow: var(--shadow-lg), 0 0 70px rgba(124, 58, 237, 0.05);
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            box-shadow: var(--shadow-lg), 0 0 80px rgba(124, 58, 237, 0.04);
         }
-        .login-glyph { font-size: 48px; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+        .login-glyph { font-size: 44px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
         #loginBox h2 {
-            margin-bottom: 4px; font-size: 26px; font-weight: 900;
+            margin-bottom: 2px; font-size: 28px; font-weight: 900;
             background: linear-gradient(135deg, var(--accent-light), #ddd6fe);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .login-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 24px; }
+        .login-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 22px; }
         #loginScreen #usernameInput {
             width: 100%; padding: 13px 16px; margin: 8px 0;
             border-radius: var(--radius-md); font-size: 14px;
@@ -483,41 +494,47 @@
         }
         #loginScreen #usernameInput:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.06);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05);
         }
         #loginBtn {
             width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-glow));
             padding: 13px; border-radius: var(--radius-md); font-weight: 700;
             border: none; cursor: pointer; color: #fff;
-            font-family: 'Tajawal', sans-serif; font-size: 16px; margin-top: 10px;
+            font-family: 'Tajawal', sans-serif; font-size: 16px; margin-top: 8px;
             transition: all var(--transition);
-            box-shadow: 0 4px 18px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
         }
-        #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(124, 58, 237, 0.5); }
+        #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5); }
 
         /* ============ تجاوب ============ */
         @media (max-width: 600px) {
-            #pipPlayer {
-                right: 8px; bottom: 90px;
-                width: 280px;
+            #videoPlayer {
+                width: 96%;
+                top: 52px;
             }
-            #pipPlayer.minimized { width: 140px; }
-            #topButtons { right: 4px; top: 6px; gap: 5px; }
-            .pill-btn { height: 36px; padding: 0 10px; font-size: 11px; }
-            #messageInput { font-size: 13px; height: 42px; padding: 0 14px; }
-            #sendBtn { height: 42px; width: 42px; }
-            #messages { padding: 55px 8px 8px; }
+            #videoPlayer.minimized {
+                width: 150px !important;
+                right: 6px;
+            }
+            #messages { padding: 60px 8px 8px; }
+            #messages.player-active { padding-top: 240px; }
+            #messageInput { font-size: 13px; height: 40px; padding: 0 14px; }
+            #sendBtn { width: 40px; height: 40px; }
+            .ctrl-btn { width: 28px; height: 28px; }
+            .ctrl-btn.play-btn { width: 34px; height: 34px; }
+            .ctrl-btn svg { width: 15px; height: 15px; }
         }
     </style>
 </head>
 <body>
     <div class="top-glow"></div>
 
+    <!-- شاشة الدخول -->
     <div id="loginScreen">
         <div id="loginBox">
             <div class="login-glyph">✦</div>
             <h2>شات خاص</h2>
-            <p class="login-sub">مساحة تواصل راقية</p>
+            <p class="login-sub">مساحة تواصل فاخرة</p>
             <input type="text" id="usernameInput" placeholder="اسمك المستعار" maxlength="15">
             <button id="loginBtn">انضم الآن</button>
         </div>
@@ -525,82 +542,96 @@
 
     <div class="toast-stack" id="toastStack"></div>
 
+    <!-- واجهة الشات -->
     <div id="chat-container" style="display:none;">
-        <div id="topButtons">
-            <button class="pill-btn" id="setVideoBtn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                فيديو
-            </button>
-            <button class="pill-btn" id="onlineListBtn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-                <span class="count-badge" id="count">0</span>
-            </button>
+        <!-- شريط علوي -->
+        <div id="topBar">
+            <span class="top-brand">✦ شات</span>
+            <div class="top-actions">
+                <button class="icon-btn" id="setVideoBtn" title="تشغيل فيديو">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10,8 16,12 10,16" fill="var(--bg-primary)"/></svg>
+                </button>
+                <button class="icon-btn" id="onlineListBtn" title="المتواجدون">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                    <span class="badge" id="count">0</span>
+                </button>
+            </div>
         </div>
 
-        <!-- مشغل PiP هرمي -->
-        <div id="pipPlayer">
-            <div class="pip-video-wrap"></div>
-            <div class="pip-header">
-                <span class="pip-title"><span class="live-dot"></span>مباشر</span>
-                <div class="pip-actions">
-                    <button class="pip-btn mini" title="تصغير">─</button>
-                    <button class="pip-btn expand" title="تكبير">⛶</button>
-                    <button class="pip-btn close" title="إغلاق">✕</button>
+        <!-- مشغل الفيديو العلوي -->
+        <div id="videoPlayer">
+            <div class="player-wrapper">
+                <div class="player-screen"></div>
+                <div class="pinch-indicator"><div class="pinch-icon"></div></div>
+                
+                <!-- Overlay علوي -->
+                <div class="player-top-overlay">
+                    <div class="player-title-group">
+                        <span class="live-badge"><span class="live-dot-mini"></span>مباشر</span>
+                        <span class="player-title-text" id="playerTitle">مشغل الفيديو</span>
+                    </div>
+                    <div class="player-top-btns">
+                        <button class="player-icon-sm" id="btnMini" title="تصغير">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="11" width="16" height="2"/></svg>
+                        </button>
+                        <button class="player-icon-sm close-btn" id="btnClose" title="إغلاق">✕</button>
+                    </div>
+                </div>
+
+                <!-- Spinner -->
+                <div class="player-spinner" id="playerSpinner">
+                    <div class="spinner-ring"></div>
+                </div>
+
+                <!-- شريط التحكم -->
+                <div class="player-controls-bar">
+                    <div class="progress-track" id="progressTrack">
+                        <div class="progress-fill" id="progressFill"><div class="progress-thumb"></div></div>
+                    </div>
+                    <div class="ctrl-row">
+                        <button class="ctrl-btn" id="btnRew" title="ترجيع 10 ثوان">
+                            <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                        </button>
+                        <button class="ctrl-btn play-btn" id="btnPlay" title="تشغيل/إيقاف">
+                            <svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg>
+                        </button>
+                        <button class="ctrl-btn" id="btnFwd" title="تقدم 10 ثوان">
+                            <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                        </button>
+                        <div class="volume-group">
+                            <button class="ctrl-btn" id="btnVolume" title="كتم/إلغاء">
+                                <svg viewBox="0 0 24 24" id="volumeIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                            </button>
+                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                        <span class="spacer"></span>
+                        <button class="ctrl-btn" id="btnFS" title="ملء الشاشة">
+                            <svg viewBox="0 0 24 24"><polygon points="8,3 3,3 3,8 5,6 8,8 10,6 7,4"/><polygon points="16,21 21,21 21,16 19,18 16,16 14,18 17,20"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="pip-controls">
-                <button class="pip-btn play-pause" title="تشغيل">▶</button>
-                <div class="pip-progress"><div class="pip-progress-fill"></div></div>
-                <span class="pip-time">00:00</span>
-                <button class="pip-btn volume" title="صوت">🔊</button>
-            </div>
         </div>
 
-        <!-- مشغل كبير -->
-        <div id="bigPlayer">
-            <div class="big-header">
-                <span class="big-title">مشغل الفيديو</span>
-                <button class="pip-btn close" id="bigClose">✕</button>
-            </div>
-            <div class="big-video-wrap"></div>
-            <div class="big-controls-wrap">
-                <div class="big-progress"><div class="big-progress-fill"></div></div>
-                <div class="big-ctrl-row">
-                    <button class="big-play">
-                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    </button>
-                    <button class="big-rew">
-                        <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                    </button>
-                    <button class="big-fwd">
-                        <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
-                    </button>
-                    <button class="big-volume">
-                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                    </button>
-                    <span class="big-time">00:00 / 00:00</span>
-                    <span class="big-spacer"></span>
-                    <button class="big-pip-btn" title="PiP">⊞</button>
-                    <button class="big-fs" title="ملء الشاشة">⛶</button>
-                </div>
-            </div>
-        </div>
-
+        <!-- نوافذ منبثقة -->
         <div id="setVideoModal">
-            <h3 class="modal-title">🎬 فيديو جديد</h3>
+            <h3 class="modal-title">🎬 تشغيل فيديو</h3>
             <input type="text" class="modal-input" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، m3u8، mp4...">
-            <button class="modal-btn" id="submitVideoUrlBtn">تشغيل</button>
+            <button class="modal-btn" id="submitVideoUrlBtn">تشغيل الآن</button>
         </div>
 
         <div id="usersBox">
-            <h3 class="modal-title">👥 المتواجدون</h3>
+            <h3 class="modal-title">👥 المتواجدون الآن</h3>
             <div id="usersList"></div>
         </div>
 
         <div id="overlay"></div>
 
+        <!-- منطقة الرسائل -->
         <div id="messages"></div>
 
+        <!-- مؤشر الكتابة -->
         <div id="typingWrapper">
             <div id="typingIndicator">
                 <span id="typingText"></span>
@@ -608,8 +639,9 @@
             </div>
         </div>
 
+        <!-- شريط الإدخال -->
         <form id="inputArea">
-            <input type="text" id="messageInput" placeholder="رسالتك..." autocomplete="off" maxlength="500">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off" maxlength="500">
             <button type="submit" id="sendBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
@@ -618,322 +650,491 @@
 
     <script>
         (function(){
-            const firebaseConfig = {apiKey:"AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",authDomain:"mychat-2d881.firebaseapp.com",databaseURL:"https://mychat-2d881-default-rtdb.firebaseio.com"};
-            try{firebase.initializeApp(firebaseConfig);}catch(e){}
-            const db=firebase.database();
-            
-            let username='',userRef,messagesRef,onlineRef,pinnedVideoRef,typingRef,serverTimeOffset=0,typingTimer=null;
-            let pipPlayer=null, bigPlayer=null, currentVideoData=null;
-            const MSG_CAP=120;
-            const $=id=>document.getElementById(id);
-            const msgPanel=$('messages'),msgField=$('messageInput'),toastStack=$('toastStack');
-            const shade=$('overlay'),userModal=$('usersBox'),videoModal=$('setVideoModal'),videoField=$('videoUrlInput');
-            const typeBox=$('typingWrapper'),typeText=$('typingText');
-            const pipEl=$('pipPlayer'),bigEl=$('bigPlayer');
+            // ============ Firebase Config ============
+            const firebaseConfig = {
+                apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+                authDomain: "mychat-2d881.firebaseapp.com",
+                databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+            };
+            try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+            const db = firebase.database();
 
-            function toast(msg,kind='msg'){const e=document.createElement('div');e.className=`toast ${kind}`;e.textContent=msg;toastStack.appendChild(e);setTimeout(()=>e.remove(),3600);}
-            
-            class RateLimiter{constructor(max=5,win=7000){this.hits=[];this.max=max;this.win=win;}check(){const n=Date.now();this.hits=this.hits.filter(t=>n-t<this.win);if(this.hits.length>=this.max){toast('⏳ تمهل قليلاً','warn');return false;}this.hits.push(n);return true;}}
-            const limiter=new RateLimiter();
-            
-            const esc=s=>{const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;};
-            const clean=s=>s.replace(/<[^>]*>/g,'').replace(/javascript:/gi,'').substring(0,500);
-            const toBottom=()=>requestAnimationFrame(()=>{msgPanel.scrollTop=msgPanel.scrollHeight;});
-            const ytCode=u=>(u||'').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1]||null;
-            const twCode=u=>(u||'').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1]||null;
-            const extractUrl=t=>{const m=t.match(/(https?:\/\/[^\s]+)/g);return m?m[0].replace(/[،،؛]+$/,''):null;};
-            const classify=u=>{if(ytCode(u))return{kind:'youtube',id:ytCode(u)};if(twCode(u))return{kind:'twitter',id:twCode(u)};if(/\.(m3u8|m3u)(\?.*)?$/i.test(u))return{kind:'hls',url:u};if(/\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u))return{kind:'direct',url:u};return{kind:'unknown'};};
-            const timeAgo=ts=>{if(!ts)return'';const s=Math.floor((Date.now()+serverTimeOffset-ts)/1000);if(s<5)return'الآن';if(s<60)return'ثواني';if(s<3600)return`د${Math.floor(s/60)}`;if(s<86400)return`س${Math.floor(s/3600)}`;return`ي${Math.floor(s/86400)}`;};
-            const fmtTime=t=>{if(isNaN(t))return'00:00';const m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
+            // ============ State ============
+            let username = '', userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
+            let serverTimeOffset = 0, typingTimer = null;
+            let videoState = { hls: null, video: null, listeners: [] };
+            const MSG_CAP = 120;
 
-            function note(text){const d=document.createElement('div');d.className='sys-badge';d.textContent=text;msgPanel.appendChild(d);toBottom();setTimeout(()=>d.remove(),5500);}
+            // ============ DOM ============
+            const $ = id => document.getElementById(id);
+            const msgPanel = $('messages'), msgField = $('messageInput'), toastStack = $('toastStack');
+            const shade = $('overlay'), userModal = $('usersBox'), videoModal = $('setVideoModal');
+            const videoField = $('videoUrlInput'), typeBox = $('typingWrapper'), typeText = $('typingText');
+            const playerEl = $('videoPlayer'), playerScreen = playerEl.querySelector('.player-screen');
+            const playerSpinner = $('playerSpinner'), progressFill = $('progressFill');
+            const progressTrack = $('progressTrack'), timeDisplay = $('timeDisplay');
+            const volumeSlider = $('volumeSlider'), volumeIcon = $('volumeIcon');
 
-            function renderMsg(key,{user,text,timestamp}){
-                const w=document.createElement('div');w.className='msg-row';w.id=`m-${key}`;
-                w.innerHTML=`<div class="msg-body"><span class="msg-name">${esc(user)}</span><span class="msg-text">${esc(text)}</span><span class="msg-time">${timeAgo(timestamp)}</span></div>`;
-                msgPanel.appendChild(w);toBottom();
-                while(msgPanel.children.length>MSG_CAP+40){const f=msgPanel.firstElementChild;if(f&&!f.classList.contains('sys-badge'))f.remove();else break;}
+            // ============ Utilities ============
+            function toast(msg, kind = 'msg') {
+                const e = document.createElement('div');
+                e.className = `toast ${kind}`;
+                e.textContent = msg;
+                toastStack.appendChild(e);
+                setTimeout(() => e.remove(), 3400);
             }
 
-            // ============ PiP Player ============
-            class PipPlayer {
-                constructor(){this.video=null;this.hls=null;this.listeners=[];this.dragging=false;this.init();}
-                init(){
-                    this.videoWrap=pipEl.querySelector('.pip-video-wrap');
-                    this.progressFill=pipEl.querySelector('.pip-progress-fill');
-                    this.timeDisplay=pipEl.querySelector('.pip-time');
-                    this.playBtn=pipEl.querySelector('.play-pause');
-                    this.volBtn=pipEl.querySelector('.volume');
-                    this.spinner=document.createElement('div');this.spinner.className='pip-spinner';
-                    this.spinner.innerHTML='<div class="pip-spinner-inner"></div>';
+            class RateLimiter {
+                constructor(max = 5, win = 7000) { this.hits = []; this.max = max; this.win = win; }
+                check() {
+                    const n = Date.now();
+                    this.hits = this.hits.filter(t => n - t < this.win);
+                    if (this.hits.length >= this.max) { toast('⏳ تمهل قليلاً', 'warn'); return false; }
+                    this.hits.push(n); return true;
                 }
-                on(el,ev,h){el.addEventListener(ev,h);this.listeners.push({el,ev,h});}
-                load(data){
-                    this.destroy();
-                    this.videoWrap.innerHTML='';
-                    this.videoWrap.appendChild(this.spinner);
-                    this.spinner.style.display='flex';
+            }
+            const limiter = new RateLimiter();
+
+            const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+            const clean = s => s.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').substring(0, 500);
+            const toBottom = () => requestAnimationFrame(() => { msgPanel.scrollTop = msgPanel.scrollHeight; });
+            const ytCode = u => (u || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1] || null;
+            const twCode = u => (u || '').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1] || null;
+            const extractUrl = t => { const m = t.match(/(https?:\/\/[^\s]+)/g); return m ? m[0].replace(/[،،؛]+$/, '') : null; };
+            const classify = u => {
+                if (ytCode(u)) return { kind: 'youtube', id: ytCode(u) };
+                if (twCode(u)) return { kind: 'twitter', id: twCode(u) };
+                if (/\.(m3u8|m3u)(\?.*)?$/i.test(u)) return { kind: 'hls', url: u };
+                if (/\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u)) return { kind: 'direct', url: u };
+                return { kind: 'unknown' };
+            };
+            const timeAgo = ts => {
+                if (!ts) return '';
+                const s = Math.floor((Date.now() + serverTimeOffset - ts) / 1000);
+                if (s < 5) return 'الآن'; if (s < 60) return 'ثواني';
+                if (s < 3600) return `د${Math.floor(s / 60)}`;
+                if (s < 86400) return `س${Math.floor(s / 3600)}`;
+                return `ي${Math.floor(s / 86400)}`;
+            };
+            const fmtTime = t => {
+                if (isNaN(t)) return '00:00';
+                const m = Math.floor(t / 60), s = Math.floor(t % 60);
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            };
+
+            // ============ Video Player Engine ============
+            function addListener(el, ev, h) {
+                el.addEventListener(ev, h);
+                videoState.listeners.push({ el, ev, h });
+            }
+
+            function destroyVideo() {
+                videoState.listeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
+                videoState.listeners = [];
+                if (videoState.hls) { videoState.hls.destroy(); videoState.hls = null; }
+                if (videoState.video) { videoState.video.pause(); videoState.video.src = ''; videoState.video = null; }
+                playerScreen.innerHTML = '';
+                playerEl.style.display = 'none';
+                playerEl.classList.remove('minimized');
+                msgPanel.classList.remove('player-active');
+                playerSpinner.style.display = 'none';
+                progressFill.style.width = '0%';
+                timeDisplay.textContent = '00:00 / 00:00';
+                $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
+            }
+
+            function loadVideo(data) {
+                destroyVideo();
+                playerEl.style.display = 'block';
+                msgPanel.classList.add('player-active');
+                playerSpinner.style.display = 'flex';
+                $('playerTitle').textContent = esc(data.setBy || 'مشغل');
+
+                if (data.kind === 'youtube') {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${esc(data.id)}?autoplay=1&rel=0&modestbranding=1`;
+                    iframe.allow = 'autoplay;encrypted-media;picture-in-picture';
+                    iframe.allowFullscreen = true;
+                    playerScreen.appendChild(iframe);
+                    playerSpinner.style.display = 'none';
+                    $('btnPlay').querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+                } else if (data.kind === 'hls' || data.kind === 'direct') {
+                    const vid = document.createElement('video');
+                    vid.playsInline = true;
+                    videoState.video = vid;
+                    playerScreen.appendChild(vid);
+
+                    const hlsMode = data.kind === 'hls';
+                    const loadSrc = () => {
+                        if (hlsMode && Hls.isSupported()) {
+                            videoState.hls = new Hls({ enableWorker: true, lowLatencyMode: true, debug: false });
+                            videoState.hls.loadSource(data.url);
+                            videoState.hls.attachMedia(vid);
+                            videoState.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                playerSpinner.style.display = 'none';
+                                vid.play().catch(() => {});
+                            });
+                            videoState.hls.on(Hls.Events.ERROR, (e, d) => {
+                                if (d.fatal) {
+                                    playerSpinner.style.display = 'none';
+                                    toast('⚠️ فشل تحميل الفيديو', 'err');
+                                }
+                            });
+                        } else {
+                            vid.src = data.url;
+                            vid.play().catch(() => {});
+                            playerSpinner.style.display = 'none';
+                        }
+                    };
+
+                    addListener(vid, 'canplay', () => { playerSpinner.style.display = 'none'; });
+                    addListener(vid, 'waiting', () => { playerSpinner.style.display = 'flex'; });
+                    addListener(vid, 'play', () => {
+                        $('btnPlay').querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+                    });
+                    addListener(vid, 'pause', () => {
+                        $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
+                    });
+                    addListener(vid, 'ended', () => {
+                        $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
+                    });
+                    addListener(vid, 'timeupdate', () => {
+                        if (vid.duration) {
+                            progressFill.style.width = (vid.currentTime / vid.duration) * 100 + '%';
+                            timeDisplay.textContent = fmtTime(vid.currentTime) + ' / ' + fmtTime(vid.duration);
+                        }
+                    });
+                    addListener(vid, 'volumechange', () => {
+                        volumeSlider.value = vid.volume;
+                        updateVolumeIcon(vid.muted, vid.volume);
+                    });
+                    loadSrc();
+                }
+            }
+
+            function updateVolumeIcon(muted, vol) {
+                let path = '';
+                if (muted || vol === 0) {
+                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><line x1="22" y1="8" x2="18" y2="16" stroke="currentColor" stroke-width="2"/><line x1="18" y1="8" x2="22" y2="16" stroke="currentColor" stroke-width="2"/>';
+                } else if (vol < 0.5) {
+                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>';
+                } else {
+                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+                }
+                volumeIcon.innerHTML = path;
+            }
+
+            // ============ Pinch to Resize ============
+            let initialDist = 0, initialWidth = 0;
+            const pinchIndicator = playerEl.querySelector('.pinch-indicator');
+            const pinchIcon = playerEl.querySelector('.pinch-icon');
+
+            function getDist(touches) {
+                if (touches.length < 2) return 0;
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            playerEl.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    initialDist = getDist(e.touches);
+                    initialWidth = playerEl.offsetWidth;
+                    pinchIndicator.classList.add('active');
+                }
+            }, { passive: true });
+
+            playerEl.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && initialDist > 0) {
+                    e.preventDefault();
+                    const currentDist = getDist(e.touches);
+                    const scale = currentDist / initialDist;
+                    let newWidth = initialWidth * scale;
+                    newWidth = Math.max(180, Math.min(newWidth, window.innerWidth * 0.95));
+                    playerEl.style.width = newWidth + 'px';
                     
-                    if(data.kind==='youtube'){
-                        const iframe=document.createElement('iframe');
-                        iframe.src=`https://www.youtube.com/embed/${esc(data.id)}?autoplay=1&rel=0&controls=0&modestbranding=1`;
-                        iframe.allow='autoplay;encrypted-media;picture-in-picture';
-                        iframe.allowFullscreen=true;
-                        this.videoWrap.appendChild(iframe);
-                        this.spinner.style.display='none';
-                        this.playBtn.textContent='⏸';
-                    }else if(data.kind==='hls'||data.kind==='direct'){
-                        const vid=document.createElement('video');
-                        vid.playsInline=true;
-                        this.video=vid;
-                        this.videoWrap.appendChild(vid);
-                        const hlsMode=data.kind==='hls';
-                        
-                        const loadVid=()=>{
-                            if(hlsMode&&Hls.isSupported()){
-                                this.hls=new Hls({enableWorker:true,lowLatencyMode:true,debug:false});
-                                this.hls.loadSource(data.url);
-                                this.hls.attachMedia(vid);
-                                this.hls.on(Hls.Events.MANIFEST_PARSED,()=>{this.spinner.style.display='none';vid.play().catch(()=>{});});
-                            }else{vid.src=data.url;vid.play().catch(()=>{});this.spinner.style.display='none';}
-                        };
-                        
-                        this.on(vid,'canplay',()=>{this.spinner.style.display='none';});
-                        this.on(vid,'waiting',()=>{this.spinner.style.display='flex';});
-                        this.on(vid,'play',()=>{this.playBtn.textContent='⏸';});
-                        this.on(vid,'pause',()=>{this.playBtn.textContent='▶';});
-                        this.on(vid,'timeupdate',()=>{
-                            if(vid.duration){
-                                const p=(vid.currentTime/vid.duration)*100;
-                                this.progressFill.style.width=p+'%';
-                                this.timeDisplay.textContent=fmtTime(vid.currentTime);
-                            }
-                        });
-                        this.on(vid,'ended',()=>{this.playBtn.textContent='▶';});
-                        loadVid();
+                    if (newWidth < 240) {
+                        playerEl.classList.add('minimized');
+                        pinchIcon.textContent = '⊟';
+                    } else {
+                        playerEl.classList.remove('minimized');
+                        pinchIcon.textContent = '⊞';
                     }
-                    pipEl.style.display='block';
-                    this.setupDrag();
                 }
-                setupDrag(){
-                    let sx,sy,sl,st,on=false;
-                    const start=e=>{
-                        if(e.target.closest('.pip-btn'))return;
-                        on=true;const p=e.touches?.[0]||e;
-                        sx=p.clientX;sy=p.clientY;
-                        sl=pipEl.offsetLeft;st=pipEl.offsetTop;
-                        pipEl.style.transition='none';
-                    };
-                    const move=e=>{if(!on)return;const p=e.touches?.[0]||e;
-                        pipEl.style.left=(sl+p.clientX-sx)+'px';
-                        pipEl.style.top=(st+p.clientY-sy)+'px';
-                        pipEl.style.right='auto';pipEl.style.bottom='auto';
-                    };
-                    const end=()=>{on=false;pipEl.style.transition='';};
-                    pipEl.addEventListener('mousedown',start);
-                    pipEl.addEventListener('touchstart',start,{passive:false});
-                    document.addEventListener('mousemove',move);
-                    document.addEventListener('touchmove',move,{passive:false});
-                    document.addEventListener('mouseup',end);
-                    document.addEventListener('touchend',end);
-                }
-                togglePlay(){if(this.video){this.video.paused?this.video.play().catch(()=>{}):this.video.pause();}}
-                toggleMute(){if(this.video){this.video.muted=!this.video.muted;this.volBtn.textContent=this.video.muted?'🔇':'🔊';}}
-                destroy(){
-                    this.listeners.forEach(({el,ev,h})=>el.removeEventListener(ev,h));
-                    this.listeners=[];
-                    if(this.hls){this.hls.destroy();this.hls=null;}
-                    if(this.video){this.video.pause();this.video.src='';this.video=null;}
-                    pipEl.style.display='none';
-                    this.videoWrap.innerHTML='';
-                }
-            }
+            }, { passive: false });
 
-            // ============ Big Player ============
-            class BigPlayer {
-                constructor(){this.video=null;this.hls=null;this.listeners=[];this.init();}
-                init(){
-                    this.videoWrap=bigEl.querySelector('.big-video-wrap');
-                    this.progressFill=bigEl.querySelector('.big-progress-fill');
-                    this.timeDisplay=bigEl.querySelector('.big-time');
-                    this.playBtn=bigEl.querySelector('.big-play svg');
-                }
-                on(el,ev,h){el.addEventListener(ev,h);this.listeners.push({el,ev,h});}
-                load(data){
-                    this.destroy();
-                    this.videoWrap.innerHTML='';
-                    if(data.kind==='youtube'){
-                        const iframe=document.createElement('iframe');
-                        iframe.src=`https://www.youtube.com/embed/${esc(data.id)}?autoplay=1&rel=0`;
-                        iframe.allow='autoplay;encrypted-media;picture-in-picture';
-                        iframe.allowFullscreen=true;
-                        this.videoWrap.appendChild(iframe);
-                    }else if(data.kind==='hls'||data.kind==='direct'){
-                        const vid=document.createElement('video');
-                        vid.playsInline=true;vid.controls=false;
-                        this.video=vid;
-                        this.videoWrap.appendChild(vid);
-                        const hlsMode=data.kind==='hls';
-                        if(hlsMode&&Hls.isSupported()){
-                            this.hls=new Hls({enableWorker:true,lowLatencyMode:true,debug:false});
-                            this.hls.loadSource(data.url);
-                            this.hls.attachMedia(vid);
-                            this.hls.on(Hls.Events.MANIFEST_PARSED,()=>vid.play().catch(()=>{}));
-                        }else{vid.src=data.url;vid.play().catch(()=>{});}
-                        this.on(vid,'play',()=>{this.playBtn.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';});
-                        this.on(vid,'pause',()=>{this.playBtn.innerHTML='<path d="M8 5v14l11-7z"/>';});
-                        this.on(vid,'timeupdate',()=>{
-                            if(vid.duration){
-                                this.progressFill.style.width=(vid.currentTime/vid.duration)*100+'%';
-                                this.timeDisplay.textContent=fmtTime(vid.currentTime)+' / '+fmtTime(vid.duration);
-                            }
-                        });
-                    }
-                    bigEl.classList.add('active');
-                }
-                destroy(){
-                    this.listeners.forEach(({el,ev,h})=>el.removeEventListener(ev,h));
-                    this.listeners=[];
-                    if(this.hls){this.hls.destroy();this.hls=null;}
-                    if(this.video){this.video.pause();this.video.src='';this.video=null;}
-                    bigEl.classList.remove('active');
-                    this.videoWrap.innerHTML='';
-                }
-            }
+            playerEl.addEventListener('touchend', () => {
+                initialDist = 0;
+                setTimeout(() => pinchIndicator.classList.remove('active'), 300);
+            });
 
-            // ============ Initialize Players ============
-            pipPlayer=new PipPlayer();
-            bigPlayer=new BigPlayer();
-
-            // PiP controls
-            pipEl.querySelector('.play-pause').onclick=()=>pipPlayer.togglePlay();
-            pipEl.querySelector('.volume').onclick=()=>pipPlayer.toggleMute();
-            pipEl.querySelector('.close').onclick=()=>{
-                pipPlayer.destroy();
-                if(pinnedVideoRef)pinnedVideoRef.remove();
+            // ============ Player Controls ============
+            $('btnPlay').onclick = () => {
+                const v = videoState.video;
+                if (v) { v.paused ? v.play().catch(() => {}) : v.pause(); }
             };
-            pipEl.querySelector('.expand').onclick=()=>{
-                if(currentVideoData)bigPlayer.load(currentVideoData);
+            $('btnRew').onclick = () => {
+                if (videoState.video) videoState.video.currentTime = Math.max(0, videoState.video.currentTime - 10);
             };
-            pipEl.querySelector('.mini').onclick=()=>pipEl.classList.toggle('minimized');
-            pipEl.querySelector('.pip-progress').onclick=e=>{
-                if(pipPlayer.video&&pipPlayer.video.duration){
-                    const r=e.target.getBoundingClientRect();
-                    pipPlayer.video.currentTime=((e.clientX-r.left)/r.width)*pipPlayer.video.duration;
+            $('btnFwd').onclick = () => {
+                if (videoState.video) videoState.video.currentTime = Math.min(videoState.video.duration || 0, videoState.video.currentTime + 10);
+            };
+            $('btnVolume').onclick = () => {
+                if (videoState.video) {
+                    videoState.video.muted = !videoState.video.muted;
+                    updateVolumeIcon(videoState.video.muted, videoState.video.volume);
+                }
+            };
+            volumeSlider.oninput = () => {
+                if (videoState.video) {
+                    videoState.video.volume = +volumeSlider.value;
+                    videoState.video.muted = false;
+                    updateVolumeIcon(false, videoState.video.volume);
+                }
+            };
+            $('btnFS').onclick = () => {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    playerEl.requestFullscreen().catch(() => {});
+                }
+            };
+            $('btnMini').onclick = () => {
+                playerEl.classList.toggle('minimized');
+                $('btnMini').querySelector('svg').innerHTML = playerEl.classList.contains('minimized')
+                    ? '<rect x="4" y="11" width="16" height="2"/>'
+                    : '<rect x="4" y="8" width="16" height="2"/><rect x="4" y="14" width="16" height="2"/>';
+            };
+            $('btnClose').onclick = () => {
+                destroyVideo();
+                if (pinnedVideoRef) pinnedVideoRef.remove();
+            };
+
+            // Progress bar click
+            progressTrack.onclick = (e) => {
+                if (videoState.video && videoState.video.duration) {
+                    const rect = progressTrack.getBoundingClientRect();
+                    const pct = (e.clientX - rect.left) / rect.width;
+                    videoState.video.currentTime = pct * videoState.video.duration;
                 }
             };
 
-            // Big player controls
-            $('bigClose').onclick=()=>bigPlayer.destroy();
-            bigEl.querySelector('.big-play').onclick=()=>{if(bigPlayer.video){bigPlayer.video.paused?bigPlayer.video.play().catch(()=>{}):bigPlayer.video.pause();}};
-            bigEl.querySelector('.big-rew').onclick=()=>{if(bigPlayer.video)bigPlayer.video.currentTime=Math.max(0,bigPlayer.video.currentTime-10);};
-            bigEl.querySelector('.big-fwd').onclick=()=>{if(bigPlayer.video)bigPlayer.video.currentTime=Math.min(bigPlayer.video.duration||0,bigPlayer.video.currentTime+10);};
-            bigEl.querySelector('.big-volume').onclick=()=>{if(bigPlayer.video)bigPlayer.video.muted=!bigPlayer.video.muted;};
-            bigEl.querySelector('.big-fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():bigEl.requestFullscreen().catch(()=>{});};
-            bigEl.querySelector('.big-pip-btn').onclick=()=>{if(currentVideoData){bigPlayer.destroy();pipPlayer.load(currentVideoData);}};
-            bigEl.querySelector('.big-progress').onclick=e=>{
-                if(bigPlayer.video&&bigPlayer.video.duration){
-                    const r=e.target.getBoundingClientRect();
-                    bigPlayer.video.currentTime=((e.clientX-r.left)/r.width)*bigPlayer.video.duration;
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                const v = videoState.video;
+                if (!v || playerEl.style.display === 'none') return;
+                switch (e.key) {
+                    case ' ': e.preventDefault(); v.paused ? v.play().catch(() => {}) : v.pause(); break;
+                    case 'ArrowLeft': e.preventDefault(); v.currentTime = Math.max(0, v.currentTime - 5); break;
+                    case 'ArrowRight': e.preventDefault(); v.currentTime = Math.min(v.duration || 0, v.currentTime + 5); break;
+                    case 'm': e.preventDefault(); v.muted = !v.muted; updateVolumeIcon(v.muted, v.volume); break;
+                    case 'f': e.preventDefault(); document.fullscreenElement ? document.exitFullscreen() : playerEl.requestFullscreen().catch(() => {}); break;
                 }
-            };
+            });
 
-            // ============ Twitter ============
-            async function fetchTwMedia(tid){
-                let vids=[];
-                try{const r=await fetch(`https://api.fxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();for(let v of(d.tweet?.media?.videos||[]))if(v.url)vids.push({url:v.url,mime:'video/mp4'});}}catch(e){}
-                if(vids.length)return vids;
-                try{const r=await fetch(`https://api.vxtwitter.com/status/${tid}`);if(r.ok){const d=await r.json();if(d.media_extended)for(let m of d.media_extended)if((m.type==='video'||m.type==='gif')&&m.url)vids.push({url:m.url,mime:'video/mp4'});}}catch(e){}
+            // ============ Twitter API ============
+            async function fetchTwMedia(tid) {
+                let vids = [];
+                try {
+                    const r = await fetch(`https://api.fxtwitter.com/status/${tid}`);
+                    if (r.ok) { const d = await r.json(); for (let v of (d.tweet?.media?.videos || [])) if (v.url) vids.push({ url: v.url, mime: 'video/mp4' }); }
+                } catch (e) {}
+                if (vids.length) return vids;
+                try {
+                    const r = await fetch(`https://api.vxtwitter.com/status/${tid}`);
+                    if (r.ok) { const d = await r.json(); if (d.media_extended) for (let m of d.media_extended) if ((m.type === 'video' || m.type === 'gif') && m.url) vids.push({ url: m.url, mime: 'video/mp4' }); }
+                } catch (e) {}
                 return vids;
             }
 
-            function dismissModals(){userModal.style.display='none';videoModal.style.display='none';shade.style.display='none';}
-            
-            function renderUsers(users){
-                const list=$('usersList');list.innerHTML='';
-                const now=Date.now()+serverTimeOffset;
-                if(!users||!Object.keys(users).length){list.innerHTML='<div style="text-align:center;color:#666;padding:20px;">لا أحد هنا</div>';return;}
-                for(let u in users){
-                    const d=now-(users[u].lastActive||0);
-                    let s=d<30000?'on':(d<60000?'idle':'off');
-                    const row=document.createElement('div');row.className='user-row';
-                    row.innerHTML=`<span class="status-dot ${s}"></span><span>${esc(u)}</span>${u===username?'<span style="color:var(--accent-light);font-size:10px;">· أنت</span>':''}`;
+            // ============ Modals ============
+            function dismissModals() { userModal.style.display = 'none'; videoModal.style.display = 'none'; shade.style.display = 'none'; }
+
+            function renderUsers(users) {
+                const list = $('usersList'); list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset;
+                if (!users || !Object.keys(users).length) {
+                    list.innerHTML = '<div style="text-align:center;color:#666;padding:20px;">لا أحد هنا</div>';
+                    return;
+                }
+                for (let u in users) {
+                    const d = now - (users[u].lastActive || 0);
+                    const s = d < 30000 ? 'on' : (d < 60000 ? 'idle' : 'off');
+                    const row = document.createElement('div'); row.className = 'user-row';
+                    row.innerHTML = `<span class="status-dot ${s}"></span><span>${esc(u)}</span>${u === username ? '<span style="color:var(--accent-light);font-size:10px;">· أنت</span>' : ''}`;
                     list.appendChild(row);
                 }
             }
 
-            function initTyping(){
-                typingRef=db.ref("typing");let active=false;const pool=new Map();
-                msgField.addEventListener('input',()=>{if(msgField.value&&!active){active=true;typingRef.child(username).set({t:firebase.database.ServerValue.TIMESTAMP});}else if(!msgField.value&&active)end();});
-                function end(){if(active){active=false;typingRef.child(username).remove();}clearTimeout(typingTimer);}
-                $('inputArea').addEventListener('submit',end);
-                typingRef.on('child_added',s=>{if(s.key!==username&&s.val()?.t){pool.set(s.key,s.val().t);refresh();}});
-                typingRef.on('child_removed',s=>{pool.delete(s.key);refresh();});
-                setInterval(()=>{const n=Date.now()+serverTimeOffset;let c=false;pool.forEach((t,k)=>{if(n-t>4000){pool.delete(k);c=true;}});if(c)refresh();},2000);
-                function refresh(){const names=[...pool.keys()];if(!names.length){typeBox.style.display='none';return;}typeBox.style.display='flex';typeText.textContent=names.length===1?`${names[0]} يكتب`:`${names.length} يكتبون`;}
+            // ============ Messages ============
+            function note(text) {
+                const d = document.createElement('div'); d.className = 'sys-badge'; d.textContent = text;
+                msgPanel.appendChild(d); toBottom(); setTimeout(() => d.remove(), 5500);
+            }
+
+            function renderMsg(key, { user, text, timestamp }) {
+                const w = document.createElement('div'); w.className = 'msg-row'; w.id = `m-${key}`;
+                w.innerHTML = `<div class="msg-body"><span class="msg-name">${esc(user)}</span><span class="msg-text">${esc(text)}</span><span class="msg-time">${timeAgo(timestamp)}</span></div>`;
+                msgPanel.appendChild(w); toBottom();
+                while (msgPanel.children.length > MSG_CAP + 40) {
+                    const f = msgPanel.firstElementChild;
+                    if (f && !f.classList.contains('sys-badge')) f.remove(); else break;
+                }
+            }
+
+            // ============ Typing ============
+            function initTyping() {
+                typingRef = db.ref("typing");
+                let active = false;
+                const pool = new Map();
+
+                msgField.addEventListener('input', () => {
+                    if (msgField.value && !active) {
+                        active = true;
+                        typingRef.child(username).set({ t: firebase.database.ServerValue.TIMESTAMP });
+                    } else if (!msgField.value && active) {
+                        endTyping();
+                    }
+                });
+
+                function endTyping() {
+                    if (active) { active = false; typingRef.child(username).remove(); }
+                    clearTimeout(typingTimer);
+                }
+
+                $('inputArea').addEventListener('submit', endTyping);
+
+                typingRef.on('child_added', s => {
+                    if (s.key !== username && s.val()?.t) { pool.set(s.key, s.val().t); refreshTyping(); }
+                });
+                typingRef.on('child_removed', s => { pool.delete(s.key); refreshTyping(); });
+
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    let changed = false;
+                    pool.forEach((t, k) => { if (now - t > 4000) { pool.delete(k); changed = true; } });
+                    if (changed) refreshTyping();
+                }, 2000);
+
+                function refreshTyping() {
+                    const names = [...pool.keys()];
+                    if (!names.length) { typeBox.style.display = 'none'; return; }
+                    typeBox.style.display = 'flex';
+                    typeText.textContent = names.length === 1 ? `${names[0]} يكتب...` : `${names.length} يكتبون...`;
+                }
                 typingRef.child(username).onDisconnect().remove();
             }
 
-            function launchChat(){
-                $('loginScreen').style.display='none';$('chat-container').style.display='flex';
-                db.ref('.info/serverTimeOffset').on('value',s=>serverTimeOffset=s.val()||0);
-                userRef=db.ref('online/'+username);messagesRef=db.ref('messages');onlineRef=db.ref('online');pinnedVideoRef=db.ref('pinned_video');
-                userRef.set({lastActive:firebase.database.ServerValue.TIMESTAMP});userRef.onDisconnect().remove();
-                setInterval(()=>userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}),30000);
-                db.ref('.info/connected').on('value',s=>toast(s.val()?'✓ متصل':'✗ انقطع الاتصال',s.val()?'ok':'err'));
-                setInterval(()=>{const now=Date.now()+serverTimeOffset;onlineRef.once('value',s=>s.forEach(c=>{if(now-(c.val().lastActive||0)>120000)c.ref.remove();}));},60000);
-                
-                $('inputArea').onsubmit=e=>{e.preventDefault();const txt=clean(msgField.value.trim());if(!txt||!limiter.check())return;messagesRef.push({user:username,text:txt,timestamp:firebase.database.ServerValue.TIMESTAMP}).catch(()=>toast('فشل الإرسال','err'));msgField.value='';msgField.focus();if(typingRef)typingRef.child(username).remove();clearTimeout(typingTimer);};
-                messagesRef.limitToLast(MSG_CAP).on('child_added',s=>{const v=s.val();if(v?.user&&v?.text)renderMsg(s.key,{user:v.user,text:v.text,timestamp:v.timestamp||Date.now()+serverTimeOffset});});
-                messagesRef.on('child_removed',s=>{const el=document.getElementById(`m-${s.key}`);if(el)el.remove();});
-                onlineRef.on('value',s=>{$('count').innerText=s.numChildren();renderUsers(s.val()||{});});
-                
-                $('onlineListBtn').onclick=()=>{userModal.style.display='block';shade.style.display='block';};
-                $('setVideoBtn').onclick=()=>{videoModal.style.display='block';shade.style.display='block';};
-                shade.onclick=dismissModals;document.addEventListener('keydown',e=>{if(e.key==='Escape'){dismissModals();if(bigEl.classList.contains('active'))bigPlayer.destroy();}});
-                
-                $('submitVideoUrlBtn').onclick=async()=>{
-                    const raw=videoField.value.trim();if(!raw){toast('أدخل رابطاً','warn');return;}
-                    try{
-                        const u=extractUrl(raw)||raw;const m=classify(u);
-                        if(m.kind==='unknown'){toast('رابط غير مدعوم','warn');return;}
-                        await pinnedVideoRef.set({...m,setBy:username});
-                        videoField.value='';dismissModals();toast('✓ تم التشغيل','ok');
-                    }catch(e){toast('فشل','err');}
-                };
-                
-                pinnedVideoRef.on('value',async s=>{
-                    const data=s.val();
-                    if(!data){pipPlayer.destroy();bigPlayer.destroy();currentVideoData=null;return;}
-                    currentVideoData=data;
-                    
-                    if(data.kind==='twitter'){
-                        const vids=await fetchTwMedia(data.id);
-                        if(vids.length)data={kind:'direct',url:vids[0].url};
-                    }
-                    
-                    pipPlayer.load(data);
-                    toast(`🎬 ${esc(data.setBy||'')} شغّل`,'msg');
+            // ============ Launch Chat ============
+            function launchChat() {
+                $('loginScreen').style.display = 'none';
+                $('chat-container').style.display = 'flex';
+
+                db.ref('.info/serverTimeOffset').on('value', s => { serverTimeOffset = s.val() || 0; });
+
+                userRef = db.ref('online/' + username);
+                messagesRef = db.ref('messages');
+                onlineRef = db.ref('online');
+                pinnedVideoRef = db.ref('pinned_video');
+
+                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                userRef.onDisconnect().remove();
+                setInterval(() => userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }), 30000);
+
+                db.ref('.info/connected').on('value', s => {
+                    toast(s.val() ? '✓ متصل بالخادم' : '✗ انقطع الاتصال', s.val() ? 'ok' : 'err');
                 });
-                
-                initTyping();msgField.focus();
+
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', s => {
+                        s.forEach(c => { if (now - (c.val().lastActive || 0) > 120000) c.ref.remove(); });
+                    });
+                }, 60000);
+
+                $('inputArea').onsubmit = e => {
+                    e.preventDefault();
+                    const txt = clean(msgField.value.trim());
+                    if (!txt || !limiter.check()) return;
+                    messagesRef.push({ user: username, text: txt, timestamp: firebase.database.ServerValue.TIMESTAMP })
+                        .catch(() => toast('فشل الإرسال', 'err'));
+                    msgField.value = '';
+                    msgField.focus();
+                    if (typingRef) typingRef.child(username).remove();
+                    clearTimeout(typingTimer);
+                };
+
+                messagesRef.limitToLast(MSG_CAP).on('child_added', s => {
+                    const v = s.val();
+                    if (v?.user && v?.text) renderMsg(s.key, { user: v.user, text: v.text, timestamp: v.timestamp || Date.now() + serverTimeOffset });
+                });
+
+                messagesRef.on('child_removed', s => {
+                    const el = document.getElementById(`m-${s.key}`);
+                    if (el) el.remove();
+                });
+
+                onlineRef.on('value', s => {
+                    $('count').innerText = s.numChildren();
+                    renderUsers(s.val() || {});
+                });
+
+                $('onlineListBtn').onclick = () => { userModal.style.display = 'block'; shade.style.display = 'block'; };
+                $('setVideoBtn').onclick = () => { videoModal.style.display = 'block'; shade.style.display = 'block'; };
+                shade.onclick = dismissModals;
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') dismissModals(); });
+
+                $('submitVideoUrlBtn').onclick = async () => {
+                    const raw = videoField.value.trim();
+                    if (!raw) { toast('أدخل رابطاً', 'warn'); return; }
+                    try {
+                        const u = extractUrl(raw) || raw;
+                        const m = classify(u);
+                        if (m.kind === 'unknown') { toast('رابط غير مدعوم', 'warn'); return; }
+                        await pinnedVideoRef.set({ ...m, setBy: username });
+                        videoField.value = '';
+                        dismissModals();
+                        toast('✓ تم تشغيل الفيديو', 'ok');
+                    } catch (e) { toast('فشل التشغيل', 'err'); }
+                };
+
+                pinnedVideoRef.on('value', async s => {
+                    const data = s.val();
+                    if (!data) { destroyVideo(); return; }
+
+                    let finalData = data;
+                    if (data.kind === 'twitter') {
+                        const vids = await fetchTwMedia(data.id);
+                        if (vids.length) finalData = { ...data, kind: 'direct', url: vids[0].url };
+                        else { toast('لم يتم العثور على فيديو', 'warn'); return; }
+                    }
+
+                    loadVideo(finalData);
+                    toast(`🎬 ${esc(data.setBy || '')} يشغل فيديو`, 'msg');
+                });
+
+                initTyping();
+                msgField.focus();
             }
 
-            function tryLogin(){
-                const raw=usernameInput.value.trim();
-                if(!raw)return toast('أدخل اسماً','warn');
-                if(/[.#$[\]/]/.test(raw))return toast('أحرف ممنوعة','warn');
-                if(raw.length<2)return toast('الاسم قصير','warn');
-                if(raw.length>15)return toast('الاسم طويل','warn');
-                username=raw;launchChat();
+            // ============ Login ============
+            function tryLogin() {
+                const raw = usernameInput.value.trim();
+                if (!raw) return toast('أدخل اسماً', 'warn');
+                if (/[.#$[\]/]/.test(raw)) return toast('أحرف ممنوعة', 'warn');
+                if (raw.length < 2) return toast('الاسم قصير جداً', 'warn');
+                if (raw.length > 15) return toast('الاسم طويل جداً', 'warn');
+                username = raw;
+                launchChat();
             }
-            
-            $('loginBtn').onclick=tryLogin;usernameInput.onkeypress=e=>{if(e.key==='Enter')tryLogin();};
-            
-            window.addEventListener('beforeunload',()=>{
-                pipPlayer.destroy();bigPlayer.destroy();
-                if(userRef)userRef.remove();
-                if(typingRef&&username)typingRef.child(username).remove();
+
+            $('loginBtn').onclick = tryLogin;
+            usernameInput.onkeypress = e => { if (e.key === 'Enter') tryLogin(); };
+
+            window.addEventListener('beforeunload', () => {
+                destroyVideo();
+                if (userRef) userRef.remove();
+                if (typingRef && username) typingRef.child(username).remove();
             });
         })();
     </script>
