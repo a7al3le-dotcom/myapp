@@ -11,1131 +11,1930 @@
     <style>
         :root {
             --bg-primary: #0a0a0f;
-            --bg-secondary: #13131c;
-            --bg-card: #181825;
-            --bg-hover: #1e1e2c;
-            --text-primary: #f1f1f5;
-            --text-secondary: #a1a1b8;
-            --text-muted: #6b6b80;
-            --accent: #7c3aed;
-            --accent-light: #a78bfa;
-            --accent-glow: #6d28d9;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --border-subtle: rgba(255, 255, 255, 0.04);
-            --border-medium: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(124, 58, 237, 0.25);
-            --glass: rgba(19, 19, 28, 0.8);
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
-            --shadow-glow: 0 0 30px rgba(124, 58, 237, 0.15);
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 22px;
-            --radius-xl: 30px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #ffb347;
+            --accent-glow: #ff8c00;
+            --danger: #ff4757;
+            --success: #2ed573;
+            --warning: #ffa502;
+            --info: #1e90ff;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(18, 18, 26, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(255, 179, 71, 0.15);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         html, body {
-            height: 100%; margin: 0; padding: 0; overflow: hidden;
-            position: fixed; width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
             font-family: 'Tajawal', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
             background-image:
-                radial-gradient(ellipse at 15% 30%, rgba(124, 58, 237, 0.04) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 60%, rgba(59, 130, 246, 0.03) 0%, transparent 55%),
-                radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.02) 0%, transparent 60%);
+                radial-gradient(ellipse at 20% 50%, rgba(255, 179, 71, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(30, 144, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 71, 87, 0.02) 0%, transparent 50%);
         }
 
-        .top-glow {
-            position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 10000;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--info), var(--success), var(--accent), transparent);
+        /* ============ شريط الحالة العلوي ============ */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-glow), var(--info), var(--accent));
             background-size: 200% 100%;
-            animation: glowFlow 5s ease infinite;
+            animation: gradientShift 3s ease infinite;
+            z-index: 10000;
         }
-        @keyframes glowFlow {
+
+        @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
 
-        #chat-container { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
-
-        /* ============ شريط علوي فاخر ============ */
-        #topBar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 10px;
-        }
-        .top-brand {
-            font-size: 18px; font-weight: 900;
-            background: linear-gradient(135deg, var(--accent-light), #c4b5fd);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; letter-spacing: -0.5px;
-        }
-        .top-actions { display: flex; gap: 8px; align-items: center; }
-        .icon-btn {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-medium);
-            color: #fff; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all var(--transition);
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
             position: relative;
-        }
-        .icon-btn:hover {
-            background: rgba(124, 58, 237, 0.15);
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
-            transform: translateY(-1px);
-        }
-        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
-        .badge {
-            position: absolute; top: -4px; right: -4px;
-            min-width: 18px; height: 18px; border-radius: 9px;
-            background: var(--accent); color: #fff;
-            font-size: 10px; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
-            padding: 0 4px; border: 2px solid var(--bg-primary);
-        }
-
-        /* ============ مشغل الفيديو العلوي ============ */
-        #videoPlayer {
-            position: fixed;
-            top: 56px;
-            left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 800px;
-            z-index: 999;
-            display: none;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #000;
-        }
-        #videoPlayer.minimized {
-            width: 200px !important;
-            border-radius: 14px;
-            left: auto;
-            right: 12px;
-            transform: none;
-        }
-        #videoPlayer.minimized .player-controls-bar,
-        #videoPlayer.minimized .player-top-overlay { display: none; }
-        #videoPlayer.minimized .player-screen { border-radius: 14px; cursor: pointer; }
-
-        .player-wrapper { position: relative; width: 100%; }
-        .player-screen {
-            position: relative; width: 100%; aspect-ratio: 16/9;
-            background: #000; cursor: pointer;
-            overflow: hidden;
-        }
-        .player-screen video,
-        .player-screen iframe {
-            width: 100%; height: 100%;
-            border: none; object-fit: contain;
-            display: block;
-        }
-
-        /* Overlay علوي */
-        .player-top-overlay {
-            position: absolute; top: 0; left: 0; right: 0;
-            padding: 12px 16px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%);
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 5; opacity: 0; transition: opacity 0.3s ease;
-        }
-        #videoPlayer:hover .player-top-overlay { opacity: 1; }
-        .player-title-group { display: flex; align-items: center; gap: 8px; }
-        .live-badge {
-            display: flex; align-items: center; gap: 6px;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 4px 10px; border-radius: 12px;
-            font-size: 10px; font-weight: 700; color: #fca5a5;
-        }
-        .live-dot-mini {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--danger);
-            animation: livePulse 1.5s infinite;
-        }
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--danger); }
-            50% { opacity: 0.5; box-shadow: 0 0 12px var(--danger); }
-        }
-        .player-title-text { font-size: 12px; color: #ddd; font-weight: 600; }
-
-        .player-top-btns { display: flex; gap: 6px; }
-        .player-icon-sm {
-            width: 30px; height: 30px; border-radius: 50%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; transition: all 0.2s;
-        }
-        .player-icon-sm:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
-        .player-icon-sm.close-btn:hover { background: rgba(239, 68, 68, 0.6); border-color: var(--danger); }
-
-        /* Spinner */
-        .player-spinner {
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.7); z-index: 4;
-        }
-        .spinner-ring {
-            width: 36px; height: 36px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--accent-light);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* شريط التحكم السفلي */
-        .player-controls-bar {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 28px 12px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
-            z-index: 5; opacity: 0; transition: opacity 0.3s ease;
-        }
-        #videoPlayer:hover .player-controls-bar { opacity: 1; }
-
-        .progress-track {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.15);
-            border-radius: 2px; cursor: pointer; margin-bottom: 10px;
-            position: relative;
-        }
-        .progress-fill {
-            height: 100%; background: var(--accent);
-            border-radius: 2px; width: 0%;
-            position: relative; transition: width 0.08s linear;
-        }
-        .progress-thumb {
-            position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
-            width: 12px; height: 12px; background: #fff;
-            border-radius: 50%; opacity: 0; transition: opacity 0.2s;
-        }
-        .progress-track:hover .progress-thumb { opacity: 1; }
-
-        .ctrl-row {
-            display: flex; align-items: center; gap: 4px;
-        }
-        .ctrl-btn {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: transparent; border: none; color: #fff;
-            cursor: pointer; display: flex; align-items: center;
-            justify-content: center; transition: all 0.2s;
-            font-size: 14px;
-        }
-        .ctrl-btn:hover { background: rgba(255,255,255,0.1); }
-        .ctrl-btn svg { width: 18px; height: 18px; fill: #fff; }
-        .ctrl-btn.play-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.1); }
-        .ctrl-btn.play-btn:hover { background: var(--accent); }
-
-        .time-display {
-            font-size: 12px; color: #ccc; font-family: 'SF Mono', 'Cascadia Code', monospace;
-            direction: ltr; min-width: 85px; text-align: center;
-        }
-        .spacer { flex: 1; }
-
-        .volume-group { display: flex; align-items: center; gap: 2px; }
-        .volume-slider {
-            width: 0; overflow: hidden; transition: width 0.2s;
-            -webkit-appearance: none; appearance: none;
-            height: 3px; background: rgba(255,255,255,0.2);
-            border-radius: 2px; outline: none; cursor: pointer;
-        }
-        .volume-group:hover .volume-slider { width: 50px; }
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 10px; height: 10px;
-            border-radius: 50%; background: #fff; cursor: pointer;
-        }
-
-        /* إيماءة التكبير والتصغير */
-        .pinch-indicator {
-            position: absolute; inset: 0; pointer-events: none;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10; opacity: 0; transition: opacity 0.3s;
-        }
-        .pinch-indicator.active { opacity: 1; }
-        .pinch-icon {
-            font-size: 40px; color: #fff;
-            background: rgba(0,0,0,0.6); border-radius: 50%;
-            width: 60px; height: 60px; display: flex;
-            align-items: center; justify-content: center;
-            animation: pinchPop 0.3s ease;
-        }
-        @keyframes pinchPop {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
 
         /* ============ منطقة الرسائل ============ */
         #messages {
-            flex: 1; overflow-y: auto; padding: 70px 16px 16px;
-            scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-            display: flex; flex-direction: column; gap: 2px;
-            transition: padding-top 0.4s ease;
+            flex: 1;
+            overflow-y: auto;
+            padding: 60px 15px 15px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background:
+                radial-gradient(ellipse at top, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
         }
-        #messages.player-active { padding-top: 280px; }
-        #messages::-webkit-scrollbar { width: 4px; }
-        #messages::-webkit-scrollbar-track { background: transparent; }
-        #messages::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.2); border-radius: 10px; }
+
+        #messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
 
         /* ============ رسالة ============ */
-        .msg-row {
-            display: flex; gap: 8px; padding: 7px 14px; border-radius: var(--radius-sm);
-            transition: background var(--transition);
-            animation: rowIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        .msg-wrapper {
+            display: flex;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            animation: msgSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-fast);
+            position: relative;
         }
-        .msg-row:hover { background: rgba(124, 58, 237, 0.02); }
-        @keyframes rowIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .msg-wrapper:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
-        .msg-body { flex: 1; min-width: 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-        .msg-name {
-            font-weight: 700; font-size: 13px; color: var(--accent-light);
-            white-space: nowrap; flex-shrink: 0;
+
+        .msg-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 0;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: height var(--transition-smooth);
         }
-        .msg-text {
-            font-size: 14px; line-height: 1.55; word-break: break-word;
-            direction: rtl; text-align: right; color: var(--text-primary);
-            opacity: 0.92; flex: 1; min-width: 0;
+
+        .msg-wrapper:hover::before {
+            height: 60%;
         }
+
+        @keyframes msgSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .msg-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .msg-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        .msg-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .msg-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .msg-user {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .msg-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255, 179, 71, 0.15);
+            color: var(--accent);
+            font-weight: 500;
+        }
+
         .msg-time {
-            font-size: 10px; color: var(--text-muted);
-            white-space: nowrap; flex-shrink: 0; margin-right: auto;
+            font-size: 10px;
+            color: var(--text-secondary);
             opacity: 0.7;
         }
 
-        .sys-badge {
-            text-align: center; font-size: 11px; margin: 8px auto;
-            padding: 6px 18px; border-radius: 20px;
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(139, 92, 246, 0.03));
-            border: 1px solid rgba(124, 58, 237, 0.15);
-            color: var(--accent-light); max-width: fit-content;
-            backdrop-filter: blur(8px);
-            animation: badgeIn 0.4s ease, badgeOut 0.4s ease 5s forwards;
+        .msg-text {
+            color: var(--text-primary);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: break-word;
+            direction: rtl;
+            text-align: right;
+            opacity: 0.95;
         }
-        @keyframes badgeIn {
-            from { opacity: 0; transform: translateY(-10px) scale(0.9); }
+
+        /* ============ رسائل النظام ============ */
+        .sys-msg {
+            text-align: center;
+            color: var(--accent);
+            font-size: 12px;
+            margin: 10px auto;
+            background: rgba(255, 179, 71, 0.08);
+            border: 1px solid rgba(255, 179, 71, 0.15);
+            padding: 8px 20px;
+            border-radius: 30px;
+            max-width: fit-content;
+            animation: sysMsgIn 0.5s ease, sysMsgOut 0.5s ease 5s forwards;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes sysMsgIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.9); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes badgeOut { to { opacity: 0; transform: translateY(-8px); } }
 
-        /* ============ شريط الإدخال ============ */
+        @keyframes sysMsgOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* ============ منطقة الإدخال ============ */
         #inputArea {
-            display: flex; gap: 10px; padding: 10px 14px;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
-            background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(30px);
+            display: flex;
+            gap: 10px;
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
-            border-top: 1px solid var(--border-subtle); z-index: 10;
+            border-top: 1px solid var(--border-subtle);
+            position: relative;
+            z-index: 10;
+        }
+
+        #inputArea::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
             align-items: center;
         }
+
         #messageInput {
-            flex: 1; font-size: 14px; height: 46px; padding: 0 18px;
-            border-radius: 23px; background: rgba(255, 255, 255, 0.03);
-            border: 2px solid var(--border-medium); color: var(--text-primary);
-            font-family: 'Tajawal', sans-serif; transition: all var(--transition);
+            width: 100%;
+            font-size: 15px;
+            height: 48px;
+            padding: 0 20px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border-medium);
+            color: var(--text-primary);
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-smooth);
             outline: none;
         }
+
         #messageInput:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05), 0 0 20px rgba(124, 58, 237, 0.06);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
         }
-        #messageInput::placeholder { color: rgba(255, 255, 255, 0.18); }
+
+        #messageInput::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .emoji-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border-medium);
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .emoji-btn:hover {
+            background: rgba(255, 179, 71, 0.1);
+            border-color: var(--accent);
+        }
 
         #sendBtn {
-            width: 46px; height: 46px; border-radius: 50%;
+            height: 48px;
+            padding: 0 28px;
+            border-radius: 24px;
             background: linear-gradient(135deg, var(--accent), var(--accent-glow));
-            color: #fff; cursor: pointer; border: none;
-            font-size: 18px; transition: all var(--transition); flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
-            display: flex; align-items: center; justify-content: center;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            transition: all var(--transition-smooth);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.25);
         }
-        #sendBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5); }
-        #sendBtn:active { transform: scale(0.94); }
 
-        /* ============ نوافذ منبثقة ============ */
-        #usersBox, #setVideoModal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--bg-card); padding: 24px; border-radius: var(--radius-xl);
-            z-index: 1003; display: none; max-height: 80vh; width: 92%; max-width: 400px;
-            overflow-y: auto; border: 1px solid var(--border-medium);
-            box-shadow: var(--shadow-lg), 0 0 60px rgba(124, 58, 237, 0.08);
-            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        #sendBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
         }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        #sendBtn:hover::before {
+            left: 100%;
         }
-        .modal-title { text-align: center; margin-bottom: 16px; font-size: 17px; font-weight: 700; color: var(--accent-light); }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.4);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        /* ============ الأزرار العلوية ============ */
+        #topButtons {
+            position: fixed;
+            top: calc(12px + env(safe-area-inset-top));
+            right: calc(12px + env(safe-area-inset-right));
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .top-btn {
+            height: 44px;
+            padding: 0 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            transition: all var(--transition-smooth);
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 500;
+        }
+
+        .top-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .top-btn .icon {
+            font-size: 18px;
+        }
+
+        .online-badge {
+            background: var(--accent);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+        }
+
+        /* ============ مشغل الفيديو - في الأعلى مثل الأصل ============ */
+        #pinnedVideoPlayer {
+            position: fixed;
+            top: calc(65px + env(safe-area-inset-top));
+            left: 15px;
+            width: 380px;
+            max-width: calc(100% - 30px);
+            min-width: 260px;
+            background: #000;
+            border-radius: var(--radius-md);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            z-index: 998;
+            display: none;
+            flex-direction: column;
+            overflow: visible;
+            animation: playerSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: none;
+        }
+
+        @keyframes playerSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .player-header {
+            background: rgba(10, 10, 15, 0.98);
+            padding: 8px 14px;
+            cursor: move;
+            touch-action: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            font-size: 12px;
+            color: #ccc;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            z-index: 5;
+            letter-spacing: 0.5px;
+        }
+
+        .player-header .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .player-header .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .player-header .dot.red { background: var(--danger); }
+        .player-header .dot.yellow { background: var(--warning); }
+        .player-header .dot.green { background: var(--success); }
+
+        .close-player {
+            background: rgba(255, 71, 87, 0.2);
+            border: none;
+            color: var(--danger);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        .close-player:hover {
+            background: var(--danger);
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+        .player-body {
+            position: relative;
+            background: #000;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            overflow: hidden;
+            min-height: 160px;
+        }
+
+        .resize-grip {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            bottom: 3px;
+            right: 3px;
+            cursor: nwse-resize;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        #pinnedVideoPlayer:hover .resize-grip {
+            opacity: 1;
+        }
+
+        .video-tabs {
+            display: flex;
+            gap: 2px;
+            padding: 4px 6px;
+            background: rgba(0, 0, 0, 0.9);
+            overflow-x: auto;
+        }
+
+        .video-tab {
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: 'Tajawal', sans-serif;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+        }
+
+        .video-tab.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            border-color: var(--accent);
+        }
+
+        .video-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* ============ مشغل Netflix الداخلي المحسن ============ */
+        .nplayer {
+            position: relative;
+            width: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nplayer-video-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #0a0a0a;
+            cursor: pointer;
+        }
+
+        .nplayer-video-wrap video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000;
+            object-fit: contain;
+        }
+
+        .nplayer-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .nplayer-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .nplayer-error {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            font-size: 13px;
+            z-index: 3;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .nplayer-error .error-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .nplayer-error button {
+            margin-top: 14px;
+            padding: 10px 28px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-fast);
+        }
+
+        .nplayer-error button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.4);
+        }
+
+        /* شريط التحكم */
+        .nplayer-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+            padding: 35px 10px 8px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .nplayer-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .nprogress-bar {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: height 0.2s;
+        }
+
+        .nprogress-bar:hover {
+            height: 7px;
+        }
+
+        .nprogress-buffer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .nprogress-filled {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            z-index: 2;
+            transition: width 0.1s linear;
+        }
+
+        .nprogress-filled::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .nprogress-bar:hover .nprogress-filled::after {
+            opacity: 1;
+        }
+
+        .nprogress-input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 3;
+            margin: 0;
+        }
+
+        .ncontrols-bottom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ncontrols-bottom button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 8px;
+            opacity: 0.85;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .ncontrols-bottom button:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.05);
+        }
+
+        .ncontrols-bottom button.active {
+            color: var(--accent);
+        }
+
+        .ntime-display {
+            font-size: 12px;
+            color: #ccc;
+            min-width: 90px;
+            direction: ltr;
+            font-family: 'SF Mono', 'Cascadia Code', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .nvolume-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nvolume-slider {
+            width: 55px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            transition: width 0.2s;
+        }
+
+        .nvolume-group:hover .nvolume-slider {
+            width: 70px;
+        }
+
+        .nvolume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 179, 71, 0.5);
+        }
+
+        .ndropdown-menu {
+            position: relative;
+        }
+
+        .ndropdown-content {
+            position: absolute;
+            bottom: 40px;
+            right: 0;
+            background: rgba(15, 15, 25, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 6px 0;
+            min-width: 90px;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            z-index: 25;
+        }
+
+        .ndropdown-content button {
+            display: block;
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 8px 18px;
+            width: 100%;
+            text-align: right;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .ndropdown-content button:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .ndropdown-content button.selected {
+            color: var(--accent);
+            font-weight: 700;
+            background: rgba(255, 179, 71, 0.08);
+        }
+
+        .nfullscreen-btn {
+            margin-right: auto;
+            font-size: 20px !important;
+        }
+
+        /* ============ النوافذ المنبثقة ============ */
+        #usersBox,
+        #setVideoModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            z-index: 1003;
+            display: none;
+            max-height: 80vh;
+            width: 92%;
+            max-width: 440px;
+            overflow-y: auto;
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-lg);
+            animation: modalPopIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalPopIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
         .modal-input {
-            width: 100%; padding: 12px 16px; border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.02); color: #fff; font-size: 14px;
-            margin-bottom: 10px; border: 2px solid var(--border-medium);
-            font-family: 'Tajawal', sans-serif; transition: all var(--transition); outline: none;
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 14px;
+            border: 2px solid var(--border-medium);
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-smooth);
+            outline: none;
         }
-        .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05); }
-        .modal-btn {
-            width: 100%; padding: 12px; border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
-            font-weight: 700; border: none; cursor: pointer; color: #fff;
-            font-family: 'Tajawal', sans-serif; font-size: 15px;
-            transition: all var(--transition);
-        }
-        .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4); }
 
-        .user-row {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; border-radius: var(--radius-sm);
-            transition: background 0.2s;
+        .modal-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
         }
-        .user-row:hover { background: rgba(255, 255, 255, 0.02); }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            transition: all var(--transition-smooth);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.35);
+        }
+
+        #usersList .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            cursor: default;
+        }
+
+        #usersList .user-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
         .status-dot {
-            width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
-        .status-dot.on { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+
+        .status-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 12px rgba(46, 213, 115, 0.6);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .status-dot.idle {
+            background: var(--warning);
+            box-shadow: 0 0 12px rgba(255, 165, 2, 0.6);
+        }
+
+        .status-dot.offline {
+            background: #555;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 8px rgba(46, 213, 115, 0.4); }
+            50% { box-shadow: 0 0 18px rgba(46, 213, 115, 0.8); }
+        }
 
         #overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65);
-            z-index: 1001; display: none;
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1001;
+            display: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         /* ============ مؤشر الكتابة ============ */
-        #typingWrapper { display: none; padding: 6px 20px; color: var(--text-secondary); font-size: 11px; }
-        #typingIndicator { display: flex; align-items: center; gap: 6px; }
-        .typing-wave { display: inline-flex; gap: 2px; margin-right: 4px; }
-        .typing-wave b {
-            width: 4px; height: 4px; background: var(--accent-light); border-radius: 50%;
-            animation: waveBounce 1.4s infinite;
-        }
-        .typing-wave b:nth-child(2) { animation-delay: 0.2s; }
-        .typing-wave b:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes waveBounce {
-            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-7px); }
+        #typingWrapper {
+            display: none;
+            padding: 6px 18px;
+            color: var(--text-secondary);
+            font-size: 12px;
         }
 
-        /* ============ Toast ============ */
-        .toast-stack {
-            position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-            z-index: 10001; display: flex; flex-direction: column; gap: 6px;
+        #typingIndicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .typing-animation {
+            display: inline-flex;
+            gap: 3px;
+        }
+
+        .typing-animation span {
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-animation span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-animation span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-8px); }
+        }
+
+        /* ============ نظام الإشعارات ============ */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             pointer-events: none;
         }
-        .toast {
-            background: rgba(24, 24, 37, 0.96); backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border-medium); border-radius: 20px;
-            padding: 10px 20px; color: #fff; font-size: 12px;
-            pointer-events: auto;
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
-            box-shadow: var(--shadow-sm); white-space: nowrap; font-weight: 500;
-        }
-        .toast.ok { border-left: 3px solid var(--success); }
-        .toast.err { border-left: 3px solid var(--danger); }
-        .toast.warn { border-left: 3px solid var(--warning); }
-        .toast.msg { border-left: 3px solid var(--info); }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes toastOut { to { opacity: 0; transform: translateY(-12px) scale(0.95); } }
 
-        /* ============ شاشة الدخول ============ */
+        .toast {
+            background: rgba(18, 18, 26, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-medium);
+            border-radius: 30px;
+            padding: 12px 24px;
+            color: #fff;
+            font-size: 13px;
+            pointer-events: auto;
+            animation: toastIn 0.5s ease, toastOut 0.5s ease 4s forwards;
+            box-shadow: var(--shadow-lg);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+        .toast.info { border-left: 3px solid var(--info); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        }
+
+        /* ============ شاشة تسجيل الدخول ============ */
         #loginScreen {
-            position: fixed; inset: 0;
-            background: radial-gradient(ellipse at center, #141420 0%, #08080f 75%);
-            display: flex; justify-content: center; align-items: center;
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #1a1a28 0%, #0a0a12 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             z-index: 10000;
         }
+
         #loginBox {
-            background: rgba(18, 18, 26, 0.98); padding: 40px 34px;
-            border-radius: var(--radius-xl); text-align: center;
-            width: 90%; max-width: 360px;
-            border: 1px solid rgba(124, 58, 237, 0.1);
-            box-shadow: var(--shadow-lg), 0 0 80px rgba(124, 58, 237, 0.04);
+            background: rgba(15, 15, 22, 0.98);
+            padding: 40px 32px;
+            border-radius: var(--radius-xl);
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-lg), 0 0 80px rgba(255, 179, 71, 0.05);
+            animation: modalPopIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .login-glyph { font-size: 44px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
+
+        .login-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            animation: float 3s ease-in-out infinite;
+        }
+
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
+
         #loginBox h2 {
-            margin-bottom: 2px; font-size: 28px; font-weight: 900;
-            background: linear-gradient(135deg, var(--accent-light), #ddd6fe);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 8px;
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .login-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 22px; }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
         #loginScreen #usernameInput {
-            width: 100%; padding: 13px 16px; margin: 8px 0;
-            border-radius: var(--radius-md); font-size: 14px;
-            background: rgba(255, 255, 255, 0.02); color: #fff;
+            width: 100%;
+            padding: 14px 18px;
+            margin: 10px 0;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
             border: 2px solid var(--border-medium);
-            font-family: 'Tajawal', sans-serif; transition: all var(--transition); outline: none;
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-smooth);
+            outline: none;
             text-align: center;
         }
+
         #loginScreen #usernameInput:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
         }
-        #loginBtn {
-            width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-glow));
-            padding: 13px; border-radius: var(--radius-md); font-weight: 700;
-            border: none; cursor: pointer; color: #fff;
-            font-family: 'Tajawal', sans-serif; font-size: 16px; margin-top: 8px;
-            transition: all var(--transition);
-            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
-        }
-        #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5); }
 
-        /* ============ تجاوب ============ */
+        #loginBtn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 17px;
+            margin-top: 12px;
+            transition: all var(--transition-smooth);
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.25);
+        }
+
+        #loginBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.4);
+        }
+
+        /* ============ تجاوب الموبايل ============ */
         @media (max-width: 600px) {
-            #videoPlayer {
-                width: 96%;
-                top: 52px;
+            #pinnedVideoPlayer {
+                left: 50% !important;
+                top: calc(70px + env(safe-area-inset-top)) !important;
+                transform: translateX(-50%) !important;
+                width: 92vw !important;
+                max-width: none !important;
+                right: auto !important;
+                bottom: auto !important;
             }
-            #videoPlayer.minimized {
-                width: 150px !important;
+
+            #topButtons {
                 right: 6px;
+                top: 6px;
+                gap: 6px;
             }
-            #messages { padding: 60px 8px 8px; }
-            #messages.player-active { padding-top: 240px; }
-            #messageInput { font-size: 13px; height: 40px; padding: 0 14px; }
-            #sendBtn { width: 40px; height: 40px; }
-            .ctrl-btn { width: 28px; height: 28px; }
-            .ctrl-btn.play-btn { width: 34px; height: 34px; }
-            .ctrl-btn svg { width: 15px; height: 15px; }
+
+            .top-btn {
+                height: 36px;
+                padding: 0 12px;
+                font-size: 12px;
+                border-radius: 18px;
+            }
+
+            .top-btn .icon {
+                font-size: 16px;
+            }
+
+            #sendBtn {
+                padding: 0 18px;
+                font-size: 14px;
+                height: 42px;
+            }
+
+            #messageInput {
+                font-size: 14px;
+                height: 42px;
+                padding: 0 16px;
+            }
+
+            #messages {
+                padding: 55px 10px 10px;
+            }
+
+            .msg-avatar {
+                width: 34px;
+                height: 34px;
+                font-size: 13px;
+            }
+
+            .nvolume-slider {
+                width: 35px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="top-glow"></div>
+    <!-- شريط التدرج العلوي -->
+    <div class="status-bar"></div>
 
-    <!-- شاشة الدخول -->
+    <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen">
         <div id="loginBox">
-            <div class="login-glyph">✦</div>
+            <div class="login-icon">💬</div>
             <h2>شات خاص</h2>
-            <p class="login-sub">مساحة تواصل فاخرة</p>
-            <input type="text" id="usernameInput" placeholder="اسمك المستعار" maxlength="15">
-            <button id="loginBtn">انضم الآن</button>
+            <p class="login-subtitle">انضم إلى المحادثة المباشرة</p>
+            <input type="text" id="usernameInput" placeholder="أدخل اسمك..." maxlength="15">
+            <button id="loginBtn">🚀 دخول إلى الشات</button>
         </div>
     </div>
 
-    <div class="toast-stack" id="toastStack"></div>
+    <!-- حاوية الإشعارات -->
+    <div class="toast-container" id="toastContainer"></div>
 
-    <!-- واجهة الشات -->
-    <div id="chat-container" style="display:none;">
-        <!-- شريط علوي -->
-        <div id="topBar">
-            <span class="top-brand">✦ شات</span>
-            <div class="top-actions">
-                <button class="icon-btn" id="setVideoBtn" title="تشغيل فيديو">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10,8 16,12 10,16" fill="var(--bg-primary)"/></svg>
-                </button>
-                <button class="icon-btn" id="onlineListBtn" title="المتواجدون">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                    <span class="badge" id="count">0</span>
-                </button>
-            </div>
+    <!-- واجهة الدردشة -->
+    <div id="chat-container" style="display: none;">
+        <!-- أزرار علوية -->
+        <div id="topButtons">
+            <button class="top-btn" id="setVideoBtn">
+                <span class="icon">📺</span> فيديو
+            </button>
+            <button class="top-btn" id="onlineListBtn">
+                <span class="icon">👥</span>
+                <span class="online-badge" id="count">0</span>
+            </button>
         </div>
 
-        <!-- مشغل الفيديو العلوي -->
-        <div id="videoPlayer">
-            <div class="player-wrapper">
-                <div class="player-screen"></div>
-                <div class="pinch-indicator"><div class="pinch-icon"></div></div>
-                
-                <!-- Overlay علوي -->
-                <div class="player-top-overlay">
-                    <div class="player-title-group">
-                        <span class="live-badge"><span class="live-dot-mini"></span>مباشر</span>
-                        <span class="player-title-text" id="playerTitle">مشغل الفيديو</span>
-                    </div>
-                    <div class="player-top-btns">
-                        <button class="player-icon-sm" id="btnMini" title="تصغير">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="11" width="16" height="2"/></svg>
-                        </button>
-                        <button class="player-icon-sm close-btn" id="btnClose" title="إغلاق">✕</button>
-                    </div>
+        <!-- مشغل الفيديو -->
+        <div id="pinnedVideoPlayer">
+            <div class="player-header">
+                <div class="dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
                 </div>
-
-                <!-- Spinner -->
-                <div class="player-spinner" id="playerSpinner">
-                    <div class="spinner-ring"></div>
-                </div>
-
-                <!-- شريط التحكم -->
-                <div class="player-controls-bar">
-                    <div class="progress-track" id="progressTrack">
-                        <div class="progress-fill" id="progressFill"><div class="progress-thumb"></div></div>
-                    </div>
-                    <div class="ctrl-row">
-                        <button class="ctrl-btn" id="btnRew" title="ترجيع 10 ثوان">
-                            <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                        </button>
-                        <button class="ctrl-btn play-btn" id="btnPlay" title="تشغيل/إيقاف">
-                            <svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg>
-                        </button>
-                        <button class="ctrl-btn" id="btnFwd" title="تقدم 10 ثوان">
-                            <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
-                        </button>
-                        <div class="volume-group">
-                            <button class="ctrl-btn" id="btnVolume" title="كتم/إلغاء">
-                                <svg viewBox="0 0 24 24" id="volumeIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                            </button>
-                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
-                        </div>
-                        <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
-                        <span class="spacer"></span>
-                        <button class="ctrl-btn" id="btnFS" title="ملء الشاشة">
-                            <svg viewBox="0 0 24 24"><polygon points="8,3 3,3 3,8 5,6 8,8 10,6 7,4"/><polygon points="16,21 21,21 21,16 19,18 16,16 14,18 17,20"/></svg>
-                        </button>
-                    </div>
-                </div>
+                <span style="font-weight:500;">مشغل الفيديو</span>
+                <button class="close-player">✕</button>
             </div>
+            <div class="player-body"></div>
+            <div class="resize-grip"></div>
         </div>
 
-        <!-- نوافذ منبثقة -->
+        <!-- نافذة فيديو -->
         <div id="setVideoModal">
             <h3 class="modal-title">🎬 تشغيل فيديو</h3>
-            <input type="text" class="modal-input" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، m3u8، mp4...">
-            <button class="modal-btn" id="submitVideoUrlBtn">تشغيل الآن</button>
+            <input type="text" class="modal-input" id="videoUrlInput" placeholder="الصق رابط يوتيوب، تويتر، m3u8، mp4...">
+            <button class="modal-btn" id="submitVideoUrlBtn">تشغيل الفيديو</button>
         </div>
 
+        <!-- نافذة المستخدمين -->
         <div id="usersBox">
-            <h3 class="modal-title">👥 المتواجدون الآن</h3>
+            <h3 class="modal-title">👥 المتصلين الآن</h3>
             <div id="usersList"></div>
         </div>
 
+        <!-- التعتيم -->
         <div id="overlay"></div>
 
-        <!-- منطقة الرسائل -->
+        <!-- الرسائل -->
         <div id="messages"></div>
 
         <!-- مؤشر الكتابة -->
         <div id="typingWrapper">
             <div id="typingIndicator">
                 <span id="typingText"></span>
-                <span class="typing-wave"><b></b><b></b><b></b></span>
+                <span class="typing-animation">
+                    <span></span><span></span><span></span>
+                </span>
             </div>
         </div>
 
-        <!-- شريط الإدخال -->
+        <!-- الإدخال -->
         <form id="inputArea">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off" maxlength="500">
-            <button type="submit" id="sendBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" maxlength="500">
+            </div>
+            <div class="input-actions">
+                <button type="button" class="emoji-btn" title="إيموجي">😊</button>
+            </div>
+            <button type="submit" id="sendBtn">إرسال</button>
         </form>
     </div>
 
     <script>
-        (function(){
-            // ============ Firebase Config ============
+        (function() {
+            // ==================== Firebase ====================
             const firebaseConfig = {
                 apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
                 authDomain: "mychat-2d881.firebaseapp.com",
                 databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
             };
-            try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+            try { firebase.initializeApp(firebaseConfig); } catch (e) {}
             const db = firebase.database();
 
-            // ============ State ============
-            let username = '', userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
-            let serverTimeOffset = 0, typingTimer = null;
-            let videoState = { hls: null, video: null, listeners: [] };
-            const MSG_CAP = 120;
+            // ==================== متغيرات ====================
+            let username = '';
+            let userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
+            let serverTimeOffset = 0;
+            let currentPlayer = null;
+            let playerListeners = [];
+            const messageTimestamps = new Map();
+            let typingTimeout = null;
+            const MSG_LIMIT = 100;
 
-            // ============ DOM ============
-            const $ = id => document.getElementById(id);
-            const msgPanel = $('messages'), msgField = $('messageInput'), toastStack = $('toastStack');
-            const shade = $('overlay'), userModal = $('usersBox'), videoModal = $('setVideoModal');
-            const videoField = $('videoUrlInput'), typeBox = $('typingWrapper'), typeText = $('typingText');
-            const playerEl = $('videoPlayer'), playerScreen = playerEl.querySelector('.player-screen');
-            const playerSpinner = $('playerSpinner'), progressFill = $('progressFill');
-            const progressTrack = $('progressTrack'), timeDisplay = $('timeDisplay');
-            const volumeSlider = $('volumeSlider'), volumeIcon = $('volumeIcon');
+            // ==================== DOM ====================
+            const $ = (id) => document.getElementById(id);
+            const loginScreen = $('loginScreen');
+            const usernameInput = $('usernameInput');
+            const loginBtn = $('loginBtn');
+            const chatContainer = $('chat-container');
+            const messagesDiv = $('messages');
+            const messageInput = $('messageInput');
+            const onlineListBtn = $('onlineListBtn');
+            const setVideoBtn = $('setVideoBtn');
+            const usersBox = $('usersBox');
+            const setVideoModal = $('setVideoModal');
+            const videoUrlInput = $('videoUrlInput');
+            const submitVideoUrlBtn = $('submitVideoUrlBtn');
+            const pinnedVideoPlayer = $('pinnedVideoPlayer');
+            const overlay = $('overlay');
+            const typingWrapper = $('typingWrapper');
+            const typingText = $('typingText');
+            const toastContainer = $('toastContainer');
 
-            // ============ Utilities ============
-            function toast(msg, kind = 'msg') {
-                const e = document.createElement('div');
-                e.className = `toast ${kind}`;
-                e.textContent = msg;
-                toastStack.appendChild(e);
-                setTimeout(() => e.remove(), 3400);
+            // ==================== Toast ====================
+            function showToast(msg, type = 'info') {
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                toastContainer.appendChild(t);
+                setTimeout(() => t.remove(), 4500);
             }
 
+            // ==================== Rate Limiter ====================
             class RateLimiter {
-                constructor(max = 5, win = 7000) { this.hits = []; this.max = max; this.win = win; }
-                check() {
-                    const n = Date.now();
-                    this.hits = this.hits.filter(t => n - t < this.win);
-                    if (this.hits.length >= this.max) { toast('⏳ تمهل قليلاً', 'warn'); return false; }
-                    this.hits.push(n); return true;
+                constructor(max = 4, win = 8000) {
+                    this.msgs = [];
+                    this.max = max;
+                    this.win = win;
+                }
+                canSend() {
+                    const now = Date.now();
+                    this.msgs = this.msgs.filter(t => now - t < this.win);
+                    if (this.msgs.length >= this.max) { showToast('⚠️ تمهل قليلاً', 'warning'); return false; }
+                    this.msgs.push(now);
+                    return true;
                 }
             }
             const limiter = new RateLimiter();
 
-            const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
-            const clean = s => s.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').substring(0, 500);
-            const toBottom = () => requestAnimationFrame(() => { msgPanel.scrollTop = msgPanel.scrollHeight; });
-            const ytCode = u => (u || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1] || null;
-            const twCode = u => (u || '').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1] || null;
-            const extractUrl = t => { const m = t.match(/(https?:\/\/[^\s]+)/g); return m ? m[0].replace(/[،،؛]+$/, '') : null; };
-            const classify = u => {
-                if (ytCode(u)) return { kind: 'youtube', id: ytCode(u) };
-                if (twCode(u)) return { kind: 'twitter', id: twCode(u) };
-                if (/\.(m3u8|m3u)(\?.*)?$/i.test(u)) return { kind: 'hls', url: u };
-                if (/\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u)) return { kind: 'direct', url: u };
-                return { kind: 'unknown' };
+            // ==================== دوال مساعدة ====================
+            const esc = (s) => { const d = document.createElement('div');
+                d.textContent = s || ''; return d.innerHTML; };
+            const sanitize = (s) => s.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').substring(0, 500);
+            const avatarColor = (n) => ['#ffb347', '#1e90ff', '#2ed573', '#ff4757', '#a55eea', '#ff6b81',
+                '#00d2d3'
+            ] [n.split('').reduce((h, c) => h + c.charCodeAt(0), 0) % 7];
+            const initials = (n) => n.substring(0, 2).toUpperCase();
+            const scrollBottom = () => requestAnimationFrame(() => messagesDiv.scrollTop = messagesDiv.scrollHeight);
+            const ytId = (u) => (u || '').match(
+                /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1] || null;
+            const twId = (u) => (u || '').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1] || null;
+            const isDirectVid = (u) => /\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u);
+            const cleanUrl = (t) => { const m = t.match(/(https?:\/\/[^\s]+)/g); return m ? m[0].replace(/[،،؛]+$/,
+                    '') : null; };
+            const detectMedia = (u) => {
+                if (ytId(u)) return { type: 'youtube', id: ytId(u) };
+                if (twId(u)) return { type: 'twitter', id: twId(u) };
+                if (/\.(m3u8|m3u)(\?.*)?$/i.test(u)) return { type: 'm3u', url: u };
+                if (isDirectVid(u)) return { type: 'direct', url: u };
+                return { type: 'unknown' };
             };
-            const timeAgo = ts => {
+            const fmtTime = (ts) => {
                 if (!ts) return '';
-                const s = Math.floor((Date.now() + serverTimeOffset - ts) / 1000);
-                if (s < 5) return 'الآن'; if (s < 60) return 'ثواني';
-                if (s < 3600) return `د${Math.floor(s / 60)}`;
-                if (s < 86400) return `س${Math.floor(s / 3600)}`;
-                return `ي${Math.floor(s / 86400)}`;
-            };
-            const fmtTime = t => {
-                if (isNaN(t)) return '00:00';
-                const m = Math.floor(t / 60), s = Math.floor(t % 60);
-                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                const d = Math.floor((Date.now() + serverTimeOffset - ts) / 1000);
+                if (d < 5) return 'الآن';
+                if (d < 60) return 'ثواني';
+                if (d < 3600) return `د${Math.floor(d/60)}`;
+                if (d < 86400) return `س${Math.floor(d/3600)}`;
+                return `ي${Math.floor(d/86400)}`;
             };
 
-            // ============ Video Player Engine ============
-            function addListener(el, ev, h) {
-                el.addEventListener(ev, h);
-                videoState.listeners.push({ el, ev, h });
+            function addNote(text) {
+                const d = document.createElement('div');
+                d.className = 'sys-msg';
+                d.textContent = text;
+                messagesDiv.appendChild(d);
+                scrollBottom();
+                setTimeout(() => d.remove(), 5500);
             }
 
-            function destroyVideo() {
-                videoState.listeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
-                videoState.listeners = [];
-                if (videoState.hls) { videoState.hls.destroy(); videoState.hls = null; }
-                if (videoState.video) { videoState.video.pause(); videoState.video.src = ''; videoState.video = null; }
-                playerScreen.innerHTML = '';
-                playerEl.style.display = 'none';
-                playerEl.classList.remove('minimized');
-                msgPanel.classList.remove('player-active');
-                playerSpinner.style.display = 'none';
-                progressFill.style.width = '0%';
-                timeDisplay.textContent = '00:00 / 00:00';
-                $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
+            function addMsg(key, { user, text, timestamp }) {
+                const w = document.createElement('div');
+                w.className = 'msg-wrapper';
+                w.id = `msg-${key}`;
+                w.innerHTML = `<div class="msg-avatar" style="background:${avatarColor(user)}">${initials(user)}</div>
+                    <div class="msg-content"><div class="msg-header"><span class="msg-user">${esc(user)}</span><span class="msg-time">${fmtTime(timestamp)}</span></div><div class="msg-text">${esc(text)}</div></div>`;
+                messagesDiv.appendChild(w);
+                messageTimestamps.set(key, { timestamp, el: w.querySelector('.msg-time') });
+                scrollBottom();
+                if (messagesDiv.children.length > MSG_LIMIT + 30) messagesDiv.firstElementChild?.remove();
             }
 
-            function loadVideo(data) {
-                destroyVideo();
-                playerEl.style.display = 'block';
-                msgPanel.classList.add('player-active');
-                playerSpinner.style.display = 'flex';
-                $('playerTitle').textContent = esc(data.setBy || 'مشغل');
+            setInterval(() => messageTimestamps.forEach(({ timestamp, el }) => { if (el) el.textContent = fmtTime(
+                timestamp); }), 30000);
 
-                if (data.kind === 'youtube') {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = `https://www.youtube.com/embed/${esc(data.id)}?autoplay=1&rel=0&modestbranding=1`;
-                    iframe.allow = 'autoplay;encrypted-media;picture-in-picture';
-                    iframe.allowFullscreen = true;
-                    playerScreen.appendChild(iframe);
-                    playerSpinner.style.display = 'none';
-                    $('btnPlay').querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-                } else if (data.kind === 'hls' || data.kind === 'direct') {
-                    const vid = document.createElement('video');
-                    vid.playsInline = true;
-                    videoState.video = vid;
-                    playerScreen.appendChild(vid);
-
-                    const hlsMode = data.kind === 'hls';
-                    const loadSrc = () => {
-                        if (hlsMode && Hls.isSupported()) {
-                            videoState.hls = new Hls({ enableWorker: true, lowLatencyMode: true, debug: false });
-                            videoState.hls.loadSource(data.url);
-                            videoState.hls.attachMedia(vid);
-                            videoState.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                                playerSpinner.style.display = 'none';
-                                vid.play().catch(() => {});
-                            });
-                            videoState.hls.on(Hls.Events.ERROR, (e, d) => {
-                                if (d.fatal) {
-                                    playerSpinner.style.display = 'none';
-                                    toast('⚠️ فشل تحميل الفيديو', 'err');
-                                }
-                            });
-                        } else {
-                            vid.src = data.url;
-                            vid.play().catch(() => {});
-                            playerSpinner.style.display = 'none';
-                        }
-                    };
-
-                    addListener(vid, 'canplay', () => { playerSpinner.style.display = 'none'; });
-                    addListener(vid, 'waiting', () => { playerSpinner.style.display = 'flex'; });
-                    addListener(vid, 'play', () => {
-                        $('btnPlay').querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-                    });
-                    addListener(vid, 'pause', () => {
-                        $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
-                    });
-                    addListener(vid, 'ended', () => {
-                        $('btnPlay').querySelector('svg').innerHTML = '<polygon points="8,5 19,12 8,19"/>';
-                    });
-                    addListener(vid, 'timeupdate', () => {
-                        if (vid.duration) {
-                            progressFill.style.width = (vid.currentTime / vid.duration) * 100 + '%';
-                            timeDisplay.textContent = fmtTime(vid.currentTime) + ' / ' + fmtTime(vid.duration);
-                        }
-                    });
-                    addListener(vid, 'volumechange', () => {
-                        volumeSlider.value = vid.volume;
-                        updateVolumeIcon(vid.muted, vid.volume);
-                    });
-                    loadSrc();
-                }
-            }
-
-            function updateVolumeIcon(muted, vol) {
-                let path = '';
-                if (muted || vol === 0) {
-                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><line x1="22" y1="8" x2="18" y2="16" stroke="currentColor" stroke-width="2"/><line x1="18" y1="8" x2="22" y2="16" stroke="currentColor" stroke-width="2"/>';
-                } else if (vol < 0.5) {
-                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>';
-                } else {
-                    path = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
-                }
-                volumeIcon.innerHTML = path;
-            }
-
-            // ============ Pinch to Resize ============
-            let initialDist = 0, initialWidth = 0;
-            const pinchIndicator = playerEl.querySelector('.pinch-indicator');
-            const pinchIcon = playerEl.querySelector('.pinch-icon');
-
-            function getDist(touches) {
-                if (touches.length < 2) return 0;
-                const dx = touches[0].clientX - touches[1].clientX;
-                const dy = touches[0].clientY - touches[1].clientY;
-                return Math.sqrt(dx * dx + dy * dy);
-            }
-
-            playerEl.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 2) {
-                    initialDist = getDist(e.touches);
-                    initialWidth = playerEl.offsetWidth;
-                    pinchIndicator.classList.add('active');
-                }
-            }, { passive: true });
-
-            playerEl.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 2 && initialDist > 0) {
-                    e.preventDefault();
-                    const currentDist = getDist(e.touches);
-                    const scale = currentDist / initialDist;
-                    let newWidth = initialWidth * scale;
-                    newWidth = Math.max(180, Math.min(newWidth, window.innerWidth * 0.95));
-                    playerEl.style.width = newWidth + 'px';
-                    
-                    if (newWidth < 240) {
-                        playerEl.classList.add('minimized');
-                        pinchIcon.textContent = '⊟';
-                    } else {
-                        playerEl.classList.remove('minimized');
-                        pinchIcon.textContent = '⊞';
-                    }
-                }
-            }, { passive: false });
-
-            playerEl.addEventListener('touchend', () => {
-                initialDist = 0;
-                setTimeout(() => pinchIndicator.classList.remove('active'), 300);
-            });
-
-            // ============ Player Controls ============
-            $('btnPlay').onclick = () => {
-                const v = videoState.video;
-                if (v) { v.paused ? v.play().catch(() => {}) : v.pause(); }
-            };
-            $('btnRew').onclick = () => {
-                if (videoState.video) videoState.video.currentTime = Math.max(0, videoState.video.currentTime - 10);
-            };
-            $('btnFwd').onclick = () => {
-                if (videoState.video) videoState.video.currentTime = Math.min(videoState.video.duration || 0, videoState.video.currentTime + 10);
-            };
-            $('btnVolume').onclick = () => {
-                if (videoState.video) {
-                    videoState.video.muted = !videoState.video.muted;
-                    updateVolumeIcon(videoState.video.muted, videoState.video.volume);
-                }
-            };
-            volumeSlider.oninput = () => {
-                if (videoState.video) {
-                    videoState.video.volume = +volumeSlider.value;
-                    videoState.video.muted = false;
-                    updateVolumeIcon(false, videoState.video.volume);
-                }
-            };
-            $('btnFS').onclick = () => {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    playerEl.requestFullscreen().catch(() => {});
-                }
-            };
-            $('btnMini').onclick = () => {
-                playerEl.classList.toggle('minimized');
-                $('btnMini').querySelector('svg').innerHTML = playerEl.classList.contains('minimized')
-                    ? '<rect x="4" y="11" width="16" height="2"/>'
-                    : '<rect x="4" y="8" width="16" height="2"/><rect x="4" y="14" width="16" height="2"/>';
-            };
-            $('btnClose').onclick = () => {
-                destroyVideo();
-                if (pinnedVideoRef) pinnedVideoRef.remove();
-            };
-
-            // Progress bar click
-            progressTrack.onclick = (e) => {
-                if (videoState.video && videoState.video.duration) {
-                    const rect = progressTrack.getBoundingClientRect();
-                    const pct = (e.clientX - rect.left) / rect.width;
-                    videoState.video.currentTime = pct * videoState.video.duration;
-                }
-            };
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                const v = videoState.video;
-                if (!v || playerEl.style.display === 'none') return;
-                switch (e.key) {
-                    case ' ': e.preventDefault(); v.paused ? v.play().catch(() => {}) : v.pause(); break;
-                    case 'ArrowLeft': e.preventDefault(); v.currentTime = Math.max(0, v.currentTime - 5); break;
-                    case 'ArrowRight': e.preventDefault(); v.currentTime = Math.min(v.duration || 0, v.currentTime + 5); break;
-                    case 'm': e.preventDefault(); v.muted = !v.muted; updateVolumeIcon(v.muted, v.volume); break;
-                    case 'f': e.preventDefault(); document.fullscreenElement ? document.exitFullscreen() : playerEl.requestFullscreen().catch(() => {}); break;
-                }
-            });
-
-            // ============ Twitter API ============
-            async function fetchTwMedia(tid) {
-                let vids = [];
-                try {
-                    const r = await fetch(`https://api.fxtwitter.com/status/${tid}`);
-                    if (r.ok) { const d = await r.json(); for (let v of (d.tweet?.media?.videos || [])) if (v.url) vids.push({ url: v.url, mime: 'video/mp4' }); }
-                } catch (e) {}
-                if (vids.length) return vids;
-                try {
-                    const r = await fetch(`https://api.vxtwitter.com/status/${tid}`);
-                    if (r.ok) { const d = await r.json(); if (d.media_extended) for (let m of d.media_extended) if ((m.type === 'video' || m.type === 'gif') && m.url) vids.push({ url: m.url, mime: 'video/mp4' }); }
-                } catch (e) {}
-                return vids;
-            }
-
-            // ============ Modals ============
-            function dismissModals() { userModal.style.display = 'none'; videoModal.style.display = 'none'; shade.style.display = 'none'; }
-
-            function renderUsers(users) {
-                const list = $('usersList'); list.innerHTML = '';
-                const now = Date.now() + serverTimeOffset;
-                if (!users || !Object.keys(users).length) {
-                    list.innerHTML = '<div style="text-align:center;color:#666;padding:20px;">لا أحد هنا</div>';
-                    return;
-                }
-                for (let u in users) {
-                    const d = now - (users[u].lastActive || 0);
-                    const s = d < 30000 ? 'on' : (d < 60000 ? 'idle' : 'off');
-                    const row = document.createElement('div'); row.className = 'user-row';
-                    row.innerHTML = `<span class="status-dot ${s}"></span><span>${esc(u)}</span>${u === username ? '<span style="color:var(--accent-light);font-size:10px;">· أنت</span>' : ''}`;
-                    list.appendChild(row);
-                }
-            }
-
-            // ============ Messages ============
-            function note(text) {
-                const d = document.createElement('div'); d.className = 'sys-badge'; d.textContent = text;
-                msgPanel.appendChild(d); toBottom(); setTimeout(() => d.remove(), 5500);
-            }
-
-            function renderMsg(key, { user, text, timestamp }) {
-                const w = document.createElement('div'); w.className = 'msg-row'; w.id = `m-${key}`;
-                w.innerHTML = `<div class="msg-body"><span class="msg-name">${esc(user)}</span><span class="msg-text">${esc(text)}</span><span class="msg-time">${timeAgo(timestamp)}</span></div>`;
-                msgPanel.appendChild(w); toBottom();
-                while (msgPanel.children.length > MSG_CAP + 40) {
-                    const f = msgPanel.firstElementChild;
-                    if (f && !f.classList.contains('sys-badge')) f.remove(); else break;
-                }
-            }
-
-            // ============ Typing ============
+            // ==================== Typing ====================
             function initTyping() {
                 typingRef = db.ref("typing");
-                let active = false;
-                const pool = new Map();
-
-                msgField.addEventListener('input', () => {
-                    if (msgField.value && !active) {
-                        active = true;
-                        typingRef.child(username).set({ t: firebase.database.ServerValue.TIMESTAMP });
-                    } else if (!msgField.value && active) {
-                        endTyping();
-                    }
+                let typing = false;
+                const users = new Map();
+                messageInput.addEventListener('input', () => {
+                    if (messageInput.value && !typing) { typing = true;
+                        typingRef.child(username).set({ t: firebase.database.ServerValue.TIMESTAMP }); } else if (!messageInput
+                        .value && typing) stopT();
                 });
 
-                function endTyping() {
-                    if (active) { active = false; typingRef.child(username).remove(); }
-                    clearTimeout(typingTimer);
-                }
+                function stopT() { if (typing) { typing = false;
+                        typingRef.child(username).remove(); }
+                    clearTimeout(typingTimeout); }
+                $('inputArea').addEventListener('submit', stopT);
+                typingRef.on('child_added', s => { if (s.key !== username && s.val()?.t) users.set(s.key, s.val().t);
+                    updT(); });
+                typingRef.on('child_removed', s => { users.delete(s.key);
+                    updT(); });
+                setInterval(() => { const n = Date.now() + serverTimeOffset; let c = false;
+                    users.forEach((t, k) => { if (n - t > 4000) { users.delete(k);
+                        c = true; } }); if (c) updT(); }, 2000);
 
-                $('inputArea').addEventListener('submit', endTyping);
-
-                typingRef.on('child_added', s => {
-                    if (s.key !== username && s.val()?.t) { pool.set(s.key, s.val().t); refreshTyping(); }
-                });
-                typingRef.on('child_removed', s => { pool.delete(s.key); refreshTyping(); });
-
-                setInterval(() => {
-                    const now = Date.now() + serverTimeOffset;
-                    let changed = false;
-                    pool.forEach((t, k) => { if (now - t > 4000) { pool.delete(k); changed = true; } });
-                    if (changed) refreshTyping();
-                }, 2000);
-
-                function refreshTyping() {
-                    const names = [...pool.keys()];
-                    if (!names.length) { typeBox.style.display = 'none'; return; }
-                    typeBox.style.display = 'flex';
-                    typeText.textContent = names.length === 1 ? `${names[0]} يكتب...` : `${names.length} يكتبون...`;
+                function updT() {
+                    const names = [...users.keys()];
+                    if (!names.length) { typingWrapper.style.display = 'none'; return; }
+                    typingWrapper.style.display = 'flex';
+                    typingText.textContent = names.length === 1 ? `${names[0]} يكتب...` : names.length === 2 ?
+                        `${names[0]} و ${names[1]} يكتبان...` : 'عدة أشخاص يكتبون...';
                 }
                 typingRef.child(username).onDisconnect().remove();
             }
 
-            // ============ Launch Chat ============
-            function launchChat() {
-                $('loginScreen').style.display = 'none';
-                $('chat-container').style.display = 'flex';
+            // ==================== مشغل Netflix ====================
+            function createPlayer(container, source, type) {
+                if (currentPlayer) {
+                    playerListeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
+                    playerListeners = [];
+                    if (currentPlayer.hls) { currentPlayer.hls.destroy();
+                        currentPlayer.hls = null; }
+                    if (currentPlayer.video) { currentPlayer.video.pause();
+                        currentPlayer.video.src = ''; }
+                    currentPlayer = null;
+                }
+                const L = [];
+                const on = (el, ev, h) => { el.addEventListener(ev, h);
+                    L.push({ el, ev, h }); };
+                const isHLS = type === 'application/x-mpegURL' || source.includes('.m3u8');
+                const wr = document.createElement('div');
+                wr.className = 'nplayer';
+                const vw = document.createElement('div');
+                vw.className = 'nplayer-video-wrap';
+                const vid = document.createElement('video');
+                vid.playsInline = true;
+                vw.appendChild(vid);
+                const ld = document.createElement('div');
+                ld.className = 'nplayer-loading';
+                ld.innerHTML = '<div class="spinner"></div><span>جاري التحميل...</span>';
+                vw.appendChild(ld);
+                const er = document.createElement('div');
+                er.className = 'nplayer-error';
+                er.innerHTML =
+                    '<span class="error-icon">⚠️</span><span>فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>';
+                vw.appendChild(er);
+                wr.appendChild(vw);
+                const ct = document.createElement('div');
+                ct.className = 'nplayer-controls';
+                const pb = document.createElement('div');
+                pb.className = 'nprogress-bar';
+                const buf = document.createElement('div');
+                buf.className = 'nprogress-buffer';
+                const fill = document.createElement('div');
+                fill.className = 'nprogress-filled';
+                const inp = document.createElement('input');
+                inp.type = 'range';
+                inp.min = 0;
+                inp.max = 100;
+                inp.value = 0;
+                inp.className = 'nprogress-input';
+                pb.appendChild(buf);
+                pb.appendChild(fill);
+                pb.appendChild(inp);
+                const row = document.createElement('div');
+                row.className = 'ncontrols-bottom';
+                const playB = document.createElement('button');
+                playB.innerHTML = '▶';
+                const rew = document.createElement('button');
+                rew.innerHTML = '⏪';
+                const fwd = document.createElement('button');
+                fwd.innerHTML = '⏩';
+                const volG = document.createElement('div');
+                volG.className = 'nvolume-group';
+                const volB = document.createElement('button');
+                volB.innerHTML = '🔊';
+                const volS = document.createElement('input');
+                volS.type = 'range';
+                volS.min = 0;
+                volS.max = 1;
+                volS.step = 0.05;
+                volS.value = 1;
+                volS.className = 'nvolume-slider';
+                volG.appendChild(volB);
+                volG.appendChild(volS);
+                const timeD = document.createElement('span');
+                timeD.className = 'ntime-display';
+                timeD.textContent = '00:00 / 00:00';
+                const spM = document.createElement('div');
+                spM.className = 'ndropdown-menu';
+                const spB = document.createElement('button');
+                spB.textContent = '1x';
+                const spD = document.createElement('div');
+                spD.className = 'ndropdown-content';
+                [0.5, 0.75, 1, 1.25, 1.5, 2].forEach(s => { const b = document.createElement('button');
+                    b.textContent = s + 'x';
+                    b.dataset.s = s; if (s === 1) b.classList.add('selected');
+                    b.onclick = e => { e.stopPropagation();
+                        vid.playbackRate = s;
+                        spB.textContent = s + 'x';
+                        spD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                        b.classList.add('selected');
+                        spD.style.display = 'none'; };
+                    spD.appendChild(b); });
+                spM.appendChild(spB);
+                spM.appendChild(spD);
+                const qM = document.createElement('div');
+                qM.className = 'ndropdown-menu';
+                const qB = document.createElement('button');
+                qB.textContent = 'تلقائي';
+                const qD = document.createElement('div');
+                qD.className = 'ndropdown-content';
+                qM.appendChild(qB);
+                qM.appendChild(qD);
+                const fsB = document.createElement('button');
+                fsB.className = 'nfullscreen-btn';
+                fsB.innerHTML = '⛶';
+                row.appendChild(playB);
+                row.appendChild(rew);
+                row.appendChild(fwd);
+                row.appendChild(volG);
+                row.appendChild(timeD);
+                row.appendChild(spM);
+                row.appendChild(qM);
+                row.appendChild(fsB);
+                ct.appendChild(pb);
+                ct.appendChild(row);
+                wr.appendChild(ct);
+                container.appendChild(wr);
 
-                db.ref('.info/serverTimeOffset').on('value', s => { serverTimeOffset = s.val() || 0; });
+                let hls = null;
+                let retries = 0;
+                let ctTimeout;
 
+                function showCt(s) { if (s) { ct.classList.add('visible');
+                        clearTimeout(ctTimeout);
+                        ctTimeout = setTimeout(() => { if (!vid.paused) ct.classList.remove('visible'); }, 3000); } else { ct
+                            .classList.remove('visible');
+                        clearTimeout(ctTimeout); } }
+                on(vw, 'mousemove', () => showCt(true));
+                on(vw, 'touchstart', () => showCt(true));
+                on(vid, 'play', () => showCt(true));
+                on(vid, 'pause', () => showCt(true));
+
+                function loadStream(url) {
+                    ld.style.display = 'flex';
+                    er.style.display = 'none'; if (hls) { hls.destroy();
+                        hls = null; }
+                    if (isHLS && Hls.isSupported()) {
+                        hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                        hls.loadSource(url);
+                        hls.attachMedia(vid);
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => { ld.style.display = 'none';
+                            fillQuality(hls.levels);
+                            vid.play().catch(() => {}); });
+                        hls.on(Hls.Events.LEVEL_SWITCHED, (e, d) => { const lv = hls.levels[d.level]; if (lv) qB
+                                .textContent = lv.height ? lv.height + 'p' : 'HD'; });
+                        hls.on(Hls.Events.ERROR, (e, d) => { if (d.fatal) { if (retries < 2) { retries++;
+                                    ld.innerHTML =
+                                        `<div class="spinner"></div><span>إعادة المحاولة (${retries}/2)...</span>`;
+                                    setTimeout(() => loadStream(url), 1000); } else { ld.style.display =
+                                        'none';
+                                    er.style.display = 'flex'; } } });
+                    } else { vid.src = url;
+                        vid.play().catch(() => {});
+                        ld.style.display = 'none'; }
+                }
+
+                function fillQuality(levels) {
+                    qD.innerHTML = '';
+                    const aB = document.createElement('button');
+                    aB.textContent = 'تلقائي';
+                    aB.classList.add('selected');
+                    aB.onclick = e => { e.stopPropagation(); if (hls) hls.currentLevel = -1;
+                        qB.textContent = 'تلقائي';
+                        qD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                        aB.classList.add('selected');
+                        qD.style.display = 'none'; };
+                    qD.appendChild(aB); if (levels) levels.forEach((lv, i) => { const h = lv.height ? lv.height +
+                            'p' : 'HD';
+                        const b = document.createElement('button');
+                        b.textContent = h;
+                        b.onclick = e => { e.stopPropagation(); if (hls) hls.currentLevel = i;
+                            qB.textContent = h;
+                            qD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                            b.classList.add('selected');
+                            qD.style.display = 'none'; };
+                        qD.appendChild(b); });
+                }
+
+                function updProgress() {
+                    if (vid.duration && !isNaN(vid.duration)) { const p = (vid.currentTime / vid.duration) * 100;
+                        fill.style.width = p + '%';
+                        inp.value = p; if (vid.buffered.length) { const be = vid.buffered.end(vid.buffered.length -
+                                1);
+                            buf.style.width = ((be / vid.duration) * 100) + '%'; } const f = t => { if (isNaN(t))
+                                return '00:00';
+                            const m = Math.floor(t / 60),
+                                s = Math.floor(t % 60); return String(m).padStart(2, '0') + ':' + String(s)
+                                .padStart(2, '0'); };
+                        timeD.textContent = f(vid.currentTime) + ' / ' + f(vid.duration); }
+                }
+                on(vid, 'timeupdate', updProgress);
+                on(vid, 'progress', updProgress);
+                on(vid, 'loadedmetadata', () => { ld.style.display = 'none';
+                    updProgress(); });
+                playB.onclick = () => { vid.paused ? vid.play().catch(() => {}) : vid.pause(); };
+                on(vid, 'play', () => playB.innerHTML = '⏸');
+                on(vid, 'pause', () => playB.innerHTML = '▶');
+                rew.onclick = () => vid.currentTime = Math.max(0, vid.currentTime - 10);
+                fwd.onclick = () => vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10);
+                volB.onclick = () => { vid.muted = !vid.muted;
+                    volB.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉'); };
+                volS.oninput = () => { vid.volume = +volS.value;
+                    vid.muted = false;
+                    volB.innerHTML = vid.volume > 0.5 ? '🔊' : '🔉'; };
+                on(vid, 'volumechange', () => { volS.value = vid.volume;
+                    volB.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉'); });
+                inp.oninput = () => fill.style.width = inp.value + '%';
+                inp.onchange = () => { if (vid.duration) vid.currentTime = (+inp.value / 100) * vid.duration; };
+                pb.addEventListener('click', e => { if (e.target === inp) return;
+                    const r = pb.getBoundingClientRect(); if (vid.duration) vid.currentTime = ((e.clientX - r.left) /
+                        r.width) * vid.duration; });
+                spB.onclick = e => { e.stopPropagation();
+                    spD.style.display = spD.style.display === 'block' ? 'none' : 'block';
+                    qD.style.display = 'none'; };
+                qB.onclick = e => { e.stopPropagation();
+                    qD.style.display = qD.style.display === 'block' ? 'none' : 'block';
+                    spD.style.display = 'none'; };
+                document.addEventListener('click', () => { spD.style.display = 'none';
+                    qD.style.display = 'none'; });
+                fsB.onclick = () => { document.fullscreenElement ? document.exitFullscreen() : container.closest(
+                        '#pinnedVideoPlayer').requestFullscreen().catch(() => {}); };
+                er.querySelector('.retry-btn').onclick = () => { retries = 0;
+                    loadStream(source); };
+                loadStream(source);
+                currentPlayer = { video: vid, hls, container: wr };
+                playerListeners = L;
+                return currentPlayer;
+            }
+
+            // ==================== Twitter ====================
+            async function fetchTwVids(tid) {
+                let vids = [];
+                try { const r = await fetch(`https://api.fxtwitter.com/status/${tid}`); if (r.ok) { const d = await r
+                        .json(); for (let v of(d.tweet?.media?.videos || [])) if (v.url) vids.push({ url: v.url,
+                            type: 'video/mp4' }); } } catch (e) {} if (vids.length) return vids;
+                try { const r = await fetch(`https://api.vxtwitter.com/status/${tid}`); if (r.ok) { const d = await r
+                        .json(); if (d.media_extended) for (let m of d.media_extended) if ((m.type === 'video' || m
+                            .type === 'gif') && m.url) vids.push({ url: m.url, type: 'video/mp4' }); } } catch (e) {}
+                return vids;
+            }
+
+            function embedTw(container, tid) {
+                container.innerHTML =
+                    `<iframe src="https://platform.twitter.com/embed/Tweet.html?id=${tid}&theme=dark&lang=ar" style="width:100%;height:100%;min-height:320px;border:none;" allowfullscreen></iframe>`;
+                if (!window.twttr) { const s = document.createElement('script');
+                    s.src = 'https://platform.twitter.com/widgets.js';
+                    s.async = true;
+                    document.head.appendChild(s); }
+            }
+
+            // ==================== السحب وتغيير الحجم ====================
+            function makeDraggable(el, handle) {
+                let sx, sy, sl, st,
+                    dragging = false;
+                const gp = e => e.touches?.[0] || e;
+                handle.addEventListener('mousedown', e => { if (e.target.closest('.close-player')) return;
+                    e.preventDefault();
+                    dragging = true;
+                    sx = e.clientX;
+                    sy = e.clientY;
+                    sl = el.offsetLeft;
+                    st = el.offsetTop;
+                    el.style.transition = 'none';
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = sl + 'px';
+                    el.style.top = st + 'px';
+                    document.addEventListener('mousemove', mv);
+                    document.addEventListener('mouseup', up); });
+                handle.addEventListener('touchstart', e => { if (e.target.closest('.close-player')) return;
+                    e.preventDefault();
+                    dragging = true;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    sl = el.offsetLeft;
+                    st = el.offsetTop;
+                    el.style.transition = 'none';
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = sl + 'px';
+                    el.style.top = st + 'px';
+                    document.addEventListener('touchmove', mv, { passive: false });
+                    document.addEventListener('touchend', up); }, { passive: false });
+
+                function mv(e) { if (!dragging) return;
+                    e.preventDefault();
+                    const p = gp(e); let nl = sl + p.clientX - sx,
+                        nt = st + p.clientY - sy;
+                    nl = Math.max(0, Math.min(nl, window.innerWidth - el.offsetWidth));
+                    nt = Math.max(0, Math.min(nt, window.innerHeight - el.offsetHeight));
+                    el.style.left = nl + 'px';
+                    el.style.top = nt + 'px'; }
+
+                function up() { dragging = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', mv);
+                    document.removeEventListener('touchmove', mv);
+                    document.removeEventListener('mouseup', up);
+                    document.removeEventListener('touchend', up); }
+            }
+
+            function makeResizable(el, handle) {
+                let sw, sh, sx, sy,
+                    resizing = false;
+                const gp = e => e.touches?.[0] || e;
+                handle.addEventListener('mousedown', e => { e.preventDefault();
+                    e.stopPropagation();
+                    resizing = true;
+                    sw = el.offsetWidth;
+                    sh = el.offsetHeight;
+                    sx = e.clientX;
+                    sy = e.clientY;
+                    el.style.transition = 'none';
+                    document.addEventListener('mousemove', mv);
+                    document.addEventListener('mouseup', up); });
+                handle.addEventListener('touchstart', e => { e.preventDefault();
+                    e.stopPropagation();
+                    resizing = true;
+                    sw = el.offsetWidth;
+                    sh = el.offsetHeight;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    el.style.transition = 'none';
+                    document.addEventListener('touchmove', mv, { passive: false });
+                    document.addEventListener('touchend', up); }, { passive: false });
+
+                function mv(e) { if (!resizing) return;
+                    e.preventDefault();
+                    const p = gp(e);
+                    el.style.width = Math.max(260, sw + p.clientX - sx) + 'px';
+                    el.style.height = Math.max(180, sh + p.clientY - sy) + 'px'; }
+
+                function up() { resizing = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', mv);
+                    document.removeEventListener('touchmove', mv);
+                    document.removeEventListener('mouseup', up);
+                    document.removeEventListener('touchend', up); }
+            }
+
+            // ==================== إغلاق النوافذ ====================
+            function closeModals() { usersBox.style.display = 'none';
+                setVideoModal.style.display = 'none';
+                overlay.style.display = 'none'; }
+
+            function renderUsers(users) {
+                const list = $('usersList');
+                list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset; if (!users || !Object.keys(users).length) { list.innerHTML =
+                        '<div style="text-align:center;color:#888;padding:20px;">لا يوجد متصلين</div>'; return; }
+                for (let u in users) { const d = now - (users[u].lastActive || 0); let cls = 'offline'; if (d < 30000)
+                        cls = 'online'; else if (d < 60000) cls = 'idle';
+                    const row = document.createElement('div');
+                    row.className = 'user-row';
+                    row.innerHTML =
+                        `<span class="status-dot ${cls}"></span><span>${esc(u)}</span>${u===username?'<span style="color:var(--accent);font-size:11px;">(أنت)</span>':''}`;
+                    list.appendChild(row); }
+            }
+
+            // ==================== بدء الدردشة ====================
+            function startChat() {
+                loginScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                db.ref('.info/serverTimeOffset').on('value', s => serverTimeOffset = s.val() || 0);
                 userRef = db.ref('online/' + username);
                 messagesRef = db.ref('messages');
                 onlineRef = db.ref('online');
                 pinnedVideoRef = db.ref('pinned_video');
-
                 userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
                 userRef.onDisconnect().remove();
                 setInterval(() => userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }), 30000);
-
-                db.ref('.info/connected').on('value', s => {
-                    toast(s.val() ? '✓ متصل بالخادم' : '✗ انقطع الاتصال', s.val() ? 'ok' : 'err');
-                });
-
-                setInterval(() => {
-                    const now = Date.now() + serverTimeOffset;
-                    onlineRef.once('value', s => {
-                        s.forEach(c => { if (now - (c.val().lastActive || 0) > 120000) c.ref.remove(); });
-                    });
-                }, 60000);
-
-                $('inputArea').onsubmit = e => {
-                    e.preventDefault();
-                    const txt = clean(msgField.value.trim());
-                    if (!txt || !limiter.check()) return;
-                    messagesRef.push({ user: username, text: txt, timestamp: firebase.database.ServerValue.TIMESTAMP })
-                        .catch(() => toast('فشل الإرسال', 'err'));
-                    msgField.value = '';
-                    msgField.focus();
-                    if (typingRef) typingRef.child(username).remove();
-                    clearTimeout(typingTimer);
-                };
-
-                messagesRef.limitToLast(MSG_CAP).on('child_added', s => {
-                    const v = s.val();
-                    if (v?.user && v?.text) renderMsg(s.key, { user: v.user, text: v.text, timestamp: v.timestamp || Date.now() + serverTimeOffset });
-                });
-
-                messagesRef.on('child_removed', s => {
-                    const el = document.getElementById(`m-${s.key}`);
-                    if (el) el.remove();
-                });
-
-                onlineRef.on('value', s => {
-                    $('count').innerText = s.numChildren();
-                    renderUsers(s.val() || {});
-                });
-
-                $('onlineListBtn').onclick = () => { userModal.style.display = 'block'; shade.style.display = 'block'; };
-                $('setVideoBtn').onclick = () => { videoModal.style.display = 'block'; shade.style.display = 'block'; };
-                shade.onclick = dismissModals;
-                document.addEventListener('keydown', e => { if (e.key === 'Escape') dismissModals(); });
-
-                $('submitVideoUrlBtn').onclick = async () => {
-                    const raw = videoField.value.trim();
-                    if (!raw) { toast('أدخل رابطاً', 'warn'); return; }
-                    try {
-                        const u = extractUrl(raw) || raw;
-                        const m = classify(u);
-                        if (m.kind === 'unknown') { toast('رابط غير مدعوم', 'warn'); return; }
+                db.ref('.info/connected').on('value', s => showToast(s.val() ? '✅ متصل بالخادم' :
+                    '⚠️ فقدان الاتصال', s.val() ? 'success' : 'error'));
+                setInterval(() => { const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', s => s.forEach(c => { if (now - (c.val().lastActive || 0) > 120000) c.ref
+                            .remove(); })); }, 60000);
+                $('inputArea').onsubmit = e => { e.preventDefault();
+                    const txt = sanitize(messageInput.value.trim()); if (!txt || !limiter.canSend()) return;
+                    messagesRef.push({ user: username, text: txt, timestamp: firebase.database.ServerValue
+                            .TIMESTAMP }).catch(() => showToast('❌ فشل الإرسال', 'error'));
+                    messageInput.value = '';
+                    messageInput.focus();
+                    scrollBottom(); if (typingRef) typingRef.child(username).remove();
+                    clearTimeout(typingTimeout); };
+                messagesRef.limitToLast(MSG_LIMIT).on('child_added', s => { const v = s.val(); if (v?.user && v?.text)
+                        addMsg(s.key, { user: v.user, text: v.text, timestamp: v.timestamp || Date.now() +
+                            serverTimeOffset }); });
+                messagesRef.on('child_removed', s => { messageTimestamps.delete(s.key);
+                    document.getElementById(`msg-${s.key}`)?.remove(); });
+                onlineRef.on('value', s => { $('count').innerText = s.numChildren();
+                    renderUsers(s.val() || {}); });
+                onlineListBtn.onclick = () => { usersBox.style.display = 'block';
+                    overlay.style.display = 'block'; };
+                setVideoBtn.onclick = () => { setVideoModal.style.display = 'block';
+                    overlay.style.display = 'block'; };
+                overlay.onclick = closeModals;
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+                submitVideoUrlBtn.onclick = async () => { const raw = videoUrlInput.value.trim(); if (!raw) { showToast(
+                            '⚠️ أدخل رابطاً', 'warning'); return; } try { const u = cleanUrl(raw) || raw;
+                        const m = detectMedia(u); if (m.type === 'unknown') { showToast('⚠️ رابط غير مدعوم',
+                                'warning'); return; }
                         await pinnedVideoRef.set({ ...m, setBy: username });
-                        videoField.value = '';
-                        dismissModals();
-                        toast('✓ تم تشغيل الفيديو', 'ok');
-                    } catch (e) { toast('فشل التشغيل', 'err'); }
-                };
-
+                        videoUrlInput.value = '';
+                        closeModals();
+                        showToast('✅ تم التشغيل', 'success'); } catch (e) { showToast('❌ فشل', 'error'); } };
                 pinnedVideoRef.on('value', async s => {
-                    const data = s.val();
-                    if (!data) { destroyVideo(); return; }
-
-                    let finalData = data;
-                    if (data.kind === 'twitter') {
-                        const vids = await fetchTwMedia(data.id);
-                        if (vids.length) finalData = { ...data, kind: 'direct', url: vids[0].url };
-                        else { toast('لم يتم العثور على فيديو', 'warn'); return; }
-                    }
-
-                    loadVideo(finalData);
-                    toast(`🎬 ${esc(data.setBy || '')} يشغل فيديو`, 'msg');
+                    if (currentPlayer) { playerListeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
+                        playerListeners = []; if (currentPlayer.hls) { currentPlayer.hls.destroy();
+                            currentPlayer.hls = null; } if (currentPlayer.video) { currentPlayer.video.pause();
+                            currentPlayer.video.src = ''; }
+                        currentPlayer = null; }
+                    const data = s.val(); if (!data) { pinnedVideoPlayer.style.display = 'none';
+                        pinnedVideoPlayer.querySelector('.player-body').innerHTML = ''; return; }
+                    pinnedVideoPlayer.innerHTML = `<div class="player-header"><div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><span style="font-weight:500;">مشغل - ${esc(data.setBy||'')}</span><button class="close-player">✕</button></div><div class="player-body"></div><div class="resize-grip"></div>`;
+                    pinnedVideoPlayer.style.display = 'flex';
+                    pinnedVideoPlayer.querySelector('.close-player').onclick = e => { e.stopPropagation();
+                        pinnedVideoRef.remove();
+                        pinnedVideoPlayer.style.display = 'none'; };
+                    makeDraggable(pinnedVideoPlayer, pinnedVideoPlayer.querySelector('.player-header'));
+                    makeResizable(pinnedVideoPlayer, pinnedVideoPlayer.querySelector('.resize-grip'));
+                    const body = pinnedVideoPlayer.querySelector('.player-body');
+                    try { if (data.type === 'youtube') body.innerHTML =
+                            `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media" allowfullscreen></iframe>`; else if (
+                            data.type === 'm3u' || data.type === 'direct') createPlayer(body, data.url, data.type ===
+                            'm3u' ? 'application/x-mpegURL' : 'video/mp4'); else if (data.type === 'twitter') { const
+                            vids = await fetchTwVids(data.id); if (vids.length) { createPlayer(body, vids[0].url,
+                                'video/mp4'); if (vids.length > 1) { const bar = document.createElement('div');
+                                bar.className = 'video-tabs';
+                                vids.forEach((v, i) => { const btn = document.createElement('button');
+                                    btn.className = 'video-tab' + (i === 0 ? ' active' : '');
+                                    btn.textContent = `مقطع ${i+1}`;
+                                    btn.onclick = () => { body.innerHTML = '';
+                                        createPlayer(body, v.url, 'video/mp4');
+                                        bar.querySelectorAll('.video-tab').forEach(b => b
+                                            .classList.remove('active'));
+                                        btn.classList.add('active'); };
+                                    bar.appendChild(btn); });
+                                body.appendChild(bar); } } else embedTw(body, data.id); }
+                        showToast(`🎬 ${esc(data.setBy||'')} شغّل فيديو`, 'info'); } catch (e) { showToast(
+                            '❌ فشل التشغيل', 'error'); }
                 });
-
                 initTyping();
-                msgField.focus();
+                messageInput.focus();
             }
 
-            // ============ Login ============
-            function tryLogin() {
-                const raw = usernameInput.value.trim();
-                if (!raw) return toast('أدخل اسماً', 'warn');
-                if (/[.#$[\]/]/.test(raw)) return toast('أحرف ممنوعة', 'warn');
-                if (raw.length < 2) return toast('الاسم قصير جداً', 'warn');
-                if (raw.length > 15) return toast('الاسم طويل جداً', 'warn');
+            // ==================== تسجيل الدخول ====================
+            function attemptLogin() {
+                const raw = usernameInput.value.trim(); if (!raw) return showToast('⚠️ أدخل اسماً', 'warning'); if (
+                    /[.#$[\]/]/.test(raw)) return showToast('⚠️ أحرف غير مسموحة', 'warning'); if (raw.length < 2)
+                    return showToast('⚠️ الاسم قصير', 'warning'); if (raw.length > 15) return showToast(
+                    '⚠️ الاسم طويل', 'warning');
                 username = raw;
-                launchChat();
+                startChat();
             }
-
-            $('loginBtn').onclick = tryLogin;
-            usernameInput.onkeypress = e => { if (e.key === 'Enter') tryLogin(); };
-
-            window.addEventListener('beforeunload', () => {
-                destroyVideo();
-                if (userRef) userRef.remove();
-                if (typingRef && username) typingRef.child(username).remove();
-            });
+            loginBtn.onclick = attemptLogin;
+            usernameInput.onkeypress = e => { if (e.key === 'Enter') attemptLogin(); };
+            window.addEventListener('beforeunload', () => { if (currentPlayer?.hls) currentPlayer.hls.destroy(); if (
+                    userRef) userRef.remove(); if (typingRef && username) typingRef.child(username).remove(); });
         })();
     </script>
 </body>
