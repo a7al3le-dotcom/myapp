@@ -4,26 +4,35 @@
     <meta charset="UTF-8">
     <title>شات خاص</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
     <style>
         :root {
-            --bg-main: #05060a;
-            --bg-grad-1: #151624;
-            --bg-grad-2: #020307;
-            --text-main: #ffffff;
-            --text-muted: #a7aec4;
-            --accent: #ffd54a;
-            --accent-soft: #ffe788;
-            --accent-dark: #d97706;
-            --danger: #e53935;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --ctrl-bg: rgba(0, 0, 0, 0.75);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --glass-bg: rgba(17, 24, 39, 0.8);
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #ffb347;
+            --accent-glow: #ff8c00;
+            --danger: #ff4757;
+            --success: #2ed573;
+            --warning: #ffa502;
+            --info: #1e90ff;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(18, 18, 26, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(255, 179, 71, 0.15);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -32,8 +41,7 @@
             padding: 0;
         }
 
-        html,
-        body {
+        html, body {
             height: 100%;
             margin: 0;
             padding: 0;
@@ -41,13 +49,35 @@
             position: fixed;
             width: 100%;
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #0a0e17 0%, #1a1f2e 50%, #0a0e17 100%);
-            color: #fff;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         body {
             display: flex;
             flex-direction: column;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 179, 71, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(30, 144, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 71, 87, 0.02) 0%, transparent 50%);
+        }
+
+        /* ============ شريط الحالة العلوي ============ */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-glow), var(--info), var(--accent));
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+            z-index: 10000;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         #chat-container {
@@ -55,58 +85,107 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
-            backdrop-filter: blur(16px);
             position: relative;
         }
 
+        /* ============ منطقة الرسائل ============ */
         #messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
-            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.9) 100%);
+            padding: 60px 15px 15px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            padding-top: 60px; /* مساحة للأزرار العلوية */
+            gap: 4px;
+            background:
+                radial-gradient(ellipse at top, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
         }
 
-        /* ============ رسائل الشات ============ */
+        #messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ============ رسالة ============ */
         .msg-wrapper {
             display: flex;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: 12px;
-            animation: messageSlideIn 0.3s ease;
-            transition: background 0.3s ease;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            animation: msgSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-fast);
+            position: relative;
         }
 
         .msg-wrapper:hover {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        @keyframes messageSlideIn {
+        .msg-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 0;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: height var(--transition-smooth);
+        }
+
+        .msg-wrapper:hover::before {
+            height: 60%;
+        }
+
+        @keyframes msgSlideIn {
             from {
                 opacity: 0;
-                transform: translateX(-20px);
+                transform: translateY(10px) scale(0.98);
             }
             to {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         .msg-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 16px;
             flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .msg-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
         }
 
         .msg-content {
@@ -118,383 +197,276 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .msg-user {
-            font-weight: bold;
+            font-weight: 700;
             color: var(--accent);
-            font-size: 13px;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .msg-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255, 179, 71, 0.15);
+            color: var(--accent);
+            font-weight: 500;
         }
 
         .msg-time {
             font-size: 10px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            opacity: 0.7;
         }
 
         .msg-text {
-            color: var(--text-main);
+            color: var(--text-primary);
             font-size: 15px;
-            line-height: 1.5;
+            line-height: 1.6;
             word-break: break-word;
             direction: rtl;
             text-align: right;
+            opacity: 0.95;
         }
 
         /* ============ رسائل النظام ============ */
         .sys-msg {
             text-align: center;
-            color: var(--accent-soft);
+            color: var(--accent);
             font-size: 12px;
-            margin: 8px auto;
-            background: rgba(255, 213, 74, 0.08);
-            border: 1px solid rgba(255, 213, 74, 0.15);
-            padding: 6px 16px;
-            border-radius: 20px;
+            margin: 10px auto;
+            background: rgba(255, 179, 71, 0.08);
+            border: 1px solid rgba(255, 179, 71, 0.15);
+            padding: 8px 20px;
+            border-radius: 30px;
             max-width: fit-content;
-            animation: fadeInOut 5s ease-in-out;
+            animation: sysMsgIn 0.5s ease, sysMsgOut 0.5s ease 5s forwards;
+            backdrop-filter: blur(10px);
         }
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-10px); }
-            15% { opacity: 1; transform: translateY(0); }
-            85% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
+        @keyframes sysMsgIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes sysMsgOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
 
         /* ============ منطقة الإدخال ============ */
         #inputArea {
             display: flex;
-            gap: 8px;
-            padding: 10px 12px;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(15, 23, 42, 0.8));
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border-color);
+            gap: 10px;
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid var(--border-subtle);
             position: relative;
             z-index: 10;
         }
 
-        #messageInput {
+        #inputArea::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
+        }
+
+        .input-wrapper {
             flex: 1;
-            font-size: 16px;
-            height: 46px;
-            padding: 0 16px;
-            border-radius: 23px;
-            background: rgba(10, 11, 20, 0.95);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            color: var(--text-main);
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #messageInput {
+            width: 100%;
+            font-size: 15px;
+            height: 48px;
+            padding: 0 20px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border-medium);
+            color: var(--text-primary);
             font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
+            transition: all var(--transition-smooth);
             outline: none;
         }
 
         #messageInput:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(255, 213, 74, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
+        }
+
+        #messageInput::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .emoji-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border-medium);
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .emoji-btn:hover {
+            background: rgba(255, 179, 71, 0.1);
+            border-color: var(--accent);
         }
 
         #sendBtn {
-            height: 46px;
-            padding: 0 24px;
-            border-radius: 23px;
-            background: linear-gradient(135deg, var(--accent), #ffe178);
+            height: 48px;
+            padding: 0 28px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
             color: #000;
             font-weight: 700;
             cursor: pointer;
             border: none;
             font-family: 'Tajawal', sans-serif;
             font-size: 15px;
-            transition: all 0.3s ease;
+            transition: all var(--transition-smooth);
             white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.25);
+        }
+
+        #sendBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        #sendBtn:hover::before {
+            left: 100%;
         }
 
         #sendBtn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(255, 213, 74, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.4);
         }
 
         #sendBtn:active {
-            transform: scale(0.98);
+            transform: translateY(0) scale(0.97);
         }
 
         /* ============ الأزرار العلوية ============ */
         #topButtons {
             position: fixed;
-            top: calc(10px + env(safe-area-inset-top));
-            right: calc(10px + env(safe-area-inset-right));
+            top: calc(12px + env(safe-area-inset-top));
+            right: calc(12px + env(safe-area-inset-right));
             display: flex;
-            gap: 8px;
+            gap: 10px;
             z-index: 1000;
         }
 
-        .icon-btn {
-            width: 42px;
-            height: 42px;
-            background: rgba(10, 11, 20, 0.95);
-            border-radius: 14px;
+        .top-btn {
+            height: 44px;
+            padding: 0 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
             cursor: pointer;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
             color: #fff;
-            font-size: 20px;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
             position: relative;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: all var(--transition-smooth);
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 500;
         }
 
-        .icon-btn:hover {
-            transform: scale(1.08);
-            background: rgba(20, 21, 30, 0.95);
+        .top-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
             border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .top-btn .icon {
+            font-size: 18px;
         }
 
         .online-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
             background: var(--accent);
             color: #000;
             font-size: 11px;
             font-weight: 700;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 10px;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 5px;
+            padding: 0 7px;
         }
 
-        /* ============ النوافذ المنبثقة ============ */
-        #usersBox,
-        #setVideoModal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at top, #1a1d2e 0%, #0a0d16 55%);
-            padding: 24px;
-            border-radius: 20px;
-            z-index: 1003;
-            display: none;
-            max-height: 80vh;
-            width: 90%;
-            max-width: 420px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-            animation: modalPopIn 0.3s ease;
-        }
-
-        @keyframes modalPopIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        #usersBox h4,
-        #setVideoModal h4 {
-            text-align: center;
-            margin-bottom: 16px;
-            font-size: 18px;
-            color: var(--accent-soft);
-        }
-
-        #usersList .user-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            transition: background 0.3s ease;
-            cursor: pointer;
-        }
-
-        #usersList .user-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .status-green {
-            background-color: #2ecc71;
-            box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
-        }
-
-        .status-yellow {
-            background-color: #f1c40f;
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
-        }
-
-        .status-gray {
-            background-color: #7f8c8d;
-        }
-
-        #videoUrlInput {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background: rgba(5, 6, 12, 0.95);
-            color: white;
-            font-size: 15px;
-            margin-bottom: 12px;
-            box-sizing: border-box;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        #videoUrlInput:focus {
-            border-color: var(--accent);
-        }
-
-        #submitVideoUrlBtn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), #ffe178);
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            color: #000;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        #submitVideoUrlBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 213, 74, 0.3);
-        }
-
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1001;
-            display: none;
-            backdrop-filter: blur(6px);
-        }
-
-        /* ============ شاشة تسجيل الدخول ============ */
-        #loginScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at top, #181a28 0%, rgba(5, 6, 10, 0.98) 50%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        #loginBox {
-            background: rgba(5, 6, 12, 0.98);
-            padding: 32px;
-            border-radius: 24px;
-            text-align: center;
-            min-width: 300px;
-            max-width: 90%;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            animation: modalPopIn 0.5s ease;
-        }
-
-        #loginBox h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            background: linear-gradient(135deg, var(--accent), #ffe178);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        #usernameInput {
-            width: 100%;
-            padding: 14px 18px;
-            margin: 10px 0;
-            border-radius: 14px;
-            font-size: 16px;
-            background: rgba(3, 4, 10, 0.96);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-sizing: border-box;
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        #usernameInput:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 213, 74, 0.1);
-        }
-
-        #loginBtn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent), #ffe178);
-            padding: 14px 26px;
-            border-radius: 14px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            color: #000;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 17px;
-            margin-top: 8px;
-            transition: all 0.3s ease;
-        }
-
-        #loginBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 213, 74, 0.3);
-        }
-
-        /* ============ مشغل الفيديو - ثابت قابل للسحب ============ */
+        /* ============ مشغل الفيديو - في الأعلى مثل الأصل ============ */
         #pinnedVideoPlayer {
             position: fixed;
-            top: 80px;
-            right: 20px;
+            top: calc(65px + env(safe-area-inset-top));
+            left: 15px;
             width: 380px;
-            max-width: calc(100vw - 40px);
-            min-width: 280px;
+            max-width: calc(100% - 30px);
+            min-width: 260px;
             background: #000;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+            border-radius: var(--radius-md);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
             z-index: 998;
             display: none;
             flex-direction: column;
             overflow: visible;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: slideInRight 0.3s ease;
-            transition: none; /* مهم للسحب بدون تأخير */
+            animation: playerSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: none;
         }
 
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
+        @keyframes playerSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
         }
 
-        .video-header {
-            background: rgba(0, 0, 0, 0.9);
+        .player-header {
+            background: rgba(10, 10, 15, 0.98);
             padding: 8px 14px;
             cursor: move;
             touch-action: none;
@@ -502,95 +474,113 @@
             justify-content: space-between;
             align-items: center;
             user-select: none;
-            font-size: 13px;
-            color: #ddd;
-            backdrop-filter: blur(10px);
+            font-size: 12px;
+            color: #ccc;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px 16px 0 0;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
             z-index: 5;
+            letter-spacing: 0.5px;
         }
 
-        .close-pinned-video {
-            background: var(--danger);
+        .player-header .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .player-header .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+        }
+
+        .player-header .dot.red { background: var(--danger); }
+        .player-header .dot.yellow { background: var(--warning); }
+        .player-header .dot.green { background: var(--success); }
+
+        .close-player {
+            background: rgba(255, 71, 87, 0.2);
+            border: none;
+            color: var(--danger);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            color: white;
-            z-index: 10;
-            pointer-events: auto;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
             flex-shrink: 0;
         }
 
-        .close-pinned-video:hover {
-            background: #dc2626;
-            transform: scale(1.15);
+        .close-player:hover {
+            background: var(--danger);
+            color: #fff;
+            transform: rotate(90deg);
         }
 
-        .video-body {
+        .player-body {
             position: relative;
             background: #000;
-            border-radius: 0 0 16px 16px;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
             overflow: hidden;
+            min-height: 160px;
         }
 
-        /* مقبض تغيير الحجم في الأسفل */
-        .resize-handle {
+        .resize-grip {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            bottom: 2px;
-            left: 2px;
-            cursor: nesw-resize;
+            width: 16px;
+            height: 16px;
+            bottom: 3px;
+            right: 3px;
+            cursor: nwse-resize;
             z-index: 20;
-            background: rgba(255, 255, 255, 0.25);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 3px;
-            transition: background 0.2s;
         }
 
-        .resize-handle:hover {
-            background: rgba(255, 255, 255, 0.5);
+        #pinnedVideoPlayer:hover .resize-grip {
+            opacity: 1;
         }
 
-        .video-selector-bar {
+        .video-tabs {
             display: flex;
-            gap: 4px;
-            padding: 6px;
+            gap: 2px;
+            padding: 4px 6px;
             background: rgba(0, 0, 0, 0.9);
-            flex-wrap: wrap;
+            overflow-x: auto;
         }
 
-        .video-selector-btn {
-            padding: 5px 14px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            color: white;
+        .video-tab {
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #aaa;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
         }
 
-        .video-selector-btn.active {
+        .video-tab.active {
             background: var(--accent);
             color: #000;
             font-weight: 700;
             border-color: var(--accent);
         }
 
-        .video-selector-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .video-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
-        /* ============ مشغل Netflix الداخلي ============ */
+        /* ============ مشغل Netflix الداخلي المحسن ============ */
         .nplayer {
             position: relative;
             width: 100%;
@@ -604,6 +594,7 @@
             width: 100%;
             aspect-ratio: 16 / 9;
             background: #0a0a0a;
+            cursor: pointer;
         }
 
         .nplayer-video-wrap video {
@@ -616,30 +607,26 @@
 
         .nplayer-loading {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             pointer-events: none;
             z-index: 2;
         }
 
-        .nplayer-loading::after {
-            content: '';
-            width: 28px;
-            height: 28px;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-top: 3px solid var(--accent);
+        .nplayer-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-top: 10px;
+            margin-bottom: 12px;
         }
 
         @keyframes spin {
@@ -648,39 +635,40 @@
 
         .nplayer-error {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 3;
             text-align: center;
             padding: 20px;
         }
 
+        .nplayer-error .error-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
         .nplayer-error button {
-            margin-top: 12px;
-            padding: 10px 24px;
+            margin-top: 14px;
+            padding: 10px 28px;
             background: var(--accent);
             color: #000;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             font-weight: 700;
             cursor: pointer;
             font-family: 'Tajawal', sans-serif;
-            pointer-events: auto;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
         }
 
         .nplayer-error button:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(255, 213, 74, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.4);
         }
 
         /* شريط التحكم */
@@ -688,28 +676,33 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 100%);
-            padding: 30px 10px 8px;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+            padding: 35px 10px 8px;
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
             z-index: 4;
         }
 
-        .nplayer-controls.show {
+        .nplayer-controls.visible {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .nprogress {
+        .nprogress-bar {
             position: relative;
             width: 100%;
             height: 5px;
             background: rgba(255, 255, 255, 0.15);
             border-radius: 3px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             cursor: pointer;
+            transition: height 0.2s;
+        }
+
+        .nprogress-bar:hover {
+            height: 7px;
         }
 
         .nprogress-buffer {
@@ -717,191 +710,343 @@
             top: 0;
             left: 0;
             height: 100%;
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 3px;
-            width: 0%;
         }
 
-        .nprogress-played {
+        .nprogress-filled {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
             background: var(--accent);
             border-radius: 3px;
-            width: 0%;
             z-index: 2;
-            transition: width 0.15s linear;
+            transition: width 0.1s linear;
+        }
+
+        .nprogress-filled::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .nprogress-bar:hover .nprogress-filled::after {
+            opacity: 1;
         }
 
         .nprogress-input {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             opacity: 0;
             cursor: pointer;
             z-index: 3;
             margin: 0;
         }
 
-        .ncontrols-row {
+        .ncontrols-bottom {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
-        .ncontrols-row button {
+        .ncontrols-bottom button {
             background: none;
             border: none;
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 5px 8px;
             opacity: 0.85;
-            transition: all 0.2s;
+            transition: all var(--transition-fast);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 30px;
-            height: 30px;
-            border-radius: 6px;
+            min-width: 34px;
+            height: 34px;
+            border-radius: 8px;
             font-family: 'Tajawal', sans-serif;
         }
 
-        .ncontrols-row button:hover {
+        .ncontrols-bottom button:hover {
             opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.05);
         }
 
-        .ntime {
+        .ncontrols-bottom button.active {
+            color: var(--accent);
+        }
+
+        .ntime-display {
             font-size: 12px;
             color: #ccc;
-            min-width: 85px;
+            min-width: 90px;
             direction: ltr;
-            font-variant-numeric: tabular-nums;
-            font-family: monospace;
+            font-family: 'SF Mono', 'Cascadia Code', monospace;
+            letter-spacing: 0.5px;
         }
 
-        .nvolume-wrap {
+        .nvolume-group {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .nvolume-slider {
-            width: 50px;
+            width: 55px;
             height: 4px;
             -webkit-appearance: none;
             appearance: none;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             border-radius: 2px;
             outline: none;
             cursor: pointer;
+            transition: width 0.2s;
+        }
+
+        .nvolume-group:hover .nvolume-slider {
+            width: 70px;
         }
 
         .nvolume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 13px;
+            height: 13px;
             border-radius: 50%;
             background: var(--accent);
             cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 179, 71, 0.5);
         }
 
-        .nspeed-menu,
-        .nquality-menu {
+        .ndropdown-menu {
             position: relative;
         }
 
-        .nspeed-dropdown,
-        .nquality-dropdown {
+        .ndropdown-content {
             position: absolute;
-            bottom: 35px;
+            bottom: 40px;
             right: 0;
-            background: rgba(20, 20, 35, 0.98);
-            backdrop-filter: blur(15px);
-            border-radius: 10px;
-            padding: 4px 0;
-            min-width: 85px;
+            background: rgba(15, 15, 25, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 6px 0;
+            min-width: 90px;
             display: none;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            z-index: 20;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            z-index: 25;
         }
 
-        .nspeed-dropdown button,
-        .nquality-dropdown button {
+        .ndropdown-content button {
             display: block;
             background: none;
             border: none;
-            color: #ddd;
-            padding: 6px 14px;
+            color: #ccc;
+            padding: 8px 18px;
             width: 100%;
             text-align: right;
             font-size: 13px;
             cursor: pointer;
             font-family: 'Tajawal', sans-serif;
-            transition: all 0.2s;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
         }
 
-        .nspeed-dropdown button:hover,
-        .nquality-dropdown button:hover {
-            background: rgba(255, 255, 255, 0.08);
+        .ndropdown-content button:hover {
+            background: rgba(255, 255, 255, 0.06);
             color: #fff;
         }
 
-        .nspeed-dropdown button.active,
-        .nquality-dropdown button.active {
+        .ndropdown-content button.selected {
             color: var(--accent);
             font-weight: 700;
+            background: rgba(255, 179, 71, 0.08);
         }
 
-        .nfullscreen {
+        .nfullscreen-btn {
             margin-right: auto;
+            font-size: 20px !important;
+        }
+
+        /* ============ النوافذ المنبثقة ============ */
+        #usersBox,
+        #setVideoModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            z-index: 1003;
+            display: none;
+            max-height: 80vh;
+            width: 92%;
+            max-width: 440px;
+            overflow-y: auto;
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-lg);
+            animation: modalPopIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalPopIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 14px;
+            border: 2px solid var(--border-medium);
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-smooth);
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            transition: all var(--transition-smooth);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.35);
+        }
+
+        #usersList .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            cursor: default;
+        }
+
+        #usersList .user-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 12px rgba(46, 213, 115, 0.6);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .status-dot.idle {
+            background: var(--warning);
+            box-shadow: 0 0 12px rgba(255, 165, 2, 0.6);
+        }
+
+        .status-dot.offline {
+            background: #555;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 8px rgba(46, 213, 115, 0.4); }
+            50% { box-shadow: 0 0 18px rgba(46, 213, 115, 0.8); }
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1001;
+            display: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         /* ============ مؤشر الكتابة ============ */
         #typingWrapper {
             display: none;
-            padding: 4px 15px;
-            color: var(--text-muted);
+            padding: 6px 18px;
+            color: var(--text-secondary);
             font-size: 12px;
         }
 
         #typingIndicator {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .typing-dots {
+        .typing-animation {
             display: inline-flex;
             gap: 3px;
         }
 
-        .typing-dot {
-            width: 4px;
-            height: 4px;
+        .typing-animation span {
+            width: 5px;
+            height: 5px;
             background: var(--accent);
             border-radius: 50%;
             animation: typingBounce 1.4s infinite;
         }
 
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-animation span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-animation span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typingBounce {
             0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-6px); }
+            30% { opacity: 1; transform: translateY(-8px); }
         }
 
-        /* ============ نظام الإشعارات (Toast) ============ */
+        /* ============ نظام الإشعارات ============ */
         .toast-container {
             position: fixed;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10001;
@@ -912,44 +1057,137 @@
         }
 
         .toast {
-            background: rgba(20, 20, 35, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px 20px;
-            color: white;
+            background: rgba(18, 18, 26, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-medium);
+            border-radius: 30px;
+            padding: 12px 24px;
+            color: #fff;
             font-size: 13px;
             pointer-events: auto;
-            animation: toastSlideIn 0.4s ease, toastSlideOut 0.4s ease 4s forwards;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            animation: toastIn 0.5s ease, toastOut 0.5s ease 4s forwards;
+            box-shadow: var(--shadow-lg);
             white-space: nowrap;
+            font-weight: 500;
         }
 
-        .toast.success { border-right: 3px solid var(--success); }
-        .toast.error { border-right: 3px solid var(--danger); }
-        .toast.warning { border-right: 3px solid var(--warning); }
-        .toast.info { border-right: 3px solid #3b82f6; }
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+        .toast.info { border-left: 3px solid var(--info); }
 
-        @keyframes toastSlideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes toastSlideOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        }
+
+        /* ============ شاشة تسجيل الدخول ============ */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #1a1a28 0%, #0a0a12 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        #loginBox {
+            background: rgba(15, 15, 22, 0.98);
+            padding: 40px 32px;
+            border-radius: var(--radius-xl);
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-lg), 0 0 80px rgba(255, 179, 71, 0.05);
+            animation: modalPopIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        #loginBox h2 {
+            margin-bottom: 8px;
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        #loginScreen #usernameInput {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 10px 0;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            border: 2px solid var(--border-medium);
+            font-family: 'Tajawal', sans-serif;
+            transition: all var(--transition-smooth);
+            outline: none;
+            text-align: center;
+        }
+
+        #loginScreen #usernameInput:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.08);
+        }
+
+        #loginBtn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 17px;
+            margin-top: 12px;
+            transition: all var(--transition-smooth);
+            box-shadow: 0 4px 20px rgba(255, 179, 71, 0.25);
+        }
+
+        #loginBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 179, 71, 0.4);
         }
 
         /* ============ تجاوب الموبايل ============ */
         @media (max-width: 600px) {
             #pinnedVideoPlayer {
-                top: auto !important;
-                right: 3vw !important;
-                bottom: 80px !important;
-                left: auto !important;
-                width: 94vw !important;
+                left: 50% !important;
+                top: calc(70px + env(safe-area-inset-top)) !important;
+                transform: translateX(-50%) !important;
+                width: 92vw !important;
                 max-width: none !important;
-                transform: none !important;
+                right: auto !important;
+                bottom: auto !important;
             }
 
             #topButtons {
@@ -958,1165 +1196,745 @@
                 gap: 6px;
             }
 
-            .icon-btn {
-                width: 36px;
+            .top-btn {
                 height: 36px;
-                font-size: 18px;
-                border-radius: 12px;
+                padding: 0 12px;
+                font-size: 12px;
+                border-radius: 18px;
+            }
+
+            .top-btn .icon {
+                font-size: 16px;
             }
 
             #sendBtn {
-                padding: 0 16px;
+                padding: 0 18px;
                 font-size: 14px;
-            }
-
-            #messageInput {
-                font-size: 15px;
                 height: 42px;
             }
 
+            #messageInput {
+                font-size: 14px;
+                height: 42px;
+                padding: 0 16px;
+            }
+
             #messages {
-                padding-top: 55px;
+                padding: 55px 10px 10px;
+            }
+
+            .msg-avatar {
+                width: 34px;
+                height: 34px;
+                font-size: 13px;
             }
 
             .nvolume-slider {
                 width: 35px;
             }
-
-            .ntime {
-                font-size: 10px;
-                min-width: 65px;
-            }
-
-            .ncontrols-row button {
-                font-size: 14px;
-                min-width: 26px;
-                height: 26px;
-                padding: 2px 4px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- ============ شاشة تسجيل الدخول ============ -->
+    <!-- شريط التدرج العلوي -->
+    <div class="status-bar"></div>
+
+    <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen">
         <div id="loginBox">
-            <h2>👋 أهلاً بك في الدردشة</h2>
-            <input type="text" id="usernameInput" placeholder="اسمك (بدون / # . $ [ ])" maxlength="15">
-            <button id="loginBtn">🚀 دخول</button>
+            <div class="login-icon">💬</div>
+            <h2>شات خاص</h2>
+            <p class="login-subtitle">انضم إلى المحادثة المباشرة</p>
+            <input type="text" id="usernameInput" placeholder="أدخل اسمك..." maxlength="15">
+            <button id="loginBtn">🚀 دخول إلى الشات</button>
         </div>
     </div>
 
-    <!-- ============ حاوية الإشعارات ============ -->
+    <!-- حاوية الإشعارات -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ============ واجهة الدردشة الرئيسية ============ -->
+    <!-- واجهة الدردشة -->
     <div id="chat-container" style="display: none;">
-        <!-- الأزرار العلوية -->
+        <!-- أزرار علوية -->
         <div id="topButtons">
-            <button class="icon-btn" id="setVideoBtn" title="تشغيل فيديو">📺</button>
-            <button class="icon-btn" id="onlineListBtn" title="المستخدمين المتصلين">
-                👥
+            <button class="top-btn" id="setVideoBtn">
+                <span class="icon">📺</span> فيديو
+            </button>
+            <button class="top-btn" id="onlineListBtn">
+                <span class="icon">👥</span>
                 <span class="online-badge" id="count">0</span>
             </button>
         </div>
 
         <!-- مشغل الفيديو -->
         <div id="pinnedVideoPlayer">
-            <div class="video-header">
-                <span>🎬 مشغل الفيديو</span>
-                <button class="close-pinned-video">✕</button>
+            <div class="player-header">
+                <div class="dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span style="font-weight:500;">مشغل الفيديو</span>
+                <button class="close-player">✕</button>
             </div>
-            <div class="video-body"></div>
-            <div class="resize-handle"></div>
+            <div class="player-body"></div>
+            <div class="resize-grip"></div>
         </div>
 
-        <!-- نافذة إضافة فيديو -->
+        <!-- نافذة فيديو -->
         <div id="setVideoModal">
-            <h4>🎬 تثبيت فيديو</h4>
-            <input type="text" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، m3u8، mp4...">
-            <button id="submitVideoUrlBtn">تثبيت</button>
+            <h3 class="modal-title">🎬 تشغيل فيديو</h3>
+            <input type="text" class="modal-input" id="videoUrlInput" placeholder="الصق رابط يوتيوب، تويتر، m3u8، mp4...">
+            <button class="modal-btn" id="submitVideoUrlBtn">تشغيل الفيديو</button>
         </div>
 
         <!-- نافذة المستخدمين -->
         <div id="usersBox">
-            <h4>👥 المتصلين</h4>
+            <h3 class="modal-title">👥 المتصلين الآن</h3>
             <div id="usersList"></div>
         </div>
 
-        <!-- طبقة التعتيم -->
+        <!-- التعتيم -->
         <div id="overlay"></div>
 
-        <!-- منطقة الرسائل -->
+        <!-- الرسائل -->
         <div id="messages"></div>
 
         <!-- مؤشر الكتابة -->
         <div id="typingWrapper">
             <div id="typingIndicator">
                 <span id="typingText"></span>
-                <span class="typing-dots">
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
+                <span class="typing-animation">
+                    <span></span><span></span><span></span>
                 </span>
             </div>
         </div>
 
-        <!-- منطقة الإدخال -->
+        <!-- الإدخال -->
         <form id="inputArea">
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" maxlength="500">
+            </div>
+            <div class="input-actions">
+                <button type="button" class="emoji-btn" title="إيموجي">😊</button>
+            </div>
             <button type="submit" id="sendBtn">إرسال</button>
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" maxlength="500">
         </form>
     </div>
 
     <script>
         (function() {
-            // ==================== تهيئة Firebase ====================
+            // ==================== Firebase ====================
             const firebaseConfig = {
                 apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
                 authDomain: "mychat-2d881.firebaseapp.com",
                 databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
             };
-
-            try {
-                firebase.initializeApp(firebaseConfig);
-            } catch (e) {
-                console.log('Firebase initialized already');
-            }
-
+            try { firebase.initializeApp(firebaseConfig); } catch (e) {}
             const db = firebase.database();
 
-            // ==================== المتغيرات العامة ====================
+            // ==================== متغيرات ====================
             let username = '';
             let userRef, messagesRef, onlineRef, pinnedVideoRef, typingRef;
             let serverTimeOffset = 0;
             let currentPlayer = null;
-            let playerEventListeners = [];
+            let playerListeners = [];
             const messageTimestamps = new Map();
             let typingTimeout = null;
-            const MESSAGE_LIMIT = 100;
+            const MSG_LIMIT = 100;
 
-            // ==================== مراجع DOM ====================
-            const loginScreen = document.getElementById('loginScreen');
-            const usernameInput = document.getElementById('usernameInput');
-            const loginBtn = document.getElementById('loginBtn');
-            const chatContainer = document.getElementById('chat-container');
-            const messagesDiv = document.getElementById("messages");
-            const messageInput = document.getElementById("messageInput");
-            const onlineListBtn = document.getElementById("onlineListBtn");
-            const setVideoBtn = document.getElementById("setVideoBtn");
-            const usersBox = document.getElementById("usersBox");
-            const setVideoModal = document.getElementById("setVideoModal");
-            const videoUrlInput = document.getElementById("videoUrlInput");
-            const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
-            const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
-            const overlay = document.getElementById("overlay");
-            const typingWrapper = document.getElementById("typingWrapper");
-            const typingText = document.getElementById("typingText");
-            const toastContainer = document.getElementById("toastContainer");
+            // ==================== DOM ====================
+            const $ = (id) => document.getElementById(id);
+            const loginScreen = $('loginScreen');
+            const usernameInput = $('usernameInput');
+            const loginBtn = $('loginBtn');
+            const chatContainer = $('chat-container');
+            const messagesDiv = $('messages');
+            const messageInput = $('messageInput');
+            const onlineListBtn = $('onlineListBtn');
+            const setVideoBtn = $('setVideoBtn');
+            const usersBox = $('usersBox');
+            const setVideoModal = $('setVideoModal');
+            const videoUrlInput = $('videoUrlInput');
+            const submitVideoUrlBtn = $('submitVideoUrlBtn');
+            const pinnedVideoPlayer = $('pinnedVideoPlayer');
+            const overlay = $('overlay');
+            const typingWrapper = $('typingWrapper');
+            const typingText = $('typingText');
+            const toastContainer = $('toastContainer');
 
-            // ==================== نظام الإشعارات (Toast) ====================
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                toastContainer.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                }, 4500);
+            // ==================== Toast ====================
+            function showToast(msg, type = 'info') {
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                toastContainer.appendChild(t);
+                setTimeout(() => t.remove(), 4500);
             }
 
-            // ==================== نظام Rate Limiting ====================
+            // ==================== Rate Limiter ====================
             class RateLimiter {
-                constructor(maxMessages = 4, timeWindow = 8000) {
-                    this.messages = [];
-                    this.maxMessages = maxMessages;
-                    this.timeWindow = timeWindow;
+                constructor(max = 4, win = 8000) {
+                    this.msgs = [];
+                    this.max = max;
+                    this.win = win;
                 }
                 canSend() {
                     const now = Date.now();
-                    this.messages = this.messages.filter(t => now - t < this.timeWindow);
-                    if (this.messages.length >= this.maxMessages) {
-                        showToast('⚠️ يرجى الانتظار قليلاً قبل إرسال رسالة أخرى', 'warning');
-                        return false;
-                    }
-                    this.messages.push(now);
+                    this.msgs = this.msgs.filter(t => now - t < this.win);
+                    if (this.msgs.length >= this.max) { showToast('⚠️ تمهل قليلاً', 'warning'); return false; }
+                    this.msgs.push(now);
                     return true;
                 }
             }
-            const rateLimiter = new RateLimiter(4, 8000);
+            const limiter = new RateLimiter();
 
             // ==================== دوال مساعدة ====================
-            function escapeHtml(str) {
-                if (!str) return "";
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
+            const esc = (s) => { const d = document.createElement('div');
+                d.textContent = s || ''; return d.innerHTML; };
+            const sanitize = (s) => s.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').substring(0, 500);
+            const avatarColor = (n) => ['#ffb347', '#1e90ff', '#2ed573', '#ff4757', '#a55eea', '#ff6b81',
+                '#00d2d3'
+            ] [n.split('').reduce((h, c) => h + c.charCodeAt(0), 0) % 7];
+            const initials = (n) => n.substring(0, 2).toUpperCase();
+            const scrollBottom = () => requestAnimationFrame(() => messagesDiv.scrollTop = messagesDiv.scrollHeight);
+            const ytId = (u) => (u || '').match(
+                /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i)?.[1] || null;
+            const twId = (u) => (u || '').match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/i)?.[1] || null;
+            const isDirectVid = (u) => /\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(u);
+            const cleanUrl = (t) => { const m = t.match(/(https?:\/\/[^\s]+)/g); return m ? m[0].replace(/[،،؛]+$/,
+                    '') : null; };
+            const detectMedia = (u) => {
+                if (ytId(u)) return { type: 'youtube', id: ytId(u) };
+                if (twId(u)) return { type: 'twitter', id: twId(u) };
+                if (/\.(m3u8|m3u)(\?.*)?$/i.test(u)) return { type: 'm3u', url: u };
+                if (isDirectVid(u)) return { type: 'direct', url: u };
+                return { type: 'unknown' };
+            };
+            const fmtTime = (ts) => {
+                if (!ts) return '';
+                const d = Math.floor((Date.now() + serverTimeOffset - ts) / 1000);
+                if (d < 5) return 'الآن';
+                if (d < 60) return 'ثواني';
+                if (d < 3600) return `د${Math.floor(d/60)}`;
+                if (d < 86400) return `س${Math.floor(d/3600)}`;
+                return `ي${Math.floor(d/86400)}`;
+            };
+
+            function addNote(text) {
+                const d = document.createElement('div');
+                d.className = 'sys-msg';
+                d.textContent = text;
+                messagesDiv.appendChild(d);
+                scrollBottom();
+                setTimeout(() => d.remove(), 5500);
             }
 
-            function sanitizeInput(input) {
-                input = input.replace(/<[^>]*>/g, '');
-                input = input.replace(/javascript:/gi, '');
-                input = input.replace(/on\w+=/gi, '');
-                return input.substring(0, 500);
+            function addMsg(key, { user, text, timestamp }) {
+                const w = document.createElement('div');
+                w.className = 'msg-wrapper';
+                w.id = `msg-${key}`;
+                w.innerHTML = `<div class="msg-avatar" style="background:${avatarColor(user)}">${initials(user)}</div>
+                    <div class="msg-content"><div class="msg-header"><span class="msg-user">${esc(user)}</span><span class="msg-time">${fmtTime(timestamp)}</span></div><div class="msg-text">${esc(text)}</div></div>`;
+                messagesDiv.appendChild(w);
+                messageTimestamps.set(key, { timestamp, el: w.querySelector('.msg-time') });
+                scrollBottom();
+                if (messagesDiv.children.length > MSG_LIMIT + 30) messagesDiv.firstElementChild?.remove();
             }
 
-            function getAvatarColor(name) {
-                const colors = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4',
-                    '#f97316', '#14b8a6', '#6366f1'
-                ];
-                let hash = 0;
-                for (let i = 0; i < name.length; i++) {
-                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-                }
-                return colors[Math.abs(hash) % colors.length];
-            }
+            setInterval(() => messageTimestamps.forEach(({ timestamp, el }) => { if (el) el.textContent = fmtTime(
+                timestamp); }), 30000);
 
-            function getInitials(name) {
-                return name.substring(0, 2).toUpperCase();
-            }
-
-            function scrollToBottom() {
-                requestAnimationFrame(() => {
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                });
-            }
-
-            function getYoutubeVideoId(url) {
-                if (!url) return null;
-                const regex = /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                const match = url.match(regex);
-                return match ? match[1] : null;
-            }
-
-            function getTweetId(url) {
-                if (!url) return null;
-                const match = url.match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/);
-                return match ? match[1] : null;
-            }
-
-            function isDirectVideo(url) {
-                return /\.(mp4|webm|mov|m4v|mkv|avi)(\?.*)?$/i.test(url) || (url.includes('video') && !url.includes(
-                    'youtube') &&
-                    !url.includes('twitter') && !url.includes('tiktok'));
-            }
-
-            function detectMediaType(url) {
-                const patterns = {
-                    youtube: /(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/i,
-                    twitter: /(?:twitter|x)\.com\/\w+\/status\/(\d+)/i,
-                    directVideo: /\.(mp4|webm|mov|mkv|avi)(\?.*)?$/i,
-                    hls: /\.(m3u8|m3u)(\?.*)?$/i
-                };
-                for (let [type, pattern] of Object.entries(patterns)) {
-                    const match = url.match(pattern);
-                    if (match) return { type, id: match[1] || url };
-                }
-                return { type: 'unknown', id: url };
-            }
-
-            function extractCleanUrl(text) {
-                const matches = text.match(/(https?:\/\/[^\s]+)/g);
-                if (!matches) return null;
-                let raw = matches[0];
-                raw = raw.replace(/[،،؛\u0600-\u06FF]+$/, '').trim();
-                return raw;
-            }
-
-            async function expandShortUrl(url) {
-                if (url.includes('t.co') || url.includes('bit.ly') || url.includes('tinyurl.com')) {
-                    try {
-                        const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
-                        return response.url;
-                    } catch (e) {
-                        console.warn('Failed to expand URL:', e);
-                        return url;
-                    }
-                }
-                return url;
-            }
-
-            function formatTimeDisplay(timestamp) {
-                if (!timestamp) return '';
-                const now = Date.now() + serverTimeOffset;
-                const diffSec = Math.floor((now - timestamp) / 1000);
-                if (diffSec < 5) return "الآن";
-                if (diffSec < 60) return "ثواني";
-                if (diffSec < 120) return "د1";
-                if (diffSec < 3600) return `د${Math.floor(diffSec / 60)}`;
-                if (diffSec < 86400) return `س${Math.floor(diffSec / 3600)}`;
-                if (diffSec < 604800) return `ي${Math.floor(diffSec / 86400)}`;
-                if (diffSec < 2592000) return `أ${Math.floor(diffSec / 604800)}`;
-                if (diffSec < 31536000) return `ش${Math.floor(diffSec / 2592000)}`;
-                return `ع${Math.floor(diffSec / 31536000)}`;
-            }
-
-            function addNotification(text) {
-                const div = document.createElement("div");
-                div.className = "sys-msg";
-                div.textContent = text;
-                messagesDiv.appendChild(div);
-                scrollToBottom();
-                setTimeout(() => { if (div.parentNode) div.remove(); }, 5000);
-            }
-
-            function addMessageToUI(key, { user, text, timestamp }) {
-                const wrapper = document.createElement("div");
-                wrapper.className = "msg-wrapper";
-                wrapper.id = `msg-${key}`;
-                const avatarColor = getAvatarColor(user);
-                const initials = getInitials(user);
-                const timeStr = formatTimeDisplay(timestamp);
-                wrapper.innerHTML = `
-                    <div class="msg-avatar" style="background: ${avatarColor};">${initials}</div>
-                    <div class="msg-content">
-                        <div class="msg-header">
-                            <span class="msg-user">${escapeHtml(user)}</span>
-                            <span class="msg-time" data-key="${key}">${timeStr}</span>
-                        </div>
-                        <div class="msg-text">${escapeHtml(text)}</div>
-                    </div>
-                `;
-                messagesDiv.appendChild(wrapper);
-                messageTimestamps.set(key, { timestamp, element: wrapper.querySelector('.msg-time') });
-                scrollToBottom();
-                if (messagesDiv.children.length > MESSAGE_LIMIT + 30) {
-                    const oldestMsg = messagesDiv.firstElementChild;
-                    if (oldestMsg && !oldestMsg.classList.contains('sys-msg')) {
-                        oldestMsg.remove();
-                    }
-                }
-            }
-
-            setInterval(() => {
-                messageTimestamps.forEach(({ timestamp, element }, key) => {
-                    if (element) {
-                        element.textContent = formatTimeDisplay(timestamp);
-                    }
-                });
-            }, 30000);
-
-            // ==================== نظام الكتابة ====================
-            function initTypingIndicator() {
+            // ==================== Typing ====================
+            function initTyping() {
                 typingRef = db.ref("typing");
-                let isTyping = false;
-                const typingUsers = new Map();
-                messageInput.addEventListener("input", () => {
-                    const text = messageInput.value;
-                    if (text.length > 0 && !isTyping) {
-                        isTyping = true;
-                        typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
-                        clearTimeout(typingTimeout);
-                    } else if (text.length === 0 && isTyping) {
-                        stopTyping();
-                    }
+                let typing = false;
+                const users = new Map();
+                messageInput.addEventListener('input', () => {
+                    if (messageInput.value && !typing) { typing = true;
+                        typingRef.child(username).set({ t: firebase.database.ServerValue.TIMESTAMP }); } else if (!messageInput
+                        .value && typing) stopT();
                 });
-                messageInput.addEventListener("keydown", () => {
-                    if (!isTyping && messageInput.value.length > 0) {
-                        isTyping = true;
-                        typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
-                    }
-                    clearTimeout(typingTimeout);
-                    typingTimeout = setTimeout(() => {
-                        if (isTyping && messageInput.value.length === 0) {
-                            stopTyping();
-                        } else if (isTyping) {
-                            typingRef.child(username).set({ time: firebase.database.ServerValue.TIMESTAMP });
-                        }
-                    }, 2000);
-                });
-                function stopTyping() {
-                    if (isTyping) {
-                        isTyping = false;
-                        typingRef.child(username).remove();
-                    }
-                    clearTimeout(typingTimeout);
-                }
-                document.getElementById("inputArea").addEventListener("submit", () => { stopTyping(); });
-                typingRef.on("child_added", (snap) => {
-                    if (snap.key === username) return;
-                    const data = snap.val();
-                    if (data && data.time) typingUsers.set(snap.key, data.time);
-                    updateTypingDisplay();
-                });
-                typingRef.on("child_changed", (snap) => {
-                    if (snap.key === username) return;
-                    const data = snap.val();
-                    if (data && data.time) typingUsers.set(snap.key, data.time);
-                    updateTypingDisplay();
-                });
-                typingRef.on("child_removed", (snap) => {
-                    if (snap.key === username) return;
-                    typingUsers.delete(snap.key);
-                    updateTypingDisplay();
-                });
-                setInterval(() => {
-                    const now = Date.now() + serverTimeOffset;
-                    let changed = false;
-                    typingUsers.forEach((time, name) => {
-                        if (now - time > 4000) {
-                            typingUsers.delete(name);
-                            changed = true;
-                        }
-                    });
-                    if (changed) updateTypingDisplay();
-                }, 2000);
-                function updateTypingDisplay() {
-                    const names = Array.from(typingUsers.keys());
-                    if (names.length === 0) {
-                        typingWrapper.style.display = "none";
-                        return;
-                    }
-                    typingWrapper.style.display = "flex";
-                    let msg = "";
-                    if (names.length === 1) msg = `${names[0]} يكتب...`;
-                    else if (names.length === 2) msg = `${names[0]} و ${names[1]} يكتبان...`;
-                    else msg = `عدة أشخاص يكتبون...`;
-                    typingText.textContent = msg;
+
+                function stopT() { if (typing) { typing = false;
+                        typingRef.child(username).remove(); }
+                    clearTimeout(typingTimeout); }
+                $('inputArea').addEventListener('submit', stopT);
+                typingRef.on('child_added', s => { if (s.key !== username && s.val()?.t) users.set(s.key, s.val().t);
+                    updT(); });
+                typingRef.on('child_removed', s => { users.delete(s.key);
+                    updT(); });
+                setInterval(() => { const n = Date.now() + serverTimeOffset; let c = false;
+                    users.forEach((t, k) => { if (n - t > 4000) { users.delete(k);
+                        c = true; } }); if (c) updT(); }, 2000);
+
+                function updT() {
+                    const names = [...users.keys()];
+                    if (!names.length) { typingWrapper.style.display = 'none'; return; }
+                    typingWrapper.style.display = 'flex';
+                    typingText.textContent = names.length === 1 ? `${names[0]} يكتب...` : names.length === 2 ?
+                        `${names[0]} و ${names[1]} يكتبان...` : 'عدة أشخاص يكتبون...';
                 }
                 typingRef.child(username).onDisconnect().remove();
             }
 
-            // ==================== تنظيف المشغل ====================
-            function cleanupPlayer() {
+            // ==================== مشغل Netflix ====================
+            function createPlayer(container, source, type) {
                 if (currentPlayer) {
-                    try {
-                        if (playerEventListeners.length > 0) {
-                            playerEventListeners.forEach(({ element, event, handler }) => {
-                                if (element) element.removeEventListener(event, handler);
-                            });
-                            playerEventListeners = [];
-                        }
-                        if (currentPlayer.hls) {
-                            currentPlayer.hls.destroy();
-                            currentPlayer.hls = null;
-                        }
-                        if (currentPlayer.video) {
-                            currentPlayer.video.pause();
-                            currentPlayer.video.src = '';
-                            currentPlayer.video.load();
-                        }
-                    } catch (e) {
-                        console.warn('Error cleaning up player:', e);
-                    }
+                    playerListeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
+                    playerListeners = [];
+                    if (currentPlayer.hls) { currentPlayer.hls.destroy();
+                        currentPlayer.hls = null; }
+                    if (currentPlayer.video) { currentPlayer.video.pause();
+                        currentPlayer.video.src = ''; }
                     currentPlayer = null;
                 }
-            }
-
-            // ==================== مشغل Netflix المحسن ====================
-            function createNetflixPlayer(container, source, type) {
-                cleanupPlayer();
-                const eventListeners = [];
-                function addListener(element, event, handler) {
-                    element.addEventListener(event, handler);
-                    eventListeners.push({ element, event, handler });
-                }
-                const isHLS = (type === 'application/x-mpegURL' || source.includes('.m3u8') || source.includes('.m3u'));
-                const wrapper = document.createElement('div');
-                wrapper.className = 'nplayer';
-                const videoWrap = document.createElement('div');
-                videoWrap.className = 'nplayer-video-wrap';
-                const video = document.createElement('video');
-                video.playsInline = true;
-                video.muted = false;
-                videoWrap.appendChild(video);
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = 'nplayer-loading';
-                loadingDiv.innerHTML = '<span>⏳ جاري التحميل...</span>';
-                videoWrap.appendChild(loadingDiv);
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'nplayer-error';
-                errorDiv.innerHTML = `<span>⚠️ فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>`;
-                videoWrap.appendChild(errorDiv);
-                wrapper.appendChild(videoWrap);
-                const controls = document.createElement('div');
-                controls.className = 'nplayer-controls';
-                const prog = document.createElement('div');
-                prog.className = 'nprogress';
-                const buffer = document.createElement('div');
-                buffer.className = 'nprogress-buffer';
-                const played = document.createElement('div');
-                played.className = 'nprogress-played';
-                const inputRange = document.createElement('input');
-                inputRange.type = 'range';
-                inputRange.min = 0;
-                inputRange.max = 100;
-                inputRange.value = 0;
-                inputRange.className = 'nprogress-input';
-                prog.appendChild(buffer);
-                prog.appendChild(played);
-                prog.appendChild(inputRange);
+                const L = [];
+                const on = (el, ev, h) => { el.addEventListener(ev, h);
+                    L.push({ el, ev, h }); };
+                const isHLS = type === 'application/x-mpegURL' || source.includes('.m3u8');
+                const wr = document.createElement('div');
+                wr.className = 'nplayer';
+                const vw = document.createElement('div');
+                vw.className = 'nplayer-video-wrap';
+                const vid = document.createElement('video');
+                vid.playsInline = true;
+                vw.appendChild(vid);
+                const ld = document.createElement('div');
+                ld.className = 'nplayer-loading';
+                ld.innerHTML = '<div class="spinner"></div><span>جاري التحميل...</span>';
+                vw.appendChild(ld);
+                const er = document.createElement('div');
+                er.className = 'nplayer-error';
+                er.innerHTML =
+                    '<span class="error-icon">⚠️</span><span>فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>';
+                vw.appendChild(er);
+                wr.appendChild(vw);
+                const ct = document.createElement('div');
+                ct.className = 'nplayer-controls';
+                const pb = document.createElement('div');
+                pb.className = 'nprogress-bar';
+                const buf = document.createElement('div');
+                buf.className = 'nprogress-buffer';
+                const fill = document.createElement('div');
+                fill.className = 'nprogress-filled';
+                const inp = document.createElement('input');
+                inp.type = 'range';
+                inp.min = 0;
+                inp.max = 100;
+                inp.value = 0;
+                inp.className = 'nprogress-input';
+                pb.appendChild(buf);
+                pb.appendChild(fill);
+                pb.appendChild(inp);
                 const row = document.createElement('div');
-                row.className = 'ncontrols-row';
-                const playBtn = document.createElement('button');
-                playBtn.innerHTML = '▶';
-                const rewindBtn = document.createElement('button');
-                rewindBtn.innerHTML = '⏪';
-                const forwardBtn = document.createElement('button');
-                forwardBtn.innerHTML = '⏩';
-                const volWrap = document.createElement('div');
-                volWrap.className = 'nvolume-wrap';
-                const volBtn = document.createElement('button');
-                volBtn.innerHTML = '🔊';
-                const volSlider = document.createElement('input');
-                volSlider.type = 'range';
-                volSlider.min = 0;
-                volSlider.max = 1;
-                volSlider.step = 0.05;
-                volSlider.value = 1;
-                volSlider.className = 'nvolume-slider';
-                volWrap.appendChild(volBtn);
-                volWrap.appendChild(volSlider);
-                const timeDisplay = document.createElement('span');
-                timeDisplay.className = 'ntime';
-                timeDisplay.textContent = '00:00 / 00:00';
-                const speedWrap = document.createElement('div');
-                speedWrap.className = 'nspeed-menu';
-                const speedBtn = document.createElement('button');
-                speedBtn.textContent = '1x';
-                const speedDropdown = document.createElement('div');
-                speedDropdown.className = 'nspeed-dropdown';
-                [0.5, 0.75, 1, 1.25, 1.5, 2].forEach(s => {
-                    const b = document.createElement('button');
+                row.className = 'ncontrols-bottom';
+                const playB = document.createElement('button');
+                playB.innerHTML = '▶';
+                const rew = document.createElement('button');
+                rew.innerHTML = '⏪';
+                const fwd = document.createElement('button');
+                fwd.innerHTML = '⏩';
+                const volG = document.createElement('div');
+                volG.className = 'nvolume-group';
+                const volB = document.createElement('button');
+                volB.innerHTML = '🔊';
+                const volS = document.createElement('input');
+                volS.type = 'range';
+                volS.min = 0;
+                volS.max = 1;
+                volS.step = 0.05;
+                volS.value = 1;
+                volS.className = 'nvolume-slider';
+                volG.appendChild(volB);
+                volG.appendChild(volS);
+                const timeD = document.createElement('span');
+                timeD.className = 'ntime-display';
+                timeD.textContent = '00:00 / 00:00';
+                const spM = document.createElement('div');
+                spM.className = 'ndropdown-menu';
+                const spB = document.createElement('button');
+                spB.textContent = '1x';
+                const spD = document.createElement('div');
+                spD.className = 'ndropdown-content';
+                [0.5, 0.75, 1, 1.25, 1.5, 2].forEach(s => { const b = document.createElement('button');
                     b.textContent = s + 'x';
-                    b.dataset.speed = s;
-                    if (s === 1) b.classList.add('active');
-                    b.onclick = (e) => {
-                        e.stopPropagation();
-                        video.playbackRate = s;
-                        speedBtn.textContent = s + 'x';
-                        speedDropdown.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                        b.classList.add('active');
-                        speedDropdown.style.display = 'none';
-                    };
-                    speedDropdown.appendChild(b);
-                });
-                speedWrap.appendChild(speedBtn);
-                speedWrap.appendChild(speedDropdown);
-                const qualityWrap = document.createElement('div');
-                qualityWrap.className = 'nquality-menu';
-                const qualityBtn = document.createElement('button');
-                qualityBtn.textContent = 'تلقائي';
-                const qualityDropdown = document.createElement('div');
-                qualityDropdown.className = 'nquality-dropdown';
-                qualityWrap.appendChild(qualityBtn);
-                qualityWrap.appendChild(qualityDropdown);
-                const fsBtn = document.createElement('button');
-                fsBtn.className = 'nfullscreen';
-                fsBtn.innerHTML = '⛶';
-                row.appendChild(playBtn);
-                row.appendChild(rewindBtn);
-                row.appendChild(forwardBtn);
-                row.appendChild(volWrap);
-                row.appendChild(timeDisplay);
-                row.appendChild(speedWrap);
-                row.appendChild(qualityWrap);
-                row.appendChild(fsBtn);
-                controls.appendChild(prog);
-                controls.appendChild(row);
-                wrapper.appendChild(controls);
-                container.appendChild(wrapper);
-                let hlsInstance = null;
-                let retryCount = 0;
-                const MAX_RETRY = 2;
-                let controlsTimeout;
-                function showControls(show) {
-                    if (show) {
-                        controls.classList.add('show');
-                        clearTimeout(controlsTimeout);
-                        controlsTimeout = setTimeout(() => {
-                            if (!video.paused) controls.classList.remove('show');
-                        }, 3000);
-                    } else {
-                        controls.classList.remove('show');
-                        clearTimeout(controlsTimeout);
-                    }
-                }
-                addListener(videoWrap, 'mousemove', () => showControls(true));
-                addListener(videoWrap, 'touchstart', () => showControls(true));
-                addListener(video, 'play', () => showControls(true));
-                addListener(video, 'pause', () => showControls(true));
+                    b.dataset.s = s; if (s === 1) b.classList.add('selected');
+                    b.onclick = e => { e.stopPropagation();
+                        vid.playbackRate = s;
+                        spB.textContent = s + 'x';
+                        spD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                        b.classList.add('selected');
+                        spD.style.display = 'none'; };
+                    spD.appendChild(b); });
+                spM.appendChild(spB);
+                spM.appendChild(spD);
+                const qM = document.createElement('div');
+                qM.className = 'ndropdown-menu';
+                const qB = document.createElement('button');
+                qB.textContent = 'تلقائي';
+                const qD = document.createElement('div');
+                qD.className = 'ndropdown-content';
+                qM.appendChild(qB);
+                qM.appendChild(qD);
+                const fsB = document.createElement('button');
+                fsB.className = 'nfullscreen-btn';
+                fsB.innerHTML = '⛶';
+                row.appendChild(playB);
+                row.appendChild(rew);
+                row.appendChild(fwd);
+                row.appendChild(volG);
+                row.appendChild(timeD);
+                row.appendChild(spM);
+                row.appendChild(qM);
+                row.appendChild(fsB);
+                ct.appendChild(pb);
+                ct.appendChild(row);
+                wr.appendChild(ct);
+                container.appendChild(wr);
+
+                let hls = null;
+                let retries = 0;
+                let ctTimeout;
+
+                function showCt(s) { if (s) { ct.classList.add('visible');
+                        clearTimeout(ctTimeout);
+                        ctTimeout = setTimeout(() => { if (!vid.paused) ct.classList.remove('visible'); }, 3000); } else { ct
+                            .classList.remove('visible');
+                        clearTimeout(ctTimeout); } }
+                on(vw, 'mousemove', () => showCt(true));
+                on(vw, 'touchstart', () => showCt(true));
+                on(vid, 'play', () => showCt(true));
+                on(vid, 'pause', () => showCt(true));
+
                 function loadStream(url) {
-                    loadingDiv.style.display = 'flex';
-                    errorDiv.style.display = 'none';
-                    if (hlsInstance) {
-                        hlsInstance.destroy();
-                        hlsInstance = null;
-                    }
-                    if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
-                        hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
-                        hlsInstance.loadSource(url);
-                        hlsInstance.attachMedia(video);
-                        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                            loadingDiv.style.display = 'none';
-                            populateQualityMenu(hlsInstance.levels);
-                            video.play().catch(() => {});
-                        });
-                        hlsInstance.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-                            const level = hlsInstance.levels[data.level];
-                            if (level) qualityBtn.textContent = level.height ? level.height + 'p' : 'HD';
-                        });
-                        hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-                            if (data.fatal) {
-                                if (retryCount < MAX_RETRY) {
-                                    retryCount++;
-                                    loadingDiv.innerHTML = `<span>🔄 إعادة المحاولة (${retryCount}/${MAX_RETRY})...</span>`;
-                                    setTimeout(() => loadStream(url), 1000);
-                                } else {
-                                    loadingDiv.style.display = 'none';
-                                    errorDiv.style.display = 'flex';
-                                }
-                            }
-                        });
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        video.src = url;
-                        video.play().catch(() => {});
-                        loadingDiv.style.display = 'none';
-                    } else {
-                        video.src = url;
-                        video.play().catch(() => {});
-                        loadingDiv.style.display = 'none';
-                    }
+                    ld.style.display = 'flex';
+                    er.style.display = 'none'; if (hls) { hls.destroy();
+                        hls = null; }
+                    if (isHLS && Hls.isSupported()) {
+                        hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                        hls.loadSource(url);
+                        hls.attachMedia(vid);
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => { ld.style.display = 'none';
+                            fillQuality(hls.levels);
+                            vid.play().catch(() => {}); });
+                        hls.on(Hls.Events.LEVEL_SWITCHED, (e, d) => { const lv = hls.levels[d.level]; if (lv) qB
+                                .textContent = lv.height ? lv.height + 'p' : 'HD'; });
+                        hls.on(Hls.Events.ERROR, (e, d) => { if (d.fatal) { if (retries < 2) { retries++;
+                                    ld.innerHTML =
+                                        `<div class="spinner"></div><span>إعادة المحاولة (${retries}/2)...</span>`;
+                                    setTimeout(() => loadStream(url), 1000); } else { ld.style.display =
+                                        'none';
+                                    er.style.display = 'flex'; } } });
+                    } else { vid.src = url;
+                        vid.play().catch(() => {});
+                        ld.style.display = 'none'; }
                 }
-                function populateQualityMenu(levels) {
-                    qualityDropdown.innerHTML = '';
-                    const autoBtn = document.createElement('button');
-                    autoBtn.textContent = 'تلقائي';
-                    autoBtn.dataset.level = '-1';
-                    autoBtn.classList.add('active');
-                    autoBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        if (hlsInstance) hlsInstance.currentLevel = -1;
-                        qualityBtn.textContent = 'تلقائي';
-                        qualityDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                        autoBtn.classList.add('active');
-                        qualityDropdown.style.display = 'none';
-                    };
-                    qualityDropdown.appendChild(autoBtn);
-                    if (levels && levels.length > 0) {
-                        levels.forEach((level, idx) => {
-                            const h = level.height ? level.height + 'p' : (level.bitrate ? Math.round(level.bitrate /
-                                1000) + 'k' : 'HD');
-                            const btn = document.createElement('button');
-                            btn.textContent = h;
-                            btn.dataset.level = idx;
-                            btn.onclick = (e) => {
-                                e.stopPropagation();
-                                if (hlsInstance) hlsInstance.currentLevel = idx;
-                                qualityBtn.textContent = h;
-                                qualityDropdown.querySelectorAll('button').forEach(b => b.classList.remove(
-                                    'active'));
-                                btn.classList.add('active');
-                                qualityDropdown.style.display = 'none';
-                            };
-                            qualityDropdown.appendChild(btn);
-                        });
-                    }
+
+                function fillQuality(levels) {
+                    qD.innerHTML = '';
+                    const aB = document.createElement('button');
+                    aB.textContent = 'تلقائي';
+                    aB.classList.add('selected');
+                    aB.onclick = e => { e.stopPropagation(); if (hls) hls.currentLevel = -1;
+                        qB.textContent = 'تلقائي';
+                        qD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                        aB.classList.add('selected');
+                        qD.style.display = 'none'; };
+                    qD.appendChild(aB); if (levels) levels.forEach((lv, i) => { const h = lv.height ? lv.height +
+                            'p' : 'HD';
+                        const b = document.createElement('button');
+                        b.textContent = h;
+                        b.onclick = e => { e.stopPropagation(); if (hls) hls.currentLevel = i;
+                            qB.textContent = h;
+                            qD.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+                            b.classList.add('selected');
+                            qD.style.display = 'none'; };
+                        qD.appendChild(b); });
                 }
-                function updateProgress() {
-                    if (video.duration && !isNaN(video.duration)) {
-                        const pct = (video.currentTime / video.duration) * 100;
-                        played.style.width = pct + '%';
-                        inputRange.value = pct;
-                        if (video.buffered.length > 0) {
-                            const bufEnd = video.buffered.end(video.buffered.length - 1);
-                            buffer.style.width = ((bufEnd / video.duration) * 100) + '%';
-                        }
-                        const fmt = (t) => {
-                            if (isNaN(t)) return '00:00';
-                            const m = Math.floor(t / 60);
-                            const s = Math.floor(t % 60);
-                            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                        };
-                        timeDisplay.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
-                    }
+
+                function updProgress() {
+                    if (vid.duration && !isNaN(vid.duration)) { const p = (vid.currentTime / vid.duration) * 100;
+                        fill.style.width = p + '%';
+                        inp.value = p; if (vid.buffered.length) { const be = vid.buffered.end(vid.buffered.length -
+                                1);
+                            buf.style.width = ((be / vid.duration) * 100) + '%'; } const f = t => { if (isNaN(t))
+                                return '00:00';
+                            const m = Math.floor(t / 60),
+                                s = Math.floor(t % 60); return String(m).padStart(2, '0') + ':' + String(s)
+                                .padStart(2, '0'); };
+                        timeD.textContent = f(vid.currentTime) + ' / ' + f(vid.duration); }
                 }
-                addListener(video, 'timeupdate', updateProgress);
-                addListener(video, 'progress', updateProgress);
-                addListener(video, 'loadedmetadata', () => {
-                    loadingDiv.style.display = 'none';
-                    updateProgress();
-                });
-                playBtn.onclick = () => { video.paused ? video.play().catch(() => {}) : video.pause(); };
-                addListener(video, 'play', () => { playBtn.innerHTML = '⏸'; });
-                addListener(video, 'pause', () => { playBtn.innerHTML = '▶'; });
-                rewindBtn.onclick = () => { video.currentTime = Math.max(0, video.currentTime - 10); };
-                forwardBtn.onclick = () => { video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); };
-                volBtn.onclick = () => {
-                    video.muted = !video.muted;
-                    volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
-                };
-                volSlider.oninput = () => {
-                    video.volume = parseFloat(volSlider.value);
-                    video.muted = false;
-                    volBtn.innerHTML = video.volume > 0.5 ? '🔊' : '🔉';
-                };
-                addListener(video, 'volumechange', () => {
-                    volSlider.value = video.volume;
-                    volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
-                });
-                inputRange.oninput = () => { played.style.width = inputRange.value + '%'; };
-                inputRange.onchange = () => {
-                    if (video.duration) video.currentTime = (parseFloat(inputRange.value) / 100) * video.duration;
-                };
-                prog.addEventListener('click', (e) => {
-                    if (e.target === inputRange) return;
-                    const rect = prog.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width;
-                    if (video.duration) video.currentTime = x * video.duration;
-                });
-                speedBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    speedDropdown.style.display = speedDropdown.style.display === 'block' ? 'none' : 'block';
-                    qualityDropdown.style.display = 'none';
-                };
-                qualityBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    qualityDropdown.style.display = qualityDropdown.style.display === 'block' ? 'none' : 'block';
-                    speedDropdown.style.display = 'none';
-                };
-                document.addEventListener('click', () => {
-                    speedDropdown.style.display = 'none';
-                    qualityDropdown.style.display = 'none';
-                });
-                fsBtn.onclick = () => {
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        container.closest('#pinnedVideoPlayer').requestFullscreen().catch(() => {});
-                    }
-                };
-                errorDiv.querySelector('.retry-btn').onclick = () => {
-                    retryCount = 0;
-                    loadStream(source);
-                };
+                on(vid, 'timeupdate', updProgress);
+                on(vid, 'progress', updProgress);
+                on(vid, 'loadedmetadata', () => { ld.style.display = 'none';
+                    updProgress(); });
+                playB.onclick = () => { vid.paused ? vid.play().catch(() => {}) : vid.pause(); };
+                on(vid, 'play', () => playB.innerHTML = '⏸');
+                on(vid, 'pause', () => playB.innerHTML = '▶');
+                rew.onclick = () => vid.currentTime = Math.max(0, vid.currentTime - 10);
+                fwd.onclick = () => vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10);
+                volB.onclick = () => { vid.muted = !vid.muted;
+                    volB.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉'); };
+                volS.oninput = () => { vid.volume = +volS.value;
+                    vid.muted = false;
+                    volB.innerHTML = vid.volume > 0.5 ? '🔊' : '🔉'; };
+                on(vid, 'volumechange', () => { volS.value = vid.volume;
+                    volB.innerHTML = vid.muted ? '🔇' : (vid.volume > 0.5 ? '🔊' : '🔉'); });
+                inp.oninput = () => fill.style.width = inp.value + '%';
+                inp.onchange = () => { if (vid.duration) vid.currentTime = (+inp.value / 100) * vid.duration; };
+                pb.addEventListener('click', e => { if (e.target === inp) return;
+                    const r = pb.getBoundingClientRect(); if (vid.duration) vid.currentTime = ((e.clientX - r.left) /
+                        r.width) * vid.duration; });
+                spB.onclick = e => { e.stopPropagation();
+                    spD.style.display = spD.style.display === 'block' ? 'none' : 'block';
+                    qD.style.display = 'none'; };
+                qB.onclick = e => { e.stopPropagation();
+                    qD.style.display = qD.style.display === 'block' ? 'none' : 'block';
+                    spD.style.display = 'none'; };
+                document.addEventListener('click', () => { spD.style.display = 'none';
+                    qD.style.display = 'none'; });
+                fsB.onclick = () => { document.fullscreenElement ? document.exitFullscreen() : container.closest(
+                        '#pinnedVideoPlayer').requestFullscreen().catch(() => {}); };
+                er.querySelector('.retry-btn').onclick = () => { retries = 0;
+                    loadStream(source); };
                 loadStream(source);
-                currentPlayer = { video, hls: hlsInstance, container: wrapper };
-                playerEventListeners = eventListeners;
+                currentPlayer = { video: vid, hls, container: wr };
+                playerListeners = L;
                 return currentPlayer;
             }
 
             // ==================== Twitter ====================
-            async function fetchTwitterVideos(tweetId) {
-                const videos = [];
-                try {
-                    const res = await fetch(`https://api.fxtwitter.com/status/${tweetId}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        const media = data.tweet?.media?.videos || [];
-                        for (let v of media)
-                            if (v.url) videos.push({ url: v.url, type: 'video/mp4' });
-                    }
-                } catch (e) { console.warn('Twitter API error:', e); }
-                if (videos.length) return videos;
-                try {
-                    const res = await fetch(`https://api.vxtwitter.com/status/${tweetId}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.media_extended) {
-                            for (let m of data.media_extended) {
-                                if ((m.type === 'video' || m.type === 'gif') && m.url) videos.push({ url: m.url,
-                                    type: 'video/mp4' });
-                            }
-                        }
-                    }
-                } catch (e) { console.warn('vxTwitter API error:', e); }
-                return videos;
+            async function fetchTwVids(tid) {
+                let vids = [];
+                try { const r = await fetch(`https://api.fxtwitter.com/status/${tid}`); if (r.ok) { const d = await r
+                        .json(); for (let v of(d.tweet?.media?.videos || [])) if (v.url) vids.push({ url: v.url,
+                            type: 'video/mp4' }); } } catch (e) {} if (vids.length) return vids;
+                try { const r = await fetch(`https://api.vxtwitter.com/status/${tid}`); if (r.ok) { const d = await r
+                        .json(); if (d.media_extended) for (let m of d.media_extended) if ((m.type === 'video' || m
+                            .type === 'gif') && m.url) vids.push({ url: m.url, type: 'video/mp4' }); } } catch (e) {}
+                return vids;
             }
 
-            function embedTwitterNative(container, tweetId) {
-                container.innerHTML = '';
-                container.style.background = '#15202b';
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar`;
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.minHeight = '320px';
-                iframe.style.border = 'none';
-                iframe.setAttribute('allowfullscreen', 'true');
-                container.appendChild(iframe);
-                if (!window.twttr) {
-                    const script = document.createElement('script');
-                    script.src = 'https://platform.twitter.com/widgets.js';
-                    script.async = true;
-                    document.head.appendChild(script);
-                }
+            function embedTw(container, tid) {
+                container.innerHTML =
+                    `<iframe src="https://platform.twitter.com/embed/Tweet.html?id=${tid}&theme=dark&lang=ar" style="width:100%;height:100%;min-height:320px;border:none;" allowfullscreen></iframe>`;
+                if (!window.twttr) { const s = document.createElement('script');
+                    s.src = 'https://platform.twitter.com/widgets.js';
+                    s.async = true;
+                    document.head.appendChild(s); }
             }
 
-            // ==================== السحب والإفلات (مُحسّن) ====================
-            function initDraggable(player) {
-                const header = player.querySelector('.video-header');
-                if (!header) return;
-
-                let isDragging = false;
-                let startX, startY, startLeft, startTop;
-
-                function getPos(e) {
-                    return e.touches ? e.touches[0] : e;
-                }
-
-                function onStart(e) {
-                    // لا تسحب إذا ضغط على زر الإغلاق
-                    if (e.target.closest('.close-pinned-video')) return;
+            // ==================== السحب وتغيير الحجم ====================
+            function makeDraggable(el, handle) {
+                let sx, sy, sl, st,
+                    dragging = false;
+                const gp = e => e.touches?.[0] || e;
+                handle.addEventListener('mousedown', e => { if (e.target.closest('.close-player')) return;
                     e.preventDefault();
-                    isDragging = true;
-                    const pos = getPos(e);
-                    startX = pos.clientX;
-                    startY = pos.clientY;
-                    const rect = player.getBoundingClientRect();
-                    startLeft = rect.left;
-                    startTop = rect.top;
-                    player.style.transition = 'none';
-                    player.style.right = 'auto';
-                    player.style.left = startLeft + 'px';
-                    player.style.top = startTop + 'px';
-                    player.style.bottom = 'auto';
-                    document.addEventListener('mousemove', onMove);
-                    document.addEventListener('touchmove', onMove, { passive: false });
-                    document.addEventListener('mouseup', onEnd);
-                    document.addEventListener('touchend', onEnd);
-                }
-
-                function onMove(e) {
-                    if (!isDragging) return;
+                    dragging = true;
+                    sx = e.clientX;
+                    sy = e.clientY;
+                    sl = el.offsetLeft;
+                    st = el.offsetTop;
+                    el.style.transition = 'none';
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = sl + 'px';
+                    el.style.top = st + 'px';
+                    document.addEventListener('mousemove', mv);
+                    document.addEventListener('mouseup', up); });
+                handle.addEventListener('touchstart', e => { if (e.target.closest('.close-player')) return;
                     e.preventDefault();
-                    const pos = getPos(e);
-                    const dx = pos.clientX - startX;
-                    const dy = pos.clientY - startY;
-                    let newLeft = startLeft + dx;
-                    let newTop = startTop + dy;
-                    // حدود الشاشة
-                    const maxLeft = window.innerWidth - player.offsetWidth;
-                    const maxTop = window.innerHeight - player.offsetHeight;
-                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-                    newTop = Math.max(0, Math.min(newTop, maxTop));
-                    player.style.left = newLeft + 'px';
-                    player.style.top = newTop + 'px';
-                }
+                    dragging = true;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    sl = el.offsetLeft;
+                    st = el.offsetTop;
+                    el.style.transition = 'none';
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = sl + 'px';
+                    el.style.top = st + 'px';
+                    document.addEventListener('touchmove', mv, { passive: false });
+                    document.addEventListener('touchend', up); }, { passive: false });
 
-                function onEnd() {
-                    isDragging = false;
-                    player.style.transition = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchend', onEnd);
-                }
+                function mv(e) { if (!dragging) return;
+                    e.preventDefault();
+                    const p = gp(e); let nl = sl + p.clientX - sx,
+                        nt = st + p.clientY - sy;
+                    nl = Math.max(0, Math.min(nl, window.innerWidth - el.offsetWidth));
+                    nt = Math.max(0, Math.min(nt, window.innerHeight - el.offsetHeight));
+                    el.style.left = nl + 'px';
+                    el.style.top = nt + 'px'; }
 
-                header.addEventListener('mousedown', onStart);
-                header.addEventListener('touchstart', onStart, { passive: false });
+                function up() { dragging = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', mv);
+                    document.removeEventListener('touchmove', mv);
+                    document.removeEventListener('mouseup', up);
+                    document.removeEventListener('touchend', up); }
             }
 
-            function initResizable(player) {
-                const handle = player.querySelector('.resize-handle');
-                if (!handle) return;
-
-                let isResizing = false;
-                let startW, startH, startX, startY;
-
-                function getPos(e) {
-                    return e.touches ? e.touches[0] : e;
-                }
-
-                function onStart(e) {
-                    e.preventDefault();
+            function makeResizable(el, handle) {
+                let sw, sh, sx, sy,
+                    resizing = false;
+                const gp = e => e.touches?.[0] || e;
+                handle.addEventListener('mousedown', e => { e.preventDefault();
                     e.stopPropagation();
-                    isResizing = true;
-                    startW = player.offsetWidth;
-                    startH = player.offsetHeight;
-                    const pos = getPos(e);
-                    startX = pos.clientX;
-                    startY = pos.clientY;
-                    player.style.transition = 'none';
-                    document.addEventListener('mousemove', onMove);
-                    document.addEventListener('touchmove', onMove, { passive: false });
-                    document.addEventListener('mouseup', onEnd);
-                    document.addEventListener('touchend', onEnd);
-                }
+                    resizing = true;
+                    sw = el.offsetWidth;
+                    sh = el.offsetHeight;
+                    sx = e.clientX;
+                    sy = e.clientY;
+                    el.style.transition = 'none';
+                    document.addEventListener('mousemove', mv);
+                    document.addEventListener('mouseup', up); });
+                handle.addEventListener('touchstart', e => { e.preventDefault();
+                    e.stopPropagation();
+                    resizing = true;
+                    sw = el.offsetWidth;
+                    sh = el.offsetHeight;
+                    const p = gp(e);
+                    sx = p.clientX;
+                    sy = p.clientY;
+                    el.style.transition = 'none';
+                    document.addEventListener('touchmove', mv, { passive: false });
+                    document.addEventListener('touchend', up); }, { passive: false });
 
-                function onMove(e) {
-                    if (!isResizing) return;
+                function mv(e) { if (!resizing) return;
                     e.preventDefault();
-                    const pos = getPos(e);
-                    const dx = pos.clientX - startX;
-                    const dy = pos.clientY - startY;
-                    const newW = Math.max(280, startW + dx);
-                    const newH = Math.max(180, startH + dy);
-                    player.style.width = newW + 'px';
-                    player.style.height = newH + 'px';
-                }
+                    const p = gp(e);
+                    el.style.width = Math.max(260, sw + p.clientX - sx) + 'px';
+                    el.style.height = Math.max(180, sh + p.clientY - sy) + 'px'; }
 
-                function onEnd() {
-                    isResizing = false;
-                    player.style.transition = '';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-                    document.removeEventListener('touchend', onEnd);
-                }
-
-                handle.addEventListener('mousedown', onStart);
-                handle.addEventListener('touchstart', onStart, { passive: false });
+                function up() { resizing = false;
+                    el.style.transition = '';
+                    document.removeEventListener('mousemove', mv);
+                    document.removeEventListener('touchmove', mv);
+                    document.removeEventListener('mouseup', up);
+                    document.removeEventListener('touchend', up); }
             }
 
             // ==================== إغلاق النوافذ ====================
-            function closeAllModals() {
-                usersBox.style.display = 'none';
+            function closeModals() { usersBox.style.display = 'none';
                 setVideoModal.style.display = 'none';
-                overlay.style.display = 'none';
-            }
+                overlay.style.display = 'none'; }
 
-            function renderUsersList(users) {
-                const list = document.getElementById("usersList");
+            function renderUsers(users) {
+                const list = $('usersList');
                 list.innerHTML = '';
-                const now = Date.now() + serverTimeOffset;
-                if (!users || Object.keys(users).length === 0) {
-                    list.innerHTML =
-                        '<div style="text-align:center;color:var(--text-muted);padding:15px;">لا يوجد متصلين حالياً</div>';
-                    return;
-                }
-                for (let u in users) {
-                    const last = users[u].lastActive || 0;
-                    let statusClass = 'status-gray';
-                    const diff = now - last;
-                    if (diff < 30000) statusClass = 'status-green';
-                    else if (diff < 60000) statusClass = 'status-yellow';
-                    const div = document.createElement('div');
-                    div.className = 'user-item';
-                    div.innerHTML = `
-                        <span class="status-indicator ${statusClass}"></span>
-                        <span>${escapeHtml(u)}</span>
-                        ${u === username ? '<span style="color:var(--accent);font-size:11px;">(أنت)</span>' : ''}
-                    `;
-                    list.appendChild(div);
-                }
+                const now = Date.now() + serverTimeOffset; if (!users || !Object.keys(users).length) { list.innerHTML =
+                        '<div style="text-align:center;color:#888;padding:20px;">لا يوجد متصلين</div>'; return; }
+                for (let u in users) { const d = now - (users[u].lastActive || 0); let cls = 'offline'; if (d < 30000)
+                        cls = 'online'; else if (d < 60000) cls = 'idle';
+                    const row = document.createElement('div');
+                    row.className = 'user-row';
+                    row.innerHTML =
+                        `<span class="status-dot ${cls}"></span><span>${esc(u)}</span>${u===username?'<span style="color:var(--accent);font-size:11px;">(أنت)</span>':''}`;
+                    list.appendChild(row); }
             }
 
             // ==================== بدء الدردشة ====================
             function startChat() {
                 loginScreen.style.display = 'none';
                 chatContainer.style.display = 'flex';
-                db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
-                userRef = db.ref("online/" + username);
-                messagesRef = db.ref("messages");
-                onlineRef = db.ref("online");
-                pinnedVideoRef = db.ref("pinned_video");
+                db.ref('.info/serverTimeOffset').on('value', s => serverTimeOffset = s.val() || 0);
+                userRef = db.ref('online/' + username);
+                messagesRef = db.ref('messages');
+                onlineRef = db.ref('online');
+                pinnedVideoRef = db.ref('pinned_video');
                 userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
                 userRef.onDisconnect().remove();
-                setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
-                db.ref('.info/connected').on('value', (snap) => {
-                    if (snap.val() === true) {
-                        showToast('✅ متصل بالخادم', 'success');
-                    } else {
-                        showToast('⚠️ فقدان الاتصال بالخادم', 'error');
-                    }
-                });
-                setInterval(() => {
-                    const now = Date.now() + serverTimeOffset;
-                    onlineRef.once('value', snap => {
-                        snap.forEach(child => {
-                            if (now - (child.val().lastActive || 0) > 120000) {
-                                child.ref.remove();
-                            }
-                        });
-                    });
-                }, 60000);
-                document.getElementById("inputArea").onsubmit = (e) => {
-                    e.preventDefault();
-                    const text = sanitizeInput(messageInput.value.trim());
-                    if (!text) return;
-                    if (!rateLimiter.canSend()) return;
-                    messagesRef.push({
-                        user: username,
-                        text: text,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    }).catch(err => {
-                        console.error('Send error:', err);
-                        showToast('❌ فشل إرسال الرسالة', 'error');
-                    });
-                    messageInput.value = "";
+                setInterval(() => userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }), 30000);
+                db.ref('.info/connected').on('value', s => showToast(s.val() ? '✅ متصل بالخادم' :
+                    '⚠️ فقدان الاتصال', s.val() ? 'success' : 'error'));
+                setInterval(() => { const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', s => s.forEach(c => { if (now - (c.val().lastActive || 0) > 120000) c.ref
+                            .remove(); })); }, 60000);
+                $('inputArea').onsubmit = e => { e.preventDefault();
+                    const txt = sanitize(messageInput.value.trim()); if (!txt || !limiter.canSend()) return;
+                    messagesRef.push({ user: username, text: txt, timestamp: firebase.database.ServerValue
+                            .TIMESTAMP }).catch(() => showToast('❌ فشل الإرسال', 'error'));
+                    messageInput.value = '';
                     messageInput.focus();
-                    scrollToBottom();
-                    if (typingRef) typingRef.child(username).remove();
-                    clearTimeout(typingTimeout);
-                };
-                messagesRef.limitToLast(MESSAGE_LIMIT).on("child_added", snap => {
-                    const val = snap.val();
-                    if (val && val.user && val.text) {
-                        const timestamp = val.timestamp || Date.now() + serverTimeOffset;
-                        addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: timestamp });
-                    }
-                });
-                messagesRef.on("child_removed", snap => {
-                    messageTimestamps.delete(snap.key);
-                    const el = document.getElementById(`msg-${snap.key}`);
-                    if (el) el.remove();
-                });
-                onlineRef.on("value", snap => {
-                    const count = snap.numChildren();
-                    document.getElementById("count").innerText = count;
-                    renderUsersList(snap.val() || {});
-                });
-                onlineListBtn.onclick = () => {
-                    usersBox.style.display = 'block';
-                    overlay.style.display = 'block';
-                };
-                setVideoBtn.onclick = () => {
-                    setVideoModal.style.display = 'block';
-                    overlay.style.display = 'block';
-                };
-                overlay.onclick = closeAllModals;
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') closeAllModals();
-                });
-                submitVideoUrlBtn.onclick = async () => {
-                    const raw = videoUrlInput.value.trim();
-                    if (!raw) {
-                        showToast('⚠️ يرجى إدخال رابط الفيديو', 'warning');
-                        return;
-                    }
-                    try {
-                        const cleanUrl = extractCleanUrl(raw) || raw;
-                        const expandedUrl = await expandShortUrl(cleanUrl);
-                        const media = detectMediaType(expandedUrl);
-                        switch (media.type) {
-                            case 'youtube':
-                                await pinnedVideoRef.set({ type: 'youtube', id: media.id, setBy: username });
-                                break;
-                            case 'twitter':
-                                await pinnedVideoRef.set({ type: 'twitter', id: media.id, setBy: username });
-                                break;
-                            case 'hls':
-                                await pinnedVideoRef.set({ type: 'm3u', url: expandedUrl, setBy: username });
-                                break;
-                            case 'directVideo':
-                                await pinnedVideoRef.set({ type: 'direct', url: expandedUrl, setBy: username });
-                                break;
-                            default:
-                                showToast('⚠️ رابط غير مدعوم', 'warning');
-                                return;
-                        }
-                        videoUrlInput.value = "";
-                        closeAllModals();
-                        showToast('✅ تم تثبيت الفيديو بنجاح', 'success');
-                    } catch (error) {
-                        console.error('Video set error:', error);
-                        showToast('❌ فشل تثبيت الفيديو', 'error');
-                    }
-                };
-                pinnedVideoRef.on("value", async (snap) => {
-                    cleanupPlayer();
-                    const data = snap.val();
-                    if (!data) {
-                        pinnedVideoPlayer.style.display = 'none';
-                        // تنظيف المحتوى
-                        const body = pinnedVideoPlayer.querySelector('.video-body');
-                        if (body) body.innerHTML = '';
-                        return;
-                    }
-                    // إعادة بناء هيكل المشغل
-                    pinnedVideoPlayer.innerHTML = `
-                        <div class="video-header">
-                            <span>🎬 بث - ${escapeHtml(data.setBy || 'مجهول')}</span>
-                            <button class="close-pinned-video">✕</button>
-                        </div>
-                        <div class="video-body"></div>
-                        <div class="resize-handle"></div>
-                    `;
+                    scrollBottom(); if (typingRef) typingRef.child(username).remove();
+                    clearTimeout(typingTimeout); };
+                messagesRef.limitToLast(MSG_LIMIT).on('child_added', s => { const v = s.val(); if (v?.user && v?.text)
+                        addMsg(s.key, { user: v.user, text: v.text, timestamp: v.timestamp || Date.now() +
+                            serverTimeOffset }); });
+                messagesRef.on('child_removed', s => { messageTimestamps.delete(s.key);
+                    document.getElementById(`msg-${s.key}`)?.remove(); });
+                onlineRef.on('value', s => { $('count').innerText = s.numChildren();
+                    renderUsers(s.val() || {}); });
+                onlineListBtn.onclick = () => { usersBox.style.display = 'block';
+                    overlay.style.display = 'block'; };
+                setVideoBtn.onclick = () => { setVideoModal.style.display = 'block';
+                    overlay.style.display = 'block'; };
+                overlay.onclick = closeModals;
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+                submitVideoUrlBtn.onclick = async () => { const raw = videoUrlInput.value.trim(); if (!raw) { showToast(
+                            '⚠️ أدخل رابطاً', 'warning'); return; } try { const u = cleanUrl(raw) || raw;
+                        const m = detectMedia(u); if (m.type === 'unknown') { showToast('⚠️ رابط غير مدعوم',
+                                'warning'); return; }
+                        await pinnedVideoRef.set({ ...m, setBy: username });
+                        videoUrlInput.value = '';
+                        closeModals();
+                        showToast('✅ تم التشغيل', 'success'); } catch (e) { showToast('❌ فشل', 'error'); } };
+                pinnedVideoRef.on('value', async s => {
+                    if (currentPlayer) { playerListeners.forEach(({ el, ev, h }) => el.removeEventListener(ev, h));
+                        playerListeners = []; if (currentPlayer.hls) { currentPlayer.hls.destroy();
+                            currentPlayer.hls = null; } if (currentPlayer.video) { currentPlayer.video.pause();
+                            currentPlayer.video.src = ''; }
+                        currentPlayer = null; }
+                    const data = s.val(); if (!data) { pinnedVideoPlayer.style.display = 'none';
+                        pinnedVideoPlayer.querySelector('.player-body').innerHTML = ''; return; }
+                    pinnedVideoPlayer.innerHTML = `<div class="player-header"><div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><span style="font-weight:500;">مشغل - ${esc(data.setBy||'')}</span><button class="close-player">✕</button></div><div class="player-body"></div><div class="resize-grip"></div>`;
                     pinnedVideoPlayer.style.display = 'flex';
-                    // إعادة ربط الأحداث
-                    const closeBtn = pinnedVideoPlayer.querySelector('.close-pinned-video');
-                    closeBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        cleanupPlayer();
+                    pinnedVideoPlayer.querySelector('.close-player').onclick = e => { e.stopPropagation();
                         pinnedVideoRef.remove();
-                        pinnedVideoPlayer.style.display = 'none';
-                    };
-                    // تهيئة السحب وتغيير الحجم
-                    initDraggable(pinnedVideoPlayer);
-                    initResizable(pinnedVideoPlayer);
-                    const body = pinnedVideoPlayer.querySelector('.video-body');
-                    try {
-                        if (data.type === 'youtube') {
-                            body.innerHTML =
-                                `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                            currentPlayer = { video: null, hls: null, container: body };
-                        } else if (data.type === 'm3u' || data.type === 'direct') {
-                            const mime = data.type === 'm3u' ? 'application/x-mpegURL' : 'video/mp4';
-                            createNetflixPlayer(body, data.url, mime);
-                        } else if (data.type === 'twitter') {
-                            embedTwitterNative(body, data.id);
-                            const videos = await fetchTwitterVideos(data.id);
-                            if (videos.length > 0) {
-                                body.innerHTML = '';
-                                createNetflixPlayer(body, videos[0].url, 'video/mp4');
-                                if (videos.length > 1) {
-                                    const bar = document.createElement('div');
-                                    bar.className = 'video-selector-bar';
-                                    videos.forEach((v, idx) => {
-                                        const btn = document.createElement('button');
-                                        btn.className = 'video-selector-btn' + (idx === 0 ? ' active' : '');
-                                        btn.textContent = `🎥 مقطع ${idx+1}`;
-                                        btn.onclick = () => {
-                                            body.innerHTML = '';
-                                            createNetflixPlayer(body, v.url, 'video/mp4');
-                                            bar.querySelectorAll('.video-selector-btn').forEach(b => b
-                                                .classList.remove('active'));
-                                            btn.classList.add('active');
-                                        };
-                                        bar.appendChild(btn);
-                                    });
-                                    body.appendChild(bar);
-                                }
-                            }
-                        }
-                        showToast(`🎬 ${escapeHtml(data.setBy || 'مجهول')} قام بتشغيل فيديو`, 'info');
-                    } catch (error) {
-                        console.error('Video playback error:', error);
-                        showToast('❌ فشل تشغيل الفيديو', 'error');
-                    }
+                        pinnedVideoPlayer.style.display = 'none'; };
+                    makeDraggable(pinnedVideoPlayer, pinnedVideoPlayer.querySelector('.player-header'));
+                    makeResizable(pinnedVideoPlayer, pinnedVideoPlayer.querySelector('.resize-grip'));
+                    const body = pinnedVideoPlayer.querySelector('.player-body');
+                    try { if (data.type === 'youtube') body.innerHTML =
+                            `<iframe src="https://www.youtube.com/embed/${data.id}?autoplay=1&rel=0" style="width:100%;aspect-ratio:16/9;border:none;" allow="autoplay;encrypted-media" allowfullscreen></iframe>`; else if (
+                            data.type === 'm3u' || data.type === 'direct') createPlayer(body, data.url, data.type ===
+                            'm3u' ? 'application/x-mpegURL' : 'video/mp4'); else if (data.type === 'twitter') { const
+                            vids = await fetchTwVids(data.id); if (vids.length) { createPlayer(body, vids[0].url,
+                                'video/mp4'); if (vids.length > 1) { const bar = document.createElement('div');
+                                bar.className = 'video-tabs';
+                                vids.forEach((v, i) => { const btn = document.createElement('button');
+                                    btn.className = 'video-tab' + (i === 0 ? ' active' : '');
+                                    btn.textContent = `مقطع ${i+1}`;
+                                    btn.onclick = () => { body.innerHTML = '';
+                                        createPlayer(body, v.url, 'video/mp4');
+                                        bar.querySelectorAll('.video-tab').forEach(b => b
+                                            .classList.remove('active'));
+                                        btn.classList.add('active'); };
+                                    bar.appendChild(btn); });
+                                body.appendChild(bar); } } else embedTw(body, data.id); }
+                        showToast(`🎬 ${esc(data.setBy||'')} شغّل فيديو`, 'info'); } catch (e) { showToast(
+                            '❌ فشل التشغيل', 'error'); }
                 });
-                initTypingIndicator();
+                initTyping();
                 messageInput.focus();
             }
 
             // ==================== تسجيل الدخول ====================
             function attemptLogin() {
-                let raw = usernameInput.value.trim();
-                if (!raw) {
-                    showToast('⚠️ الرجاء إدخال اسم المستخدم', 'warning');
-                    return;
-                }
-                if (/[.#$[\]/]/.test(raw)) {
-                    showToast('⚠️ لا يُسمح بأحرف خاصة: . # $ [ ] /', 'warning');
-                    return;
-                }
-                if (raw.length < 2) {
-                    showToast('⚠️ الاسم قصير جداً', 'warning');
-                    return;
-                }
-                if (raw.length > 15) {
-                    showToast('⚠️ الاسم طويل جداً (الحد الأقصى 15 حرف)', 'warning');
-                    return;
-                }
+                const raw = usernameInput.value.trim(); if (!raw) return showToast('⚠️ أدخل اسماً', 'warning'); if (
+                    /[.#$[\]/]/.test(raw)) return showToast('⚠️ أحرف غير مسموحة', 'warning'); if (raw.length < 2)
+                    return showToast('⚠️ الاسم قصير', 'warning'); if (raw.length > 15) return showToast(
+                    '⚠️ الاسم طويل', 'warning');
                 username = raw;
                 startChat();
             }
             loginBtn.onclick = attemptLogin;
-            usernameInput.onkeypress = (e) => {
-                if (e.key === 'Enter') attemptLogin();
-            };
-            window.addEventListener('beforeunload', () => {
-                cleanupPlayer();
-                if (userRef) userRef.remove();
-                if (typingRef && username) typingRef.child(username).remove();
-            });
-            window.addEventListener('error', (e) => {
-                console.error('Global error:', e.error);
-            });
-            window.addEventListener('unhandledrejection', (e) => {
-                console.error('Unhandled promise rejection:', e.reason);
-            });
+            usernameInput.onkeypress = e => { if (e.key === 'Enter') attemptLogin(); };
+            window.addEventListener('beforeunload', () => { if (currentPlayer?.hls) currentPlayer.hls.destroy(); if (
+                    userRef) userRef.remove(); if (typingRef && username) typingRef.child(username).remove(); });
         })();
     </script>
 </body>
