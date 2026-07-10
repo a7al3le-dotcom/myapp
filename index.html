@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>شات خاص - نسخة متطورة كاملة</title>
+    <title>شات خاص</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -69,6 +69,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            padding-top: 60px; /* مساحة للأزرار العلوية */
         }
 
         /* ============ رسائل الشات ============ */
@@ -467,29 +468,28 @@
             box-shadow: 0 10px 30px rgba(255, 213, 74, 0.3);
         }
 
-        /* ============ مشغل الفيديو ============ */
+        /* ============ مشغل الفيديو - ثابت قابل للسحب ============ */
         #pinnedVideoPlayer {
             position: fixed;
-            top: calc(60px + env(safe-area-inset-top));
-            left: 10px;
-            width: 400px;
-            max-width: calc(100% - 20px);
-            min-width: 300px;
-            min-height: 200px;
+            top: 80px;
+            right: 20px;
+            width: 380px;
+            max-width: calc(100vw - 40px);
+            min-width: 280px;
             background: #000;
             border-radius: 16px;
-            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.95);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
             z-index: 998;
             display: none;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            animation: slideInLeft 0.3s ease;
-            resize: both;
+            overflow: visible;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInRight 0.3s ease;
+            transition: none; /* مهم للسحب بدون تأخير */
         }
 
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-30px); }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
@@ -506,6 +506,7 @@
             color: #ddd;
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px 16px 0 0;
             z-index: 5;
         }
 
@@ -525,6 +526,7 @@
             z-index: 10;
             pointer-events: auto;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .close-pinned-video:hover {
@@ -532,22 +534,29 @@
             transform: scale(1.15);
         }
 
-        .resize-handle {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            bottom: 4px;
-            right: 4px;
-            cursor: nwse-resize;
-            z-index: 20;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
         .video-body {
             position: relative;
-            flex: 1;
             background: #000;
+            border-radius: 0 0 16px 16px;
+            overflow: hidden;
+        }
+
+        /* مقبض تغيير الحجم في الأسفل */
+        .resize-handle {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            bottom: 2px;
+            left: 2px;
+            cursor: nesw-resize;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .resize-handle:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .video-selector-bar {
@@ -934,12 +943,13 @@
         /* ============ تجاوب الموبايل ============ */
         @media (max-width: 600px) {
             #pinnedVideoPlayer {
-                left: 50% !important;
                 top: auto !important;
+                right: 3vw !important;
                 bottom: 80px !important;
-                transform: translateX(-50%) !important;
-                width: 94vw;
-                max-width: none;
+                left: auto !important;
+                width: 94vw !important;
+                max-width: none !important;
+                transform: none !important;
             }
 
             #topButtons {
@@ -963,6 +973,10 @@
             #messageInput {
                 font-size: 15px;
                 height: 42px;
+            }
+
+            #messages {
+                padding-top: 55px;
             }
 
             .nvolume-slider {
@@ -1119,7 +1133,6 @@
                     this.maxMessages = maxMessages;
                     this.timeWindow = timeWindow;
                 }
-
                 canSend() {
                     const now = Date.now();
                     this.messages = this.messages.filter(t => now - t < this.timeWindow);
@@ -1131,7 +1144,6 @@
                     return true;
                 }
             }
-
             const rateLimiter = new RateLimiter(4, 8000);
 
             // ==================== دوال مساعدة ====================
@@ -1196,7 +1208,6 @@
                     directVideo: /\.(mp4|webm|mov|mkv|avi)(\?.*)?$/i,
                     hls: /\.(m3u8|m3u)(\?.*)?$/i
                 };
-
                 for (let [type, pattern] of Object.entries(patterns)) {
                     const match = url.match(pattern);
                     if (match) return { type, id: match[1] || url };
@@ -1253,11 +1264,9 @@
                 const wrapper = document.createElement("div");
                 wrapper.className = "msg-wrapper";
                 wrapper.id = `msg-${key}`;
-
                 const avatarColor = getAvatarColor(user);
                 const initials = getInitials(user);
                 const timeStr = formatTimeDisplay(timestamp);
-
                 wrapper.innerHTML = `
                     <div class="msg-avatar" style="background: ${avatarColor};">${initials}</div>
                     <div class="msg-content">
@@ -1268,12 +1277,9 @@
                         <div class="msg-text">${escapeHtml(text)}</div>
                     </div>
                 `;
-
                 messagesDiv.appendChild(wrapper);
                 messageTimestamps.set(key, { timestamp, element: wrapper.querySelector('.msg-time') });
                 scrollToBottom();
-
-                // تنظيف الرسائل القديمة
                 if (messagesDiv.children.length > MESSAGE_LIMIT + 30) {
                     const oldestMsg = messagesDiv.firstElementChild;
                     if (oldestMsg && !oldestMsg.classList.contains('sys-msg')) {
@@ -1282,7 +1288,6 @@
                 }
             }
 
-            // تحديث الوقت كل 30 ثانية
             setInterval(() => {
                 messageTimestamps.forEach(({ timestamp, element }, key) => {
                     if (element) {
@@ -1291,12 +1296,11 @@
                 });
             }, 30000);
 
-            // ==================== نظام الكتابة (Typing Indicator) ====================
+            // ==================== نظام الكتابة ====================
             function initTypingIndicator() {
                 typingRef = db.ref("typing");
                 let isTyping = false;
                 const typingUsers = new Map();
-
                 messageInput.addEventListener("input", () => {
                     const text = messageInput.value;
                     if (text.length > 0 && !isTyping) {
@@ -1307,7 +1311,6 @@
                         stopTyping();
                     }
                 });
-
                 messageInput.addEventListener("keydown", () => {
                     if (!isTyping && messageInput.value.length > 0) {
                         isTyping = true;
@@ -1322,7 +1325,6 @@
                         }
                     }, 2000);
                 });
-
                 function stopTyping() {
                     if (isTyping) {
                         isTyping = false;
@@ -1330,29 +1332,24 @@
                     }
                     clearTimeout(typingTimeout);
                 }
-
                 document.getElementById("inputArea").addEventListener("submit", () => { stopTyping(); });
-
                 typingRef.on("child_added", (snap) => {
                     if (snap.key === username) return;
                     const data = snap.val();
                     if (data && data.time) typingUsers.set(snap.key, data.time);
                     updateTypingDisplay();
                 });
-
                 typingRef.on("child_changed", (snap) => {
                     if (snap.key === username) return;
                     const data = snap.val();
                     if (data && data.time) typingUsers.set(snap.key, data.time);
                     updateTypingDisplay();
                 });
-
                 typingRef.on("child_removed", (snap) => {
                     if (snap.key === username) return;
                     typingUsers.delete(snap.key);
                     updateTypingDisplay();
                 });
-
                 setInterval(() => {
                     const now = Date.now() + serverTimeOffset;
                     let changed = false;
@@ -1364,7 +1361,6 @@
                     });
                     if (changed) updateTypingDisplay();
                 }, 2000);
-
                 function updateTypingDisplay() {
                     const names = Array.from(typingUsers.keys());
                     if (names.length === 0) {
@@ -1378,7 +1374,6 @@
                     else msg = `عدة أشخاص يكتبون...`;
                     typingText.textContent = msg;
                 }
-
                 typingRef.child(username).onDisconnect().remove();
             }
 
@@ -1392,12 +1387,10 @@
                             });
                             playerEventListeners = [];
                         }
-
                         if (currentPlayer.hls) {
                             currentPlayer.hls.destroy();
                             currentPlayer.hls = null;
                         }
-
                         if (currentPlayer.video) {
                             currentPlayer.video.pause();
                             currentPlayer.video.src = '';
@@ -1414,41 +1407,30 @@
             function createNetflixPlayer(container, source, type) {
                 cleanupPlayer();
                 const eventListeners = [];
-
                 function addListener(element, event, handler) {
                     element.addEventListener(event, handler);
                     eventListeners.push({ element, event, handler });
                 }
-
                 const isHLS = (type === 'application/x-mpegURL' || source.includes('.m3u8') || source.includes('.m3u'));
-
                 const wrapper = document.createElement('div');
                 wrapper.className = 'nplayer';
-
                 const videoWrap = document.createElement('div');
                 videoWrap.className = 'nplayer-video-wrap';
                 const video = document.createElement('video');
                 video.playsInline = true;
                 video.muted = false;
                 videoWrap.appendChild(video);
-
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'nplayer-loading';
                 loadingDiv.innerHTML = '<span>⏳ جاري التحميل...</span>';
                 videoWrap.appendChild(loadingDiv);
-
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'nplayer-error';
-                errorDiv.innerHTML =
-                    `<span>⚠️ فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>`;
+                errorDiv.innerHTML = `<span>⚠️ فشل التشغيل</span><button class="retry-btn">إعادة المحاولة</button>`;
                 videoWrap.appendChild(errorDiv);
-
                 wrapper.appendChild(videoWrap);
-
-                // شريط التحكم
                 const controls = document.createElement('div');
                 controls.className = 'nplayer-controls';
-
                 const prog = document.createElement('div');
                 prog.className = 'nprogress';
                 const buffer = document.createElement('div');
@@ -1464,17 +1446,14 @@
                 prog.appendChild(buffer);
                 prog.appendChild(played);
                 prog.appendChild(inputRange);
-
                 const row = document.createElement('div');
                 row.className = 'ncontrols-row';
-
                 const playBtn = document.createElement('button');
                 playBtn.innerHTML = '▶';
                 const rewindBtn = document.createElement('button');
                 rewindBtn.innerHTML = '⏪';
                 const forwardBtn = document.createElement('button');
                 forwardBtn.innerHTML = '⏩';
-
                 const volWrap = document.createElement('div');
                 volWrap.className = 'nvolume-wrap';
                 const volBtn = document.createElement('button');
@@ -1488,11 +1467,9 @@
                 volSlider.className = 'nvolume-slider';
                 volWrap.appendChild(volBtn);
                 volWrap.appendChild(volSlider);
-
                 const timeDisplay = document.createElement('span');
                 timeDisplay.className = 'ntime';
                 timeDisplay.textContent = '00:00 / 00:00';
-
                 const speedWrap = document.createElement('div');
                 speedWrap.className = 'nspeed-menu';
                 const speedBtn = document.createElement('button');
@@ -1508,8 +1485,7 @@
                         e.stopPropagation();
                         video.playbackRate = s;
                         speedBtn.textContent = s + 'x';
-                        speedDropdown.querySelectorAll('button').forEach(btn => btn.classList.remove(
-                            'active'));
+                        speedDropdown.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
                         b.classList.add('active');
                         speedDropdown.style.display = 'none';
                     };
@@ -1517,7 +1493,6 @@
                 });
                 speedWrap.appendChild(speedBtn);
                 speedWrap.appendChild(speedDropdown);
-
                 const qualityWrap = document.createElement('div');
                 qualityWrap.className = 'nquality-menu';
                 const qualityBtn = document.createElement('button');
@@ -1526,11 +1501,9 @@
                 qualityDropdown.className = 'nquality-dropdown';
                 qualityWrap.appendChild(qualityBtn);
                 qualityWrap.appendChild(qualityDropdown);
-
                 const fsBtn = document.createElement('button');
                 fsBtn.className = 'nfullscreen';
                 fsBtn.innerHTML = '⛶';
-
                 row.appendChild(playBtn);
                 row.appendChild(rewindBtn);
                 row.appendChild(forwardBtn);
@@ -1539,17 +1512,13 @@
                 row.appendChild(speedWrap);
                 row.appendChild(qualityWrap);
                 row.appendChild(fsBtn);
-
                 controls.appendChild(prog);
                 controls.appendChild(row);
                 wrapper.appendChild(controls);
                 container.appendChild(wrapper);
-
                 let hlsInstance = null;
                 let retryCount = 0;
                 const MAX_RETRY = 2;
-
-                // إظهار/إخفاء التحكم
                 let controlsTimeout;
                 function showControls(show) {
                     if (show) {
@@ -1563,13 +1532,10 @@
                         clearTimeout(controlsTimeout);
                     }
                 }
-
                 addListener(videoWrap, 'mousemove', () => showControls(true));
                 addListener(videoWrap, 'touchstart', () => showControls(true));
                 addListener(video, 'play', () => showControls(true));
                 addListener(video, 'pause', () => showControls(true));
-
-                // تحميل التدفق
                 function loadStream(url) {
                     loadingDiv.style.display = 'flex';
                     errorDiv.style.display = 'none';
@@ -1577,7 +1543,6 @@
                         hlsInstance.destroy();
                         hlsInstance = null;
                     }
-
                     if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
                         hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
                         hlsInstance.loadSource(url);
@@ -1595,8 +1560,7 @@
                             if (data.fatal) {
                                 if (retryCount < MAX_RETRY) {
                                     retryCount++;
-                                    loadingDiv.innerHTML =
-                                        `<span>🔄 إعادة المحاولة (${retryCount}/${MAX_RETRY})...</span>`;
+                                    loadingDiv.innerHTML = `<span>🔄 إعادة المحاولة (${retryCount}/${MAX_RETRY})...</span>`;
                                     setTimeout(() => loadStream(url), 1000);
                                 } else {
                                     loadingDiv.style.display = 'none';
@@ -1614,8 +1578,6 @@
                         loadingDiv.style.display = 'none';
                     }
                 }
-
-                // قائمة الجودة
                 function populateQualityMenu(levels) {
                     qualityDropdown.innerHTML = '';
                     const autoBtn = document.createElement('button');
@@ -1631,11 +1593,10 @@
                         qualityDropdown.style.display = 'none';
                     };
                     qualityDropdown.appendChild(autoBtn);
-
                     if (levels && levels.length > 0) {
                         levels.forEach((level, idx) => {
-                            const h = level.height ? level.height + 'p' : (level.bitrate ? Math.round(level
-                                .bitrate / 1000) + 'k' : 'HD');
+                            const h = level.height ? level.height + 'p' : (level.bitrate ? Math.round(level.bitrate /
+                                1000) + 'k' : 'HD');
                             const btn = document.createElement('button');
                             btn.textContent = h;
                             btn.dataset.level = idx;
@@ -1643,8 +1604,8 @@
                                 e.stopPropagation();
                                 if (hlsInstance) hlsInstance.currentLevel = idx;
                                 qualityBtn.textContent = h;
-                                qualityDropdown.querySelectorAll('button').forEach(b => b.classList
-                                    .remove('active'));
+                                qualityDropdown.querySelectorAll('button').forEach(b => b.classList.remove(
+                                    'active'));
                                 btn.classList.add('active');
                                 qualityDropdown.style.display = 'none';
                             };
@@ -1652,8 +1613,6 @@
                         });
                     }
                 }
-
-                // تحديث شريط التقدم
                 function updateProgress() {
                     if (video.duration && !isNaN(video.duration)) {
                         const pct = (video.currentTime / video.duration) * 100;
@@ -1672,22 +1631,17 @@
                         timeDisplay.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
                     }
                 }
-
                 addListener(video, 'timeupdate', updateProgress);
                 addListener(video, 'progress', updateProgress);
                 addListener(video, 'loadedmetadata', () => {
                     loadingDiv.style.display = 'none';
                     updateProgress();
                 });
-
-                // أحداث الأزرار
                 playBtn.onclick = () => { video.paused ? video.play().catch(() => {}) : video.pause(); };
                 addListener(video, 'play', () => { playBtn.innerHTML = '⏸'; });
                 addListener(video, 'pause', () => { playBtn.innerHTML = '▶'; });
-
                 rewindBtn.onclick = () => { video.currentTime = Math.max(0, video.currentTime - 10); };
                 forwardBtn.onclick = () => { video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); };
-
                 volBtn.onclick = () => {
                     video.muted = !video.muted;
                     volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
@@ -1701,7 +1655,6 @@
                     volSlider.value = video.volume;
                     volBtn.innerHTML = video.muted ? '🔇' : (video.volume > 0.5 ? '🔊' : '🔉');
                 });
-
                 inputRange.oninput = () => { played.style.width = inputRange.value + '%'; };
                 inputRange.onchange = () => {
                     if (video.duration) video.currentTime = (parseFloat(inputRange.value) / 100) * video.duration;
@@ -1712,7 +1665,6 @@
                     const x = (e.clientX - rect.left) / rect.width;
                     if (video.duration) video.currentTime = x * video.duration;
                 });
-
                 speedBtn.onclick = (e) => {
                     e.stopPropagation();
                     speedDropdown.style.display = speedDropdown.style.display === 'block' ? 'none' : 'block';
@@ -1723,12 +1675,10 @@
                     qualityDropdown.style.display = qualityDropdown.style.display === 'block' ? 'none' : 'block';
                     speedDropdown.style.display = 'none';
                 };
-
                 document.addEventListener('click', () => {
                     speedDropdown.style.display = 'none';
                     qualityDropdown.style.display = 'none';
                 });
-
                 fsBtn.onclick = () => {
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
@@ -1736,13 +1686,10 @@
                         container.closest('#pinnedVideoPlayer').requestFullscreen().catch(() => {});
                     }
                 };
-
-                // زر إعادة المحاولة
                 errorDiv.querySelector('.retry-btn').onclick = () => {
                     retryCount = 0;
                     loadStream(source);
                 };
-
                 loadStream(source);
                 currentPlayer = { video, hls: hlsInstance, container: wrapper };
                 playerEventListeners = eventListeners;
@@ -1781,8 +1728,7 @@
                 container.innerHTML = '';
                 container.style.background = '#15202b';
                 const iframe = document.createElement('iframe');
-                iframe.src =
-                `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar`;
+                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar`;
                 iframe.style.width = '100%';
                 iframe.style.height = '100%';
                 iframe.style.minHeight = '320px';
@@ -1797,20 +1743,34 @@
                 }
             }
 
-            // ==================== السحب والإفلات ====================
-            function makeDraggable(element, handle) {
-                let startX, startY, startLeft, startTop, isDragging = false;
-                const getPos = (e) => e.touches ? e.touches[0] : e;
+            // ==================== السحب والإفلات (مُحسّن) ====================
+            function initDraggable(player) {
+                const header = player.querySelector('.video-header');
+                if (!header) return;
+
+                let isDragging = false;
+                let startX, startY, startLeft, startTop;
+
+                function getPos(e) {
+                    return e.touches ? e.touches[0] : e;
+                }
 
                 function onStart(e) {
-                    if (e.target.classList && e.target.classList.contains('close-pinned-video')) return;
+                    // لا تسحب إذا ضغط على زر الإغلاق
+                    if (e.target.closest('.close-pinned-video')) return;
                     e.preventDefault();
                     isDragging = true;
                     const pos = getPos(e);
                     startX = pos.clientX;
                     startY = pos.clientY;
-                    startLeft = element.offsetLeft;
-                    startTop = element.offsetTop;
+                    const rect = player.getBoundingClientRect();
+                    startLeft = rect.left;
+                    startTop = rect.top;
+                    player.style.transition = 'none';
+                    player.style.right = 'auto';
+                    player.style.left = startLeft + 'px';
+                    player.style.top = startTop + 'px';
+                    player.style.bottom = 'auto';
                     document.addEventListener('mousemove', onMove);
                     document.addEventListener('touchmove', onMove, { passive: false });
                     document.addEventListener('mouseup', onEnd);
@@ -1821,40 +1781,53 @@
                     if (!isDragging) return;
                     e.preventDefault();
                     const pos = getPos(e);
-                    let newLeft = startLeft + (pos.clientX - startX);
-                    let newTop = startTop + (pos.clientY - startY);
-                    if (window.innerWidth <= 600) return;
-                    newLeft = Math.min(window.innerWidth - element.offsetWidth, Math.max(0, newLeft));
-                    newTop = Math.min(window.innerHeight - element.offsetHeight, Math.max(0, newTop));
-                    element.style.left = newLeft + 'px';
-                    element.style.top = newTop + 'px';
-                    element.style.right = 'auto';
-                    element.style.bottom = 'auto';
+                    const dx = pos.clientX - startX;
+                    const dy = pos.clientY - startY;
+                    let newLeft = startLeft + dx;
+                    let newTop = startTop + dy;
+                    // حدود الشاشة
+                    const maxLeft = window.innerWidth - player.offsetWidth;
+                    const maxTop = window.innerHeight - player.offsetHeight;
+                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                    newTop = Math.max(0, Math.min(newTop, maxTop));
+                    player.style.left = newLeft + 'px';
+                    player.style.top = newTop + 'px';
                 }
 
                 function onEnd() {
                     isDragging = false;
+                    player.style.transition = '';
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('touchmove', onMove);
                     document.removeEventListener('mouseup', onEnd);
                     document.removeEventListener('touchend', onEnd);
                 }
 
-                handle.addEventListener('mousedown', onStart);
-                handle.addEventListener('touchstart', onStart, { passive: false });
+                header.addEventListener('mousedown', onStart);
+                header.addEventListener('touchstart', onStart, { passive: false });
             }
 
-            function makeResizable(element, handle) {
+            function initResizable(player) {
+                const handle = player.querySelector('.resize-handle');
+                if (!handle) return;
+
+                let isResizing = false;
                 let startW, startH, startX, startY;
-                const getPos = (e) => e.touches ? e.touches[0] : e;
+
+                function getPos(e) {
+                    return e.touches ? e.touches[0] : e;
+                }
 
                 function onStart(e) {
                     e.preventDefault();
-                    startW = element.offsetWidth;
-                    startH = element.offsetHeight;
+                    e.stopPropagation();
+                    isResizing = true;
+                    startW = player.offsetWidth;
+                    startH = player.offsetHeight;
                     const pos = getPos(e);
                     startX = pos.clientX;
                     startY = pos.clientY;
+                    player.style.transition = 'none';
                     document.addEventListener('mousemove', onMove);
                     document.addEventListener('touchmove', onMove, { passive: false });
                     document.addEventListener('mouseup', onEnd);
@@ -1862,17 +1835,24 @@
                 }
 
                 function onMove(e) {
+                    if (!isResizing) return;
                     e.preventDefault();
                     const pos = getPos(e);
-                    let newW = startW + (pos.clientX - startX);
-                    let newH = startH + (pos.clientY - startY);
-                    if (newW > 280) element.style.width = newW + 'px';
-                    if (newH > 200) element.style.height = newH + 'px';
+                    const dx = pos.clientX - startX;
+                    const dy = pos.clientY - startY;
+                    const newW = Math.max(280, startW + dx);
+                    const newH = Math.max(180, startH + dy);
+                    player.style.width = newW + 'px';
+                    player.style.height = newH + 'px';
                 }
 
                 function onEnd() {
+                    isResizing = false;
+                    player.style.transition = '';
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+                    document.removeEventListener('touchend', onEnd);
                 }
 
                 handle.addEventListener('mousedown', onStart);
@@ -1901,7 +1881,6 @@
                     const diff = now - last;
                     if (diff < 30000) statusClass = 'status-green';
                     else if (diff < 60000) statusClass = 'status-yellow';
-
                     const div = document.createElement('div');
                     div.className = 'user-item';
                     div.innerHTML = `
@@ -1917,18 +1896,14 @@
             function startChat() {
                 loginScreen.style.display = 'none';
                 chatContainer.style.display = 'flex';
-
                 db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
-
                 userRef = db.ref("online/" + username);
                 messagesRef = db.ref("messages");
                 onlineRef = db.ref("online");
                 pinnedVideoRef = db.ref("pinned_video");
-
                 userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
                 userRef.onDisconnect().remove();
                 setInterval(() => { userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); }, 30000);
-
                 db.ref('.info/connected').on('value', (snap) => {
                     if (snap.val() === true) {
                         showToast('✅ متصل بالخادم', 'success');
@@ -1936,8 +1911,6 @@
                         showToast('⚠️ فقدان الاتصال بالخادم', 'error');
                     }
                 });
-
-                // تنظيف المستخدمين غير النشطين
                 setInterval(() => {
                     const now = Date.now() + serverTimeOffset;
                     onlineRef.once('value', snap => {
@@ -1948,14 +1921,11 @@
                         });
                     });
                 }, 60000);
-
-                // إرسال الرسائل
                 document.getElementById("inputArea").onsubmit = (e) => {
                     e.preventDefault();
                     const text = sanitizeInput(messageInput.value.trim());
                     if (!text) return;
                     if (!rateLimiter.canSend()) return;
-
                     messagesRef.push({
                         user: username,
                         text: text,
@@ -1964,15 +1934,12 @@
                         console.error('Send error:', err);
                         showToast('❌ فشل إرسال الرسالة', 'error');
                     });
-
                     messageInput.value = "";
                     messageInput.focus();
                     scrollToBottom();
                     if (typingRef) typingRef.child(username).remove();
                     clearTimeout(typingTimeout);
                 };
-
-                // استقبال الرسائل
                 messagesRef.limitToLast(MESSAGE_LIMIT).on("child_added", snap => {
                     const val = snap.val();
                     if (val && val.user && val.text) {
@@ -1980,50 +1947,38 @@
                         addMessageToUI(snap.key, { user: val.user, text: val.text, timestamp: timestamp });
                     }
                 });
-
                 messagesRef.on("child_removed", snap => {
                     messageTimestamps.delete(snap.key);
                     const el = document.getElementById(`msg-${snap.key}`);
                     if (el) el.remove();
                 });
-
-                // قائمة المتصلين
                 onlineRef.on("value", snap => {
                     const count = snap.numChildren();
                     document.getElementById("count").innerText = count;
                     renderUsersList(snap.val() || {});
                 });
-
-                // أزرار النوافذ
                 onlineListBtn.onclick = () => {
                     usersBox.style.display = 'block';
                     overlay.style.display = 'block';
                 };
-
                 setVideoBtn.onclick = () => {
                     setVideoModal.style.display = 'block';
                     overlay.style.display = 'block';
                 };
-
                 overlay.onclick = closeAllModals;
-
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') closeAllModals();
                 });
-
-                // تثبيت الفيديو
                 submitVideoUrlBtn.onclick = async () => {
                     const raw = videoUrlInput.value.trim();
                     if (!raw) {
                         showToast('⚠️ يرجى إدخال رابط الفيديو', 'warning');
                         return;
                     }
-
                     try {
                         const cleanUrl = extractCleanUrl(raw) || raw;
                         const expandedUrl = await expandShortUrl(cleanUrl);
                         const media = detectMediaType(expandedUrl);
-
                         switch (media.type) {
                             case 'youtube':
                                 await pinnedVideoRef.set({ type: 'youtube', id: media.id, setBy: username });
@@ -2041,7 +1996,6 @@
                                 showToast('⚠️ رابط غير مدعوم', 'warning');
                                 return;
                         }
-
                         videoUrlInput.value = "";
                         closeAllModals();
                         showToast('✅ تم تثبيت الفيديو بنجاح', 'success');
@@ -2050,45 +2004,38 @@
                         showToast('❌ فشل تثبيت الفيديو', 'error');
                     }
                 };
-
-                // مراقبة الفيديو المثبت
                 pinnedVideoRef.on("value", async (snap) => {
                     cleanupPlayer();
-                    pinnedVideoPlayer.innerHTML = '';
                     const data = snap.val();
-
                     if (!data) {
                         pinnedVideoPlayer.style.display = 'none';
+                        // تنظيف المحتوى
+                        const body = pinnedVideoPlayer.querySelector('.video-body');
+                        if (body) body.innerHTML = '';
                         return;
                     }
-
+                    // إعادة بناء هيكل المشغل
+                    pinnedVideoPlayer.innerHTML = `
+                        <div class="video-header">
+                            <span>🎬 بث - ${escapeHtml(data.setBy || 'مجهول')}</span>
+                            <button class="close-pinned-video">✕</button>
+                        </div>
+                        <div class="video-body"></div>
+                        <div class="resize-handle"></div>
+                    `;
                     pinnedVideoPlayer.style.display = 'flex';
-                    const header = document.createElement('div');
-                    header.className = 'video-header';
-                    header.innerHTML = `<span>🎬 بث - ${escapeHtml(data.setBy || 'مجهول')}</span>`;
-                    const closeBtn = document.createElement('button');
-                    closeBtn.className = 'close-pinned-video';
-                    closeBtn.innerHTML = '✕';
+                    // إعادة ربط الأحداث
+                    const closeBtn = pinnedVideoPlayer.querySelector('.close-pinned-video');
                     closeBtn.onclick = (e) => {
                         e.stopPropagation();
                         cleanupPlayer();
                         pinnedVideoRef.remove();
+                        pinnedVideoPlayer.style.display = 'none';
                     };
-                    header.appendChild(closeBtn);
-
-                    const body = document.createElement('div');
-                    body.className = 'video-body';
-
-                    const resizeHandle = document.createElement('div');
-                    resizeHandle.className = 'resize-handle';
-
-                    pinnedVideoPlayer.appendChild(header);
-                    pinnedVideoPlayer.appendChild(body);
-                    pinnedVideoPlayer.appendChild(resizeHandle);
-
-                    makeDraggable(pinnedVideoPlayer, header);
-                    makeResizable(pinnedVideoPlayer, resizeHandle);
-
+                    // تهيئة السحب وتغيير الحجم
+                    initDraggable(pinnedVideoPlayer);
+                    initResizable(pinnedVideoPlayer);
+                    const body = pinnedVideoPlayer.querySelector('.video-body');
                     try {
                         if (data.type === 'youtube') {
                             body.innerHTML =
@@ -2108,14 +2055,13 @@
                                     bar.className = 'video-selector-bar';
                                     videos.forEach((v, idx) => {
                                         const btn = document.createElement('button');
-                                        btn.className = 'video-selector-btn' + (idx === 0 ? ' active' :
-                                            '');
+                                        btn.className = 'video-selector-btn' + (idx === 0 ? ' active' : '');
                                         btn.textContent = `🎥 مقطع ${idx+1}`;
                                         btn.onclick = () => {
                                             body.innerHTML = '';
                                             createNetflixPlayer(body, v.url, 'video/mp4');
-                                            bar.querySelectorAll('.video-selector-btn').forEach(
-                                                b => b.classList.remove('active'));
+                                            bar.querySelectorAll('.video-selector-btn').forEach(b => b
+                                                .classList.remove('active'));
                                             btn.classList.add('active');
                                         };
                                         bar.appendChild(btn);
@@ -2130,7 +2076,6 @@
                         showToast('❌ فشل تشغيل الفيديو', 'error');
                     }
                 });
-
                 initTypingIndicator();
                 messageInput.focus();
             }
@@ -2157,28 +2102,21 @@
                 username = raw;
                 startChat();
             }
-
             loginBtn.onclick = attemptLogin;
             usernameInput.onkeypress = (e) => {
                 if (e.key === 'Enter') attemptLogin();
             };
-
-            // ==================== تنظيف عند الخروج ====================
             window.addEventListener('beforeunload', () => {
                 cleanupPlayer();
                 if (userRef) userRef.remove();
                 if (typingRef && username) typingRef.child(username).remove();
             });
-
-            // ==================== معالجة الأخطاء العامة ====================
             window.addEventListener('error', (e) => {
                 console.error('Global error:', e.error);
             });
-
             window.addEventListener('unhandledrejection', (e) => {
                 console.error('Unhandled promise rejection:', e.reason);
             });
-
         })();
     </script>
 </body>
