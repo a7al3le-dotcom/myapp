@@ -1,228 +1,1266 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<title>شات خاص</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
-<style>
-:root{--bg-primary:#0a0b12;--bg-secondary:#11131f;--bg-elevated:#181b2b;--bg-input:#0f111c;--text-primary:#f0f2fa;--text-secondary:#9aa1b8;--text-muted:#5d6478;--border-color:rgba(255,255,255,0.06);--shadow-soft:0 8px 32px rgba(0,0,0,0.6);--shadow-strong:0 20px 60px rgba(0,0,0,0.8);--accent-primary:#6c5ce7;--accent-secondary:#a29bfe;--accent-gradient:linear-gradient(135deg,#6c5ce7,#fd79a8);--success:#00b894;--danger:#e17055;--warning:#fdcb6e;--radius-sm:8px;--radius-md:14px;--radius-lg:20px;--radius-full:9999px;--transition-fast:0.15s cubic-bezier(0.4,0,0.2,1);--transition-smooth:0.3s cubic-bezier(0.4,0,0.2,1);--scrollbar-track:transparent;--scrollbar-thumb:#6c5ce7}
-[data-theme="light"]{--bg-primary:#f0f2fa;--bg-secondary:#ffffff;--bg-elevated:#e8ebf5;--bg-input:#ffffff;--text-primary:#1a1a2e;--text-secondary:#4a4a6a;--text-muted:#8a8aa8;--border-color:rgba(0,0,0,0.08);--shadow-soft:0 8px 32px rgba(0,0,0,0.08);--shadow-strong:0 20px 60px rgba(0,0,0,0.12);--scrollbar-track:#e8ebf5;--scrollbar-thumb:#6c5ce7}
-[data-theme="light"] .msg{background:#f8f9fe;border-color:rgba(0,0,0,0.06)}
-[data-theme="light"] .msg.self{background:rgba(108,92,231,0.08);border-color:rgba(108,92,231,0.2)}
-[data-theme="light"] #loginBox{background:#fff;border-color:rgba(0,0,0,0.06)}
-[data-theme="light"] #usernameInput{background:#f8f9fe;border-color:rgba(0,0,0,0.08);color:#1a1a2e}
-[data-theme="light"] #usernameInput::placeholder{color:#8a8aa8}
-[data-theme="light"] #inputArea{background:#fff;border-top-color:rgba(0,0,0,0.06)}
-[data-theme="light"] #messageInput{background:#f8f9fe;border-color:rgba(0,0,0,0.08);color:#1a1a2e}
-[data-theme="light"] #messageInput::placeholder{color:#8a8aa8}
-[data-theme="light"] #topButtons .btn{background:#fff;border-color:rgba(0,0,0,0.06);color:#1a1a2e}
-[data-theme="light"] #topButtons .btn:hover{background:#f0f2fa}
-[data-theme="light"] #usersBox,[data-theme="light"] #setVideoModal{background:#fff;border-color:rgba(0,0,0,0.06);color:#1a1a2e}
-[data-theme="light"] #videoUrlInput{background:#f8f9fe;border-color:rgba(0,0,0,0.08);color:#1a1a2e}
-[data-theme="light"] .user-item{background:rgba(0,0,0,0.02)}
-[data-theme="light"] .sys{background:rgba(0,0,0,0.02);border-color:rgba(0,0,0,0.04);color:var(--text-secondary)}
-[data-theme="light"] .toast{background:#fff;border-color:rgba(0,0,0,0.08);color:#1a1a2e}
-[data-theme="light"] #pinnedVideoPlayer{background:#fff;border-color:rgba(0,0,0,0.08)}
-[data-theme="light"] .video-header{background:#f8f9fe}
-[data-theme="light"] .video-header .title{color:var(--text-secondary)}
-[data-theme="light"] #loginBox .subtitle{color:var(--text-secondary)}
-[data-theme="light"] .resize-handle{background:linear-gradient(135deg,transparent 50%,rgba(0,0,0,0.08)50%)}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;height:-webkit-fill-available;overflow:hidden;font-family:'Tajawal',sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:background 0.3s ease,color 0.3s ease}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:var(--scrollbar-track)}
-::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:var(--radius-full)}
-#loginScreen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:var(--bg-primary);z-index:10000;padding:20px;transition:background 0.3s ease}
-#loginBox{background:var(--bg-secondary);padding:40px 36px 32px;border-radius:var(--radius-lg);text-align:center;max-width:380px;width:100%;border:1px solid var(--border-color);box-shadow:var(--shadow-strong);animation:fadeUp 0.6s ease;transition:background 0.3s ease,border-color 0.3s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-#loginBox .logo{font-size:48px;margin-bottom:8px}
-#loginBox h2{font-size:24px;font-weight:900;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
-#loginBox .subtitle{color:var(--text-secondary);font-size:14px;margin-bottom:20px;transition:color 0.3s ease}
-#usernameInput{width:100%;padding:14px 18px;border-radius:var(--radius-full);font-size:16px;font-family:'Tajawal',sans-serif;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-primary);text-align:center;transition:var(--transition-fast),background 0.3s ease,color 0.3s ease;outline:none;box-shadow:inset 0 2px 8px rgba(0,0,0,0.3)}
-#usernameInput:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(108,92,231,0.2),inset 0 2px 8px rgba(0,0,0,0.3)}
-#usernameInput::placeholder{color:var(--text-muted)}
-#loginBtn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:var(--radius-full);background:var(--accent-gradient);color:#fff;font-weight:700;font-size:16px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:var(--transition-smooth);box-shadow:0 4px 20px rgba(108,92,231,0.3)}
-#loginBtn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,92,231,0.4)}
-#loginBtn:active{transform:translateY(0)}
-#chat-container{display:none;flex-direction:column;height:100dvh;background:var(--bg-primary);position:relative;transition:background 0.3s ease}
-#messages{flex:1;overflow-y:auto;padding:16px 20px;padding-top:70px;scroll-behavior:smooth}
-.msg-wrapper{display:flex;flex-direction:column;margin:4px 0;animation:msgIn 0.25s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.msg{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-radius:var(--radius-md);background:var(--bg-secondary);border:1px solid var(--border-color);max-width:85%;word-break:break-word;line-height:1.5;font-size:14px;transition:background 0.3s ease,border-color 0.3s ease}
-.msg.self{align-self:flex-end;background:rgba(108,92,231,0.15);border-color:rgba(108,92,231,0.3)}
-.msg .user{font-weight:700;color:var(--accent-secondary);white-space:nowrap}
-.msg .text{flex:1}
-.msg .time{font-size:10px;color:var(--text-muted);white-space:nowrap;margin-right:8px;padding-top:2px}
-.sys{text-align:center;color:var(--text-secondary);font-size:12px;padding:6px 16px;margin:6px auto;background:rgba(255,255,255,0.03);border-radius:var(--radius-full);border:1px solid var(--border-color);max-width:80%;transition:background 0.3s ease,color 0.3s ease,border-color 0.3s ease}
-#typingIndicator{display:none;padding:6px 20px;font-size:13px;color:var(--text-secondary);align-items:center;gap:10px;min-height:32px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);transition:background 0.3s ease,border-color 0.3s ease;position:relative;z-index:5}
-#typingIndicator .typing-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
-#typingIndicator .typing-content{display:flex;align-items:center;gap:8px;flex:1}
-#typingIndicator .typing-name{font-weight:700;color:var(--accent-secondary)}
-#typingIndicator .typing-dots{display:flex;gap:4px;align-items:center}
-#typingIndicator .typing-dot{width:7px;height:7px;background:var(--accent-primary);border-radius:50%;animation:typingDot 1.4s infinite ease-in-out}
-#typingIndicator .typing-dot:nth-child(2){animation-delay:0.2s}
-#typingIndicator .typing-dot:nth-child(3){animation-delay:0.4s}
-@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:0.3}30%{transform:translateY(-8px);opacity:1}}
-#typingIndicator .typing-text{color:var(--text-muted);font-size:12px}
-#inputArea{display:flex;gap:10px;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));background:var(--bg-secondary);border-top:1px solid var(--border-color);backdrop-filter:blur(12px);transition:background 0.3s ease,border-color 0.3s ease}
-#messageInput{flex:1;height:48px;padding:0 20px;border-radius:var(--radius-full);font-size:16px;font-family:'Tajawal',sans-serif;background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);outline:none;transition:var(--transition-fast),background 0.3s ease,color 0.3s ease,border-color 0.3s ease}
-#messageInput:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(108,92,231,0.15)}
-#messageInput::placeholder{color:var(--text-muted)}
-#sendBtn{height:48px;padding:0 28px;border:none;border-radius:var(--radius-full);background:var(--accent-gradient);color:#fff;font-weight:700;font-size:14px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:var(--transition-smooth);white-space:nowrap;box-shadow:0 4px 16px rgba(108,92,231,0.25)}
-#sendBtn:hover{transform:scale(1.02);box-shadow:0 6px 24px rgba(108,92,231,0.35)}
-#sendBtn:active{transform:scale(0.97)}
-#topButtons{position:fixed;top:12px;right:12px;display:flex;gap:8px;z-index:1000}
-#topButtons .btn{padding:8px 16px;background:var(--bg-secondary);border-radius:var(--radius-full);border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:14px;font-family:'Tajawal',sans-serif;display:flex;align-items:center;gap:6px;transition:var(--transition-fast),background 0.3s ease,color 0.3s ease,border-color 0.3s ease;backdrop-filter:blur(12px);box-shadow:var(--shadow-soft)}
-#topButtons .btn:hover{background:var(--bg-elevated);border-color:rgba(255,255,255,0.12);transform:translateY(-1px)}
-#topButtons .btn .count{background:var(--accent-primary);color:#fff;border-radius:var(--radius-full);padding:0 8px;font-size:11px;font-weight:700;min-width:20px;text-align:center}
-#themeToggleBtn{background:var(--bg-secondary)!important;font-size:18px!important;padding:8px 14px!important}
-#pinnedVideoPlayer{position:fixed;top:80px;right:20px;width:420px;max-width:92vw;background:var(--bg-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-strong);z-index:999;display:none;flex-direction:column;overflow:hidden;border:1px solid var(--border-color);transition:width 0.3s ease,height 0.3s ease,background 0.3s ease,border-color 0.3s ease}
-#pinnedVideoPlayer.minimized{width:200px!important;height:120px!important;cursor:pointer}
-#pinnedVideoPlayer.minimized .video-header{padding:4px 10px;font-size:11px}
-#pinnedVideoPlayer.minimized .video-header .title{display:none}
-#pinnedVideoPlayer.minimized .video-body{min-height:80px}
-#pinnedVideoPlayer.minimized .video-body video-js,#pinnedVideoPlayer.minimized .video-body iframe{min-height:80px}
-.video-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-elevated);cursor:move;touch-action:none;user-select:none;flex-shrink:0;transition:background 0.3s ease}
-.video-header .title{font-size:13px;font-weight:500;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;transition:color 0.3s ease}
-.video-header .title .highlight{color:var(--accent-secondary)}
-.video-header .controls{display:flex;gap:6px;align-items:center}
-.video-header .controls button{background:rgba(255,255,255,0.06);border:none;color:var(--text-secondary);width:28px;height:28px;border-radius:var(--radius-full);cursor:pointer;font-size:14px;transition:var(--transition-fast);display:flex;align-items:center;justify-content:center}
-.video-header .controls button:hover{background:rgba(255,255,255,0.12);color:var(--text-primary)}
-.video-header .controls .close-btn{background:rgba(225,112,85,0.2);color:var(--danger)}
-.video-header .controls .close-btn:hover{background:var(--danger);color:#fff}
-.video-body{width:100%;background:#000;flex-shrink:0;min-height:240px;position:relative}
-.video-body video-js{width:100%!important;height:100%!important;min-height:240px}
-.video-body iframe{width:100%;height:100%;min-height:240px;border:none}
-.resize-handle{position:absolute;bottom:0;right:0;width:24px;height:24px;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,0.15)50%);border-radius:0 0 var(--radius-md)0;transition:background 0.3s ease}
-.video-js.vjs-custom-theme{background:#000}
-.vjs-custom-theme .vjs-control-bar{background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);height:4em}
-.vjs-custom-theme .vjs-big-play-button{display:none!important}
-.vjs-custom-theme .vjs-progress-control{position:absolute;top:-2.5em;left:0;right:0;width:100%;height:2.5em}
-.vjs-custom-theme .vjs-progress-holder{height:4px;margin:1em 0;border-radius:var(--radius-full)}
-.vjs-custom-theme .vjs-play-progress{background:var(--accent-gradient)}
-.vjs-custom-theme .vjs-play-progress:before{display:none}
-.vjs-custom-theme .vjs-load-progress{background:rgba(255,255,255,0.2)}
-.vjs-custom-theme .vjs-time-control{line-height:3em;padding:0 0.8em;font-size:12px}
-.vjs-custom-theme .vjs-button>.vjs-icon-placeholder:before{font-size:1.8em;line-height:2}
-.video-selector-bar{display:flex;gap:6px;padding:8px 12px;background:rgba(0,0,0,0.6);overflow-x:auto;flex-shrink:0}
-.video-selector-btn{flex-shrink:0;padding:4px 12px;border-radius:var(--radius-full);border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--text-secondary);font-size:11px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:var(--transition-fast)}
-.video-selector-btn:hover{background:rgba(255,255,255,0.1)}
-.video-selector-btn.active{background:var(--accent-gradient);color:#fff;border-color:transparent}
-#usersBox,#setVideoModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);background:var(--bg-secondary);padding:24px 28px;border-radius:var(--radius-lg);border:1px solid var(--border-color);box-shadow:var(--shadow-strong);z-index:1003;display:none;max-height:80vh;overflow-y:auto;width:400px;max-width:92vw;animation:modalIn 0.25s ease;transition:background 0.3s ease,border-color 0.3s ease,color 0.3s ease}
-@keyframes modalIn{from{opacity:0;transform:translate(-50%,-50%) scale(0.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-#usersBox h4,#setVideoModal h4{font-size:18px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-#usersList{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto}
-.user-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.02);font-size:14px;transition:background 0.3s ease}
-.user-item .status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.user-item .status.online{background:var(--success)}
-.user-item .status.idle{background:var(--warning)}
-.user-item .status.offline{background:var(--text-muted)}
-.user-item .username{flex:1}
-.user-item .badge{font-size:10px;background:var(--accent-primary);color:#fff;padding:0 8px;border-radius:var(--radius-full)}
-.user-item .typing-badge{font-size:10px;background:var(--warning);color:#000;padding:0 8px;border-radius:var(--radius-full);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-#videoUrlInput{width:100%;padding:12px 16px;border-radius:var(--radius-full);border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-primary);font-size:14px;font-family:'Tajawal',sans-serif;outline:none;transition:var(--transition-fast),background 0.3s ease,color 0.3s ease,border-color 0.3s ease;margin-bottom:12px}
-#videoUrlInput:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(108,92,231,0.15)}
-#videoUrlInput::placeholder{color:var(--text-muted)}
-#submitVideoUrlBtn{width:100%;padding:12px;border:none;border-radius:var(--radius-full);background:var(--accent-gradient);color:#fff;font-weight:700;font-size:14px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:var(--transition-smooth)}
-#submitVideoUrlBtn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(108,92,231,0.3)}
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:1001;display:none;transition:background 0.3s ease}
-#toastContainer{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
-.toast{padding:10px 24px;border-radius:var(--radius-full);background:var(--bg-elevated);border:1px solid var(--border-color);color:var(--text-primary);font-size:13px;font-weight:500;box-shadow:var(--shadow-strong);animation:toastIn 0.4s ease,toastOut 0.4s ease 2.6s forwards;pointer-events:auto;backdrop-filter:blur(12px);transition:background 0.3s ease,border-color 0.3s ease,color 0.3s ease}
-.toast.info{border-color:rgba(108,92,231,0.3)}
-.toast.success{border-color:rgba(0,184,148,0.3)}
-.toast.error{border-color:rgba(225,112,85,0.3)}
-@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
-@media(max-width:768px){#pinnedVideoPlayer{top:70px;right:10px;width:340px;max-width:94vw}#pinnedVideoPlayer.minimized{width:160px!important;height:100px!important}#messages{padding:16px 12px;padding-top:70px}.msg{max-width:95%;font-size:13px;padding:6px 12px}#topButtons{top:8px;right:8px;gap:4px}#topButtons .btn{padding:6px 12px;font-size:12px}#topButtons .btn .count{font-size:10px;min-width:16px}#inputArea{padding:8px 12px;gap:6px}#messageInput{height:40px;font-size:16px;padding:0 14px}#sendBtn{height:40px;padding:0 18px;font-size:13px}#usersBox,#setVideoModal{padding:18px 16px;width:94vw}#typingIndicator{font-size:11px;padding:4px 12px;min-height:28px}#typingIndicator .typing-avatar{width:22px;height:22px;font-size:11px}}
-@media(max-width:480px){#pinnedVideoPlayer{top:60px;right:5px;width:96vw;max-width:96vw}#pinnedVideoPlayer.minimized{width:120px!important;height:80px!important;right:5px}#pinnedVideoPlayer.minimized .video-header .controls .minimize-btn{display:none}}
-</style>
+    <meta charset="UTF-8">
+    <title>شات خاص</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
+    <!-- hls.js لدعم M3U8 على Chrome/Android/Firefox -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #05060a;
+            --bg-grad-1: #151624;
+            --bg-grad-2: #020307;
+            --bg-section: #0d0f18;
+            --bg-elevated: #11121b;
+            --text-main: #ffffff;
+            --text-muted: #a7aec4;
+            --accent: #ffd54a;
+            --accent-soft: #ffe788;
+            --border-soft: #262839;
+            --danger: #e53935;
+        }
+
+        html,
+        body {
+            height: 100%;
+            height: -webkit-fill-available;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background:
+                radial-gradient(circle at top, var(--bg-grad-1) 0%, rgba(5, 6, 10, 0.95) 50%, var(--bg-grad-2) 100%),
+                radial-gradient(circle at 120% 0%, rgba(255, 213, 74, 0.08) 0%, transparent 55%);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            height: 100dvh;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        /* رسائل الشات */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.9) 100%);
+            scroll-behavior: smooth;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .msg {
+            margin: 8px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            direction: ltr;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        .sys {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin: 10px auto;
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: opacity 0.5s;
+        }
+
+        .user {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .time {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* منطقة الإدخال */
+        #inputArea {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.7));
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        #messageInput {
+            flex: 1;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            height: 44px;
+            padding: 0 15px;
+            border-radius: 999px;
+            font-family: 'Tajawal', sans-serif;
+            background: rgba(10, 11, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.7),
+                0 18px 45px rgba(0, 0, 0, 0.75);
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #messageInput::placeholder {
+            color: #6f7487;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--accent-soft);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(255, 213, 74, 0.35),
+                0 20px 50px rgba(0, 0, 0, 0.9);
+        }
+
+        /* زر الإرسال - ستايل زر أساسي */
+        #sendBtn {
+            height: 44px;
+            padding: 0 22px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
+            transition:
+                transform 0.16s ease,
+                box-shadow 0.16s ease,
+                filter 0.16s ease;
+            white-space: nowrap;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
+        }
+
+        /* أزرار أعلى الشاشة */
+        #topButtons {
+            position: fixed;
+            top: 10px;
+            top: calc(10px + env(safe-area-inset-top));
+            right: 10px;
+            right: calc(10px + env(safe-area-inset-right));
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            background: rgba(10, 11, 20, 0.95);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+            transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .btn:hover {
+            background: rgba(25, 27, 45, 0.98);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn .count-text {
+            font-size: 13px;
+            margin-right: 4px;
+            color: var(--accent-soft);
+            font-weight: 600;
+        }
+
+        /* #onlineList - غير مستخدم في HTML حالياً */
+
+        /* مودالات */
+        #usersBox,
+        #setVideoModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at top, #181a28 0%, #05060b 55%, #020307 100%);
+            padding: 20px 22px;
+            border-radius: 18px;
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.85);
+            z-index: 1003;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+
+        #usersBox h4,
+        #setVideoModal h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        #usersList {
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-green {
+            background-color: #2ecc71;
+        }
+
+        .status-yellow {
+            background-color: #f1c40f;
+        }
+
+        .status-gray {
+            background-color: #7f8c8d;
+        }
+
+        #videoUrlInput {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 6, 12, 0.95);
+            color: var(--text-main);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #videoUrlInput::placeholder {
+            color: #747a90;
+        }
+
+        #submitVideoUrlBtn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+        }
+
+        #submitVideoUrlBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.85);
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        .delete-btn {
+            display: none;
+        }
+
+        /* شاشة تسجيل الدخول */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background:
+                radial-gradient(circle at top, #181a28 0%, rgba(5, 6, 10, 0.96) 50%, #020307 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+
+        #loginBox {
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.02) 0%, rgba(5, 6, 12, 0.98) 55%, #05060b 100%);
+            padding: 26px 26px 22px;
+            border-radius: 22px;
+            text-align: center;
+            min-width: 300px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+
+        #loginBox h2 {
+            margin: 0 0 14px;
+            font-size: 20px;
+        }
+
+        #usernameInput {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 999px;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            text-align: center;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(3, 4, 10, 0.96);
+            color: var(--text-main);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #usernameInput::placeholder {
+            color: #868ba0;
+        }
+
+        #loginBtn {
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            border: none;
+            padding: 10px 26px;
+            border-radius: 999px;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            margin-top: 8px;
+            font-weight: 600;
+            box-shadow: 0 18px 46px rgba(0, 0, 0, 0.9);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+
+        #loginBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95);
+        }
+
+        #loginBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.9);
+        }
+
+        /* فيديو مثبت */
+        #pinnedVideoPlayer {
+            position: fixed;
+            top: 60px;
+            top: calc(60px + env(safe-area-inset-top));
+            left: 10px;
+            width: clamp(280px, 92vw, 480px);
+            background: #000;
+            border-radius: 16px;
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.9);
+            z-index: 998;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .video-header {
+            background: linear-gradient(to right, #151623, #090a11);
+            color: #fff;
+            padding: 6px 10px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            touch-action: none;
+            font-size: 13px;
+        }
+
+        .video-body {
+            width: 100%;
+            background: #000;
+            flex-grow: 1;
+            min-height: 320px;
+        }
+
+        .video-js .vjs-tech {
+            object-fit: contain;
+        }
+
+        .close-pinned-video {
+            background: var(--danger);
+            border: 1px solid #c62828;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            bottom: 0;
+            right: 0;
+            cursor: nwse-resize;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent);
+        }
+
+        /* ثيم نتفلكس للفيديو */
+        .video-js.vjs-netflix-theme {
+            background-color: #000;
+        }
+
+        .vjs-netflix-theme .vjs-control-bar {
+            height: 6em;
+            background: none;
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .vjs-netflix-theme .vjs-big-play-button {
+            display: none !important;
+        }
+
+        .vjs-netflix-theme .vjs-progress-control {
+            position: absolute;
+            left: 0;
+            right: 0;
+            width: 100%;
+            top: -3em;
+            height: 2.5em;
+        }
+
+        .vjs-netflix-theme .vjs-progress-holder {
+            height: 0.3em;
+            margin: 1.1em 0;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress,
+        .vjs-netflix-theme .vjs-load-progress {
+            height: 100%;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress:before {
+            display: none;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress {
+            background-color: #e50914;
+        }
+
+        .vjs-netflix-theme .vjs-load-progress {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .vjs-netflix-theme .vjs-time-control {
+            line-height: 5em;
+            padding: 0 1em;
+        }
+
+        .vjs-netflix-theme .vjs-remaining-time {
+            line-height: 5em;
+        }
+
+        .vjs-netflix-theme .vjs-button>.vjs-icon-placeholder:before {
+            font-size: 2.2em;
+            line-height: 2.2;
+        }
+
+        .vjs-netflix-theme .vjs-volume-panel,
+        .vjs-netflix-theme .vjs-fullscreen-control {
+            margin-right: 1em;
+        }
+
+        .video-js.vjs-netflix-theme.vjs-has-started.vjs-user-inactive .vjs-control-bar {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .video-selector-bar {
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            background: #111;
+            overflow-x: auto;
+            border-top: 1px solid #333;
+            max-height: 60px;
+        }
+
+        .video-selector-btn {
+            flex-shrink: 0;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .video-selector-btn:hover {
+            background: #333;
+            border-color: #666;
+        }
+
+        .video-selector-btn.active {
+            background: #e50914;
+            border-color: #c40812;
+        }
+
+        @media (max-width: 600px) {
+            #loginBox {
+                width: 90%;
+                padding: 22px 18px 18px;
+            }
+
+            #pinnedVideoPlayer {
+                top: calc(60px + env(safe-area-inset-top));
+                left: 50%;
+                transform: translateX(-50%);
+                width: 94vw;
+                max-width: 94vw;
+            }
+
+            #topButtons {
+                right: calc(8px + env(safe-area-inset-right));
+                top: calc(8px + env(safe-area-inset-top));
+            }
+
+            #inputArea {
+                padding: 8px 8px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            }
+
+            #sendBtn {
+                padding: 0 14px;
+                font-size: 13px;
+            }
+
+            #messageInput {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div id="loginScreen"><div id="loginBox"><div class="logo">💬</div><h2>شات خاص</h2><p class="subtitle">تواصل مع أصدقائك وشاهد الفيديوهات معاً</p><input type="text" id="usernameInput" placeholder="اكتب اسمك..." maxlength="15" autofocus><button id="loginBtn">دخول</button><div id="loginError" style="color:var(--danger);font-size:13px;margin-top:10px;display:none;"></div></div></div>
-<div id="chat-container">
-<div id="topButtons"><button class="btn" id="themeToggleBtn">🌙</button><button class="btn" id="setVideoBtn">📺 فيديو</button><button class="btn" id="onlineListBtn">👥 <span class="count" id="count">0</span></button></div>
-<div id="typingIndicator"><div class="typing-avatar" id="typingAvatar">?</div><div class="typing-content"><span class="typing-name" id="typingName">شخص</span><span class="typing-text">يكتب</span><span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div></div>
-<div id="messages"></div>
-<form id="inputArea"><button type="submit" id="sendBtn">إرسال</button><input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off"></form>
-</div>
-<div id="pinnedVideoPlayer"><div class="video-header"><span class="title">🎬 <span class="highlight">بث مباشر</span></span><div class="controls"><button class="minimize-btn">⤢</button><button class="close-btn">✕</button></div></div><div class="video-body"></div><div class="resize-handle"></div></div>
-<div id="setVideoModal"><h4>📺 تثبيت فيديو للجميع</h4><input type="text" id="videoUrlInput" placeholder="رابط يوتيوب، تويتر، M3U8، أو MP4"><button id="submitVideoUrlBtn">تثبيت الفيديو</button></div>
-<div id="usersBox"><h4>👥 المتصلين الآن</h4><div id="usersList"></div></div>
-<div id="overlay"></div>
-<div id="toastContainer"></div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-const firebaseConfig = {
-  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-  authDomain: "mychat-2d881.firebaseapp.com",
-  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
-  projectId: "mychat-2d881",
-  storageBucket: "mychat-2d881.firebasestorage.app",
-  messagingSenderId: "532385733649",
-  appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"};
-let username='',userRef,messagesRef,onlineRef,pinnedVideoRef;
-let serverTimeOffset=0,videoPlayerInstance=null,currentVideoIndex=0,currentVideosList=[],isMinimized=false,isDragging=false,dragOffsetX=0,dragOffsetY=0,messageTimestamps=new Map,isInitialized=false,typingTimeout=null,isTyping=false,currentTheme='dark',reconnectAttempts=0,reconnectTimer=null;
-const loginScreen=document.getElementById('loginScreen'),usernameInput=document.getElementById('usernameInput'),loginBtn=document.getElementById('loginBtn'),loginError=document.getElementById('loginError'),chatContainer=document.getElementById('chat-container'),messagesDiv=document.getElementById('messages'),messageInput=document.getElementById('messageInput'),sendBtn=document.getElementById('sendBtn'),onlineListBtn=document.getElementById('onlineListBtn'),setVideoBtn=document.getElementById('setVideoBtn'),themeToggleBtn=document.getElementById('themeToggleBtn'),usersBox=document.getElementById('usersBox'),usersList=document.getElementById('usersList'),setVideoModal=document.getElementById('setVideoModal'),videoUrlInput=document.getElementById('videoUrlInput'),submitVideoUrlBtn=document.getElementById('submitVideoUrlBtn'),pinnedVideoPlayer=document.getElementById('pinnedVideoPlayer'),videoBody=document.querySelector('.video-body'),videoHeader=document.querySelector('.video-header'),videoTitle=document.querySelector('.video-header .title'),minimizeBtn=document.querySelector('.minimize-btn'),closeBtn=document.querySelector('.close-btn'),resizeHandle=document.querySelector('.resize-handle'),overlay=document.getElementById('overlay'),toastContainer=document.getElementById('toastContainer'),typingIndicator=document.getElementById('typingIndicator'),typingAvatar=document.getElementById('typingAvatar'),typingName=document.getElementById('typingName');
-function toggleTheme(){const html=document.documentElement;if(currentTheme==='dark'){html.setAttribute('data-theme','light');currentTheme='light';themeToggleBtn.textContent='🌙';localStorage.setItem('chat-theme','light');showToast('☀️ تم التبديل إلى الوضع النهاري','info')}else{html.removeAttribute('data-theme');currentTheme='dark';themeToggleBtn.textContent='☀️';localStorage.setItem('chat-theme','dark');showToast('🌙 تم التبديل إلى الوضع الليلي','info')}}
-function loadTheme(){const savedTheme=localStorage.getItem('chat-theme');if(savedTheme==='light'){document.documentElement.setAttribute('data-theme','light');currentTheme='light';themeToggleBtn.textContent='🌙'}else{document.documentElement.removeAttribute('data-theme');currentTheme='dark';themeToggleBtn.textContent='☀️'}}
-themeToggleBtn.onclick=toggleTheme;
-function escapeHtml(unsafe){if(!unsafe)return'';return unsafe.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function scrollToBottom(){messagesDiv.scrollTop=messagesDiv.scrollHeight}
-function showToast(message,type='info'){const toast=document.createElement('div');toast.className='toast '+type;toast.textContent=message;toastContainer.appendChild(toast);setTimeout(()=>{if(toast.parentNode)toast.remove()},3000)}
-function closeAllModals(){usersBox.style.display='none';setVideoModal.style.display='none';overlay.style.display='none'}
-function getYoutubeVideoId(url){if(!url)return null;const regex=/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;const match=url.match(regex);return match?match[1]:null}
-function getTweetId(url){if(!url)return null;const regex=/(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;const match=url.match(regex);return match?match[1]:null}
-function isDirectVideo(url){if(!url)return false;if(/\.(mp4|webm|ogv|mkv|avi|mov|flv|m4v)(\?.*)?$/i.test(url))return true;if(/video/i.test(url)&&!/(youtube|youtu\.be|twitter|x\.com)/i.test(url))return true;return false}
-function sanitizeKey(str){return str.replace(/[.#$\[\]]/g,'_')}
-function showTypingIndicator(userName){if(!userName||userName===username||!typingIndicator){typingIndicator.style.display='none';return}typingAvatar.textContent=userName.charAt(0).toUpperCase();typingName.textContent=escapeHtml(userName);typingIndicator.style.display='flex';clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{typingIndicator.style.display='none'},4000)}
-function hideTypingIndicator(){if(typingIndicator)typingIndicator.style.display='none';clearTimeout(typingTimeout)}
-let typingTimer;messageInput.addEventListener('input',()=>{if(!isTyping&&messageInput.value.trim().length>0){isTyping=true;if(userRef){userRef.update({typing:true}).catch(()=>{})}}else if(messageInput.value.trim().length===0){isTyping=false;if(userRef){userRef.update({typing:false}).catch(()=>{})}hideTypingIndicator()}clearTimeout(typingTimer);typingTimer=setTimeout(()=>{if(isTyping){isTyping=false;if(userRef){userRef.update({typing:false}).catch(()=>{})}hideTypingIndicator()}},2000)});
-function setupTypingListener(){if(!onlineRef)return;onlineRef.off('child_changed');onlineRef.off('child_removed');onlineRef.on('child_changed',(snap)=>{const data=snap.val();const userName=data.username||snap.key;if(data.typing&&userName!==username){showTypingIndicator(userName)}else if(userName!==username&&!data.typing){if(typingName.textContent===escapeHtml(userName)){hideTypingIndicator()}}});onlineRef.on('child_removed',(snap)=>{const data=snap.val();const userName=data.username||snap.key;if(userName!==username&&typingName.textContent===escapeHtml(userName)){hideTypingIndicator()}})}
-function initFirebase(){try{if(!firebase.apps.length){firebase.initializeApp(firebaseConfig)}return firebase.database()}catch(e){console.error('Firebase init error:',e);showToast('❌ خطأ في الاتصال بالخادم','error');return null}}
-const db=initFirebase();if(!db){loginError.textContent='❌ تعذر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.';loginError.style.display='block'}
-function attemptLogin(){if(!db){showToast('❌ الخادم غير متصل','error');return}let inputName=usernameInput.value.trim();const invalidChars=/[.#$\\[\\]]/;if(invalidChars.test(inputName)){showToast('❌ الاسم يحتوي على رموز غير مسموحة','error');return}if(inputName.length<2){showToast('❌ الاسم قصير جداً (2 أحرف على الأقل)','error');return}username=inputName;const safeUsername=sanitizeKey(username);userRef=db.ref('online/'+safeUsername);messagesRef=db.ref('messages');onlineRef=db.ref('online');pinnedVideoRef=db.ref('pinned_video');const testRef=db.ref('.info/connected');testRef.once('value',(snap)=>{if(snap.val()===true){startChat()}else{showToast('❌ لا يوجد اتصال بالإنترنت','error')}})}
-loginBtn.onclick=attemptLogin;usernameInput.onkeypress=(e)=>{if(e.key==='Enter')attemptLogin()};
-function startChat(){loginScreen.style.display='none';chatContainer.style.display='flex';showToast('✅ مرحباً '+username,'success');loadTheme();db.ref('.info/serverTimeOffset').on('value',snap=>{serverTimeOffset=snap.val()||0});const safeUsername=sanitizeKey(username);userRef.set({lastActive:firebase.database.ServerValue.TIMESTAMP,username:username,typing:false}).catch(err=>{console.error('Failed to set online status:',err);setTimeout(()=>{userRef.set({lastActive:firebase.database.ServerValue.TIMESTAMP,username:username,typing:false}).catch(e=>console.warn('Retry failed:',e))},2000)});userRef.onDisconnect().remove().catch(err=>{console.warn('onDisconnect setup failed:',err)});setupTypingListener();const pingInterval=setInterval(()=>{if(userRef){userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(err=>{console.warn('Ping failed:',err)})}},45000);setInterval(()=>{const now=Date.now()+serverTimeOffset;onlineRef.once('value',snap=>{snap.forEach(child=>{if(now-(child.val().lastActive||0)>90000){child.ref.remove().catch(()=>{})}})})},60000);messagesRef.limitToLast(100).on('child_added',snap=>{addMessageToUI(snap.key,snap.val())});messagesRef.on('child_removed',snap=>{const el=document.getElementById('msg-'+snap.key);if(el){el.style.opacity='0';el.style.transform='translateX(-20px)';setTimeout(()=>el.remove(),300)}});onlineRef.on('value',snap=>{const count=snap.numChildren();document.getElementById('count').textContent=count;renderUsersList(snap.val()||{})});pinnedVideoRef.on('value',async(snap)=>{const data=snap.val();handlePinnedVideo(data)});document.getElementById('inputArea').onsubmit=(e)=>{e.preventDefault();const text=messageInput.value.trim();if(!text)return;hideTypingIndicator();if(userRef){userRef.update({typing:false}).catch(()=>{})}const time=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});messagesRef.push({user:username,text:text,time:time,timestamp:firebase.database.ServerValue.TIMESTAMP}).catch(err=>{showToast('❌ فشل إرسال الرسالة','error');console.error('Send message error:',err)});messageInput.value='';userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});scrollToBottom()};onlineListBtn.onclick=(e)=>{e.stopPropagation();usersBox.style.display='block';overlay.style.display='block'};setVideoBtn.onclick=(e)=>{e.stopPropagation();setVideoModal.style.display='block';overlay.style.display='block'};overlay.onclick=closeAllModals;submitVideoUrlBtn.onclick=()=>{const url=videoUrlInput.value.trim();if(!url){showToast('⚠️ الرجاء إدخال رابط','error');return}const youtubeId=getYoutubeVideoId(url),tweetId=getTweetId(url);let videoData=null;if(youtubeId){videoData={type:'youtube',id:youtubeId,setBy:username}}else if(tweetId){videoData={type:'twitter',id:tweetId,setBy:username}}else if(url.toLowerCase().includes('.m3u')||url.toLowerCase().includes('.m3u8')){videoData={type:'m3u',url:url,setBy:username}}else if(isDirectVideo(url)){videoData={type:'direct',url:url,setBy:username}}else{showToast('❌ الرابط غير مدعوم','error');return}pinnedVideoRef.set(videoData).then(()=>{showToast('✅ تم تثبيت الفيديو','success');videoUrlInput.value='';closeAllModals()}).catch(err=>{showToast('❌ فشل تثبيت الفيديو','error');console.error('Set video error:',err)})};document.addEventListener('click',(e)=>{if(e.target===overlay)closeAllModals()});window.addEventListener('beforeunload',()=>{clearInterval(pingInterval);if(userRef){userRef.remove().catch(()=>{})}});isInitialized=true}
-function addMessageToUI(key,{user,text,timestamp}){const wrapper=document.createElement('div');wrapper.className='msg-wrapper';wrapper.id='msg-'+key;const msg=document.createElement('div');msg.className='msg';if(user===username)msg.classList.add('self');const userSpan=document.createElement('span');userSpan.className='user';userSpan.textContent=escapeHtml(user);const textSpan=document.createElement('span');textSpan.className='text';textSpan.textContent=escapeHtml(text);const timeSpan=document.createElement('span');timeSpan.className='time';timeSpan.id='time-'+key;msg.appendChild(userSpan);msg.appendChild(textSpan);msg.appendChild(timeSpan);wrapper.appendChild(msg);messagesDiv.appendChild(wrapper);if(timestamp){messageTimestamps.set(key,{timestamp,el:timeSpan});updateTimeDisplay(key,timestamp,timeSpan)}scrollToBottom()}
-function updateTimeDisplay(key,timestamp,timeElement){if(!timestamp)return;const now=Date.now()+serverTimeOffset;const diffMs=now-(timestamp+serverTimeOffset);const diffSec=Math.floor(diffMs/1000);const diffMin=Math.floor(diffSec/60);let text;if(diffSec<5)text='الآن';else if(diffSec<60)text='ثواني';else if(diffMin<2)text='د1';else if(diffMin<60)text='د'+diffMin;else text=new Date(timestamp+serverTimeOffset).toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'});if(timeElement)timeElement.textContent=text}
-setInterval(()=>{messageTimestamps.forEach(({timestamp,el},key)=>{if(el)updateTimeDisplay(key,timestamp,el)})},30000);
-function renderUsersList(users){usersList.innerHTML='';const now=Date.now()+serverTimeOffset;const sorted=Object.keys(users).sort();sorted.forEach(uName=>{const uData=users[uName];const div=document.createElement('div');div.className='user-item';const status=document.createElement('span');status.className='status';const diff=now-(uData.lastActive||0);if(diff>60000)status.classList.add('offline');else if(diff>30000)status.classList.add('idle');else status.classList.add('online');const nameSpan=document.createElement('span');nameSpan.className='username';const displayName=uData.username||uName;nameSpan.textContent=escapeHtml(displayName);div.appendChild(status);div.appendChild(nameSpan);if(uData.typing&&displayName!==username){const typingBadge=document.createElement('span');typingBadge.className='typing-badge';typingBadge.textContent='✍️ يكتب';div.appendChild(typingBadge)}if(displayName===username||uName===sanitizeKey(username)){const badge=document.createElement('span');badge.className='badge';badge.textContent='أنت';div.appendChild(badge)}usersList.appendChild(div)})}
-async function handlePinnedVideo(data){if(videoPlayerInstance){try{videoPlayerInstance.dispose()}catch(e){}videoPlayerInstance=null}videoBody.innerHTML='';currentVideosList=[];currentVideoIndex=0;if(!data){pinnedVideoPlayer.style.display='none';isMinimized=false;return}pinnedVideoPlayer.style.display='flex';pinnedVideoPlayer.classList.remove('minimized');isMinimized=false;const setBy=data.setBy||'مجهول';const typeMap={youtube:'يوتيوب',twitter:'تغريدة',m3u:'بث مباشر',direct:'فيديو'};videoTitle.innerHTML='🎬 <span class="highlight">'+(typeMap[data.type]||'فيديو')+'</span> - بواسطة '+escapeHtml(setBy);try{if(data.type==='youtube'){createYouTubePlayer(data.id)}else if(data.type==='twitter'){await createTwitterPlayer(data.id)}else if(data.type==='m3u'){createHLSPlayer(data.url)}else if(data.type==='direct'){createDirectPlayer(data.url)}}catch(e){console.error('Video creation error:',e);videoBody.innerHTML='<div style="color:var(--danger);padding:20px;text-align:center;">⚠️ تعذر تشغيل الفيديو</div>';showToast('⚠️ تعذر تشغيل الفيديو','error')}showToast('📺 تم تشغيل فيديو بواسطة '+escapeHtml(setBy),'info')}
-function createYouTubePlayer(videoId){const el=document.createElement('video-js');el.className='vjs-custom-theme';videoBody.appendChild(el);try{videoPlayerInstance=videojs(el,{autoplay:true,muted:true,controls:true,playsinline:true,techOrder:['youtube'],sources:[{type:'video/youtube',src:'https://www.youtube.com/watch?v='+videoId}]});videoPlayerInstance.on('error',()=>{showToast('⚠️ تعذر تشغيل فيديو يوتيوب','error');videoBody.innerHTML='<div style="color:var(--danger);padding:20px;text-align:center;">⚠️ تعذر تشغيل الفيديو</div>'})}catch(e){videoBody.innerHTML='<div style="color:var(--danger);padding:20px;text-align:center;">⚠️ خطأ في تحميل المشغل</div>'}}
-function createHLSPlayer(url){const el=document.createElement('video-js');el.className='vjs-custom-theme';videoBody.appendChild(el);const isSafari=/Safari/.test(navigator.userAgent)&&!/Chrome/.test(navigator.userAgent);if(isSafari||!window.Hls||!Hls.isSupported()){try{videoPlayerInstance=videojs(el,{autoplay:true,muted:true,controls:true,playsinline:true,sources:[{type:'application/x-mpegURL',src:url}]})}catch(e){videoBody.innerHTML='<div style="color:var(--danger);padding:20px;text-align:center;">⚠️ تعذر تشغيل البث</div>'}}else{const nativeVideo=document.createElement('video');nativeVideo.controls=true;nativeVideo.autoplay=true;nativeVideo.muted=true;nativeVideo.playsInline=true;nativeVideo.style.cssText='width:100%;height:100%;background:#000;display:block;';videoBody.innerHTML='';videoBody.appendChild(nativeVideo);const hls=new Hls({enableWorker:true,lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(nativeVideo);hls.on(Hls.Events.ERROR,(event,data)=>{if(data.fatal){showToast('⚠️ خطأ في تشغيل البث المباشر','error')}});videoPlayerInstance={dispose:()=>{hls.destroy();nativeVideo.remove()}}}}
-function createDirectPlayer(url){const el=document.createElement('video-js');el.className='vjs-custom-theme';videoBody.appendChild(el);try{videoPlayerInstance=videojs(el,{autoplay:true,muted:true,controls:true,playsinline:true,sources:[{type:'video/mp4',src:url}]});videoPlayerInstance.on('error',()=>{showToast('⚠️ تعذر تشغيل الفيديو','error')})}catch(e){videoBody.innerHTML='<div style="color:var(--danger);padding:20px;text-align:center;">⚠️ تعذر تشغيل الفيديو</div>'}}
-async function createTwitterPlayer(tweetId){try{const videos=await fetchTwitterVideos(tweetId);if(videos&&videos.length>0){currentVideosList=videos;currentVideoIndex=0;createTwitterVideoPlayer(videos[0].url);if(videos.length>1){createVideoSelector(videos)}return}}catch(e){console.warn('[Twitter] Fetch failed, using embed fallback',e)}embedTwitter(videoBody,tweetId)}
-function createTwitterVideoPlayer(videoUrl){const video=document.createElement('video');video.controls=true;video.autoplay=true;video.muted=true;video.playsInline=true;video.style.cssText='width:100%;height:100%;background:#000;display:block;';video.src=videoUrl;videoBody.innerHTML='';videoBody.appendChild(video);video.onerror=()=>{showToast('⚠️ تعذر تشغيل فيديو التغريدة','error')};videoPlayerInstance={dispose:()=>{video.src='';video.remove()}}}
-function embedTwitter(container,tweetId){container.innerHTML='';container.style.background='#15202b';const iframe=document.createElement('iframe');iframe.src='https://platform.twitter.com/embed/Tweet.html?id='+tweetId+'&theme=dark&lang=ar&dnt=true';iframe.style.cssText='width:100%;height:100%;min-height:240px;border:none;';iframe.setAttribute('allowfullscreen','');iframe.setAttribute('allow','autoplay; fullscreen');container.appendChild(iframe);videoPlayerInstance={dispose:()=>{iframe.src='';iframe.remove()}}}
-function createVideoSelector(videos){const bar=document.createElement('div');bar.className='video-selector-bar';videos.forEach((v,idx)=>{const btn=document.createElement('button');btn.className='video-selector-btn';if(idx===0)btn.classList.add('active');btn.textContent='مقطع '+(idx+1);btn.onclick=(e)=>{e.preventDefault();if(idx!==currentVideoIndex){currentVideoIndex=idx;const video=videoBody.querySelector('video');if(video){video.src=videos[idx].url;video.play()}bar.querySelectorAll('.video-selector-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}};bar.appendChild(btn)});videoBody.appendChild(bar)}
-async function fetchTwitterVideos(tweetId){const videos=[];try{const token=((Number(tweetId)/1e15)*Math.PI).toString(36).replace(/(0+|\.)/g,'');const res=await fetch('https://cdn.syndication.twimg.com/tweet-result?id='+tweetId+'&lang=ar&token='+token,{headers:{'Accept':'application/json'}});if(res.ok){const data=await res.json();(data.mediaDetails||[]).forEach(media=>{if(media.type==='video'||media.type==='animated_gif'){const variants=(media.video_info?.variants||[]).filter(v=>v.content_type==='video/mp4').sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));if(variants.length){videos.push({url:variants[0].url})}}})}}catch(e){}if(videos.length)return videos;try{const res=await fetch('https://api.fxtwitter.com/status/'+tweetId,{headers:{'Accept':'application/json'}});if(res.ok){const data=await res.json();const media=data.tweet?.media||{};const items=media.videos||media.all?.filter(v=>v.type==='video'||v.type==='gif')||[];items.forEach(v=>{const src=v.url||v.variants?.[0]?.url;if(src)videos.push({url:src})});if(!videos.length&&data.tweet?.video){const src=data.tweet.video.url||data.tweet.video.variants?.[0]?.url;if(src)videos.push({url:src})}}}catch(e){}if(videos.length)return videos;try{const res=await fetch('https://api.vxtwitter.com/status/'+tweetId,{headers:{'Accept':'application/json'}});if(res.ok){const data=await res.json();(data.media_extended||[]).forEach(m=>{if(m&&(m.type==='video'||m.type==='gif')&&m.url){videos.push({url:m.url})}})}}catch(e){}return videos}
-minimizeBtn.onclick=(e)=>{e.stopPropagation();isMinimized=!isMinimized;pinnedVideoPlayer.classList.toggle('minimized',isMinimized);minimizeBtn.textContent=isMinimized?'⤢':'⤣'};
-closeBtn.onclick=(e)=>{e.stopPropagation();if(pinnedVideoRef){pinnedVideoRef.remove().then(()=>{showToast('🗑️ تم إغلاق الفيديو','info')}).catch(()=>{showToast('⚠️ فشل إغلاق الفيديو','error')})}};
-pinnedVideoPlayer.onclick=(e)=>{if(isMinimized&&e.target.closest('.video-header')===null){isMinimized=false;pinnedVideoPlayer.classList.remove('minimized');minimizeBtn.textContent='⤣'}};
-function getPointer(e){return e.touches?e.touches[0]:e}
-videoHeader.addEventListener('mousedown',startDrag);videoHeader.addEventListener('touchstart',startDrag,{passive:false});
-function startDrag(e){if(e.target.closest('.controls'))return;const pointer=getPointer(e);const rect=pinnedVideoPlayer.getBoundingClientRect();dragOffsetX=pointer.clientX-rect.left;dragOffsetY=pointer.clientY-rect.top;isDragging=true;document.addEventListener('mousemove',onDrag);document.addEventListener('touchmove',onDrag,{passive:false});document.addEventListener('mouseup',endDrag);document.addEventListener('touchend',endDrag);pinnedVideoPlayer.style.position='fixed';if(e.type==='mousedown')e.preventDefault()}
-function onDrag(e){if(!isDragging)return;const pointer=getPointer(e);pinnedVideoPlayer.style.left=(pointer.clientX-dragOffsetX)+'px';pinnedVideoPlayer.style.top=(pointer.clientY-dragOffsetY)+'px';pinnedVideoPlayer.style.right='auto';if(e.type==='touchmove')e.preventDefault()}
-function endDrag(){isDragging=false;document.removeEventListener('mousemove',onDrag);document.removeEventListener('touchmove',onDrag);document.removeEventListener('mouseup',endDrag);document.removeEventListener('touchend',endDrag)}
-resizeHandle.addEventListener('mousedown',startResize);resizeHandle.addEventListener('touchstart',startResize,{passive:false});
-let resizeStartX,resizeStartY,resizeStartW,resizeStartH;
-function startResize(e){const pointer=getPointer(e);resizeStartX=pointer.clientX;resizeStartY=pointer.clientY;resizeStartW=pinnedVideoPlayer.offsetWidth;resizeStartH=pinnedVideoPlayer.offsetHeight;document.addEventListener('mousemove',onResize);document.addEventListener('touchmove',onResize,{passive:false});document.addEventListener('mouseup',endResize);document.addEventListener('touchend',endResize);if(e.type==='mousedown')e.preventDefault()}
-function onResize(e){const pointer=getPointer(e);const dw=pointer.clientX-resizeStartX;const dh=pointer.clientY-resizeStartY;const newW=Math.max(300,resizeStartW+dw);const newH=Math.max(200,resizeStartH+dh);pinnedVideoPlayer.style.width=newW+'px';pinnedVideoPlayer.style.height=newH+'px';if(e.type==='touchmove')e.preventDefault()}
-function endResize(){document.removeEventListener('mousemove',onResize);document.removeEventListener('touchmove',onResize);document.removeEventListener('mouseup',endResize);document.removeEventListener('touchend',endResize)}
-loadTheme();setTimeout(()=>usernameInput.focus(),300);
-document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeAllModals();if(isMinimized){isMinimized=false;pinnedVideoPlayer.classList.remove('minimized');minimizeBtn.textContent='⤣'}}});
-window.addEventListener('online',()=>{showToast('✅ تم استعادة الاتصال بالإنترنت','success');if(!isInitialized&&username){attemptLogin()}});
-window.addEventListener('offline',()=>{showToast('❌ انقطع الاتصال بالإنترنت','error')});
-console.log('🚀 شات خاص V4 - مؤشر الكتابة مفعل بالكامل في شريط الحالة وقائمة المتصلين');
-});
-</script>
+
+    <div id="loginScreen">
+        <div id="loginBox">
+            <h2>👋 أهلاً بك في الدردشة</h2>
+            <input type="text" id="usernameInput" placeholder="اكتب اسمك (بدون رموز خاصة)" maxlength="15" autofocus>
+            <button id="loginBtn">دخول</button>
+        </div>
+    </div>
+
+    <div id="chat-container" style="display: none;">
+        <div id="topButtons">
+            <div class="btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
+            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span>
+            </div>
+        </div>
+
+        <div id="pinnedVideoPlayer"></div>
+
+        <div id="setVideoModal">
+            <h4>تثبيت فيديو للجميع</h4>
+            <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4" />
+            <button id="submitVideoUrlBtn">تثبيت</button>
+        </div>
+
+        <div id="usersBox">
+            <h4>المتصلين الآن</h4>
+            <div id="usersList"></div>
+        </div>
+
+        <div id="overlay"></div>
+
+        <div id="messages" role="list"></div>
+
+        <form id="inputArea">
+            <button type="submit" id="sendBtn">إرسال</button>
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+                authDomain: "mychat-2d881.firebaseapp.com",
+                databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+
+            let username = '';
+            let userRef, messagesRef, onlineRef, pinnedVideoRef;
+            let serverTimeOffset = 0;
+            let videoPlayerInstance = null;
+            let currentVideoIndex = 0;
+            let currentVideosList = [];
+
+            const loginScreen = document.getElementById('loginScreen');
+            const usernameInput = document.getElementById('usernameInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const chatContainer = document.getElementById('chat-container');
+            const messagesDiv = document.getElementById("messages");
+            const messageInput = document.getElementById("messageInput");
+            const onlineListBtn = document.getElementById("onlineListBtn");
+            const setVideoBtn = document.getElementById("setVideoBtn");
+            const usersBox = document.getElementById("usersBox");
+            const setVideoModal = document.getElementById("setVideoModal");
+            const videoUrlInput = document.getElementById("videoUrlInput");
+            const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
+            const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
+            const overlay = document.getElementById("overlay");
+
+            function attemptLogin() {
+                let inputName = usernameInput.value.trim();
+                const invalidChars = /[.#$\\[\\]]/;
+                if (invalidChars.test(inputName)) {
+                    alert("الاسم لا يجب أن يحتوي على رموز خاصة");
+                    return;
+                }
+                if (inputName.length < 2) {
+                    alert("الاسم قصير جداً");
+                    return;
+                }
+
+                username = inputName;
+                userRef = db.ref("online/" + username);
+                messagesRef = db.ref("messages");
+                onlineRef = db.ref("online");
+                pinnedVideoRef = db.ref("pinned_video");
+
+                startChat();
+            }
+
+            loginBtn.onclick = attemptLogin;
+            usernameInput.onkeypress = (e) => { if (e.key === 'Enter') attemptLogin(); };
+
+            function startChat() {
+                loginScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+
+                db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
+
+                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                userRef.onDisconnect().remove();
+
+                setInterval(() => {
+                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                }, 60000);
+
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', snap => {
+                        snap.forEach(child => {
+                            if (now - child.val().lastActive > 90000) child.ref.remove();
+                        });
+                    });
+                }, 60000);
+
+                onlineListBtn.onclick = (e) => { e.stopPropagation(); usersBox.style.display = 'block'; overlay.style.display = 'block'; };
+                setVideoBtn.onclick = (e) => { e.stopPropagation(); setVideoModal.style.display = 'block'; overlay.style.display = 'block'; };
+                overlay.onclick = closeAllModals;
+
+                document.getElementById("inputArea").onsubmit = (e) => {
+                    e.preventDefault();
+                    const text = messageInput.value.trim();
+                    if (!text) return;
+
+                    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    messagesRef.push({ user: username, text: text, time: time, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                    messageInput.value = "";
+                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    scrollToBottom();
+                };
+
+                messagesRef.limitToLast(100).on("child_added", snap => {
+                    addMessageToUI(snap.key, snap.val());
+                });
+
+                messagesRef.on("child_removed", snap => {
+                    const msgElement = document.getElementById(`msg-${snap.key}`);
+                    if (msgElement) {
+                        msgElement.style.opacity = '0';
+                        setTimeout(() => msgElement.remove(), 300);
+                    }
+                });
+
+                onlineRef.on("value", snap => {
+                    document.getElementById("count").textContent = snap.numChildren();
+                    renderUsersList(snap.val() || {});
+                });
+
+                submitVideoUrlBtn.onclick = () => {
+                    const url = videoUrlInput.value.trim();
+                    if (!url) return;
+
+                    const youtubeId = getYoutubeVideoId(url);
+                    const tweetId = getTweetId(url);
+
+                    if (youtubeId) {
+                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
+                    } else if (tweetId) {
+                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
+                    } else if (url.toLowerCase().includes('.m3u')) {
+                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: username });
+                    } else if (isDirectVideo(url)) {
+                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: username });
+                    } else {
+                        alert("الرابط غير مدعوم.");
+                        return;
+                    }
+
+                    videoUrlInput.value = "";
+                    closeAllModals();
+                };
+
+                pinnedVideoRef.on("value", async (snap) => {
+                    const data = snap.val();
+                    if (videoPlayerInstance) {
+                        videoPlayerInstance.dispose();
+                        videoPlayerInstance = null;
+                    }
+                    pinnedVideoPlayer.innerHTML = '';
+                    currentVideosList = [];
+                    currentVideoIndex = 0;
+
+                    if (data) {
+                        pinnedVideoPlayer.style.display = 'flex';
+                        const header = document.createElement('div');
+                        header.className = 'video-header';
+                        header.innerHTML = `<span>بث مباشر - ${data.setBy}</span>`;
+                        const closeBtn = document.createElement('button');
+                        closeBtn.className = 'close-pinned-video';
+                        closeBtn.innerHTML = '✖';
+                        closeBtn.onclick = () => pinnedVideoRef.remove();
+                        header.appendChild(closeBtn);
+                        const body = document.createElement('div');
+                        body.className = 'video-body';
+
+                        const resizeHandle = document.createElement('div');
+                        resizeHandle.className = 'resize-handle';
+
+                        pinnedVideoPlayer.appendChild(header);
+                        pinnedVideoPlayer.appendChild(body);
+                        pinnedVideoPlayer.appendChild(resizeHandle);
+
+                        makeDraggable(pinnedVideoPlayer, header);
+                        makeResizable(pinnedVideoPlayer, resizeHandle);
+
+                        if (data.type === 'youtube') {
+                            createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`, 'video/youtube', true);
+                        } else if (data.type === 'm3u') {
+                            createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
+                        } else if (data.type === 'direct') {
+                            createVideoPlayer(body, data.url, 'video/mp4', false);
+                        } else if (data.type === 'twitter') {
+                            // ✨ حل جذري: embed فوراً ثم تحديث في الخلفية
+                            embedTwitterNative(body, data.id); // يظهر فوراً 100%
+
+                            // حاول جلب الفيديو المباشر في الخلفية
+                            const _twId = data.id;
+                            fetchTwitterVideos(_twId).then(videos => {
+                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
+                                currentVideosList = videos;
+                                currentVideoIndex = 0;
+                                // شغّل الفيديو، ولو فشل ارجع للـ embed
+                                const vEl = document.createElement('video');
+                                vEl.controls = true;
+                                vEl.autoplay = true;
+                                vEl.muted = true;
+                                vEl.playsInline = true;
+                                vEl.style.cssText = 'width:100%;height:100%;background:#000;display:block;';
+                                vEl.src = videos[0].url;
+                                body.innerHTML = '';
+                                body.appendChild(vEl);
+                                // لو فشل التحميل ارجع للـ embed تلقائياً
+                                vEl.onerror = () => embedTwitterNative(body, _twId);
+                                videoPlayerInstance = { dispose: () => { vEl.src = ''; vEl.remove(); } };
+                                if (videos.length > 1) createVideoSelector(body, videos);
+                            }).catch(() => { }); // فشل صامت - embed موجود
+                        }
+
+                        addNotification(`${data.setBy} قام بتشغيل فيديو`);
+                    } else {
+                        pinnedVideoPlayer.style.display = 'none';
+                    }
+                });
+            }
+
+            // دالة: embed التغريدة عبر iframe رسمي من تويتر (الأضمن دائماً)
+            function embedTwitterNative(container, tweetId) {
+                container.innerHTML = '';
+                container.style.background = '#15202b';
+                container.style.overflow = 'hidden';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '320px';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('scrolling', 'no')
+                container.appendChild(iframe);
+            }
+
+            function createVideoPlayer(container, videoSource, videoType, isYoutube) {
+                const videoEl = document.createElement('video-js');
+                videoEl.className = 'vjs-netflix-theme';
+                container.innerHTML = '';
+                container.appendChild(videoEl);
+
+                // HLS على المتصفحات غير Safari
+                const isHLS = videoType === 'application/x-mpegURL' || videoSource.includes('.m3u');
+                if (isHLS && !videoEl.canPlayType('application/vnd.apple.mpegurl') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hls = new Hls();
+                    const nativeVideo = document.createElement('video');
+                    nativeVideo.controls = true;
+                    nativeVideo.autoplay = true;
+                    nativeVideo.muted = true;
+                    nativeVideo.playsInline = true;
+                    nativeVideo.style.width = '100%';
+                    nativeVideo.style.height = '100%';
+                    nativeVideo.style.background = '#000';
+                    container.innerHTML = '';
+                    container.appendChild(nativeVideo);
+                    hls.loadSource(videoSource);
+                    hls.attachMedia(nativeVideo);
+                    videoPlayerInstance = { dispose: () => { hls.destroy(); nativeVideo.remove(); } };
+                    return;
+                }
+
+                let playerOptions = {
+                    autoplay: true,
+                    muted: true,
+                    controls: true,
+                    aspectRatio: '16:9',
+                    playsinline: true,
+                    techOrder: isYoutube ? ['youtube'] : ['html5'],
+                    sources: [{ type: videoType, src: videoSource }]
+                };
+
+                try {
+                    videoPlayerInstance = videojs(videoEl, playerOptions);
+                    videoPlayerInstance.on('error', () => {
+                        container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ تعذّر تشغيل الفيديو. تحقق من الرابط أو جرب صيغة أخرى.</p>`;
+                    });
+                } catch (e) {
+                    container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ خطأ في تحميل المشغّل.</p>`;
+                }
+            }
+
+            function createVideoSelector(container, videos) {
+                const selectorBar = document.createElement('div');
+                selectorBar.className = 'video-selector-bar';
+
+                videos.forEach((v, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'video-selector-btn';
+                    btn.textContent = `مقطع ${idx + 1}`;
+                    if (idx === 0) btn.classList.add('active');
+
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        if (idx !== currentVideoIndex && videoPlayerInstance) {
+                            currentVideoIndex = idx;
+                            videoPlayerInstance.src({ src: v.url, type: 'video/mp4' });
+                            videoPlayerInstance.play();
+
+                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                        }
+                    };
+                    selectorBar.appendChild(btn);
+                });
+
+                container.appendChild(selectorBar);
+            }
+
+            async function fetchTwitterVideos(tweetId) {
+                const videos = [];
+
+                // ==== طريقة 0: Twitter Syndication API (نفس API اللي يستخدمه تويتر في embed الرسمي) ====
+                try {
+                    // حساب token نفس طريقة مكتبة Twitter
+                    const token = ((Number(tweetId) / 1e15) * Math.PI)
+                        .toString(36).replace(/(0+|\.)/g, '');
+                    const synRes = await fetch(
+                        `https://cdn.syndication.twimg.com/tweet-result?id=${tweetId}&lang=ar&token=${token}`,
+                        { headers: { 'Accept': 'application/json' } }
+                    );
+                    if (synRes.ok) {
+                        const synData = await synRes.json();
+                        (synData.mediaDetails || []).forEach(media => {
+                            if (media.type === 'video' || media.type === 'animated_gif') {
+                                // اختر أعلى جودة
+                                const variants = (media.video_info?.variants || [])
+                                    .filter(v => v.content_type === 'video/mp4')
+                                    .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                                if (variants.length) {
+                                    videos.push({ url: variants[0].url, type: 'video/mp4', provider: 'syndication' });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) { console.warn('[syndication]', e.message); }
+
+                if (videos.length) { console.log('[Twitter] syndication ✓', videos); return videos; }
+
+                // ==== طريقة 1: fxtwitter ====
+                try {
+                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`,
+                        { headers: { 'Accept': 'application/json' } });
+                    if (fxRes.ok) {
+                        const fxData = await fxRes.json();
+                        const tweet = fxData.tweet || {};
+                        const media = tweet.media || {};
+                        const items = Array.isArray(media.videos) ? media.videos
+                            : Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif')
+                                : [];
+                        items.forEach(v => {
+                            const src = v.url || v.variants?.[0]?.url;
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                        });
+                        if (!videos.length && tweet.video) {
+                            const src = tweet.video.url || tweet.video.variants?.[0]?.url;
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                        }
+                    }
+                } catch (e) { console.warn('[fxtwitter]', e.message); }
+
+                if (videos.length) { console.log('[Twitter] fxtwitter ✓', videos); return videos; }
+
+                // ==== طريقة 2: vxtwitter ====
+                try {
+                    const vxRes = await fetch(`https://api.vxtwitter.com/status/${tweetId}`,
+                        { headers: { 'Accept': 'application/json' } });
+                    if (vxRes.ok) {
+                        const vxData = await vxRes.json();
+                        (vxData.media_extended || []).forEach(m => {
+                            if (m && (m.type === 'video' || m.type === 'gif') && m.url)
+                                videos.push({ url: m.url, type: 'video/mp4', provider: 'vxtwitter' });
+                        });
+                    }
+                } catch (e) { console.warn('[vxtwitter]', e.message); }
+
+                if (videos.length) { console.log('[Twitter] vxtwitter ✓', videos); return videos; }
+
+                // ==== طريقة 3: cobalt.tools ====
+                try {
+                    const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: `https://x.com/i/status/${tweetId}` })
+                    });
+                    if (cobaltRes.ok) {
+                        const cobaltData = await cobaltRes.json();
+                        if (cobaltData.url)
+                            videos.push({ url: cobaltData.url, type: 'video/mp4', provider: 'cobalt' });
+                        else if (Array.isArray(cobaltData.picker))
+                            cobaltData.picker.forEach(p => {
+                                if (p.url) videos.push({ url: p.url, type: 'video/mp4', provider: 'cobalt' });
+                            });
+                    }
+                } catch (e) { console.warn('[cobalt]', e.message); }
+
+                console.log('[Twitter] all APIs done, found:', videos.length);
+                return videos;
+            }
+
+            // تحديث الأوقات لكل الرسائل بـ interval واحد مشترك (بدل interval لكل رسالة)
+            const messageTimestamps = new Map();
+            setInterval(() => {
+                messageTimestamps.forEach(({ timestamp, el }, key) => {
+                    updateTimeDisplay(key, timestamp, el);
+                });
+            }, 60000);
+
+            function addMessageToUI(key, { user, text, time, timestamp }) {
+                const div = document.createElement("div");
+                div.className = "msg";
+                div.id = `msg-${key}`;
+
+                const timeElement = document.createElement("span");
+                timeElement.className = "time";
+                timeElement.id = `time-${key}`;
+
+                updateTimeDisplay(key, timestamp, timeElement);
+
+                div.innerHTML = `
+        <span class="user">${escapeHtml(user)}</span>
+        <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
+      `;
+
+                div.appendChild(timeElement);
+                messageTimestamps.set(key, { timestamp, el: timeElement });
+
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            function updateTimeDisplay(key, timestamp, timeElement) {
+                if (!timestamp) return;
+
+                const now = Date.now() + serverTimeOffset;
+                const messageTime = timestamp + serverTimeOffset;
+                const diffMs = now - messageTime;
+                const diffSec = Math.floor(diffMs / 1000);
+                const diffMin = Math.floor(diffSec / 60);
+                const diffHours = Math.floor(diffMin / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                const diffWeeks = Math.floor(diffDays / 7);
+                const diffMonths = Math.floor(diffDays / 30);
+                const diffYears = Math.floor(diffDays / 365);
+
+                let timeText = "";
+
+                if (diffSec < 5) {
+                    timeText = "الآن";
+                } else if (diffSec < 60) {
+                    timeText = "ثواني";
+                } else if (diffMin < 2) {
+                    timeText = "د1";
+                } else if (diffMin < 60) {
+                    timeText = `د${diffMin}`;
+                } else if (diffHours < 24) {
+                    timeText = `س${diffHours}`;
+                } else if (diffDays < 7) {
+                    timeText = `ي${diffDays}`;
+                } else if (diffWeeks < 4) {
+                    timeText = `أ${diffWeeks}`;
+                } else if (diffMonths < 12) {
+                    timeText = `ش${diffMonths}`;
+                } else {
+                    timeText = `ع${diffYears}`;
+                }
+
+                timeElement.textContent = timeText;
+            }
+
+            function addNotification(text) {
+                const div = document.createElement("div");
+                div.className = "sys";
+                div.textContent = text;
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            function renderUsersList(users) {
+                const list = document.getElementById("usersList");
+                list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset;
+                Object.keys(users).forEach(uName => {
+                    const uData = users[uName];
+                    const div = document.createElement("div");
+                    div.className = "user-item";
+                    let colorClass = 'status-green';
+                    const diff = now - (uData.lastActive || 0);
+                    if (diff > 60000) colorClass = 'status-gray';
+                    else if (diff > 30000) colorClass = 'status-yellow';
+                    div.innerHTML = `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
+                    list.appendChild(div);
+                });
+            }
+
+            function closeAllModals() {
+                usersBox.style.display = 'none';
+                setVideoModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+
+            function makeDraggable(element, handle) {
+                let offsetX = 0, offsetY = 0;
+                let isDragging = false;
+
+                const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+
+                const onDragStart = (e) => {
+                    isDragging = true;
+                    const pointer = getPointerPosition(e);
+                    offsetX = pointer.clientX - element.offsetLeft;
+                    offsetY = pointer.clientY - element.offsetTop;
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('mouseup', onDragEnd);
+                    document.addEventListener('touchend', onDragEnd);
+                };
+
+                const onDragMove = (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        const pointer = getPointerPosition(e);
+                        element.style.left = (pointer.clientX - offsetX) + "px";
+                        element.style.top = (pointer.clientY - offsetY) + "px";
+                    }
+                };
+
+                const onDragEnd = () => {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onDragMove);
+                    document.removeEventListener('touchmove', onDragMove);
+                    document.removeEventListener('mouseup', onDragEnd);
+                    document.removeEventListener('touchend', onDragEnd);
+                };
+
+                handle.addEventListener('mousedown', onDragStart);
+                handle.addEventListener('touchstart', onDragStart, { passive: false });
+            }
+
+            function makeResizable(element, handle) {
+                let initialWidth, initialHeight, initialX, initialY;
+                const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+
+                function onResizeStart(e) {
+                    if (e.type === 'touchstart') e.preventDefault();
+                    const pointer = getPointerPosition(e);
+                    initialWidth = element.offsetWidth;
+                    initialHeight = element.offsetHeight;
+                    initialX = pointer.clientX;
+                    initialY = pointer.clientY;
+                    document.addEventListener('mousemove', onResizeMove);
+                    document.addEventListener('touchmove', onResizeMove, { passive: false });
+                    document.addEventListener('mouseup', onResizeEnd);
+                    document.addEventListener('touchend', onResizeEnd);
+                }
+
+                function onResizeMove(e) {
+                    if (e.type === 'touchmove') e.preventDefault();
+                    const pointer = getPointerPosition(e);
+                    const newWidth = initialWidth + (pointer.clientX - initialX);
+                    const newHeight = initialHeight + (pointer.clientY - initialY);
+                    if (newWidth > 300) { element.style.width = newWidth + 'px'; }
+                    if (newHeight > 200) { element.style.height = newHeight + 'px'; }
+                }
+
+                function onResizeEnd() {
+                    document.removeEventListener('mousemove', onResizeMove);
+                    document.removeEventListener('touchmove', onResizeMove);
+                    document.removeEventListener('mouseup', onResizeEnd);
+                    document.removeEventListener('touchend', onResizeEnd);
+                }
+
+                handle.addEventListener('mousedown', onResizeStart);
+                handle.addEventListener('touchstart', onResizeStart, { passive: false });
+            }
+
+            function getYoutubeVideoId(url) {
+                if (!url) return null;
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                return (url.match(regex) || [])[1] || null;
+            }
+
+            function getTweetId(url) {
+                if (!url) return null;
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
+                return (url.match(regex) || [])[1] || null;
+            }
+
+            function isDirectVideo(url) {
+                if (!url) return false;
+                // تحقق من الامتداد الصريح
+                if (/\.(mp4|webm|ogv|mkv|avi|mov|flv|m4v)(\?.*)?$/i.test(url)) return true;
+                // روابط تحتوي على video في المسار وليست يوتيوب أو تويتر
+                if (/video/i.test(url) && !/(youtube|youtu\.be|twitter|x\.com)/i.test(url)) return true;
+                return false;
+            }
+
+            function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+            function escapeHtml(unsafe) { if (!unsafe) return ""; return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        });
+    </script>
 </body>
+
 </html>
