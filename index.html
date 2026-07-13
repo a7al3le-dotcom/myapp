@@ -1,1111 +1,1270 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta charset="UTF-8">
     <title>شات خاص</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
-    </script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
+    <!-- hls.js لدعم M3U8 على Chrome/Android/Firefox -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+
     <style>
-        * {
+        :root {
+            --bg-main: #05060a;
+            --bg-grad-1: #151624;
+            --bg-grad-2: #020307;
+            --bg-section: #0d0f18;
+            --bg-elevated: #11121b;
+            --text-main: #ffffff;
+            --text-muted: #a7aec4;
+            --accent: #ffd54a;
+            --accent-soft: #ffe788;
+            --border-soft: #262839;
+            --danger: #e53935;
+        }
+
+        html,
+        body {
+            height: 100%;
+            height: -webkit-fill-available;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
 
         body {
-            background: #0b0e1a;
+            font-family: 'Tajawal', sans-serif;
+            background:
+                radial-gradient(circle at top, var(--bg-grad-1) 0%, rgba(5, 6, 10, 0.95) 50%, var(--bg-grad-2) 100%),
+                radial-gradient(circle at 120% 0%, rgba(255, 213, 74, 0.08) 0%, transparent 55%);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            height: 100dvh;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        /* رسائل الشات */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.9) 100%);
+            scroll-behavior: smooth;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .msg {
+            margin: 8px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            direction: ltr;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        .sys {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin: 10px auto;
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: opacity 0.5s;
+        }
+
+        .user {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .time {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* منطقة الإدخال */
+        #inputArea {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.7));
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        #messageInput {
+            flex: 1;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            height: 44px;
+            padding: 0 15px;
+            border-radius: 999px;
+            font-family: 'Tajawal', sans-serif;
+            background: rgba(10, 11, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.7),
+                0 18px 45px rgba(0, 0, 0, 0.75);
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #messageInput::placeholder {
+            color: #6f7487;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--accent-soft);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(255, 213, 74, 0.35),
+                0 20px 50px rgba(0, 0, 0, 0.9);
+        }
+
+        /* زر الإرسال - ستايل زر أساسي */
+        #sendBtn {
+            height: 44px;
+            padding: 0 22px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
+            transition:
+                transform 0.16s ease,
+                box-shadow 0.16s ease,
+                filter 0.16s ease;
+            white-space: nowrap;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
+        }
+
+        /* أزرار أعلى الشاشة */
+        #topButtons {
+            position: fixed;
+            top: 10px;
+            top: calc(10px + env(safe-area-inset-top));
+            right: 10px;
+            right: calc(10px + env(safe-area-inset-right));
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            background: rgba(10, 11, 20, 0.95);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+            transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .btn:hover {
+            background: rgba(25, 27, 45, 0.98);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn .count-text {
+            font-size: 13px;
+            margin-right: 4px;
+            color: var(--accent-soft);
+            font-weight: 600;
+        }
+
+        /* #onlineList - غير مستخدم في HTML حالياً */
+
+        /* مودالات */
+        #usersBox,
+        #setVideoModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at top, #181a28 0%, #05060b 55%, #020307 100%);
+            padding: 20px 22px;
+            border-radius: 18px;
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.85);
+            z-index: 1003;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+
+        #usersBox h4,
+        #setVideoModal h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        #usersList {
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-green {
+            background-color: #2ecc71;
+        }
+
+        .status-yellow {
+            background-color: #f1c40f;
+        }
+
+        .status-gray {
+            background-color: #7f8c8d;
+        }
+
+        #videoUrlInput {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 6, 12, 0.95);
+            color: var(--text-main);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #videoUrlInput::placeholder {
+            color: #747a90;
+        }
+
+        #submitVideoUrlBtn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+        }
+
+        #submitVideoUrlBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.85);
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        .delete-btn {
+            display: none;
+        }
+
+        /* شاشة تسجيل الدخول */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background:
+                radial-gradient(circle at top, #181a28 0%, rgba(5, 6, 10, 0.96) 50%, #020307 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 12px;
+            z-index: 10000;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
         }
 
-        .chat-app {
-            max-width: 500px;
+        #loginBox {
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.02) 0%, rgba(5, 6, 12, 0.98) 55%, #05060b 100%);
+            padding: 26px 26px 22px;
+            border-radius: 22px;
+            text-align: center;
+            min-width: 300px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+
+        #loginBox h2 {
+            margin: 0 0 14px;
+            font-size: 20px;
+        }
+
+        #usernameInput {
             width: 100%;
-            height: 90vh;
-            max-height: 800px;
-            background: #141a2b;
-            border-radius: 32px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-            display: flex;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 999px;
+            font-size: 16px;
+            /* 16px+ يمنع التكبير التلقائي على iOS */
+            text-align: center;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(3, 4, 10, 0.96);
+            color: var(--text-main);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #usernameInput::placeholder {
+            color: #868ba0;
+        }
+
+        #loginBtn {
+            background: linear-gradient(135deg, var(--accent), #ffe178);
+            color: #000;
+            border: none;
+            padding: 10px 26px;
+            border-radius: 999px;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            margin-top: 8px;
+            font-weight: 600;
+            box-shadow: 0 18px 46px rgba(0, 0, 0, 0.9);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+
+        #loginBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95);
+        }
+
+        #loginBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.9);
+        }
+
+        /* فيديو مثبت */
+        #pinnedVideoPlayer {
+            position: fixed;
+            top: 60px;
+            top: calc(60px + env(safe-area-inset-top));
+            left: 10px;
+            width: clamp(280px, 92vw, 480px);
+            background: #000;
+            border-radius: 16px;
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.9);
+            z-index: 998;
+            display: none;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
-            color: #eef2ff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
-        /* ===== HEADER - مثبت ===== */
-        .header {
-            padding: 12px 16px;
-            background: #141a2b;
-            border-bottom: 1px solid #2f3b5c;
+        .video-header {
+            background: linear-gradient(to right, #151623, #090a11);
+            color: #fff;
+            padding: 6px 10px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            cursor: move;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            touch-action: none;
+            font-size: 13px;
         }
 
-        .header h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #a0b8ff;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-actions button {
-            background: transparent;
-            border: none;
-            color: #b4c8ff;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            padding: 4px 6px;
-        }
-
-        .header-actions button:hover {
-            color: #fff;
-        }
-
-        .users-count {
-            font-size: 0.75rem;
-            background: #1f2a44;
-            padding: 2px 10px;
-            border-radius: 30px;
-            color: #a0b8ff;
-        }
-
-        .connection-status {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: #2a3a5c;
-            color: #8892b0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .connection-status .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .connection-status .dot.online {
-            background: #4cd964;
-        }
-        .connection-status .dot.offline {
-            background: #ff4d5a;
-        }
-        .connection-status .dot.connecting {
-            background: #ffcc00;
-            animation: pulse 0.8s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* ===== منطقة الرسائل ===== */
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 14px;
-            background: #101624;
-            scroll-behavior: smooth;
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 4px;
-        }
-        .messages-container::-webkit-scrollbar-thumb {
-            background: #3b4a72;
-            border-radius: 10px;
-        }
-
-        /* ===== الرسالة: سطر واحد ===== */
-        .message {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            padding: 4px 0;
-            border-bottom: 1px solid #1e2846;
-            font-size: 0.9rem;
-            animation: fadeIn 0.15s ease;
-            flex-wrap: wrap;
-        }
-
-        .message .msg-user {
-            font-weight: 600;
-            color: #9bb2ff;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
-        .message .msg-text {
-            color: #eef2ff;
-            word-break: break-word;
-            flex: 1;
-            min-width: 60px;
-        }
-
-        .message .msg-time {
-            font-size: 0.6rem;
-            color: #6c7a9a;
-            white-space: nowrap;
-            direction: ltr;
-        }
-
-        .message .delete-btn {
-            background: transparent;
-            border: none;
-            color: #ff6b7a;
-            font-size: 0.65rem;
-            cursor: pointer;
-            opacity: 0.4;
-            transition: 0.2s;
-            padding: 0 4px;
-        }
-
-        .message .delete-btn:hover {
-            opacity: 1;
-        }
-
-        /* كل الرسائل بنفس اللون - بدون تمييز */
-        .message.own .msg-user {
-            color: #9bb2ff; /* نفس اللون */
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== Input Area - مثبت ===== */
-        .input-area {
-            padding: 8px 12px 12px;
-            background: #141a2b;
-            border-top: 1px solid #28324e;
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
-        }
-
-        .input-area input {
-            flex: 1;
-            background: #1d2844;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 30px;
-            color: #eef2ff;
-            font-size: 0.9rem;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        .input-area input::placeholder {
-            color: #7b88b0;
-        }
-
-        .input-area input:focus {
-            background: #25335a;
-            box-shadow: 0 0 0 2px #3f5a8a;
-        }
-
-        .input-area input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .input-area button {
-            background: linear-gradient(135deg, #4f6ef7, #7a4cf0);
-            border: none;
-            width: 44px;
-            border-radius: 30px;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .input-area button:hover:not(:disabled) {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
-
-        .input-area button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ===== باقي العناصر ===== */
-        .typing-indicator {
-            padding: 4px 16px;
-            font-size: 0.75rem;
-            color: #8892b0;
-            min-height: 24px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            background: #101624;
-        }
-
-        .typing-indicator.active {
-            opacity: 1;
-        }
-
-        .typing-indicator .dots {
-            display: flex;
-            gap: 3px;
-        }
-
-        .typing-indicator .dot-anim {
-            width: 5px;
-            height: 5px;
-            background: #8892b0;
-            border-radius: 50%;
-            animation: typingDot 1.2s infinite;
-        }
-
-        .typing-indicator .dot-anim:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator .dot-anim:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingDot {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-            30% { transform: translateY(-4px); opacity: 1; }
-        }
-
-        /* ===== Login Modal ===== */
-        .login-modal {
-            position: absolute;
-            inset: 0;
-            background: rgba(8, 12, 26, 0.92);
-            backdrop-filter: blur(6px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: #1b2340;
-            padding: 28px 20px;
-            border-radius: 40px;
+        .video-body {
             width: 100%;
-            max-width: 320px;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7);
+            background: #000;
+            flex-grow: 1;
+            min-height: 320px;
+        }
+
+        .video-js .vjs-tech {
+            object-fit: contain;
+        }
+
+        .close-pinned-video {
+            background: var(--danger);
+            border: 1px solid #c62828;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 20px;
             text-align: center;
         }
 
-        .login-card h2 {
-            margin-bottom: 18px;
-            color: #b0c6ff;
-        }
-
-        .login-card input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 40px;
-            border: 1px solid #33416a;
-            background: #10182e;
-            color: white;
-            font-size: 0.95rem;
-            margin-bottom: 14px;
-            outline: none;
-        }
-
-        .login-card input:focus {
-            border-color: #6b86e6;
-            box-shadow: 0 0 0 3px #3b5490;
-        }
-
-        .login-card .error {
-            color: #ff7b89;
-            font-size: 0.75rem;
-            min-height: 18px;
-            margin-bottom: 10px;
-        }
-
-        .login-card button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #4f6ef7, #7a4cf0);
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .login-card button:hover {
-            transform: scale(1.02);
-            filter: brightness(1.1);
-        }
-
-        /* ===== Users Modal ===== */
-        .modal-overlay {
+        .resize-handle {
             position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 40;
-            padding: 20px;
+            width: 20px;
+            height: 20px;
+            bottom: 0;
+            right: 0;
+            cursor: nwse-resize;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent);
         }
 
-        .modal-overlay.active {
-            display: flex;
+        /* ثيم نتفلكس للفيديو */
+        .video-js.vjs-netflix-theme {
+            background-color: #000;
         }
 
-        .modal-card {
-            background: #1b2340;
-            border-radius: 32px;
-            padding: 20px;
-            width: 100%;
-            max-width: 300px;
-            max-height: 70vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        .vjs-netflix-theme .vjs-control-bar {
+            height: 6em;
+            background: none;
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
         }
 
-        .modal-card h3 {
-            margin-bottom: 12px;
-            font-weight: 500;
-            color: #bccdfa;
-            display: flex;
-            justify-content: space-between;
+        .vjs-netflix-theme .vjs-big-play-button {
+            display: none !important;
         }
 
-        .modal-card .user-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #2f3b5c;
-        }
-
-        .modal-card .user-item .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-        .status-dot.online { background: #4cd964; }
-        .status-dot.away { background: #ffcc00; }
-        .status-dot.offline { background: #6c7a9a; }
-
-        .modal-card .close-modal {
-            margin-top: 14px;
-            width: 100%;
-            padding: 10px;
-            background: #33416a;
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* ===== Video ===== */
-        .video-wrapper {
+        .vjs-netflix-theme .vjs-progress-control {
             position: absolute;
-            bottom: 80px;
-            left: 20px;
-            width: 260px;
-            height: 160px;
-            background: #0b0e1a;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            z-index: 30;
-            display: none;
-            border: 2px solid #3a4b78;
-            cursor: grab;
-            overflow: hidden;
-        }
-
-        .video-wrapper.active {
-            display: block;
-        }
-
-        .video-wrapper video,
-        .video-wrapper iframe {
+            left: 0;
+            right: 0;
             width: 100%;
+            top: -3em;
+            height: 2.5em;
+        }
+
+        .vjs-netflix-theme .vjs-progress-holder {
+            height: 0.3em;
+            margin: 1.1em 0;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress,
+        .vjs-netflix-theme .vjs-load-progress {
             height: 100%;
-            border: none;
         }
 
-        .video-controls {
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            display: flex;
-            gap: 4px;
+        .vjs-netflix-theme .vjs-play-progress:before {
+            display: none;
         }
 
-        .video-controls button {
-            background: rgba(0, 0, 0, 0.6);
-            border: none;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 16px;
-            font-size: 0.65rem;
-            cursor: pointer;
+        .vjs-netflix-theme .vjs-play-progress {
+            background-color: #e50914;
         }
 
-        .video-controls button:hover {
-            background: #ff4d5a;
+        .vjs-netflix-theme .vjs-load-progress {
+            background: rgba(255, 255, 255, 0.4);
         }
 
-        .video-modal-input {
+        .vjs-netflix-theme .vjs-time-control {
+            line-height: 5em;
+            padding: 0 1em;
+        }
+
+        .vjs-netflix-theme .vjs-remaining-time {
+            line-height: 5em;
+        }
+
+        .vjs-netflix-theme .vjs-button>.vjs-icon-placeholder:before {
+            font-size: 2.2em;
+            line-height: 2.2;
+        }
+
+        .vjs-netflix-theme .vjs-volume-panel,
+        .vjs-netflix-theme .vjs-fullscreen-control {
+            margin-right: 1em;
+        }
+
+        .video-js.vjs-netflix-theme.vjs-has-started.vjs-user-inactive .vjs-control-bar {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .video-selector-bar {
             display: flex;
             gap: 6px;
-            margin: 10px 0;
-            flex-wrap: wrap;
+            padding: 8px;
+            background: #111;
+            overflow-x: auto;
+            border-top: 1px solid #333;
+            max-height: 60px;
         }
 
-        .video-modal-input input {
-            flex: 1;
-            padding: 8px 12px;
-            border-radius: 30px;
-            border: 1px solid #33416a;
-            background: #10182e;
-            color: white;
-            font-size: 0.85rem;
+        .video-selector-btn {
+            flex-shrink: 0;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s;
         }
 
-        .video-modal-input button {
-            background: #4f6ef7;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 30px;
-            color: white;
-            font-weight: 600;
+        .video-selector-btn:hover {
+            background: #333;
+            border-color: #666;
         }
 
-        /* ===== Notification ===== */
-        .notification {
-            position: absolute;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 30px;
-            color: #eef2ff;
-            font-size: 0.8rem;
-            z-index: 100;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #2f3b5c;
-            animation: slideDown 0.3s ease;
+        .video-selector-btn.active {
+            background: #e50914;
+            border-color: #c40812;
         }
 
-        .notification.show {
-            display: flex;
-        }
-
-        .notification.error { border-color: #ff4d5a; }
-        .notification.success { border-color: #4cd964; }
-        .notification.info { border-color: #4f6ef7; }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        /* ===== Responsive ===== */
-        @media(max-width:500px) {
-            .chat-app {
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-            .video-wrapper {
-                width: 180px;
-                height: 120px;
-                left: 10px;
-                bottom: 76px;
-            }
-            .notification {
+        @media (max-width: 600px) {
+            #loginBox {
                 width: 90%;
-                font-size: 0.75rem;
-                padding: 6px 14px;
-                top: 60px;
+                padding: 22px 18px 18px;
             }
-            .connection-status span:last-child {
-                display: none;
+
+            #pinnedVideoPlayer {
+                top: calc(60px + env(safe-area-inset-top));
+                left: 50%;
+                transform: translateX(-50%);
+                width: 94vw;
+                max-width: 94vw;
             }
-            .header h2 {
-                font-size: 0.85rem;
+
+            #topButtons {
+                right: calc(8px + env(safe-area-inset-right));
+                top: calc(8px + env(safe-area-inset-top));
             }
-            .message {
-                font-size: 0.8rem;
-                gap: 4px;
+
+            #inputArea {
+                padding: 8px 8px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            }
+
+            #sendBtn {
+                padding: 0 14px;
+                font-size: 13px;
+            }
+
+            #messageInput {
+                font-size: 16px;
             }
         }
     </style>
 </head>
+
 <body>
 
-<div class="chat-app" id="app">
-    <!-- Login Modal -->
-    <div class="login-modal" id="loginModal">
-        <div class="login-card">
-            <h2><i class="fas fa-comment-dots"></i> دردشة</h2>
-            <input type="text" id="usernameInput" placeholder="اسم المستخدم" maxlength="20" />
-            <div class="error" id="loginError"></div>
+    <div id="loginScreen">
+        <div id="loginBox">
+            <h2>👋 أهلاً بك في الدردشة</h2>
+            <input type="text" id="usernameInput" placeholder="اكتب اسمك (بدون رموز خاصة)" maxlength="15" autofocus>
             <button id="loginBtn">دخول</button>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        <i class="fas fa-info-circle" id="notificationIcon"></i>
-        <span id="notificationText"></span>
-    </div>
-
-    <!-- Header -->
-    <div class="header">
-        <h2><i class="fas fa-circle" style="color:#4cd964;font-size:0.6rem;"></i> غرفة الدردشة</h2>
-        <div class="header-actions">
-            <div class="connection-status" id="connectionStatus">
-                <span class="dot online" id="connectionDot"></span>
-                <span id="connectionText">متصل</span>
+    <div id="chat-container" style="display: none;">
+        <div id="topButtons">
+            <div class="btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
+            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span>
             </div>
-            <span class="users-count" id="usersCount"><i class="fas fa-user-friends"></i> 0</span>
-            <button id="showUsersBtn"><i class="fas fa-users"></i></button>
-            <button id="showVideoModalBtn"><i class="fas fa-video"></i></button>
         </div>
-    </div>
 
-    <!-- Messages -->
-    <div class="messages-container" id="messagesContainer"></div>
+        <div id="pinnedVideoPlayer"></div>
 
-    <!-- Typing -->
-    <div class="typing-indicator" id="typingIndicator">
-        <span>يكتب</span>
-        <span class="dots">
-            <span class="dot-anim"></span>
-            <span class="dot-anim"></span>
-            <span class="dot-anim"></span>
-        </span>
-    </div>
+        <div id="setVideoModal">
+            <h4>تثبيت فيديو للجميع</h4>
+            <input type="text" id="videoUrlInput" placeholder="ادخل رابط يوتيوب، تويتر، M3U، أو MP4" />
+            <button id="submitVideoUrlBtn">تثبيت</button>
+        </div>
 
-    <!-- Input Area -->
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="اكتب رسالة..." />
-        <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-    </div>
-
-    <!-- Users Modal -->
-    <div class="modal-overlay" id="usersModal">
-        <div class="modal-card">
-            <h3><span>المتصلون</span> <span id="modalUsersCount">0</span></h3>
+        <div id="usersBox">
+            <h4>المتصلين الآن</h4>
             <div id="usersList"></div>
-            <button class="close-modal" id="closeUsersModal">إغلاق</button>
         </div>
+
+        <div id="overlay"></div>
+
+        <div id="messages" role="list"></div>
+
+        <form id="inputArea">
+            <button type="submit" id="sendBtn">إرسال</button>
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
+        </form>
     </div>
 
-    <!-- Video Modal -->
-    <div class="modal-overlay" id="videoModal">
-        <div class="modal-card">
-            <h3>تشغيل فيديو</h3>
-            <div class="video-modal-input">
-                <input type="text" id="videoUrlInput" placeholder="رابط يوتيوب / MP4" />
-                <button id="setVideoBtn">تشغيل</button>
-            </div>
-            <button class="close-modal" id="closeVideoModal">إلغاء</button>
-        </div>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+  projectId: "mychat-2d881",
+  storageBucket: "mychat-2d881.firebasestorage.app",
+  messagingSenderId: "532385733649",
+  appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
 
-    <!-- Video Player -->
-    <div class="video-wrapper" id="videoWrapper">
-        <div class="video-controls">
-            <button id="closeVideoBtn"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="videoContainer"></div>
-    </div>
-</div>
+            let username = '';
+            let userRef, messagesRef, onlineRef, pinnedVideoRef;
+            let serverTimeOffset = 0;
+            let videoPlayerInstance = null;
+            let currentVideoIndex = 0;
+            let currentVideosList = [];
 
-<script>
-    // ========== Firebase Config ==========
-    const firebaseConfig = {
-        apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-        authDomain: "mychat-2d881.firebaseapp.com",
-        databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
-        projectId: "mychat-2d881",
-        storageBucket: "mychat-2d881.firebasestorage.app",
-        messagingSenderId: "532385733649",
-        appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+            const loginScreen = document.getElementById('loginScreen');
+            const usernameInput = document.getElementById('usernameInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const chatContainer = document.getElementById('chat-container');
+            const messagesDiv = document.getElementById("messages");
+            const messageInput = document.getElementById("messageInput");
+            const onlineListBtn = document.getElementById("onlineListBtn");
+            const setVideoBtn = document.getElementById("setVideoBtn");
+            const usersBox = document.getElementById("usersBox");
+            const setVideoModal = document.getElementById("setVideoModal");
+            const videoUrlInput = document.getElementById("videoUrlInput");
+            const submitVideoUrlBtn = document.getElementById("submitVideoUrlBtn");
+            const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
+            const overlay = document.getElementById("overlay");
 
-    // ========== State ==========
-    let currentUser = null;
-    let isLoggedIn = false;
-    let userRef = null;
-    let typingTimeout = null;
-    let retryCount = 0;
-    const MAX_RETRIES = 5;
-    let isConnectionRetrying = false;
-
-    const usersRef = db.ref('users');
-    const messagesRef = db.ref('messages');
-    const videoRef = db.ref('video');
-    const typingRef = db.ref('typing');
-    let currentVideoKey = null;
-
-    // ========== DOM ==========
-    const loginModal = document.getElementById('loginModal');
-    const usernameInput = document.getElementById('usernameInput');
-    const loginError = document.getElementById('loginError');
-    const loginBtn = document.getElementById('loginBtn');
-    const messagesContainer = document.getElementById('messagesContainer');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const usersCount = document.getElementById('usersCount');
-    const showUsersBtn = document.getElementById('showUsersBtn');
-    const usersModal = document.getElementById('usersModal');
-    const usersList = document.getElementById('usersList');
-    const modalUsersCount = document.getElementById('modalUsersCount');
-    const closeUsersModal = document.getElementById('closeUsersModal');
-    const showVideoModalBtn = document.getElementById('showVideoModalBtn');
-    const videoModal = document.getElementById('videoModal');
-    const videoUrlInput = document.getElementById('videoUrlInput');
-    const setVideoBtn = document.getElementById('setVideoBtn');
-    const closeVideoModal = document.getElementById('closeVideoModal');
-    const videoWrapper = document.getElementById('videoWrapper');
-    const videoContainer = document.getElementById('videoContainer');
-    const closeVideoBtn = document.getElementById('closeVideoBtn');
-    const typingIndicator = document.getElementById('typingIndicator');
-    const notification = document.getElementById('notification');
-    const notificationText = document.getElementById('notificationText');
-    const notificationIcon = document.getElementById('notificationIcon');
-    const connectionDot = document.getElementById('connectionDot');
-    const connectionText = document.getElementById('connectionText');
-
-    // ========== Helpers ==========
-    function sanitize(name) {
-        return name.replace(/[^a-zA-Z\u0600-\u06FF0-9\s]/g, '').trim();
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function formatTime(timestamp) {
-        const diff = Math.floor((Date.now() - timestamp) / 1000);
-        if (diff < 60) return 'الآن';
-        if (diff < 3600) return `د${Math.floor(diff / 60)}`;
-        if (diff < 86400) return `س${Math.floor(diff / 3600)}`;
-        return `${Math.floor(diff / 86400)}ي`;
-    }
-
-    function scrollToBottom() {
-        setTimeout(() => {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }, 50);
-    }
-
-    function showNotification(text, type = 'info', duration = 3000) {
-        notification.className = 'notification show ' + type;
-        notificationText.textContent = text;
-        const icons = { info: 'fa-info-circle', success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-        notificationIcon.className = 'fas ' + (icons[type] || icons.info);
-        clearTimeout(notification._timeout);
-        notification._timeout = setTimeout(() => notification.classList.remove('show'), duration);
-    }
-
-    // ========== Connection Status ==========
-    function updateConnectionStatus(status) {
-        connectionDot.className = 'dot ' + status;
-        const statusTexts = { online: 'متصل', connecting: 'جاري...', offline: 'غير متصل' };
-        connectionText.textContent = statusTexts[status] || status;
-        messageInput.disabled = status === 'offline';
-        sendBtn.disabled = status === 'offline';
-        if (status === 'offline') {
-            showNotification('فقدان الاتصال، جاري إعادة المحاولة...', 'error', 4000);
-        } else if (status === 'online') {
-            showNotification('تم إعادة الاتصال', 'success', 1500);
-        }
-    }
-
-    function setupConnectionMonitoring() {
-        const connectedRef = firebase.database().ref('.info/connected');
-        connectedRef.on('value', (snap) => {
-            const connected = snap.val();
-            if (connected) {
-                updateConnectionStatus('online');
-                retryCount = 0;
-                isConnectionRetrying = false;
-                if (currentUser && userRef) {
-                    userRef.update({ status: 'online', lastSeen: Date.now() });
-                }
-            } else {
-                updateConnectionStatus('connecting');
-                handleReconnection();
-            }
-        });
-    }
-
-    function handleReconnection() {
-        if (isConnectionRetrying) return;
-        isConnectionRetrying = true;
-        function attemptReconnect() {
-            retryCount++;
-            if (retryCount > MAX_RETRIES) {
-                updateConnectionStatus('offline');
-                isConnectionRetrying = false;
-                showNotification('فشل الاتصال، يرجى تحديث الصفحة', 'error', 5000);
-                return;
-            }
-            showNotification(`محاولة ${retryCount}/${MAX_RETRIES}...`, 'warning', 2000);
-            firebase.database().ref('.info/connected').once('value').then((snap) => {
-                if (snap.val() === true) {
-                    updateConnectionStatus('online');
-                    isConnectionRetrying = false;
-                    retryCount = 0;
+            function attemptLogin() {
+                let inputName = usernameInput.value.trim();
+                const invalidChars = /[.#$\\[\\]]/;
+                if (invalidChars.test(inputName)) {
+                    alert("الاسم لا يجب أن يحتوي على رموز خاصة");
                     return;
                 }
-                setTimeout(attemptReconnect, 3000 * retryCount);
-            }).catch(() => setTimeout(attemptReconnect, 3000 * retryCount));
-        }
-        setTimeout(attemptReconnect, 2000);
-    }
-
-    // ========== Render Messages (سطر واحد) ==========
-    function renderMessages(snapshot) {
-        const msgs = snapshot.val();
-        messagesContainer.innerHTML = '';
-        if (!msgs) return;
-        const keys = Object.keys(msgs);
-        keys.forEach(key => {
-            const m = msgs[key];
-            const div = document.createElement('div');
-            div.className = `message ${m.user === currentUser ? 'own' : ''}`;
-            div.dataset.key = key;
-
-            const userSpan = document.createElement('span');
-            userSpan.className = 'msg-user';
-            userSpan.textContent = m.user;
-
-            const textSpan = document.createElement('span');
-            textSpan.className = 'msg-text';
-            textSpan.textContent = m.text;
-
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'msg-time';
-            timeSpan.textContent = formatTime(m.timestamp);
-
-            div.appendChild(userSpan);
-            div.appendChild(textSpan);
-            div.appendChild(timeSpan);
-
-            if (m.user === currentUser) {
-                const delBtn = document.createElement('button');
-                delBtn.className = 'delete-btn';
-                delBtn.dataset.key = key;
-                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                delBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    messagesRef.child(key).remove().catch(() => showNotification('فشل الحذف', 'error'));
-                });
-                div.appendChild(delBtn);
-            }
-
-            messagesContainer.appendChild(div);
-        });
-        scrollToBottom();
-    }
-
-    // ========== Update Users ==========
-    function updateUsers(snapshot) {
-        const data = snapshot.val();
-        const count = data ? Object.keys(data).length : 0;
-        usersCount.innerHTML = `<i class="fas fa-user-friends"></i> ${count}`;
-        modalUsersCount.textContent = count;
-        usersList.innerHTML = '';
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const u = data[key];
-                const div = document.createElement('div');
-                div.className = 'user-item';
-                const dot = document.createElement('span');
-                dot.className = `status-dot ${u.status || 'offline'}`;
-                div.appendChild(dot);
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = u.name || 'مجهول';
-                div.appendChild(nameSpan);
-                usersList.appendChild(div);
-            });
-        }
-    }
-
-    // ========== Typing ==========
-    function setupTypingIndicator() {
-        typingRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data) { typingIndicator.classList.remove('active'); return; }
-            const typingUsers = Object.keys(data).filter(key => key !== currentUser);
-            if (typingUsers.length === 0) { typingIndicator.classList.remove('active'); return; }
-            const firstName = data[typingUsers[0]]?.name || 'شخص';
-            if (typingUsers.length === 1) {
-                notificationText.textContent = `${firstName} يكتب...`;
-            } else if (typingUsers.length === 2) {
-                const secondName = data[typingUsers[1]]?.name || 'آخر';
-                notificationText.textContent = `${firstName} و ${secondName} يكتبان...`;
-            } else {
-                notificationText.textContent = `${typingUsers.length} أشخاص يكتبون...`;
-            }
-            typingIndicator.classList.add('active');
-        });
-    }
-
-    function handleTyping() {
-        if (!currentUser) return;
-        typingRef.child(currentUser).set({ name: currentUser, timestamp: Date.now() });
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => typingRef.child(currentUser).remove(), 2000);
-    }
-
-    // ========== Video ==========
-    function renderVideo(snapshot) {
-        const data = snapshot.val();
-        if (!data || !data.url) {
-            videoWrapper.classList.remove('active');
-            videoContainer.innerHTML = '';
-            currentVideoKey = null;
-            return;
-        }
-        currentVideoKey = snapshot.key;
-        videoWrapper.classList.add('active');
-        const url = data.url;
-        let html = '';
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            const vid = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
-            if (vid) {
-                html = `<iframe src="https://www.youtube.com/embed/${vid[1]}?autoplay=1" allowfullscreen></iframe>`;
-            } else {
-                html = `<video controls autoplay><source src="${escapeHtml(url)}" /></video>`;
-            }
-        } else {
-            html = `<video controls autoplay><source src="${escapeHtml(url)}" /></video>`;
-        }
-        videoContainer.innerHTML = html;
-    }
-
-    // ========== Login ==========
-    function attemptLogin() {
-        let name = sanitize(usernameInput.value.trim());
-        if (name.length < 2) {
-            loginError.textContent = 'الاسم يجب أن يكون حرفين على الأقل';
-            return;
-        }
-        if (!/^[\u0600-\u06FFa-zA-Z0-9\s]{2,20}$/.test(name)) {
-            loginError.textContent = 'أحرف وأرقام فقط';
-            return;
-        }
-
-        loginBtn.disabled = true;
-        loginBtn.textContent = 'جاري...';
-
-        usersRef.orderByChild('name').equalTo(name).once('value').then(snap => {
-            if (snap.exists()) {
-                loginError.textContent = 'هذا الاسم مستخدم حالياً';
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'دخول';
-                return;
-            }
-
-            currentUser = name;
-            isLoggedIn = true;
-            loginModal.style.display = 'none';
-            userRef = usersRef.push({ name, status: 'online', lastSeen: Date.now() });
-            userRef.onDisconnect().remove();
-
-            setupConnectionMonitoring();
-            messagesRef.on('value', renderMessages);
-            usersRef.on('value', updateUsers);
-            videoRef.on('value', renderVideo);
-            setupTypingIndicator();
-
-            setInterval(() => {
-                if (currentUser && userRef) {
-                    userRef.update({ lastSeen: Date.now(), status: 'online' }).catch(() => {});
+                if (inputName.length < 2) {
+                    alert("الاسم قصير جداً");
+                    return;
                 }
-            }, 30000);
 
-            setInterval(() => {
-                const now = Date.now();
-                usersRef.once('value', snap => {
+                username = inputName;
+                userRef = db.ref("online/" + username);
+                messagesRef = db.ref("messages");
+                onlineRef = db.ref("online");
+                pinnedVideoRef = db.ref("pinned_video");
+
+                startChat();
+            }
+
+            loginBtn.onclick = attemptLogin;
+            usernameInput.onkeypress = (e) => { if (e.key === 'Enter') attemptLogin(); };
+
+            function startChat() {
+                loginScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+
+                db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
+
+                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                userRef.onDisconnect().remove();
+
+                setInterval(() => {
+                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                }, 60000);
+
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', snap => {
+                        snap.forEach(child => {
+                            if (now - child.val().lastActive > 90000) child.ref.remove();
+                        });
+                    });
+                }, 60000);
+
+                onlineListBtn.onclick = (e) => { e.stopPropagation(); usersBox.style.display = 'block'; overlay.style.display = 'block'; };
+                setVideoBtn.onclick = (e) => { e.stopPropagation(); setVideoModal.style.display = 'block'; overlay.style.display = 'block'; };
+                overlay.onclick = closeAllModals;
+
+                document.getElementById("inputArea").onsubmit = (e) => {
+                    e.preventDefault();
+                    const text = messageInput.value.trim();
+                    if (!text) return;
+
+                    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    messagesRef.push({ user: username, text: text, time: time, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                    messageInput.value = "";
+                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    scrollToBottom();
+                };
+
+                messagesRef.limitToLast(100).on("child_added", snap => {
+                    addMessageToUI(snap.key, snap.val());
+                });
+
+                messagesRef.on("child_removed", snap => {
+                    const msgElement = document.getElementById(`msg-${snap.key}`);
+                    if (msgElement) {
+                        msgElement.style.opacity = '0';
+                        setTimeout(() => msgElement.remove(), 300);
+                    }
+                });
+
+                onlineRef.on("value", snap => {
+                    document.getElementById("count").textContent = snap.numChildren();
+                    renderUsersList(snap.val() || {});
+                });
+
+                submitVideoUrlBtn.onclick = () => {
+                    const url = videoUrlInput.value.trim();
+                    if (!url) return;
+
+                    const youtubeId = getYoutubeVideoId(url);
+                    const tweetId = getTweetId(url);
+
+                    if (youtubeId) {
+                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
+                    } else if (tweetId) {
+                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
+                    } else if (url.toLowerCase().includes('.m3u')) {
+                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: username });
+                    } else if (isDirectVideo(url)) {
+                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: username });
+                    } else {
+                        alert("الرابط غير مدعوم.");
+                        return;
+                    }
+
+                    videoUrlInput.value = "";
+                    closeAllModals();
+                };
+
+                pinnedVideoRef.on("value", async (snap) => {
                     const data = snap.val();
+                    if (videoPlayerInstance) {
+                        videoPlayerInstance.dispose();
+                        videoPlayerInstance = null;
+                    }
+                    pinnedVideoPlayer.innerHTML = '';
+                    currentVideosList = [];
+                    currentVideoIndex = 0;
+
                     if (data) {
-                        Object.keys(data).forEach(key => {
-                            if (now - (data[key].lastSeen || 0) > 60000) {
-                                usersRef.child(key).remove().catch(() => {});
+                        pinnedVideoPlayer.style.display = 'flex';
+                        const header = document.createElement('div');
+                        header.className = 'video-header';
+                        header.innerHTML = `<span>بث مباشر - ${data.setBy}</span>`;
+                        const closeBtn = document.createElement('button');
+                        closeBtn.className = 'close-pinned-video';
+                        closeBtn.innerHTML = '✖';
+                        closeBtn.onclick = () => pinnedVideoRef.remove();
+                        header.appendChild(closeBtn);
+                        const body = document.createElement('div');
+                        body.className = 'video-body';
+
+                        const resizeHandle = document.createElement('div');
+                        resizeHandle.className = 'resize-handle';
+
+                        pinnedVideoPlayer.appendChild(header);
+                        pinnedVideoPlayer.appendChild(body);
+                        pinnedVideoPlayer.appendChild(resizeHandle);
+
+                        makeDraggable(pinnedVideoPlayer, header);
+                        makeResizable(pinnedVideoPlayer, resizeHandle);
+
+                        if (data.type === 'youtube') {
+                            createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`, 'video/youtube', true);
+                        } else if (data.type === 'm3u') {
+                            createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
+                        } else if (data.type === 'direct') {
+                            createVideoPlayer(body, data.url, 'video/mp4', false);
+                        } else if (data.type === 'twitter') {
+                            // ✨ حل جذري: embed فوراً ثم تحديث في الخلفية
+                            embedTwitterNative(body, data.id); // يظهر فوراً 100%
+
+                            // حاول جلب الفيديو المباشر في الخلفية
+                            const _twId = data.id;
+                            fetchTwitterVideos(_twId).then(videos => {
+                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
+                                currentVideosList = videos;
+                                currentVideoIndex = 0;
+                                // شغّل الفيديو، ولو فشل ارجع للـ embed
+                                const vEl = document.createElement('video');
+                                vEl.controls = true;
+                                vEl.autoplay = true;
+                                vEl.muted = true;
+                                vEl.playsInline = true;
+                                vEl.style.cssText = 'width:100%;height:100%;background:#000;display:block;';
+                                vEl.src = videos[0].url;
+                                body.innerHTML = '';
+                                body.appendChild(vEl);
+                                // لو فشل التحميل ارجع للـ embed تلقائياً
+                                vEl.onerror = () => embedTwitterNative(body, _twId);
+                                videoPlayerInstance = { dispose: () => { vEl.src = ''; vEl.remove(); } };
+                                if (videos.length > 1) createVideoSelector(body, videos);
+                            }).catch(() => { }); // فشل صامت - embed موجود
+                        }
+
+                        addNotification(`${data.setBy} قام بتشغيل فيديو`);
+                    } else {
+                        pinnedVideoPlayer.style.display = 'none';
+                    }
+                });
+            }
+
+            // دالة: embed التغريدة عبر iframe رسمي من تويتر (الأضمن دائماً)
+            function embedTwitterNative(container, tweetId) {
+                container.innerHTML = '';
+                container.style.background = '#15202b';
+                container.style.overflow = 'hidden';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '320px';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('scrolling', 'no')
+                container.appendChild(iframe);
+            }
+
+            function createVideoPlayer(container, videoSource, videoType, isYoutube) {
+                const videoEl = document.createElement('video-js');
+                videoEl.className = 'vjs-netflix-theme';
+                container.innerHTML = '';
+                container.appendChild(videoEl);
+
+                // HLS على المتصفحات غير Safari
+                const isHLS = videoType === 'application/x-mpegURL' || videoSource.includes('.m3u');
+                if (isHLS && !videoEl.canPlayType('application/vnd.apple.mpegurl') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hls = new Hls();
+                    const nativeVideo = document.createElement('video');
+                    nativeVideo.controls = true;
+                    nativeVideo.autoplay = true;
+                    nativeVideo.muted = true;
+                    nativeVideo.playsInline = true;
+                    nativeVideo.style.width = '100%';
+                    nativeVideo.style.height = '100%';
+                    nativeVideo.style.background = '#000';
+                    container.innerHTML = '';
+                    container.appendChild(nativeVideo);
+                    hls.loadSource(videoSource);
+                    hls.attachMedia(nativeVideo);
+                    videoPlayerInstance = { dispose: () => { hls.destroy(); nativeVideo.remove(); } };
+                    return;
+                }
+
+                let playerOptions = {
+                    autoplay: true,
+                    muted: true,
+                    controls: true,
+                    aspectRatio: '16:9',
+                    playsinline: true,
+                    techOrder: isYoutube ? ['youtube'] : ['html5'],
+                    sources: [{ type: videoType, src: videoSource }]
+                };
+
+                try {
+                    videoPlayerInstance = videojs(videoEl, playerOptions);
+                    videoPlayerInstance.on('error', () => {
+                        container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ تعذّر تشغيل الفيديو. تحقق من الرابط أو جرب صيغة أخرى.</p>`;
+                    });
+                } catch (e) {
+                    container.innerHTML = `<p style="color:#ff6b6b;padding:12px;font-size:13px;">⚠️ خطأ في تحميل المشغّل.</p>`;
+                }
+            }
+
+            function createVideoSelector(container, videos) {
+                const selectorBar = document.createElement('div');
+                selectorBar.className = 'video-selector-bar';
+
+                videos.forEach((v, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'video-selector-btn';
+                    btn.textContent = `مقطع ${idx + 1}`;
+                    if (idx === 0) btn.classList.add('active');
+
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        if (idx !== currentVideoIndex && videoPlayerInstance) {
+                            currentVideoIndex = idx;
+                            videoPlayerInstance.src({ src: v.url, type: 'video/mp4' });
+                            videoPlayerInstance.play();
+
+                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                        }
+                    };
+                    selectorBar.appendChild(btn);
+                });
+
+                container.appendChild(selectorBar);
+            }
+
+            async function fetchTwitterVideos(tweetId) {
+                const videos = [];
+
+                // ==== طريقة 0: Twitter Syndication API (نفس API اللي يستخدمه تويتر في embed الرسمي) ====
+                try {
+                    // حساب token نفس طريقة مكتبة Twitter
+                    const token = ((Number(tweetId) / 1e15) * Math.PI)
+                        .toString(36).replace(/(0+|\.)/g, '');
+                    const synRes = await fetch(
+                        `https://cdn.syndication.twimg.com/tweet-result?id=${tweetId}&lang=ar&token=${token}`,
+                        { headers: { 'Accept': 'application/json' } }
+                    );
+                    if (synRes.ok) {
+                        const synData = await synRes.json();
+                        (synData.mediaDetails || []).forEach(media => {
+                            if (media.type === 'video' || media.type === 'animated_gif') {
+                                // اختر أعلى جودة
+                                const variants = (media.video_info?.variants || [])
+                                    .filter(v => v.content_type === 'video/mp4')
+                                    .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                                if (variants.length) {
+                                    videos.push({ url: variants[0].url, type: 'video/mp4', provider: 'syndication' });
+                                }
                             }
                         });
                     }
-                });
-            }, 60000);
+                } catch (e) { console.warn('[syndication]', e.message); }
 
-            setInterval(() => {
-                document.querySelectorAll('.message .msg-time').forEach(el => {
-                    const msgDiv = el.closest('.message');
-                    if (msgDiv) {
-                        const key = msgDiv.dataset.key;
-                        if (key) {
-                            messagesRef.child(key).once('value').then(snap => {
-                                const msg = snap.val();
-                                if (msg && msg.timestamp) {
-                                    el.textContent = formatTime(msg.timestamp);
-                                }
-                            }).catch(() => {});
+                if (videos.length) { console.log('[Twitter] syndication ✓', videos); return videos; }
+
+                // ==== طريقة 1: fxtwitter ====
+                try {
+                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`,
+                        { headers: { 'Accept': 'application/json' } });
+                    if (fxRes.ok) {
+                        const fxData = await fxRes.json();
+                        const tweet = fxData.tweet || {};
+                        const media = tweet.media || {};
+                        const items = Array.isArray(media.videos) ? media.videos
+                            : Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif')
+                                : [];
+                        items.forEach(v => {
+                            const src = v.url || v.variants?.[0]?.url;
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                        });
+                        if (!videos.length && tweet.video) {
+                            const src = tweet.video.url || tweet.video.variants?.[0]?.url;
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
                         }
                     }
+                } catch (e) { console.warn('[fxtwitter]', e.message); }
+
+                if (videos.length) { console.log('[Twitter] fxtwitter ✓', videos); return videos; }
+
+                // ==== طريقة 2: vxtwitter ====
+                try {
+                    const vxRes = await fetch(`https://api.vxtwitter.com/status/${tweetId}`,
+                        { headers: { 'Accept': 'application/json' } });
+                    if (vxRes.ok) {
+                        const vxData = await vxRes.json();
+                        (vxData.media_extended || []).forEach(m => {
+                            if (m && (m.type === 'video' || m.type === 'gif') && m.url)
+                                videos.push({ url: m.url, type: 'video/mp4', provider: 'vxtwitter' });
+                        });
+                    }
+                } catch (e) { console.warn('[vxtwitter]', e.message); }
+
+                if (videos.length) { console.log('[Twitter] vxtwitter ✓', videos); return videos; }
+
+                // ==== طريقة 3: cobalt.tools ====
+                try {
+                    const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: `https://x.com/i/status/${tweetId}` })
+                    });
+                    if (cobaltRes.ok) {
+                        const cobaltData = await cobaltRes.json();
+                        if (cobaltData.url)
+                            videos.push({ url: cobaltData.url, type: 'video/mp4', provider: 'cobalt' });
+                        else if (Array.isArray(cobaltData.picker))
+                            cobaltData.picker.forEach(p => {
+                                if (p.url) videos.push({ url: p.url, type: 'video/mp4', provider: 'cobalt' });
+                            });
+                    }
+                } catch (e) { console.warn('[cobalt]', e.message); }
+
+                console.log('[Twitter] all APIs done, found:', videos.length);
+                return videos;
+            }
+
+            // تحديث الأوقات لكل الرسائل بـ interval واحد مشترك (بدل interval لكل رسالة)
+            const messageTimestamps = new Map();
+            setInterval(() => {
+                messageTimestamps.forEach(({ timestamp, el }, key) => {
+                    updateTimeDisplay(key, timestamp, el);
                 });
             }, 60000);
 
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
-            loginError.textContent = '';
-            showNotification(`مرحباً ${name}!`, 'success');
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'دخول';
-        }).catch(() => {
-            loginError.textContent = 'خطأ في الاتصال';
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'دخول';
+            function addMessageToUI(key, { user, text, time, timestamp }) {
+                const div = document.createElement("div");
+                div.className = "msg";
+                div.id = `msg-${key}`;
+
+                const timeElement = document.createElement("span");
+                timeElement.className = "time";
+                timeElement.id = `time-${key}`;
+
+                updateTimeDisplay(key, timestamp, timeElement);
+
+                div.innerHTML = `
+        <span class="user">${escapeHtml(user)}</span>
+        <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
+      `;
+
+                div.appendChild(timeElement);
+                messageTimestamps.set(key, { timestamp, el: timeElement });
+
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            function updateTimeDisplay(key, timestamp, timeElement) {
+                if (!timestamp) return;
+
+                const now = Date.now() + serverTimeOffset;
+                const messageTime = timestamp + serverTimeOffset;
+                const diffMs = now - messageTime;
+                const diffSec = Math.floor(diffMs / 1000);
+                const diffMin = Math.floor(diffSec / 60);
+                const diffHours = Math.floor(diffMin / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                const diffWeeks = Math.floor(diffDays / 7);
+                const diffMonths = Math.floor(diffDays / 30);
+                const diffYears = Math.floor(diffDays / 365);
+
+                let timeText = "";
+
+                if (diffSec < 5) {
+                    timeText = "الآن";
+                } else if (diffSec < 60) {
+                    timeText = "ثواني";
+                } else if (diffMin < 2) {
+                    timeText = "د1";
+                } else if (diffMin < 60) {
+                    timeText = `د${diffMin}`;
+                } else if (diffHours < 24) {
+                    timeText = `س${diffHours}`;
+                } else if (diffDays < 7) {
+                    timeText = `ي${diffDays}`;
+                } else if (diffWeeks < 4) {
+                    timeText = `أ${diffWeeks}`;
+                } else if (diffMonths < 12) {
+                    timeText = `ش${diffMonths}`;
+                } else {
+                    timeText = `ع${diffYears}`;
+                }
+
+                timeElement.textContent = timeText;
+            }
+
+            function addNotification(text) {
+                const div = document.createElement("div");
+                div.className = "sys";
+                div.textContent = text;
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            function renderUsersList(users) {
+                const list = document.getElementById("usersList");
+                list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset;
+                Object.keys(users).forEach(uName => {
+                    const uData = users[uName];
+                    const div = document.createElement("div");
+                    div.className = "user-item";
+                    let colorClass = 'status-green';
+                    const diff = now - (uData.lastActive || 0);
+                    if (diff > 60000) colorClass = 'status-gray';
+                    else if (diff > 30000) colorClass = 'status-yellow';
+                    div.innerHTML = `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
+                    list.appendChild(div);
+                });
+            }
+
+            function closeAllModals() {
+                usersBox.style.display = 'none';
+                setVideoModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+
+            function makeDraggable(element, handle) {
+                let offsetX = 0, offsetY = 0;
+                let isDragging = false;
+
+                const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+
+                const onDragStart = (e) => {
+                    isDragging = true;
+                    const pointer = getPointerPosition(e);
+                    offsetX = pointer.clientX - element.offsetLeft;
+                    offsetY = pointer.clientY - element.offsetTop;
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('mouseup', onDragEnd);
+                    document.addEventListener('touchend', onDragEnd);
+                };
+
+                const onDragMove = (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        const pointer = getPointerPosition(e);
+                        element.style.left = (pointer.clientX - offsetX) + "px";
+                        element.style.top = (pointer.clientY - offsetY) + "px";
+                    }
+                };
+
+                const onDragEnd = () => {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onDragMove);
+                    document.removeEventListener('touchmove', onDragMove);
+                    document.removeEventListener('mouseup', onDragEnd);
+                    document.removeEventListener('touchend', onDragEnd);
+                };
+
+                handle.addEventListener('mousedown', onDragStart);
+                handle.addEventListener('touchstart', onDragStart, { passive: false });
+            }
+
+            function makeResizable(element, handle) {
+                let initialWidth, initialHeight, initialX, initialY;
+                const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
+
+                function onResizeStart(e) {
+                    if (e.type === 'touchstart') e.preventDefault();
+                    const pointer = getPointerPosition(e);
+                    initialWidth = element.offsetWidth;
+                    initialHeight = element.offsetHeight;
+                    initialX = pointer.clientX;
+                    initialY = pointer.clientY;
+                    document.addEventListener('mousemove', onResizeMove);
+                    document.addEventListener('touchmove', onResizeMove, { passive: false });
+                    document.addEventListener('mouseup', onResizeEnd);
+                    document.addEventListener('touchend', onResizeEnd);
+                }
+
+                function onResizeMove(e) {
+                    if (e.type === 'touchmove') e.preventDefault();
+                    const pointer = getPointerPosition(e);
+                    const newWidth = initialWidth + (pointer.clientX - initialX);
+                    const newHeight = initialHeight + (pointer.clientY - initialY);
+                    if (newWidth > 300) { element.style.width = newWidth + 'px'; }
+                    if (newHeight > 200) { element.style.height = newHeight + 'px'; }
+                }
+
+                function onResizeEnd() {
+                    document.removeEventListener('mousemove', onResizeMove);
+                    document.removeEventListener('touchmove', onResizeMove);
+                    document.removeEventListener('mouseup', onResizeEnd);
+                    document.removeEventListener('touchend', onResizeEnd);
+                }
+
+                handle.addEventListener('mousedown', onResizeStart);
+                handle.addEventListener('touchstart', onResizeStart, { passive: false });
+            }
+
+            function getYoutubeVideoId(url) {
+                if (!url) return null;
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                return (url.match(regex) || [])[1] || null;
+            }
+
+            function getTweetId(url) {
+                if (!url) return null;
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
+                return (url.match(regex) || [])[1] || null;
+            }
+
+            function isDirectVideo(url) {
+                if (!url) return false;
+                // تحقق من الامتداد الصريح
+                if (/\.(mp4|webm|ogv|mkv|avi|mov|flv|m4v)(\?.*)?$/i.test(url)) return true;
+                // روابط تحتوي على video في المسار وليست يوتيوب أو تويتر
+                if (/video/i.test(url) && !/(youtube|youtu\.be|twitter|x\.com)/i.test(url)) return true;
+                return false;
+            }
+
+            function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+            function escapeHtml(unsafe) { if (!unsafe) return ""; return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
         });
-    }
-
-    loginBtn.addEventListener('click', attemptLogin);
-    usernameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-
-    // ========== Send ==========
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text || !currentUser) return;
-        if (typingTimeout) { clearTimeout(typingTimeout); typingRef.child(currentUser).remove().catch(() => {}); }
-        messagesRef.push({ user: currentUser, text, timestamp: Date.now() }).catch(() => showNotification('فشل الإرسال', 'error'));
-        messageInput.value = '';
-        messageInput.focus();
-        scrollToBottom();
-    }
-
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-    messageInput.addEventListener('input', handleTyping);
-
-    // ========== Modals ==========
-    showUsersBtn.addEventListener('click', () => usersModal.classList.add('active'));
-    closeUsersModal.addEventListener('click', () => usersModal.classList.remove('active'));
-    usersModal.addEventListener('click', (e) => { if (e.target === usersModal) usersModal.classList.remove('active'); });
-
-    showVideoModalBtn.addEventListener('click', () => videoModal.classList.add('active'));
-    closeVideoModal.addEventListener('click', () => videoModal.classList.remove('active'));
-    videoModal.addEventListener('click', (e) => { if (e.target === videoModal) videoModal.classList.remove('active'); });
-
-    setVideoBtn.addEventListener('click', () => {
-        const url = videoUrlInput.value.trim();
-        if (!url) { showNotification('الرجاء إدخال رابط', 'warning'); return; }
-        videoRef.set({ url, timestamp: Date.now() }).then(() => {
-            videoModal.classList.remove('active');
-            videoUrlInput.value = '';
-            showNotification('تم تشغيل الفيديو', 'success');
-        }).catch(() => showNotification('فشل التشغيل', 'error'));
-    });
-
-    closeVideoBtn.addEventListener('click', () => {
-        if (currentVideoKey) { videoRef.remove().catch(() => {}); }
-        else { videoWrapper.classList.remove('active'); videoContainer.innerHTML = ''; }
-    });
-
-    // ========== Draggable ==========
-    let isDragging = false, offsetX, offsetY;
-    videoWrapper.addEventListener('mousedown', (e) => {
-        if (e.target.closest('.video-controls') || e.target.closest('button')) return;
-        isDragging = true;
-        const rect = videoWrapper.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        videoWrapper.style.cursor = 'grabbing';
-    });
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const parent = document.getElementById('app');
-        const pRect = parent.getBoundingClientRect();
-        const left = Math.min(Math.max(e.clientX - offsetX, 0), pRect.width - videoWrapper.offsetWidth);
-        const top = Math.min(Math.max(e.clientY - offsetY, 0), pRect.height - videoWrapper.offsetHeight);
-        videoWrapper.style.left = left + 'px';
-        videoWrapper.style.top = top + 'px';
-    });
-    document.addEventListener('mouseup', () => { isDragging = false; videoWrapper.style.cursor = 'grab'; });
-
-    videoWrapper.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.video-controls') || e.target.closest('button')) return;
-        const touch = e.touches[0];
-        const rect = videoWrapper.getBoundingClientRect();
-        offsetX = touch.clientX - rect.left;
-        offsetY = touch.clientY - rect.top;
-        isDragging = true;
-    }, { passive: true });
-    document.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        const parent = document.getElementById('app');
-        const pRect = parent.getBoundingClientRect();
-        const left = Math.min(Math.max(touch.clientX - offsetX, 0), pRect.width - videoWrapper.offsetWidth);
-        const top = Math.min(Math.max(touch.clientY - offsetY, 0), pRect.height - videoWrapper.offsetHeight);
-        videoWrapper.style.left = left + 'px';
-        videoWrapper.style.top = top + 'px';
-    }, { passive: true });
-    document.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
-
-    // ========== Init ==========
-    loginModal.style.display = 'flex';
-    messageInput.disabled = true;
-    sendBtn.disabled = true;
-</script>
+    </script>
 </body>
+
 </html>
