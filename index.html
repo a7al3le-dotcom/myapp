@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>شات خاص</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    </script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
         * {
@@ -34,7 +33,7 @@
             width: 100%;
             height: 90vh;
             max-height: 800px;
-            background: linear-gradient(145deg, #141a2b, #1e2640);
+            background: #141a2b;
             border-radius: 32px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
             display: flex;
@@ -44,154 +43,95 @@
             color: #eef2ff;
         }
 
-        /* header */
+        /* ===== HEADER - مثبت ===== */
         .header {
-            padding: 16px 20px;
-            background: rgba(20, 26, 43, 0.7);
-            backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            background: #141a2b;
             border-bottom: 1px solid #2f3b5c;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .header h2 {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
-            background: linear-gradient(135deg, #a0b8ff, #7a8fe0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #a0b8ff;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header-actions button {
             background: transparent;
             border: none;
             color: #b4c8ff;
-            font-size: 1.3rem;
-            margin-left: 12px;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: 0.2s;
+            padding: 4px 6px;
         }
 
         .header-actions button:hover {
             color: #fff;
-            transform: scale(1.05);
         }
 
-        /* users count */
         .users-count {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             background: #1f2a44;
-            padding: 4px 12px;
+            padding: 2px 10px;
             border-radius: 30px;
             color: #a0b8ff;
         }
 
-        /* connection status */
         .connection-status {
-            font-size: 0.7rem;
-            padding: 4px 10px;
+            font-size: 0.65rem;
+            padding: 2px 8px;
             border-radius: 20px;
             background: #2a3a5c;
             color: #8892b0;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .connection-status .dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             display: inline-block;
         }
 
         .connection-status .dot.online {
             background: #4cd964;
-            animation: pulse 1.5s infinite;
         }
-
         .connection-status .dot.offline {
             background: #ff4d5a;
-            animation: pulse 1s infinite;
         }
-
         .connection-status .dot.connecting {
             background: #ffcc00;
             animation: pulse 0.8s infinite;
         }
 
         @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.3;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
-        /* typing indicator */
-        .typing-indicator {
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            color: #8892b0;
-            min-height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .typing-indicator.active {
-            opacity: 1;
-        }
-
-        .typing-indicator .dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-indicator .dot-anim {
-            width: 6px;
-            height: 6px;
-            background: #8892b0;
-            border-radius: 50%;
-            animation: typingDot 1.2s infinite;
-        }
-
-        .typing-indicator .dot-anim:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-indicator .dot-anim:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typingDot {
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.3;
-            }
-            30% {
-                transform: translateY(-6px);
-                opacity: 1;
-            }
-        }
-
-        /* messages */
+        /* ===== منطقة الرسائل ===== */
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            scroll-behavior: smooth;
+            padding: 8px 14px;
             background: #101624;
+            scroll-behavior: smooth;
         }
 
         .messages-container::-webkit-scrollbar {
@@ -202,92 +142,85 @@
             border-radius: 10px;
         }
 
+        /* ===== الرسالة: سطر واحد ===== */
         .message {
-            background: #1e2846;
-            padding: 10px 14px;
-            border-radius: 18px 18px 18px 4px;
-            max-width: 85%;
-            align-self: flex-start;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            word-wrap: break-word;
-            animation: fadeIn 0.2s ease;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            padding: 4px 0;
+            border-bottom: 1px solid #1e2846;
+            font-size: 0.9rem;
+            animation: fadeIn 0.15s ease;
+            flex-wrap: wrap;
         }
 
         .message .msg-user {
             font-weight: 600;
             color: #9bb2ff;
             font-size: 0.85rem;
-            margin-bottom: 4px;
+            white-space: nowrap;
         }
 
         .message .msg-text {
-            font-size: 0.95rem;
-            line-height: 1.4;
+            color: #eef2ff;
+            word-break: break-word;
+            flex: 1;
+            min-width: 60px;
         }
 
         .message .msg-time {
-            font-size: 0.65rem;
-            color: #8892b0;
-            margin-top: 4px;
-            text-align: left;
+            font-size: 0.6rem;
+            color: #6c7a9a;
+            white-space: nowrap;
             direction: ltr;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .message .delete-btn {
             background: transparent;
             border: none;
             color: #ff6b7a;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             cursor: pointer;
-            opacity: 0.6;
+            opacity: 0.4;
             transition: 0.2s;
-            padding: 2px 6px;
-            border-radius: 12px;
+            padding: 0 4px;
         }
 
         .message .delete-btn:hover {
             opacity: 1;
-            background: rgba(255, 107, 122, 0.1);
         }
 
-        .message.own {
-            align-self: flex-end;
-            background: #293b66;
-            border-radius: 18px 18px 4px 18px;
+        /* كل الرسائل بنفس اللون - بدون تمييز */
+        .message.own .msg-user {
+            color: #9bb2ff; /* نفس اللون */
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* input area */
+        /* ===== Input Area - مثبت ===== */
         .input-area {
-            padding: 10px 16px 16px;
+            padding: 8px 12px 12px;
             background: #141a2b;
             border-top: 1px solid #28324e;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
         }
 
         .input-area input {
             flex: 1;
             background: #1d2844;
             border: none;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 30px;
             color: #eef2ff;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
             transition: 0.2s;
         }
@@ -309,15 +242,16 @@
         .input-area button {
             background: linear-gradient(135deg, #4f6ef7, #7a4cf0);
             border: none;
-            width: 48px;
+            width: 44px;
             border-radius: 30px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .input-area button:hover:not(:disabled) {
@@ -330,56 +264,50 @@
             cursor: not-allowed;
         }
 
-        /* notification toast */
-        .notification {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 12px 24px;
-            border-radius: 30px;
-            color: #eef2ff;
-            font-size: 0.9rem;
-            z-index: 100;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid #2f3b5c;
-            animation: slideDown 0.3s ease;
-        }
-
-        .notification.show {
+        /* ===== باقي العناصر ===== */
+        .typing-indicator {
+            padding: 4px 16px;
+            font-size: 0.75rem;
+            color: #8892b0;
+            min-height: 24px;
             display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: #101624;
         }
 
-        .notification.error {
-            border-color: #ff4d5a;
-        }
-        .notification.success {
-            border-color: #4cd964;
-        }
-        .notification.info {
-            border-color: #4f6ef7;
+        .typing-indicator.active {
+            opacity: 1;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+        .typing-indicator .dots {
+            display: flex;
+            gap: 3px;
         }
 
-        /* login modal */
+        .typing-indicator .dot-anim {
+            width: 5px;
+            height: 5px;
+            background: #8892b0;
+            border-radius: 50%;
+            animation: typingDot 1.2s infinite;
+        }
+
+        .typing-indicator .dot-anim:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator .dot-anim:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        /* ===== Login Modal ===== */
         .login-modal {
             position: absolute;
             inset: 0;
-            background: rgba(8, 12, 26, 0.9);
+            background: rgba(8, 12, 26, 0.92);
             backdrop-filter: blur(6px);
             display: flex;
             justify-content: center;
@@ -390,32 +318,29 @@
 
         .login-card {
             background: #1b2340;
-            padding: 30px 24px;
+            padding: 28px 20px;
             border-radius: 40px;
             width: 100%;
-            max-width: 340px;
+            max-width: 320px;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7);
             text-align: center;
         }
 
         .login-card h2 {
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #b0c6ff, #8a9ef0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 18px;
+            color: #b0c6ff;
         }
 
         .login-card input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border-radius: 40px;
             border: 1px solid #33416a;
             background: #10182e;
             color: white;
-            font-size: 1rem;
-            margin-bottom: 18px;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
             outline: none;
-            transition: 0.2s;
         }
 
         .login-card input:focus {
@@ -425,20 +350,19 @@
 
         .login-card .error {
             color: #ff7b89;
-            font-size: 0.8rem;
-            margin-top: -10px;
-            margin-bottom: 12px;
-            min-height: 20px;
+            font-size: 0.75rem;
+            min-height: 18px;
+            margin-bottom: 10px;
         }
 
         .login-card button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: linear-gradient(135deg, #4f6ef7, #7a4cf0);
             border: none;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: white;
             cursor: pointer;
             transition: 0.2s;
@@ -449,7 +373,7 @@
             filter: brightness(1.1);
         }
 
-        /* online users modal */
+        /* ===== Users Modal ===== */
         .modal-overlay {
             position: absolute;
             inset: 0;
@@ -469,16 +393,16 @@
         .modal-card {
             background: #1b2340;
             border-radius: 32px;
-            padding: 24px 20px;
+            padding: 20px;
             width: 100%;
-            max-width: 320px;
+            max-width: 300px;
             max-height: 70vh;
             overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
         }
 
         .modal-card h3 {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             font-weight: 500;
             color: #bccdfa;
             display: flex;
@@ -488,30 +412,24 @@
         .modal-card .user-item {
             display: flex;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #2f3b5c;
         }
 
         .modal-card .user-item .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-left: 12px;
+            margin-left: 10px;
         }
-        .status-dot.online {
-            background: #4cd964;
-        }
-        .status-dot.away {
-            background: #ffcc00;
-        }
-        .status-dot.offline {
-            background: #6c7a9a;
-        }
+        .status-dot.online { background: #4cd964; }
+        .status-dot.away { background: #ffcc00; }
+        .status-dot.offline { background: #6c7a9a; }
 
         .modal-card .close-modal {
-            margin-top: 16px;
+            margin-top: 14px;
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #33416a;
             border: none;
             border-radius: 30px;
@@ -520,22 +438,21 @@
             cursor: pointer;
         }
 
-        /* video player */
+        /* ===== Video ===== */
         .video-wrapper {
             position: absolute;
             bottom: 80px;
             left: 20px;
-            width: 280px;
-            height: 180px;
+            width: 260px;
+            height: 160px;
             background: #0b0e1a;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             z-index: 30;
             display: none;
-            resize: both;
-            overflow: auto;
             border: 2px solid #3a4b78;
             cursor: grab;
+            overflow: hidden;
         }
 
         .video-wrapper.active {
@@ -546,27 +463,25 @@
         .video-wrapper iframe {
             width: 100%;
             height: 100%;
-            border-radius: 18px;
             border: none;
         }
 
         .video-controls {
             position: absolute;
-            top: 6px;
-            left: 6px;
+            top: 4px;
+            left: 4px;
             display: flex;
-            gap: 6px;
+            gap: 4px;
         }
 
         .video-controls button {
             background: rgba(0, 0, 0, 0.6);
             border: none;
             color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 16px;
+            font-size: 0.65rem;
             cursor: pointer;
-            backdrop-filter: blur(2px);
         }
 
         .video-controls button:hover {
@@ -575,30 +490,64 @@
 
         .video-modal-input {
             display: flex;
-            gap: 8px;
-            margin: 12px 0;
+            gap: 6px;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
 
         .video-modal-input input {
             flex: 1;
-            padding: 10px;
+            padding: 8px 12px;
             border-radius: 30px;
             border: 1px solid #33416a;
             background: #10182e;
             color: white;
+            font-size: 0.85rem;
         }
 
         .video-modal-input button {
             background: #4f6ef7;
             border: none;
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 30px;
             color: white;
             font-weight: 600;
         }
 
-        /* responsive */
+        /* ===== Notification ===== */
+        .notification {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #eef2ff;
+            font-size: 0.8rem;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #2f3b5c;
+            animation: slideDown 0.3s ease;
+        }
+
+        .notification.show {
+            display: flex;
+        }
+
+        .notification.error { border-color: #ff4d5a; }
+        .notification.success { border-color: #4cd964; }
+        .notification.info { border-color: #4f6ef7; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ===== Responsive ===== */
         @media(max-width:500px) {
             .chat-app {
                 height: 100vh;
@@ -606,690 +555,557 @@
                 border-radius: 0;
             }
             .video-wrapper {
-                width: 200px;
-                height: 130px;
+                width: 180px;
+                height: 120px;
                 left: 10px;
-                bottom: 80px;
+                bottom: 76px;
             }
             .notification {
                 width: 90%;
-                font-size: 0.8rem;
-                padding: 10px 16px;
-                top: 70px;
+                font-size: 0.75rem;
+                padding: 6px 14px;
+                top: 60px;
             }
-            .connection-status span {
+            .connection-status span:last-child {
                 display: none;
+            }
+            .header h2 {
+                font-size: 0.85rem;
+            }
+            .message {
+                font-size: 0.8rem;
+                gap: 4px;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="chat-app" id="app">
-        <!-- Login Modal -->
-        <div class="login-modal" id="loginModal">
-            <div class="login-card">
-                <h2><i class="fas fa-comment-dots"></i> دردشة</h2>
-                <input type="text" id="usernameInput" placeholder="اسم المستخدم" maxlength="20" />
-                <div class="error" id="loginError"></div>
-                <button id="loginBtn">دخول</button>
-            </div>
-        </div>
-
-        <!-- Notification Toast -->
-        <div class="notification" id="notification">
-            <i class="fas fa-info-circle" id="notificationIcon"></i>
-            <span id="notificationText">تم الاتصال</span>
-        </div>
-
-        <!-- Header -->
-        <div class="header">
-            <h2><i class="fas fa-circle" style="color:#4cd964;font-size:0.7rem;"></i> غرفة الدردشة</h2>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div class="connection-status" id="connectionStatus">
-                    <span class="dot online" id="connectionDot"></span>
-                    <span id="connectionText">متصل</span>
-                </div>
-                <span class="users-count" id="usersCount"><i class="fas fa-user-friends"></i> 0</span>
-                <div class="header-actions">
-                    <button id="showUsersBtn"><i class="fas fa-users"></i></button>
-                    <button id="showVideoModalBtn"><i class="fas fa-video"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Messages -->
-        <div class="messages-container" id="messagesContainer"></div>
-
-        <!-- Typing Indicator -->
-        <div class="typing-indicator" id="typingIndicator">
-            <span>يكتب</span>
-            <span class="dots">
-                <span class="dot-anim"></span>
-                <span class="dot-anim"></span>
-                <span class="dot-anim"></span>
-            </span>
-        </div>
-
-        <!-- Input -->
-        <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب رسالة..." />
-            <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-        </div>
-
-        <!-- Online Users Modal -->
-        <div class="modal-overlay" id="usersModal">
-            <div class="modal-card">
-                <h3><span>المتصلون</span> <span id="modalUsersCount">0</span></h3>
-                <div id="usersList"></div>
-                <button class="close-modal" id="closeUsersModal">إغلاق</button>
-            </div>
-        </div>
-
-        <!-- Video Modal -->
-        <div class="modal-overlay" id="videoModal">
-            <div class="modal-card">
-                <h3>تشغيل فيديو</h3>
-                <div class="video-modal-input">
-                    <input type="text" id="videoUrlInput" placeholder="رابط يوتيوب / MP4 / M3U8" />
-                    <button id="setVideoBtn">تشغيل</button>
-                </div>
-                <button class="close-modal" id="closeVideoModal">إلغاء</button>
-            </div>
-        </div>
-
-        <!-- Video Player (draggable/resizable) -->
-        <div class="video-wrapper" id="videoWrapper">
-            <div class="video-controls">
-                <button id="closeVideoBtn"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="videoContainer"></div>
+<div class="chat-app" id="app">
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-card">
+            <h2><i class="fas fa-comment-dots"></i> دردشة</h2>
+            <input type="text" id="usernameInput" placeholder="اسم المستخدم" maxlength="20" />
+            <div class="error" id="loginError"></div>
+            <button id="loginBtn">دخول</button>
         </div>
     </div>
 
-    <script>
-        // ========== Firebase Config ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-            authDomain: "mychat-2d881.firebaseapp.com",
-            databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
-            projectId: "mychat-2d881",
-            storageBucket: "mychat-2d881.firebasestorage.app",
-            messagingSenderId: "532385733649",
-            appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle" id="notificationIcon"></i>
+        <span id="notificationText"></span>
+    </div>
 
-        // ========== State ==========
-        let currentUser = null;
-        let isLoggedIn = false;
-        let userRef = null;
-        let typingTimeout = null;
-        let isConnectionRetrying = false;
-        let retryCount = 0;
-        const MAX_RETRIES = 5;
+    <!-- Header -->
+    <div class="header">
+        <h2><i class="fas fa-circle" style="color:#4cd964;font-size:0.6rem;"></i> غرفة الدردشة</h2>
+        <div class="header-actions">
+            <div class="connection-status" id="connectionStatus">
+                <span class="dot online" id="connectionDot"></span>
+                <span id="connectionText">متصل</span>
+            </div>
+            <span class="users-count" id="usersCount"><i class="fas fa-user-friends"></i> 0</span>
+            <button id="showUsersBtn"><i class="fas fa-users"></i></button>
+            <button id="showVideoModalBtn"><i class="fas fa-video"></i></button>
+        </div>
+    </div>
 
-        let usersRef = db.ref('users');
-        let messagesRef = db.ref('messages');
-        let videoRef = db.ref('video');
-        let typingRef = db.ref('typing');
-        let currentVideoKey = null;
+    <!-- Messages -->
+    <div class="messages-container" id="messagesContainer"></div>
 
-        // ========== DOM ==========
-        const loginModal = document.getElementById('loginModal');
-        const usernameInput = document.getElementById('usernameInput');
-        const loginError = document.getElementById('loginError');
-        const loginBtn = document.getElementById('loginBtn');
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const usersCount = document.getElementById('usersCount');
-        const showUsersBtn = document.getElementById('showUsersBtn');
-        const usersModal = document.getElementById('usersModal');
-        const usersList = document.getElementById('usersList');
-        const modalUsersCount = document.getElementById('modalUsersCount');
-        const closeUsersModal = document.getElementById('closeUsersModal');
-        const showVideoModalBtn = document.getElementById('showVideoModalBtn');
-        const videoModal = document.getElementById('videoModal');
-        const videoUrlInput = document.getElementById('videoUrlInput');
-        const setVideoBtn = document.getElementById('setVideoBtn');
-        const closeVideoModal = document.getElementById('closeVideoModal');
-        const videoWrapper = document.getElementById('videoWrapper');
-        const videoContainer = document.getElementById('videoContainer');
-        const closeVideoBtn = document.getElementById('closeVideoBtn');
-        const typingIndicator = document.getElementById('typingIndicator');
-        const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notificationText');
-        const notificationIcon = document.getElementById('notificationIcon');
-        const connectionDot = document.getElementById('connectionDot');
-        const connectionText = document.getElementById('connectionText');
+    <!-- Typing -->
+    <div class="typing-indicator" id="typingIndicator">
+        <span>يكتب</span>
+        <span class="dots">
+            <span class="dot-anim"></span>
+            <span class="dot-anim"></span>
+            <span class="dot-anim"></span>
+        </span>
+    </div>
 
-        // ========== Helpers ==========
-        function sanitize(name) {
-            return name.replace(/[^a-zA-Z\u0600-\u06FF0-9\s]/g, '').trim();
+    <!-- Input Area -->
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="اكتب رسالة..." />
+        <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <!-- Users Modal -->
+    <div class="modal-overlay" id="usersModal">
+        <div class="modal-card">
+            <h3><span>المتصلون</span> <span id="modalUsersCount">0</span></h3>
+            <div id="usersList"></div>
+            <button class="close-modal" id="closeUsersModal">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="modal-card">
+            <h3>تشغيل فيديو</h3>
+            <div class="video-modal-input">
+                <input type="text" id="videoUrlInput" placeholder="رابط يوتيوب / MP4" />
+                <button id="setVideoBtn">تشغيل</button>
+            </div>
+            <button class="close-modal" id="closeVideoModal">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-wrapper" id="videoWrapper">
+        <div class="video-controls">
+            <button id="closeVideoBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="videoContainer"></div>
+    </div>
+</div>
+
+<script>
+    // ========== Firebase Config ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+        authDomain: "mychat-2d881.firebaseapp.com",
+        databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+        projectId: "mychat-2d881",
+        storageBucket: "mychat-2d881.firebasestorage.app",
+        messagingSenderId: "532385733649",
+        appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ========== State ==========
+    let currentUser = null;
+    let isLoggedIn = false;
+    let userRef = null;
+    let typingTimeout = null;
+    let retryCount = 0;
+    const MAX_RETRIES = 5;
+    let isConnectionRetrying = false;
+
+    const usersRef = db.ref('users');
+    const messagesRef = db.ref('messages');
+    const videoRef = db.ref('video');
+    const typingRef = db.ref('typing');
+    let currentVideoKey = null;
+
+    // ========== DOM ==========
+    const loginModal = document.getElementById('loginModal');
+    const usernameInput = document.getElementById('usernameInput');
+    const loginError = document.getElementById('loginError');
+    const loginBtn = document.getElementById('loginBtn');
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const usersCount = document.getElementById('usersCount');
+    const showUsersBtn = document.getElementById('showUsersBtn');
+    const usersModal = document.getElementById('usersModal');
+    const usersList = document.getElementById('usersList');
+    const modalUsersCount = document.getElementById('modalUsersCount');
+    const closeUsersModal = document.getElementById('closeUsersModal');
+    const showVideoModalBtn = document.getElementById('showVideoModalBtn');
+    const videoModal = document.getElementById('videoModal');
+    const videoUrlInput = document.getElementById('videoUrlInput');
+    const setVideoBtn = document.getElementById('setVideoBtn');
+    const closeVideoModal = document.getElementById('closeVideoModal');
+    const videoWrapper = document.getElementById('videoWrapper');
+    const videoContainer = document.getElementById('videoContainer');
+    const closeVideoBtn = document.getElementById('closeVideoBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    const notificationIcon = document.getElementById('notificationIcon');
+    const connectionDot = document.getElementById('connectionDot');
+    const connectionText = document.getElementById('connectionText');
+
+    // ========== Helpers ==========
+    function sanitize(name) {
+        return name.replace(/[^a-zA-Z\u0600-\u06FF0-9\s]/g, '').trim();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatTime(timestamp) {
+        const diff = Math.floor((Date.now() - timestamp) / 1000);
+        if (diff < 60) return 'الآن';
+        if (diff < 3600) return `د${Math.floor(diff / 60)}`;
+        if (diff < 86400) return `س${Math.floor(diff / 3600)}`;
+        return `${Math.floor(diff / 86400)}ي`;
+    }
+
+    function scrollToBottom() {
+        setTimeout(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 50);
+    }
+
+    function showNotification(text, type = 'info', duration = 3000) {
+        notification.className = 'notification show ' + type;
+        notificationText.textContent = text;
+        const icons = { info: 'fa-info-circle', success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+        notificationIcon.className = 'fas ' + (icons[type] || icons.info);
+        clearTimeout(notification._timeout);
+        notification._timeout = setTimeout(() => notification.classList.remove('show'), duration);
+    }
+
+    // ========== Connection Status ==========
+    function updateConnectionStatus(status) {
+        connectionDot.className = 'dot ' + status;
+        const statusTexts = { online: 'متصل', connecting: 'جاري...', offline: 'غير متصل' };
+        connectionText.textContent = statusTexts[status] || status;
+        messageInput.disabled = status === 'offline';
+        sendBtn.disabled = status === 'offline';
+        if (status === 'offline') {
+            showNotification('فقدان الاتصال، جاري إعادة المحاولة...', 'error', 4000);
+        } else if (status === 'online') {
+            showNotification('تم إعادة الاتصال', 'success', 1500);
         }
+    }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function relativeTime(timestamp) {
-            const diff = Math.floor((Date.now() - timestamp) / 1000);
-            if (diff < 60) return 'الآن';
-            if (diff < 3600) return `د${Math.floor(diff / 60)}`;
-            if (diff < 86400) return `س${Math.floor(diff / 3600)}`;
-            return `${Math.floor(diff / 86400)}ي`;
-        }
-
-        function formatTime(timestamp) {
-            return relativeTime(timestamp);
-        }
-
-        function scrollToBottom() {
-            setTimeout(() => {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }, 50);
-        }
-
-        // ========== Notification System ==========
-        function showNotification(text, type = 'info', duration = 3000) {
-            notification.className = 'notification show ' + type;
-            notificationText.textContent = text;
-
-            const icons = {
-                info: 'fa-info-circle',
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle'
-            };
-            notificationIcon.className = 'fas ' + (icons[type] || icons.info);
-
-            clearTimeout(notification._timeout);
-            notification._timeout = setTimeout(() => {
-                notification.classList.remove('show');
-            }, duration);
-        }
-
-        // ========== Connection Status ==========
-        function updateConnectionStatus(status) {
-            connectionDot.className = 'dot ' + status;
-            const statusTexts = {
-                online: 'متصل',
-                connecting: 'جاري الاتصال...',
-                offline: 'غير متصل'
-            };
-            connectionText.textContent = statusTexts[status] || status;
-            messageInput.disabled = status === 'offline';
-            sendBtn.disabled = status === 'offline';
-
-            if (status === 'offline') {
-                showNotification('فقدان الاتصال بالخادم، جاري إعادة المحاولة...', 'error', 5000);
-            } else if (status === 'online') {
-                showNotification('تم إعادة الاتصال بنجاح', 'success', 2000);
+    function setupConnectionMonitoring() {
+        const connectedRef = firebase.database().ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            const connected = snap.val();
+            if (connected) {
+                updateConnectionStatus('online');
+                retryCount = 0;
+                isConnectionRetrying = false;
+                if (currentUser && userRef) {
+                    userRef.update({ status: 'online', lastSeen: Date.now() });
+                }
+            } else {
+                updateConnectionStatus('connecting');
+                handleReconnection();
             }
-        }
+        });
+    }
 
-        function setupConnectionMonitoring() {
-            const connectedRef = firebase.database().ref('.info/connected');
-            connectedRef.on('value', (snap) => {
-                const connected = snap.val();
-                if (connected) {
-                    updateConnectionStatus('online');
-                    retryCount = 0;
-                    isConnectionRetrying = false;
-                    // Re-authenticate user if needed
-                    if (currentUser && userRef) {
-                        userRef.update({ status: 'online', lastSeen: Date.now() });
-                    }
-                } else {
-                    updateConnectionStatus('connecting');
-                    handleReconnection();
-                }
-            });
-
-            // Monitor connection state changes
-            firebase.database().ref('.info/serverTimeOffset').on('value', (snap) => {
-                if (snap.val() !== null) {
-                    updateConnectionStatus('online');
-                }
-            });
-        }
-
-        function handleReconnection() {
-            if (isConnectionRetrying) return;
-            isConnectionRetrying = true;
-
-            function attemptReconnect() {
-                retryCount++;
-                if (retryCount > MAX_RETRIES) {
-                    updateConnectionStatus('offline');
-                    isConnectionRetrying = false;
-                    showNotification('فشل الاتصال بعد عدة محاولات. يرجى تحديث الصفحة.', 'error', 5000);
-                    return;
-                }
-
-                showNotification(`محاولة إعادة الاتصال ${retryCount}/${MAX_RETRIES}...`, 'warning', 3000);
-
-                // Try to ping the database
-                const pingRef = firebase.database().ref('.info/connected');
-                pingRef.once('value').then((snap) => {
-                    if (snap.val() === true) {
-                        updateConnectionStatus('online');
-                        isConnectionRetrying = false;
-                        retryCount = 0;
-                        return;
-                    }
-                    // Retry after delay
-                    setTimeout(attemptReconnect, 3000 * retryCount);
-                }).catch(() => {
-                    setTimeout(attemptReconnect, 3000 * retryCount);
-                });
-            }
-
-            setTimeout(attemptReconnect, 2000);
-        }
-
-        // ========== Render Messages (safe) ==========
-        function renderMessages(snapshot) {
-            const msgs = snapshot.val();
-            messagesContainer.innerHTML = '';
-            if (!msgs) return;
-            const keys = Object.keys(msgs);
-            keys.forEach(key => {
-                const m = msgs[key];
-                const div = document.createElement('div');
-                div.className = `message ${m.user === currentUser ? 'own' : ''}`;
-                div.dataset.key = key;
-
-                const userDiv = document.createElement('div');
-                userDiv.className = 'msg-user';
-                userDiv.textContent = m.user;
-
-                const textDiv = document.createElement('div');
-                textDiv.className = 'msg-text';
-                textDiv.textContent = m.text;
-
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'msg-time';
-                const timeSpan = document.createElement('span');
-                timeSpan.textContent = formatTime(m.timestamp);
-                timeDiv.appendChild(timeSpan);
-
-                if (m.user === currentUser) {
-                    const delBtn = document.createElement('button');
-                    delBtn.className = 'delete-btn';
-                    delBtn.dataset.key = key;
-                    delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                    delBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const k = delBtn.dataset.key;
-                        messagesRef.child(k).remove().catch(error => {
-                            showNotification('فشل حذف الرسالة', 'error');
-                        });
-                    });
-                    timeDiv.appendChild(delBtn);
-                }
-
-                div.appendChild(userDiv);
-                div.appendChild(textDiv);
-                div.appendChild(timeDiv);
-                messagesContainer.appendChild(div);
-            });
-            scrollToBottom();
-        }
-
-        // ========== Update online users ==========
-        function updateUsers(snapshot) {
-            const data = snapshot.val();
-            const count = data ? Object.keys(data).length : 0;
-            usersCount.innerHTML = `<i class="fas fa-user-friends"></i> ${count}`;
-            modalUsersCount.textContent = count;
-            usersList.innerHTML = '';
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    const u = data[key];
-                    const div = document.createElement('div');
-                    div.className = 'user-item';
-                    const status = u.status || 'offline';
-                    const dot = document.createElement('span');
-                    dot.className = `status-dot ${status}`;
-                    div.appendChild(dot);
-                    const nameSpan = document.createElement('span');
-                    nameSpan.textContent = u.name || 'مجهول';
-                    div.appendChild(nameSpan);
-                    usersList.appendChild(div);
-                });
-            }
-        }
-
-        // ========== Typing Indicator ==========
-        function setupTypingIndicator() {
-            typingRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    typingIndicator.classList.remove('active');
-                    return;
-                }
-
-                // Get all typing users except current user
-                const typingUsers = Object.keys(data).filter(key => key !== currentUser);
-                if (typingUsers.length === 0) {
-                    typingIndicator.classList.remove('active');
-                    return;
-                }
-
-                // Show first typing user
-                const firstName = data[typingUsers[0]]?.name || 'شخص';
-                if (typingUsers.length === 1) {
-                    notificationText.textContent = `${firstName} يكتب...`;
-                } else if (typingUsers.length === 2) {
-                    const secondName = data[typingUsers[1]]?.name || 'آخر';
-                    notificationText.textContent = `${firstName} و ${secondName} يكتبان...`;
-                } else {
-                    notificationText.textContent = `${typingUsers.length} أشخاص يكتبون...`;
-                }
-                typingIndicator.classList.add('active');
-            });
-        }
-
-        function handleTyping() {
-            if (!currentUser) return;
-            const typingUserRef = typingRef.child(currentUser);
-            typingUserRef.set({ name: currentUser, timestamp: Date.now() });
-
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                typingUserRef.remove();
-            }, 2000);
-        }
-
-        // ========== Video ==========
-        function renderVideo(snapshot) {
-            const data = snapshot.val();
-            if (!data || !data.url) {
-                videoWrapper.classList.remove('active');
-                videoContainer.innerHTML = '';
-                currentVideoKey = null;
+    function handleReconnection() {
+        if (isConnectionRetrying) return;
+        isConnectionRetrying = true;
+        function attemptReconnect() {
+            retryCount++;
+            if (retryCount > MAX_RETRIES) {
+                updateConnectionStatus('offline');
+                isConnectionRetrying = false;
+                showNotification('فشل الاتصال، يرجى تحديث الصفحة', 'error', 5000);
                 return;
             }
-            currentVideoKey = snapshot.key;
-            videoWrapper.classList.add('active');
-            const url = data.url;
-            let html = '';
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                const vid = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
-                if (vid) {
-                    html =
-                        `<iframe src="https://www.youtube.com/embed/${vid[1]}?autoplay=1" allowfullscreen></iframe>`;
-                } else {
-                    html = `<video controls autoplay><source src="${escapeHtml(url)}" /></video>`;
+            showNotification(`محاولة ${retryCount}/${MAX_RETRIES}...`, 'warning', 2000);
+            firebase.database().ref('.info/connected').once('value').then((snap) => {
+                if (snap.val() === true) {
+                    updateConnectionStatus('online');
+                    isConnectionRetrying = false;
+                    retryCount = 0;
+                    return;
                 }
-            } else if (url.includes('.m3u8')) {
-                html =
-                    `<video controls autoplay><source src="${escapeHtml(url)}" type="application/vnd.apple.mpegurl" /></video>`;
+                setTimeout(attemptReconnect, 3000 * retryCount);
+            }).catch(() => setTimeout(attemptReconnect, 3000 * retryCount));
+        }
+        setTimeout(attemptReconnect, 2000);
+    }
+
+    // ========== Render Messages (سطر واحد) ==========
+    function renderMessages(snapshot) {
+        const msgs = snapshot.val();
+        messagesContainer.innerHTML = '';
+        if (!msgs) return;
+        const keys = Object.keys(msgs);
+        keys.forEach(key => {
+            const m = msgs[key];
+            const div = document.createElement('div');
+            div.className = `message ${m.user === currentUser ? 'own' : ''}`;
+            div.dataset.key = key;
+
+            const userSpan = document.createElement('span');
+            userSpan.className = 'msg-user';
+            userSpan.textContent = m.user;
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'msg-text';
+            textSpan.textContent = m.text;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'msg-time';
+            timeSpan.textContent = formatTime(m.timestamp);
+
+            div.appendChild(userSpan);
+            div.appendChild(textSpan);
+            div.appendChild(timeSpan);
+
+            if (m.user === currentUser) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.dataset.key = key;
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    messagesRef.child(key).remove().catch(() => showNotification('فشل الحذف', 'error'));
+                });
+                div.appendChild(delBtn);
+            }
+
+            messagesContainer.appendChild(div);
+        });
+        scrollToBottom();
+    }
+
+    // ========== Update Users ==========
+    function updateUsers(snapshot) {
+        const data = snapshot.val();
+        const count = data ? Object.keys(data).length : 0;
+        usersCount.innerHTML = `<i class="fas fa-user-friends"></i> ${count}`;
+        modalUsersCount.textContent = count;
+        usersList.innerHTML = '';
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const u = data[key];
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                const dot = document.createElement('span');
+                dot.className = `status-dot ${u.status || 'offline'}`;
+                div.appendChild(dot);
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = u.name || 'مجهول';
+                div.appendChild(nameSpan);
+                usersList.appendChild(div);
+            });
+        }
+    }
+
+    // ========== Typing ==========
+    function setupTypingIndicator() {
+        typingRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) { typingIndicator.classList.remove('active'); return; }
+            const typingUsers = Object.keys(data).filter(key => key !== currentUser);
+            if (typingUsers.length === 0) { typingIndicator.classList.remove('active'); return; }
+            const firstName = data[typingUsers[0]]?.name || 'شخص';
+            if (typingUsers.length === 1) {
+                notificationText.textContent = `${firstName} يكتب...`;
+            } else if (typingUsers.length === 2) {
+                const secondName = data[typingUsers[1]]?.name || 'آخر';
+                notificationText.textContent = `${firstName} و ${secondName} يكتبان...`;
+            } else {
+                notificationText.textContent = `${typingUsers.length} أشخاص يكتبون...`;
+            }
+            typingIndicator.classList.add('active');
+        });
+    }
+
+    function handleTyping() {
+        if (!currentUser) return;
+        typingRef.child(currentUser).set({ name: currentUser, timestamp: Date.now() });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => typingRef.child(currentUser).remove(), 2000);
+    }
+
+    // ========== Video ==========
+    function renderVideo(snapshot) {
+        const data = snapshot.val();
+        if (!data || !data.url) {
+            videoWrapper.classList.remove('active');
+            videoContainer.innerHTML = '';
+            currentVideoKey = null;
+            return;
+        }
+        currentVideoKey = snapshot.key;
+        videoWrapper.classList.add('active');
+        const url = data.url;
+        let html = '';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const vid = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
+            if (vid) {
+                html = `<iframe src="https://www.youtube.com/embed/${vid[1]}?autoplay=1" allowfullscreen></iframe>`;
             } else {
                 html = `<video controls autoplay><source src="${escapeHtml(url)}" /></video>`;
             }
-            videoContainer.innerHTML = html;
+        } else {
+            html = `<video controls autoplay><source src="${escapeHtml(url)}" /></video>`;
+        }
+        videoContainer.innerHTML = html;
+    }
+
+    // ========== Login ==========
+    function attemptLogin() {
+        let name = sanitize(usernameInput.value.trim());
+        if (name.length < 2) {
+            loginError.textContent = 'الاسم يجب أن يكون حرفين على الأقل';
+            return;
+        }
+        if (!/^[\u0600-\u06FFa-zA-Z0-9\s]{2,20}$/.test(name)) {
+            loginError.textContent = 'أحرف وأرقام فقط';
+            return;
         }
 
-        // ========== Login ==========
-        function attemptLogin() {
-            let name = usernameInput.value.trim();
-            name = sanitize(name);
-            if (name.length < 2) {
-                loginError.textContent = 'الاسم يجب أن يكون حرفين على الأقل';
-                return;
-            }
-            if (!/^[\u0600-\u06FFa-zA-Z0-9\s]{2,20}$/.test(name)) {
-                loginError.textContent = 'أحرف وأرقام فقط (بدون رموز)';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'جاري...';
+
+        usersRef.orderByChild('name').equalTo(name).once('value').then(snap => {
+            if (snap.exists()) {
+                loginError.textContent = 'هذا الاسم مستخدم حالياً';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'دخول';
                 return;
             }
 
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'جاري التحقق...';
+            currentUser = name;
+            isLoggedIn = true;
+            loginModal.style.display = 'none';
+            userRef = usersRef.push({ name, status: 'online', lastSeen: Date.now() });
+            userRef.onDisconnect().remove();
 
-            usersRef.orderByChild('name').equalTo(name).once('value').then(snap => {
-                if (snap.exists()) {
-                    loginError.textContent = 'هذا الاسم مستخدم حالياً';
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'دخول';
-                    return;
+            setupConnectionMonitoring();
+            messagesRef.on('value', renderMessages);
+            usersRef.on('value', updateUsers);
+            videoRef.on('value', renderVideo);
+            setupTypingIndicator();
+
+            setInterval(() => {
+                if (currentUser && userRef) {
+                    userRef.update({ lastSeen: Date.now(), status: 'online' }).catch(() => {});
                 }
+            }, 30000);
 
-                currentUser = name;
-                isLoggedIn = true;
-                loginModal.style.display = 'none';
-                userRef = usersRef.push({
-                    name: name,
-                    status: 'online',
-                    lastSeen: Date.now()
-                });
-
-                userRef.onDisconnect().remove();
-
-                // Setup connection monitoring
-                setupConnectionMonitoring();
-
-                // Listen for messages
-                messagesRef.on('value', renderMessages);
-
-                // Listen for users
-                usersRef.on('value', updateUsers);
-
-                // Listen for video
-                videoRef.on('value', renderVideo);
-
-                // Setup typing indicator
-                setupTypingIndicator();
-
-                // Update status periodically
-                setInterval(() => {
-                    if (currentUser && userRef) {
-                        userRef.update({ lastSeen: Date.now(), status: 'online' })
-                            .catch(() => {});
-                    }
-                }, 30000);
-
-                // Clean inactive users
-                setInterval(() => {
-                    const now = Date.now();
-                    usersRef.once('value', snap => {
-                        const data = snap.val();
-                        if (data) {
-                            Object.keys(data).forEach(key => {
-                                const u = data[key];
-                                if (now - (u.lastSeen || 0) > 60000) {
-                                    usersRef.child(key).remove().catch(() => {});
-                                }
-                            });
-                        }
-                    });
-                }, 60000);
-
-                // Update message times
-                setInterval(() => {
-                    const timeElements = document.querySelectorAll('.message .msg-time');
-                    timeElements.forEach(el => {
-                        const msgDiv = el.closest('.message');
-                        if (msgDiv) {
-                            const key = msgDiv.dataset.key;
-                            if (key) {
-                                messagesRef.child(key).once('value').then(snap => {
-                                    const msg = snap.val();
-                                    if (msg && msg.timestamp) {
-                                        const timeSpan = el.querySelector('span:first-child');
-                                        if (timeSpan) {
-                                            timeSpan.textContent = formatTime(msg.timestamp);
-                                        }
-                                    }
-                                }).catch(() => {});
+            setInterval(() => {
+                const now = Date.now();
+                usersRef.once('value', snap => {
+                    const data = snap.val();
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            if (now - (data[key].lastSeen || 0) > 60000) {
+                                usersRef.child(key).remove().catch(() => {});
                             }
-                        }
-                    });
-                }, 60000);
-
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
-                messageInput.focus();
-                loginError.textContent = '';
-                showNotification(`مرحباً ${name}!`, 'success');
-
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'دخول';
-            }).catch(error => {
-                loginError.textContent = 'خطأ في الاتصال، حاول مرة أخرى';
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'دخول';
-                showNotification('فشل الاتصال بالخادم', 'error');
-            });
-        }
-
-        loginBtn.addEventListener('click', attemptLogin);
-        usernameInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') attemptLogin();
-        });
-
-        // ========== Send message ==========
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !currentUser) return;
-
-            // Clear typing indicator
-            if (typingTimeout) {
-                clearTimeout(typingTimeout);
-                if (currentUser) {
-                    typingRef.child(currentUser).remove().catch(() => {});
-                }
-            }
-
-            messagesRef.push({
-                user: currentUser,
-                text: text,
-                timestamp: Date.now()
-            }).catch(error => {
-                showNotification('فشل إرسال الرسالة', 'error');
-            });
-
-            messageInput.value = '';
-            messageInput.focus();
-            scrollToBottom();
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Typing detection
-        messageInput.addEventListener('input', handleTyping);
-
-        // ========== Users modal ==========
-        showUsersBtn.addEventListener('click', () => usersModal.classList.add('active'));
-        closeUsersModal.addEventListener('click', () => usersModal.classList.remove('active'));
-        usersModal.addEventListener('click', (e) => {
-            if (e.target === usersModal) usersModal.classList.remove('active');
-        });
-
-        // ========== Video modal ==========
-        showVideoModalBtn.addEventListener('click', () => videoModal.classList.add('active'));
-        closeVideoModal.addEventListener('click', () => videoModal.classList.remove('active'));
-        videoModal.addEventListener('click', (e) => {
-            if (e.target === videoModal) videoModal.classList.remove('active');
-        });
-
-        setVideoBtn.addEventListener('click', () => {
-            const url = videoUrlInput.value.trim();
-            if (!url) {
-                showNotification('الرجاء إدخال رابط فيديو', 'warning');
-                return;
-            }
-            videoRef.set({ url: url, timestamp: Date.now() })
-                .then(() => {
-                    videoModal.classList.remove('active');
-                    videoUrlInput.value = '';
-                    showNotification('تم تشغيل الفيديو', 'success');
-                })
-                .catch(() => {
-                    showNotification('فشل تشغيل الفيديو', 'error');
+                        });
+                    }
                 });
-        });
+            }, 60000);
 
-        closeVideoBtn.addEventListener('click', () => {
-            if (currentVideoKey) {
-                videoRef.remove().catch(() => {});
-            } else {
-                videoWrapper.classList.remove('active');
-                videoContainer.innerHTML = '';
-            }
-        });
+            setInterval(() => {
+                document.querySelectorAll('.message .msg-time').forEach(el => {
+                    const msgDiv = el.closest('.message');
+                    if (msgDiv) {
+                        const key = msgDiv.dataset.key;
+                        if (key) {
+                            messagesRef.child(key).once('value').then(snap => {
+                                const msg = snap.val();
+                                if (msg && msg.timestamp) {
+                                    el.textContent = formatTime(msg.timestamp);
+                                }
+                            }).catch(() => {});
+                        }
+                    }
+                });
+            }, 60000);
 
-        // ========== Draggable / Resizable ==========
-        let isDragging = false,
-            offsetX, offsetY;
-        videoWrapper.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.video-controls') || e.target.closest('button')) return;
-            isDragging = true;
-            const rect = videoWrapper.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            videoWrapper.style.cursor = 'grabbing';
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+            loginError.textContent = '';
+            showNotification(`مرحباً ${name}!`, 'success');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'دخول';
+        }).catch(() => {
+            loginError.textContent = 'خطأ في الاتصال';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'دخول';
         });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const left = e.clientX - offsetX;
-            const top = e.clientY - offsetY;
-            const parent = document.getElementById('app');
-            const pRect = parent.getBoundingClientRect();
-            videoWrapper.style.left = Math.min(Math.max(left, 0), pRect.width - videoWrapper.offsetWidth) + 'px';
-            videoWrapper.style.top = Math.min(Math.max(top, 0), pRect.height - videoWrapper.offsetHeight) + 'px';
-        });
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            videoWrapper.style.cursor = 'grab';
-        });
+    }
 
-        // Touch support
-        videoWrapper.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.video-controls') || e.target.closest('button')) return;
-            const touch = e.touches[0];
-            const rect = videoWrapper.getBoundingClientRect();
-            offsetX = touch.clientX - rect.left;
-            offsetY = touch.clientY - rect.top;
-            isDragging = true;
-        }, { passive: true });
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const touch = e.touches[0];
-            const left = touch.clientX - offsetX;
-            const top = touch.clientY - offsetY;
-            const parent = document.getElementById('app');
-            const pRect = parent.getBoundingClientRect();
-            videoWrapper.style.left = Math.min(Math.max(left, 0), pRect.width - videoWrapper.offsetWidth) + 'px';
-            videoWrapper.style.top = Math.min(Math.max(top, 0), pRect.height - videoWrapper.offsetHeight) + 'px';
-        }, { passive: true });
-        document.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
+    loginBtn.addEventListener('click', attemptLogin);
+    usernameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
 
-        // ========== Init ==========
-        loginModal.style.display = 'flex';
-        messageInput.disabled = true;
-        sendBtn.disabled = true;
+    // ========== Send ==========
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentUser) return;
+        if (typingTimeout) { clearTimeout(typingTimeout); typingRef.child(currentUser).remove().catch(() => {}); }
+        messagesRef.push({ user: currentUser, text, timestamp: Date.now() }).catch(() => showNotification('فشل الإرسال', 'error'));
+        messageInput.value = '';
+        messageInput.focus();
+        scrollToBottom();
+    }
 
-        // Setup connection monitoring from start
-        const connectedRef = firebase.database().ref('.info/connected');
-        connectedRef.on('value', (snap) => {
-            if (snap.val() === true && !isLoggedIn) {
-                // Connection is available
-            }
-        });
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    messageInput.addEventListener('input', handleTyping);
 
-        console.log('تم تحميل التطبيق بنجاح ✅');
-    </script>
+    // ========== Modals ==========
+    showUsersBtn.addEventListener('click', () => usersModal.classList.add('active'));
+    closeUsersModal.addEventListener('click', () => usersModal.classList.remove('active'));
+    usersModal.addEventListener('click', (e) => { if (e.target === usersModal) usersModal.classList.remove('active'); });
+
+    showVideoModalBtn.addEventListener('click', () => videoModal.classList.add('active'));
+    closeVideoModal.addEventListener('click', () => videoModal.classList.remove('active'));
+    videoModal.addEventListener('click', (e) => { if (e.target === videoModal) videoModal.classList.remove('active'); });
+
+    setVideoBtn.addEventListener('click', () => {
+        const url = videoUrlInput.value.trim();
+        if (!url) { showNotification('الرجاء إدخال رابط', 'warning'); return; }
+        videoRef.set({ url, timestamp: Date.now() }).then(() => {
+            videoModal.classList.remove('active');
+            videoUrlInput.value = '';
+            showNotification('تم تشغيل الفيديو', 'success');
+        }).catch(() => showNotification('فشل التشغيل', 'error'));
+    });
+
+    closeVideoBtn.addEventListener('click', () => {
+        if (currentVideoKey) { videoRef.remove().catch(() => {}); }
+        else { videoWrapper.classList.remove('active'); videoContainer.innerHTML = ''; }
+    });
+
+    // ========== Draggable ==========
+    let isDragging = false, offsetX, offsetY;
+    videoWrapper.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.video-controls') || e.target.closest('button')) return;
+        isDragging = true;
+        const rect = videoWrapper.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        videoWrapper.style.cursor = 'grabbing';
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const parent = document.getElementById('app');
+        const pRect = parent.getBoundingClientRect();
+        const left = Math.min(Math.max(e.clientX - offsetX, 0), pRect.width - videoWrapper.offsetWidth);
+        const top = Math.min(Math.max(e.clientY - offsetY, 0), pRect.height - videoWrapper.offsetHeight);
+        videoWrapper.style.left = left + 'px';
+        videoWrapper.style.top = top + 'px';
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; videoWrapper.style.cursor = 'grab'; });
+
+    videoWrapper.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.video-controls') || e.target.closest('button')) return;
+        const touch = e.touches[0];
+        const rect = videoWrapper.getBoundingClientRect();
+        offsetX = touch.clientX - rect.left;
+        offsetY = touch.clientY - rect.top;
+        isDragging = true;
+    }, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const parent = document.getElementById('app');
+        const pRect = parent.getBoundingClientRect();
+        const left = Math.min(Math.max(touch.clientX - offsetX, 0), pRect.width - videoWrapper.offsetWidth);
+        const top = Math.min(Math.max(touch.clientY - offsetY, 0), pRect.height - videoWrapper.offsetHeight);
+        videoWrapper.style.left = left + 'px';
+        videoWrapper.style.top = top + 'px';
+    }, { passive: true });
+    document.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
+
+    // ========== Init ==========
+    loginModal.style.display = 'flex';
+    messageInput.disabled = true;
+    sendBtn.disabled = true;
+</script>
 </body>
 </html>
