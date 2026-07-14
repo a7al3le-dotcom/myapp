@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-youtube@3.0.1/dist/Youtube.min.js"></script>
-    <!-- hls.js لدعم M3U8 على Chrome/Android/Firefox -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
     <style>
@@ -58,7 +58,6 @@
             backdrop-filter: blur(16px);
         }
 
-        /* رسائل الشات */
         #messages {
             flex: 1;
             overflow-y: auto;
@@ -105,7 +104,6 @@
             text-align: right;
         }
 
-        /* منطقة الإدخال */
         #inputArea {
             display: flex;
             flex-direction: row;
@@ -120,7 +118,6 @@
         #messageInput {
             flex: 1;
             font-size: 16px;
-            /* 16px+ يمنع التكبير التلقائي على iOS */
             height: 44px;
             padding: 0 15px;
             border-radius: 999px;
@@ -149,7 +146,6 @@
                 0 20px 50px rgba(0, 0, 0, 0.9);
         }
 
-        /* زر الإرسال - ستايل زر أساسي */
         #sendBtn {
             height: 44px;
             padding: 0 22px;
@@ -184,7 +180,6 @@
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
         }
 
-        /* أزرار أعلى الشاشة */
         #topButtons {
             position: fixed;
             top: 10px;
@@ -225,9 +220,6 @@
             font-weight: 600;
         }
 
-        /* #onlineList - غير مستخدم في HTML حالياً */
-
-        /* مودالات */
         #usersBox,
         #setVideoModal {
             position: fixed;
@@ -295,7 +287,6 @@
             color: var(--text-main);
             font-family: 'Tajawal', sans-serif;
             font-size: 16px;
-            /* 16px+ يمنع التكبير التلقائي على iOS */
             box-sizing: border-box;
             margin-bottom: 10px;
             -webkit-appearance: none;
@@ -342,7 +333,6 @@
             display: none;
         }
 
-        /* شاشة تسجيل الدخول */
         #loginScreen {
             position: fixed;
             top: 0;
@@ -382,7 +372,6 @@
             margin: 10px 0;
             border-radius: 999px;
             font-size: 16px;
-            /* 16px+ يمنع التكبير التلقائي على iOS */
             text-align: center;
             box-sizing: border-box;
             font-family: 'Tajawal', sans-serif;
@@ -424,7 +413,6 @@
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.9);
         }
 
-        /* فيديو مثبت */
         #pinnedVideoPlayer {
             position: fixed;
             top: 60px;
@@ -491,7 +479,6 @@
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent);
         }
 
-        /* ثيم نتفلكس للفيديو */
         .video-js.vjs-netflix-theme {
             background-color: #000;
         }
@@ -673,16 +660,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const firebaseConfig = {
-  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-  authDomain: "mychat-2d881.firebaseapp.com",
-  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
-  projectId: "mychat-2d881",
-  storageBucket: "mychat-2d881.firebasestorage.app",
-  messagingSenderId: "532385733649",
-  appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
+                apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+                authDomain: "mychat-2d881.firebaseapp.com",
+                databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+                projectId: "mychat-2d881",
+                storageBucket: "mychat-2d881.firebasestorage.app",
+                messagingSenderId: "532385733649",
+                appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
             };
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
+            const auth = firebase.auth();
 
             let username = '';
             let userRef, messagesRef, onlineRef, pinnedVideoRef;
@@ -719,12 +707,36 @@
                 }
 
                 username = inputName;
-                userRef = db.ref("online/" + username);
-                messagesRef = db.ref("messages");
-                onlineRef = db.ref("online");
-                pinnedVideoRef = db.ref("pinned_video");
 
-                startChat();
+                // تعطيل زر الدخول أثناء المصادقة
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'جاري الدخول...';
+
+                // تسجيل الدخول كمجهول ثم تحديث اسم المستخدم
+                auth.signInAnonymously()
+                    .then(() => {
+                        // تحديث الملف الشخصي للمستخدم المجهول باسم المستخدم
+                        return auth.currentUser.updateProfile({
+                            displayName: username
+                        });
+                    })
+                    .then(() => {
+                        // إجبار تحديث التوكن ليشمل الاسم الجديد
+                        return auth.currentUser.getIdToken(true);
+                    })
+                    .then(() => {
+                        userRef = db.ref("online/" + username);
+                        messagesRef = db.ref("messages");
+                        onlineRef = db.ref("online");
+                        pinnedVideoRef = db.ref("pinned_video");
+                        startChat();
+                    })
+                    .catch((error) => {
+                        console.error("فشل المصادقة:", error);
+                        alert("حدث خطأ في الاتصال، حاول مجدداً.");
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'دخول';
+                    });
             }
 
             loginBtn.onclick = attemptLogin;
@@ -740,7 +752,9 @@
                 userRef.onDisconnect().remove();
 
                 setInterval(() => {
-                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    if (auth.currentUser) {
+                        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    }
                 }, 60000);
 
                 setInterval(() => {
@@ -759,10 +773,15 @@
                 document.getElementById("inputArea").onsubmit = (e) => {
                     e.preventDefault();
                     const text = messageInput.value.trim();
-                    if (!text) return;
+                    if (!text || !auth.currentUser) return;
 
                     const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    messagesRef.push({ user: username, text: text, time: time, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                    messagesRef.push({ 
+                        user: auth.currentUser.displayName || username, 
+                        text: text, 
+                        time: time, 
+                        timestamp: firebase.database.ServerValue.TIMESTAMP 
+                    });
                     messageInput.value = "";
                     userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
                     scrollToBottom();
@@ -786,6 +805,8 @@
                 });
 
                 submitVideoUrlBtn.onclick = () => {
+                    if (!auth.currentUser) return;
+
                     const url = videoUrlInput.value.trim();
                     if (!url) return;
 
@@ -793,13 +814,13 @@
                     const tweetId = getTweetId(url);
 
                     if (youtubeId) {
-                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: username });
+                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: auth.currentUser.displayName || username });
                     } else if (tweetId) {
-                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: username });
+                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: auth.currentUser.displayName || username });
                     } else if (url.toLowerCase().includes('.m3u')) {
-                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: username });
+                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: auth.currentUser.displayName || username });
                     } else if (isDirectVideo(url)) {
-                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: username });
+                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: auth.currentUser.displayName || username });
                     } else {
                         alert("الرابط غير مدعوم.");
                         return;
@@ -823,11 +844,15 @@
                         pinnedVideoPlayer.style.display = 'flex';
                         const header = document.createElement('div');
                         header.className = 'video-header';
-                        header.innerHTML = `<span>بث مباشر - ${data.setBy}</span>`;
+                        header.innerHTML = `<span>بث مباشر - ${data.setBy || 'مستخدم'}</span>`;
                         const closeBtn = document.createElement('button');
                         closeBtn.className = 'close-pinned-video';
                         closeBtn.innerHTML = '✖';
-                        closeBtn.onclick = () => pinnedVideoRef.remove();
+                        closeBtn.onclick = () => {
+                            if (auth.currentUser) {
+                                pinnedVideoRef.remove();
+                            }
+                        };
                         header.appendChild(closeBtn);
                         const body = document.createElement('div');
                         body.className = 'video-body';
@@ -849,16 +874,13 @@
                         } else if (data.type === 'direct') {
                             createVideoPlayer(body, data.url, 'video/mp4', false);
                         } else if (data.type === 'twitter') {
-                            // ✨ حل جذري: embed فوراً ثم تحديث في الخلفية
-                            embedTwitterNative(body, data.id); // يظهر فوراً 100%
+                            embedTwitterNative(body, data.id);
 
-                            // حاول جلب الفيديو المباشر في الخلفية
                             const _twId = data.id;
                             fetchTwitterVideos(_twId).then(videos => {
                                 if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
                                 currentVideosList = videos;
                                 currentVideoIndex = 0;
-                                // شغّل الفيديو، ولو فشل ارجع للـ embed
                                 const vEl = document.createElement('video');
                                 vEl.controls = true;
                                 vEl.autoplay = true;
@@ -868,21 +890,19 @@
                                 vEl.src = videos[0].url;
                                 body.innerHTML = '';
                                 body.appendChild(vEl);
-                                // لو فشل التحميل ارجع للـ embed تلقائياً
                                 vEl.onerror = () => embedTwitterNative(body, _twId);
                                 videoPlayerInstance = { dispose: () => { vEl.src = ''; vEl.remove(); } };
                                 if (videos.length > 1) createVideoSelector(body, videos);
-                            }).catch(() => { }); // فشل صامت - embed موجود
+                            }).catch(() => { });
                         }
 
-                        addNotification(`${data.setBy} قام بتشغيل فيديو`);
+                        addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
                     } else {
                         pinnedVideoPlayer.style.display = 'none';
                     }
                 });
             }
 
-            // دالة: embed التغريدة عبر iframe رسمي من تويتر (الأضمن دائماً)
             function embedTwitterNative(container, tweetId) {
                 container.innerHTML = '';
                 container.style.background = '#15202b';
@@ -896,7 +916,7 @@
                 iframe.style.border = 'none';
                 iframe.setAttribute('allowfullscreen', '');
                 iframe.setAttribute('allow', 'autoplay; fullscreen');
-                iframe.setAttribute('scrolling', 'no')
+                iframe.setAttribute('scrolling', 'no');
                 container.appendChild(iframe);
             }
 
@@ -906,7 +926,6 @@
                 container.innerHTML = '';
                 container.appendChild(videoEl);
 
-                // HLS على المتصفحات غير Safari
                 const isHLS = videoType === 'application/x-mpegURL' || videoSource.includes('.m3u');
                 if (isHLS && !videoEl.canPlayType('application/vnd.apple.mpegurl') && typeof Hls !== 'undefined' && Hls.isSupported()) {
                     const hls = new Hls();
@@ -976,9 +995,7 @@
             async function fetchTwitterVideos(tweetId) {
                 const videos = [];
 
-                // ==== طريقة 0: Twitter Syndication API (نفس API اللي يستخدمه تويتر في embed الرسمي) ====
                 try {
-                    // حساب token نفس طريقة مكتبة Twitter
                     const token = ((Number(tweetId) / 1e15) * Math.PI)
                         .toString(36).replace(/(0+|\.)/g, '');
                     const synRes = await fetch(
@@ -989,7 +1006,6 @@
                         const synData = await synRes.json();
                         (synData.mediaDetails || []).forEach(media => {
                             if (media.type === 'video' || media.type === 'animated_gif') {
-                                // اختر أعلى جودة
                                 const variants = (media.video_info?.variants || [])
                                     .filter(v => v.content_type === 'video/mp4')
                                     .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
@@ -1003,7 +1019,6 @@
 
                 if (videos.length) { console.log('[Twitter] syndication ✓', videos); return videos; }
 
-                // ==== طريقة 1: fxtwitter ====
                 try {
                     const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`,
                         { headers: { 'Accept': 'application/json' } });
@@ -1027,7 +1042,6 @@
 
                 if (videos.length) { console.log('[Twitter] fxtwitter ✓', videos); return videos; }
 
-                // ==== طريقة 2: vxtwitter ====
                 try {
                     const vxRes = await fetch(`https://api.vxtwitter.com/status/${tweetId}`,
                         { headers: { 'Accept': 'application/json' } });
@@ -1042,7 +1056,6 @@
 
                 if (videos.length) { console.log('[Twitter] vxtwitter ✓', videos); return videos; }
 
-                // ==== طريقة 3: cobalt.tools ====
                 try {
                     const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
                         method: 'POST',
@@ -1064,7 +1077,6 @@
                 return videos;
             }
 
-            // تحديث الأوقات لكل الرسائل بـ interval واحد مشترك (بدل interval لكل رسالة)
             const messageTimestamps = new Map();
             setInterval(() => {
                 messageTimestamps.forEach(({ timestamp, el }, key) => {
@@ -1084,9 +1096,9 @@
                 updateTimeDisplay(key, timestamp, timeElement);
 
                 div.innerHTML = `
-        <span class="user">${escapeHtml(user)}</span>
-        <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
-      `;
+                    <span class="user">${escapeHtml(user)}</span>
+                    <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
+                `;
 
                 div.appendChild(timeElement);
                 messageTimestamps.set(key, { timestamp, el: timeElement });
@@ -1254,9 +1266,7 @@
 
             function isDirectVideo(url) {
                 if (!url) return false;
-                // تحقق من الامتداد الصريح
                 if (/\.(mp4|webm|ogv|mkv|avi|mov|flv|m4v)(\?.*)?$/i.test(url)) return true;
-                // روابط تحتوي على video في المسار وليست يوتيوب أو تويتر
                 if (/video/i.test(url) && !/(youtube|youtu\.be|twitter|x\.com)/i.test(url)) return true;
                 return false;
             }
@@ -1267,4 +1277,4 @@
     </script>
 </body>
 
-</html>
+    </html>
