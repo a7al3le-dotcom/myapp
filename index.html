@@ -467,6 +467,7 @@
             font-size: 14px;
             line-height: 20px;
             text-align: center;
+            border: none;
         }
 
         .resize-handle {
@@ -582,6 +583,32 @@
             border-color: #c40812;
         }
 
+        .video-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 320px;
+            background: #000;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .video-loading::after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 600px) {
             #loginBox {
                 width: 90%;
@@ -679,7 +706,8 @@
             let videoPlayerInstance = null;
             let currentVideoIndex = 0;
             let currentVideosList = [];
-            let isVideoPlayerDisposed = false;
+            let isCreatingPlayer = false;
+            let lastVideoData = null;
 
             const loginScreen = document.getElementById('loginScreen');
             const usernameInput = document.getElementById('usernameInput');
@@ -835,9 +863,17 @@
                     closeAllModals();
                 };
 
-                pinnedVideoRef.on("value", async (snap) => {
+                // تحسين مستمع الفيديو لمنع إعادة الإنشاء المتكررة
+                pinnedVideoRef.on("value", (snap) => {
                     const data = snap.val();
-
+                    
+                    // منع إعادة الإنشاء إذا كانت البيانات متطابقة
+                    if (JSON.stringify(data) === JSON.stringify(lastVideoData) && videoPlayerInstance) {
+                        return;
+                    }
+                    
+                    lastVideoData = data;
+                    
                     // تنظيف المشغل القديم
                     if (videoPlayerInstance) {
                         try {
@@ -902,13 +938,35 @@
                     const body = document.createElement('div');
                     body.className = 'video-body';
                     body.style.cssText = 'width:100%;background:#000;flex-grow:1;min-height:320px;position:relative;';
+                    
+                    // إضافة مؤشر تحميل
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'video-loading';
+                    loadingDiv.textContent = 'جاري تحميل الفيديو...';
+                    body.appendChild(loadingDiv);
 
                     pinnedVideoPlayer.appendChild(header);
                     pinnedVideoPlayer.appendChild(body);
 
+                    // إضافة resize handle
+                    const resizeHandle = document.createElement('div');
+                    resizeHandle.className = 'resize-handle';
+                    resizeHandle.style.cssText =
+                        'position:absolute;width:20px;height:20px;bottom:0;right:0;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg,rgba(255,255,255,0.24),transparent);';
+                    pinnedVideoPlayer.appendChild(resizeHandle);
+
+                    // تفعيل السحب والتحجيم
+                    makeDraggable(pinnedVideoPlayer, header);
+                    makeResizable(pinnedVideoPlayer, resizeHandle);
+
                     // تشغيل الفيديو
                     setTimeout(() => {
                         try {
+                            // إزالة مؤشر التحميل
+                            if (body.contains(loadingDiv)) {
+                                body.removeChild(loadingDiv);
+                            }
+                            
                             if (data.type === 'youtube') {
                                 createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`,
                                     'video/youtube', true);
@@ -946,9 +1004,16 @@
                         } catch (error) {
                             console.error('Error creating video:', error);
                             body.innerHTML =
-                                `<div style="color:#ff6b6b;padding:20px;text-align:center;">حدث خطأ في تشغيل الفيديو</div>`;
+                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                <p style="font-size:14px;">حدث خطأ في تشغيل الفيديو</p>
+                                <button onclick="this.parentElement.parentElement.querySelector('video')?.load()" 
+                                        style="margin-top:10px;padding:8px 20px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                                    إعادة المحاولة
+                                </button>
+                            </div>`;
                         }
-                    }, 200);
+                    }, 300);
 
                     addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
                 });
@@ -1318,10 +1383,9 @@
                     "&quot;").replace(/'/g, "&#039;");
             }
 
-            // دالة مساعدة لإضافة السحب والتحريك
+            // دوال السحب والتحجيم
             function makeDraggable(element, handle) {
-                let offsetX = 0,
-                    offsetY = 0;
+                let offsetX = 0, offsetY = 0;
                 let isDragging = false;
 
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
@@ -1360,7 +1424,6 @@
                 }
             }
 
-            // دالة مساعدة لإضافة التحجيم
             function makeResizable(element, handle) {
                 let initialWidth, initialHeight, initialX, initialY;
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
@@ -1399,49 +1462,8 @@
                     handle.addEventListener('touchstart', onResizeStart, { passive: false });
                 }
             }
-
-            // إضافة دوال السحب والتحجيم للمشغل
-            const observer = new MutationObserver(() => {
-                const videoPlayer = document.getElementById('pinnedVideoPlayer');
-                if (videoPlayer && videoPlayer.style.display !== 'none') {
-                    const header = videoPlayer.querySelector('.video-header');
-                    const resizeHandle = videoPlayer.querySelector('.resize-handle');
-                    if (header && !header._draggableInitialized) {
-                        makeDraggable(videoPlayer, header);
-                        header._draggableInitialized = true;
-                    }
-                    if (resizeHandle && !resizeHandle._resizableInitialized) {
-                        makeResizable(videoPlayer, resizeHandle);
-                        resizeHandle._resizableInitialized = true;
-                    }
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style']
-            });
-
-            // إضافة resize handle عند إنشاء المشغل
-            const originalCreateVideoPlayer = createVideoPlayer;
-            createVideoPlayer = function(container, videoSource, videoType, isYoutube) {
-                originalCreateVideoPlayer(container, videoSource, videoType, isYoutube);
-
-                // إضافة resize handle إذا لم يكن موجوداً
-                const player = document.getElementById('pinnedVideoPlayer');
-                if (player && !player.querySelector('.resize-handle')) {
-                    const resizeHandle = document.createElement('div');
-                    resizeHandle.className = 'resize-handle';
-                    resizeHandle.style.cssText =
-                        'position:absolute;width:20px;height:20px;bottom:0;right:0;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg,rgba(255,255,255,0.24),transparent);';
-                    player.appendChild(resizeHandle);
-                }
-            };
-
         });
     </script>
 </body>
 
-</html>
+    </html>
