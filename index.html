@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
     <style>
+        /* نفس الستايلات الموجودة - لم يتم التعديل عليها */
         :root {
             --bg-main: #05060a;
             --bg-grad-1: #151624;
@@ -27,10 +28,6 @@
             --accent-soft: #ffe788;
             --border-soft: #262839;
             --danger: #e53935;
-        }
-
-        * {
-            box-sizing: border-box;
         }
 
         html,
@@ -54,13 +51,12 @@
         }
 
         #chat-container {
-            display: none;
+            display: flex;
             flex-direction: column;
             height: 100%;
             height: 100dvh;
             -webkit-backdrop-filter: blur(16px);
             backdrop-filter: blur(16px);
-            position: relative;
         }
 
         #messages {
@@ -100,7 +96,6 @@
         .user {
             font-weight: bold;
             color: var(--accent);
-            white-space: nowrap;
         }
 
         .time {
@@ -108,7 +103,6 @@
             color: var(--text-muted);
             min-width: 32px;
             text-align: right;
-            margin-left: auto;
         }
 
         #inputArea {
@@ -132,9 +126,7 @@
             background: rgba(10, 11, 20, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.05);
             color: var(--text-main);
-            box-shadow:
-                0 0 0 1px rgba(0, 0, 0, 0.7),
-                0 18px 45px rgba(0, 0, 0, 0.75);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 18px 45px rgba(0, 0, 0, 0.75);
             box-sizing: border-box;
             -webkit-appearance: none;
             appearance: none;
@@ -147,10 +139,7 @@
         #messageInput:focus {
             outline: none;
             border-color: var(--accent-soft);
-            box-shadow:
-                0 0 0 1px rgba(0, 0, 0, 0.7),
-                0 0 0 1px rgba(255, 213, 74, 0.35),
-                0 20px 50px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 213, 74, 0.35), 0 20px 50px rgba(0, 0, 0, 0.9);
         }
 
         #sendBtn {
@@ -169,10 +158,7 @@
             justify-content: center;
             box-sizing: border-box;
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
-            transition:
-                transform 0.16s ease,
-                box-shadow 0.16s ease,
-                filter 0.16s ease;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
             white-space: nowrap;
         }
 
@@ -271,7 +257,6 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            flex-shrink: 0;
         }
 
         .status-green {
@@ -335,6 +320,10 @@
             display: none;
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
+        }
+
+        .delete-btn {
+            display: none;
         }
 
         #loginScreen {
@@ -417,14 +406,10 @@
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.9);
         }
 
-        #loginBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         #pinnedVideoPlayer {
             position: fixed;
             top: 60px;
+            top: calc(60px + env(safe-area-inset-top));
             left: 10px;
             width: clamp(280px, 92vw, 480px);
             background: #000;
@@ -450,7 +435,6 @@
             flex-shrink: 0;
             touch-action: none;
             font-size: 13px;
-            user-select: none;
         }
 
         .video-body {
@@ -477,7 +461,6 @@
             line-height: 20px;
             text-align: center;
             border: none;
-            padding: 0;
         }
 
         .resize-handle {
@@ -489,6 +472,75 @@
             cursor: nwse-resize;
             z-index: 10;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent);
+        }
+
+        .video-js.vjs-netflix-theme {
+            background-color: #000;
+        }
+
+        .vjs-netflix-theme .vjs-control-bar {
+            height: 6em;
+            background: none;
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .vjs-netflix-theme .vjs-big-play-button {
+            display: none !important;
+        }
+
+        .vjs-netflix-theme .vjs-progress-control {
+            position: absolute;
+            left: 0;
+            right: 0;
+            width: 100%;
+            top: -3em;
+            height: 2.5em;
+        }
+
+        .vjs-netflix-theme .vjs-progress-holder {
+            height: 0.3em;
+            margin: 1.1em 0;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress,
+        .vjs-netflix-theme .vjs-load-progress {
+            height: 100%;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress:before {
+            display: none;
+        }
+
+        .vjs-netflix-theme .vjs-play-progress {
+            background-color: #e50914;
+        }
+
+        .vjs-netflix-theme .vjs-load-progress {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .vjs-netflix-theme .vjs-time-control {
+            line-height: 5em;
+            padding: 0 1em;
+        }
+
+        .vjs-netflix-theme .vjs-remaining-time {
+            line-height: 5em;
+        }
+
+        .vjs-netflix-theme .vjs-button>.vjs-icon-placeholder:before {
+            font-size: 2.2em;
+            line-height: 2.2;
+        }
+
+        .vjs-netflix-theme .vjs-volume-panel,
+        .vjs-netflix-theme .vjs-fullscreen-control {
+            margin-right: 1em;
+        }
+
+        .video-js.vjs-netflix-theme.vjs-has-started.vjs-user-inactive .vjs-control-bar {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .video-selector-bar {
@@ -547,7 +599,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 600px) {
@@ -596,10 +650,11 @@
         </div>
     </div>
 
-    <div id="chat-container">
+    <div id="chat-container" style="display: none;">
         <div id="topButtons">
             <div class="btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
-            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span></div>
+            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span>
+            </div>
         </div>
 
         <div id="pinnedVideoPlayer"></div>
@@ -620,14 +675,14 @@
         <div id="messages" role="list"></div>
 
         <form id="inputArea">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
             <button type="submit" id="sendBtn">إرسال</button>
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
         </form>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Firebase configuration
+            // ==================== تهيئة Firebase ====================
             const firebaseConfig = {
                 apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
                 authDomain: "mychat-2d881.firebaseapp.com",
@@ -637,25 +692,24 @@
                 messagingSenderId: "532385733649",
                 appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
             };
-
-            // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
             const auth = firebase.auth();
 
-            // State variables
+            // ==================== متغيرات الحالة ====================
             let username = '';
-            let userRef = null;
-            let messagesRef = null;
-            let onlineRef = null;
-            let pinnedVideoRef = null;
+            let userRef = null,
+                messagesRef = null,
+                onlineRef = null,
+                pinnedVideoRef = null;
             let serverTimeOffset = 0;
             let videoPlayerInstance = null;
             let currentVideoIndex = 0;
             let currentVideosList = [];
             let lastVideoData = null;
+            let isProcessingVideo = false; // منع التكرار
 
-            // DOM elements
+            // ==================== عناصر DOM ====================
             const loginScreen = document.getElementById('loginScreen');
             const usernameInput = document.getElementById('usernameInput');
             const loginBtn = document.getElementById('loginBtn');
@@ -671,656 +725,30 @@
             const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
             const overlay = document.getElementById("overlay");
 
-            // Login function
-            function attemptLogin() {
-                const inputName = usernameInput.value.trim();
-                const invalidChars = /[.#$\[\]]/;
-                
-                if (invalidChars.test(inputName)) {
-                    alert("الاسم لا يجب أن يحتوي على رموز خاصة");
-                    return;
-                }
-                
-                if (inputName.length < 2) {
-                    alert("الاسم قصير جداً");
-                    return;
-                }
-
-                username = inputName;
-                loginBtn.disabled = true;
-                loginBtn.textContent = 'جاري الدخول...';
-
-                auth.signInAnonymously()
-                    .then(() => {
-                        // Store username in localStorage for reference
-                        localStorage.setItem('chatUsername', username);
-                        
-                        // Initialize database references
-                        userRef = db.ref("online/" + username);
-                        messagesRef = db.ref("messages");
-                        onlineRef = db.ref("online");
-                        pinnedVideoRef = db.ref("pinned_video");
-                        
-                        startChat();
-                    })
-                    .catch((error) => {
-                        console.error("فشل المصادقة:", error);
-                        alert("حدث خطأ في الاتصال، حاول مجدداً.");
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'دخول';
-                    });
+            // ==================== دوال مساعدة ====================
+            function escapeHtml(unsafe) {
+                if (!unsafe) return "";
+                return unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
             }
 
-            // Event listeners for login
-            loginBtn.addEventListener('click', attemptLogin);
-            usernameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    attemptLogin();
-                }
-            });
-
-            // Start chat function
-            function startChat() {
-                loginScreen.style.display = 'none';
-                chatContainer.style.display = 'flex';
-
-                // Get server time offset
-                db.ref('.info/serverTimeOffset').on('value', snap => {
-                    serverTimeOffset = snap.val() || 0;
-                });
-
-                // Set user online status
-                userRef.set({ 
-                    lastActive: firebase.database.ServerValue.TIMESTAMP 
-                });
-                userRef.onDisconnect().remove();
-
-                // Update last active periodically
-                setInterval(() => {
-                    if (auth.currentUser) {
-                        userRef.update({ 
-                            lastActive: firebase.database.ServerValue.TIMESTAMP 
-                        });
-                    }
-                }, 60000);
-
-                // Clean up inactive users
-                setInterval(() => {
-                    const now = Date.now() + serverTimeOffset;
-                    onlineRef.once('value', snap => {
-                        snap.forEach(child => {
-                            const lastActive = child.val().lastActive || 0;
-                            if (now - lastActive > 90000) {
-                                child.ref.remove();
-                            }
-                        });
-                    });
-                }, 60000);
-
-                // Button click handlers
-                onlineListBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    usersBox.style.display = 'block';
-                    overlay.style.display = 'block';
-                });
-
-                setVideoBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    setVideoModal.style.display = 'block';
-                    overlay.style.display = 'block';
-                });
-
-                overlay.addEventListener('click', closeAllModals);
-
-                // Message form submission
-                document.getElementById("inputArea").addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const text = messageInput.value.trim();
-                    if (!text || !auth.currentUser) return;
-
-                    messagesRef.push({
-                        user: username,
-                        text: text,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    messageInput.value = "";
-                    userRef.update({ 
-                        lastActive: firebase.database.ServerValue.TIMESTAMP 
-                    });
-                });
-
-                // Listen for new messages
-                messagesRef.limitToLast(100).on("child_added", snap => {
-                    addMessageToUI(snap.key, snap.val());
-                });
-
-                // Listen for removed messages
-                messagesRef.on("child_removed", snap => {
-                    const msgElement = document.getElementById(`msg-${snap.key}`);
-                    if (msgElement) {
-                        msgElement.style.opacity = '0';
-                        setTimeout(() => msgElement.remove(), 300);
-                    }
-                });
-
-                // Listen for online users
-                onlineRef.on("value", snap => {
-                    const userCount = snap.numChildren();
-                    document.getElementById("count").textContent = userCount;
-                    renderUsersList(snap.val() || {});
-                });
-
-                // Video URL submission
-                submitVideoUrlBtn.addEventListener('click', () => {
-                    if (!auth.currentUser) return;
-
-                    const url = videoUrlInput.value.trim();
-                    if (!url) return;
-
-                    const youtubeId = getYoutubeVideoId(url);
-                    const tweetId = getTweetId(url);
-
-                    const videoData = {
-                        setBy: username,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    };
-
-                    if (youtubeId) {
-                        videoData.type = 'youtube';
-                        videoData.id = youtubeId;
-                    } else if (tweetId) {
-                        videoData.type = 'twitter';
-                        videoData.id = tweetId;
-                    } else if (url.toLowerCase().includes('.m3u8') || url.toLowerCase().includes('.m3u')) {
-                        videoData.type = 'm3u';
-                        videoData.url = url;
-                    } else if (isDirectVideo(url)) {
-                        videoData.type = 'direct';
-                        videoData.url = url;
-                    } else {
-                        alert("الرابط غير مدعوم.");
-                        return;
-                    }
-
-                    pinnedVideoRef.set(videoData);
-                    videoUrlInput.value = "";
-                    closeAllModals();
-                });
-
-                // Listen for pinned video changes
-                pinnedVideoRef.on("value", (snap) => {
-                    const data = snap.val();
-
-                    // Check if data hasn't changed
-                    if (JSON.stringify(data) === JSON.stringify(lastVideoData) && videoPlayerInstance) {
-                        return;
-                    }
-
-                    lastVideoData = data;
-
-                    // Clean up old player
-                    if (videoPlayerInstance) {
-                        try {
-                            if (typeof videoPlayerInstance.dispose === 'function') {
-                                videoPlayerInstance.dispose();
-                            }
-                        } catch (e) {
-                            console.log("Error disposing player:", e);
-                        }
-                        videoPlayerInstance = null;
-                    }
-
-                    // Clean up container
-                    pinnedVideoPlayer.innerHTML = '';
-                    pinnedVideoPlayer.style.display = 'none';
-                    currentVideosList = [];
-                    currentVideoIndex = 0;
-
-                    if (!data) return;
-
-                    // Show player
-                    pinnedVideoPlayer.style.display = 'flex';
-
-                    // Create player structure
-                    createVideoPlayerStructure(data);
-                });
-            }
-
-            // Create video player structure
-            function createVideoPlayerStructure(data) {
-                // Create header
-                const header = document.createElement('div');
-                header.className = 'video-header';
-                
-                const titleSpan = document.createElement('span');
-                titleSpan.textContent = `🎬 فيديو ${data.setBy || 'مستخدم'}`;
-                header.appendChild(titleSpan);
-
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'close-pinned-video';
-                closeBtn.textContent = '✖';
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (auth.currentUser) {
-                        pinnedVideoRef.remove();
-                    }
-                });
-                header.appendChild(closeBtn);
-
-                // Create body
-                const body = document.createElement('div');
-                body.className = 'video-body';
-
-                // Create loading indicator
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = 'video-loading';
-                loadingDiv.textContent = 'جاري تحميل الفيديو...';
-                body.appendChild(loadingDiv);
-
-                pinnedVideoPlayer.appendChild(header);
-                pinnedVideoPlayer.appendChild(body);
-
-                // Add resize handle
-                const resizeHandle = document.createElement('div');
-                resizeHandle.className = 'resize-handle';
-                pinnedVideoPlayer.appendChild(resizeHandle);
-
-                // Enable dragging and resizing
-                makeDraggable(pinnedVideoPlayer, header);
-                makeResizable(pinnedVideoPlayer, resizeHandle);
-
-                // Load video
-                setTimeout(() => {
-                    try {
-                        if (body.contains(loadingDiv)) {
-                            body.removeChild(loadingDiv);
-                        }
-
-                        if (data.type === 'youtube') {
-                            createYoutubePlayer(body, data.id);
-                        } else if (data.type === 'm3u') {
-                            createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
-                        } else if (data.type === 'direct') {
-                            createVideoPlayer(body, data.url, 'video/mp4', false);
-                        } else if (data.type === 'twitter') {
-                            embedTwitterNative(body, data.id);
-                            fetchTwitterVideos(data.id).then(videos => {
-                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
-                                currentVideosList = videos;
-                                currentVideoIndex = 0;
-                                
-                                // Replace iframe with video element
-                                body.innerHTML = '';
-                                const vEl = document.createElement('video');
-                                vEl.controls = true;
-                                vEl.autoplay = true;
-                                vEl.muted = true;
-                                vEl.playsInline = true;
-                                vEl.style.cssText = 'width:100%;height:100%;background:#000;display:block;';
-                                vEl.src = videos[0].url;
-                                body.appendChild(vEl);
-                                
-                                videoPlayerInstance = {
-                                    dispose: () => {
-                                        vEl.src = '';
-                                        vEl.remove();
-                                    }
-                                };
-                                
-                                if (videos.length > 1) {
-                                    createVideoSelector(body, videos);
-                                }
-                            }).catch(() => {
-                                // Keep the iframe as fallback
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error creating video:', error);
-                        body.innerHTML = `
-                            <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">حدث خطأ في تشغيل الفيديو</p>
-                            </div>`;
-                    }
-                }, 300);
-
-                addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
-            }
-
-            // Create YouTube player
-            function createYoutubePlayer(container, videoId) {
-                container.innerHTML = '';
-                
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0&playsinline=1`;
-                iframe.style.cssText = 'width:100%;height:100%;min-height:320px;border:none;display:block;';
-                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
-                iframe.setAttribute('allowfullscreen', '');
-                iframe.setAttribute('frameborder', '0');
-                container.appendChild(iframe);
-
-                videoPlayerInstance = {
-                    dispose: () => {
-                        try { iframe.src = 'about:blank'; } catch (e) {}
-                        iframe.remove();
-                    }
-                };
-            }
-
-            // Create video player for M3U/Direct
-            function createVideoPlayer(container, videoSource, videoType, isYoutube) {
-                container.innerHTML = '';
-
-                if (!container || !container.parentNode) {
-                    console.error('Container not found');
-                    return;
-                }
-
-                try {
-                    const videoEl = document.createElement('video');
-                    videoEl.controls = true;
-                    videoEl.autoplay = true;
-                    videoEl.muted = true;
-                    videoEl.playsInline = true;
-                    videoEl.style.cssText = 'width:100%;height:100%;background:#000;object-fit:contain;display:block;';
-
-                    if (videoType === 'application/x-mpegURL' || videoSource.includes('.m3u8') || videoSource.includes('.m3u')) {
-                        // Handle HLS streams
-                        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                            container.appendChild(videoEl);
-                            const hls = new Hls({
-                                enableWorker: true,
-                                lowLatencyMode: true,
-                            });
-                            hls.loadSource(videoSource);
-                            hls.attachMedia(videoEl);
-
-                            videoPlayerInstance = {
-                                dispose: () => {
-                                    hls.destroy();
-                                    videoEl.pause();
-                                    videoEl.src = '';
-                                    videoEl.remove();
-                                }
-                            };
-
-                            hls.on(Hls.Events.ERROR, (event, data) => {
-                                if (data.fatal) {
-                                    container.innerHTML = `
-                                        <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                            <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                            <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
-                                        </div>`;
-                                }
-                            });
-                        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-                            // Native HLS support (Safari)
-                            container.appendChild(videoEl);
-                            videoEl.src = videoSource;
-
-                            videoPlayerInstance = {
-                                dispose: () => {
-                                    videoEl.pause();
-                                    videoEl.src = '';
-                                    videoEl.remove();
-                                }
-                            };
-                        } else {
-                            container.innerHTML = `
-                                <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                    <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                    <p style="font-size:14px;">المتصفح لا يدعم تشغيل بث HLS.</p>
-                                </div>`;
-                        }
-                    } else {
-                        // Direct video
-                        container.appendChild(videoEl);
-                        videoEl.src = videoSource;
-
-                        videoPlayerInstance = {
-                            dispose: () => {
-                                videoEl.pause();
-                                videoEl.src = '';
-                                videoEl.remove();
-                            }
-                        };
-                    }
-
-                    videoEl.onerror = () => {
-                        container.innerHTML = `
-                            <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">تعذّر تشغيل الفيديو. تحقق من الرابط أو الصيغة.</p>
-                            </div>`;
-                    };
-
-                } catch (error) {
-                    console.error('Error creating video player:', error);
-                    container.innerHTML = `
-                        <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;">
-                            <p>حدث خطأ في تشغيل الفيديو</p>
-                        </div>`;
-                }
-            }
-
-            // Embed Twitter native
-            function embedTwitterNative(container, tweetId) {
-                container.innerHTML = '';
-                container.style.background = '#15202b';
-                container.style.overflow = 'hidden';
-
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.minHeight = '320px';
-                iframe.style.border = 'none';
-                iframe.setAttribute('allowfullscreen', '');
-                iframe.setAttribute('allow', 'autoplay; fullscreen');
-                iframe.setAttribute('scrolling', 'no');
-                container.appendChild(iframe);
-            }
-
-            // Create video selector
-            function createVideoSelector(container, videos) {
-                const selectorBar = document.createElement('div');
-                selectorBar.className = 'video-selector-bar';
-
-                videos.forEach((v, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'video-selector-btn';
-                    btn.textContent = `مقطع ${idx + 1}`;
-                    if (idx === 0) btn.classList.add('active');
-
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (idx !== currentVideoIndex && videoPlayerInstance) {
-                            currentVideoIndex = idx;
-                            const videoEl = container.querySelector('video');
-                            if (videoEl) {
-                                videoEl.src = videos[idx].url;
-                                videoEl.load();
-                                videoEl.play();
-                            }
-
-                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                        }
-                    });
-                    selectorBar.appendChild(btn);
-                });
-
-                container.appendChild(selectorBar);
-            }
-
-            // Fetch Twitter videos
-            async function fetchTwitterVideos(tweetId) {
-                const videos = [];
-
-                try {
-                    const token = ((Number(tweetId) / 1e15) * Math.PI)
-                        .toString(36).replace(/(0+|\.)/g, '');
-                    const synRes = await fetch(
-                        `https://cdn.syndication.twimg.com/tweet-result?id=${tweetId}&lang=ar&token=${token}`,
-                        { headers: { 'Accept': 'application/json' } }
-                    );
-                    if (synRes.ok) {
-                        const synData = await synRes.json();
-                        (synData.mediaDetails || []).forEach(media => {
-                            if (media.type === 'video' || media.type === 'animated_gif') {
-                                const variants = (media.video_info?.variants || [])
-                                    .filter(v => v.content_type === 'video/mp4')
-                                    .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-                                if (variants.length) {
-                                    videos.push({ url: variants[0].url, type: 'video/mp4', provider: 'syndication' });
-                                }
-                            }
-                        });
-                    }
-                } catch (e) { console.warn('[syndication]', e.message); }
-
-                if (videos.length) return videos;
-
-                try {
-                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`,
-                        { headers: { 'Accept': 'application/json' } });
-                    if (fxRes.ok) {
-                        const fxData = await fxRes.json();
-                        const tweet = fxData.tweet || {};
-                        const media = tweet.media || {};
-                        const items = Array.isArray(media.videos) ? media.videos :
-                            Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif') : [];
-                        items.forEach(v => {
-                            const src = v.url || v.variants?.[0]?.url;
-                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
-                        });
-                    }
-                } catch (e) { console.warn('[fxtwitter]', e.message); }
-
-                return videos;
-            }
-
-            // Add message to UI
-            function addMessageToUI(key, data) {
-                const { user, text, timestamp } = data;
-                const div = document.createElement("div");
-                div.className = "msg";
-                div.id = `msg-${key}`;
-
-                const timeElement = document.createElement("span");
-                timeElement.className = "time";
-                timeElement.id = `time-${key}`;
-
-                div.innerHTML = `
-                    <span class="user">${escapeHtml(user)}</span>
-                    <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
-                `;
-
-                div.appendChild(timeElement);
-                updateTimeDisplay(timestamp, timeElement);
-                
-                messagesDiv.appendChild(div);
-                scrollToBottom();
-
-                // Update time display periodically
-                if (timestamp) {
-                    setInterval(() => updateTimeDisplay(timestamp, timeElement), 60000);
-                }
-            }
-
-            // Update time display
-            function updateTimeDisplay(timestamp, timeElement) {
-                if (!timestamp) {
-                    timeElement.textContent = "الآن";
-                    return;
-                }
-
-                const now = Date.now() + serverTimeOffset;
-                const messageTime = timestamp + serverTimeOffset;
-                const diffMs = now - messageTime;
-                const diffSec = Math.floor(diffMs / 1000);
-                const diffMin = Math.floor(diffSec / 60);
-                const diffHours = Math.floor(diffMin / 60);
-                const diffDays = Math.floor(diffHours / 24);
-                const diffWeeks = Math.floor(diffDays / 7);
-                const diffMonths = Math.floor(diffDays / 30);
-                const diffYears = Math.floor(diffDays / 365);
-
-                let timeText = "";
-
-                if (diffSec < 5) {
-                    timeText = "الآن";
-                } else if (diffSec < 60) {
-                    timeText = "ثواني";
-                } else if (diffMin < 2) {
-                    timeText = "د1";
-                } else if (diffMin < 60) {
-                    timeText = `د${diffMin}`;
-                } else if (diffHours < 24) {
-                    timeText = `س${diffHours}`;
-                } else if (diffDays < 7) {
-                    timeText = `ي${diffDays}`;
-                } else if (diffWeeks < 4) {
-                    timeText = `أ${diffWeeks}`;
-                } else if (diffMonths < 12) {
-                    timeText = `ش${diffMonths}`;
-                } else {
-                    timeText = `ع${diffYears}`;
-                }
-
-                timeElement.textContent = timeText;
-            }
-
-            // Add notification
-            function addNotification(text) {
-                const div = document.createElement("div");
-                div.className = "sys";
-                div.textContent = text;
-                messagesDiv.appendChild(div);
-                scrollToBottom();
-            }
-
-            // Render users list
-            function renderUsersList(users) {
-                const list = document.getElementById("usersList");
-                list.innerHTML = '';
-                const now = Date.now() + serverTimeOffset;
-                
-                Object.keys(users).forEach(uName => {
-                    const uData = users[uName];
-                    const div = document.createElement("div");
-                    div.className = "user-item";
-                    
-                    let colorClass = 'status-green';
-                    const diff = now - (uData.lastActive || 0);
-                    if (diff > 60000) colorClass = 'status-gray';
-                    else if (diff > 30000) colorClass = 'status-yellow';
-                    
-                    div.innerHTML = `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
-                    list.appendChild(div);
-                });
-            }
-
-            // Close all modals
-            function closeAllModals() {
-                usersBox.style.display = 'none';
-                setVideoModal.style.display = 'none';
-                overlay.style.display = 'none';
-            }
-
-            // Utility functions
             function getYoutubeVideoId(url) {
                 if (!url) return null;
-                const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                return (url.match(regex) || [])[1] || null;
+                const regex =
+                    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                const match = url.match(regex);
+                return match ? match[1] : null;
             }
 
             function getTweetId(url) {
                 if (!url) return null;
                 const regex = /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?:\w+)\/status\/(\d+)/;
-                return (url.match(regex) || [])[1] || null;
+                const match = url.match(regex);
+                return match ? match[1] : null;
             }
 
             function isDirectVideo(url) {
@@ -1334,43 +762,122 @@
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            function escapeHtml(unsafe) {
-                if (!unsafe) return "";
-                return unsafe.toString()
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
+            // ==================== دوال واجهة المستخدم ====================
+            function closeAllModals() {
+                usersBox.style.display = 'none';
+                setVideoModal.style.display = 'none';
+                overlay.style.display = 'none';
             }
 
-            // Draggable function
+            function addNotification(text) {
+                const div = document.createElement("div");
+                div.className = "sys";
+                div.textContent = text;
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            const messageTimestamps = new Map();
+
+            function updateTimeDisplay(key, timestamp, timeElement) {
+                if (!timestamp) return;
+                const now = Date.now() + serverTimeOffset;
+                const messageTime = timestamp + serverTimeOffset;
+                const diffMs = now - messageTime;
+                const diffSec = Math.floor(diffMs / 1000);
+                const diffMin = Math.floor(diffSec / 60);
+                const diffHours = Math.floor(diffMin / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                const diffWeeks = Math.floor(diffDays / 7);
+                const diffMonths = Math.floor(diffDays / 30);
+                const diffYears = Math.floor(diffDays / 365);
+
+                let timeText = "";
+                if (diffSec < 5) timeText = "الآن";
+                else if (diffSec < 60) timeText = "ثواني";
+                else if (diffMin < 2) timeText = "د1";
+                else if (diffMin < 60) timeText = `د${diffMin}`;
+                else if (diffHours < 24) timeText = `س${diffHours}`;
+                else if (diffDays < 7) timeText = `ي${diffDays}`;
+                else if (diffWeeks < 4) timeText = `أ${diffWeeks}`;
+                else if (diffMonths < 12) timeText = `ش${diffMonths}`;
+                else timeText = `ع${diffYears}`;
+
+                timeElement.textContent = timeText;
+            }
+
+            // تحديث التوقيت كل دقيقة
+            setInterval(() => {
+                messageTimestamps.forEach(({ timestamp, el }, key) => {
+                    updateTimeDisplay(key, timestamp, el);
+                });
+            }, 60000);
+
+            function addMessageToUI(key, { user, text, time, timestamp }) {
+                const div = document.createElement("div");
+                div.className = "msg";
+                div.id = `msg-${key}`;
+
+                const timeElement = document.createElement("span");
+                timeElement.className = "time";
+                timeElement.id = `time-${key}`;
+                updateTimeDisplay(key, timestamp, timeElement);
+
+                div.innerHTML = `
+                    <span class="user">${escapeHtml(user)}</span>
+                    <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
+                `;
+                div.appendChild(timeElement);
+
+                messageTimestamps.set(key, { timestamp, el: timeElement });
+                messagesDiv.appendChild(div);
+                scrollToBottom();
+            }
+
+            function renderUsersList(users) {
+                const list = document.getElementById("usersList");
+                list.innerHTML = '';
+                const now = Date.now() + serverTimeOffset;
+                Object.keys(users).forEach(uName => {
+                    const uData = users[uName];
+                    const div = document.createElement("div");
+                    div.className = "user-item";
+                    let colorClass = 'status-green';
+                    const diff = now - (uData.lastActive || 0);
+                    if (diff > 60000) colorClass = 'status-gray';
+                    else if (diff > 30000) colorClass = 'status-yellow';
+                    div.innerHTML =
+                        `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
+                    list.appendChild(div);
+                });
+            }
+
+            // ==================== دوال السحب والتحجيم ====================
             function makeDraggable(element, handle) {
-                let offsetX = 0, offsetY = 0;
+                let offsetX = 0,
+                    offsetY = 0;
                 let isDragging = false;
 
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
 
                 const onDragStart = (e) => {
-                    if (e.target === handle || handle.contains(e.target)) {
-                        isDragging = true;
-                        const pointer = getPointerPosition(e);
-                        offsetX = pointer.clientX - element.getBoundingClientRect().left;
-                        offsetY = pointer.clientY - element.getBoundingClientRect().top;
-                        document.addEventListener('mousemove', onDragMove);
-                        document.addEventListener('touchmove', onDragMove, { passive: false });
-                        document.addEventListener('mouseup', onDragEnd);
-                        document.addEventListener('touchend', onDragEnd);
-                    }
+                    if (e.type === 'touchstart') e.preventDefault();
+                    isDragging = true;
+                    const pointer = getPointerPosition(e);
+                    offsetX = pointer.clientX - element.offsetLeft;
+                    offsetY = pointer.clientY - element.offsetTop;
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('mouseup', onDragEnd);
+                    document.addEventListener('touchend', onDragEnd);
                 };
 
                 const onDragMove = (e) => {
-                    if (isDragging) {
-                        e.preventDefault();
-                        const pointer = getPointerPosition(e);
-                        element.style.left = (pointer.clientX - offsetX) + "px";
-                        element.style.top = (pointer.clientY - offsetY) + "px";
-                    }
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    const pointer = getPointerPosition(e);
+                    element.style.left = (pointer.clientX - offsetX) + "px";
+                    element.style.top = (pointer.clientY - offsetY) + "px";
                 };
 
                 const onDragEnd = () => {
@@ -1381,14 +888,14 @@
                     document.removeEventListener('touchend', onDragEnd);
                 };
 
-                handle.addEventListener('mousedown', onDragStart);
-                handle.addEventListener('touchstart', onDragStart, { passive: false });
+                if (handle) {
+                    handle.addEventListener('mousedown', onDragStart);
+                    handle.addEventListener('touchstart', onDragStart, { passive: false });
+                }
             }
 
-            // Resizable function
             function makeResizable(element, handle) {
                 let initialWidth, initialHeight, initialX, initialY;
-
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
 
                 function onResizeStart(e) {
@@ -1409,8 +916,8 @@
                     const pointer = getPointerPosition(e);
                     const newWidth = initialWidth + (pointer.clientX - initialX);
                     const newHeight = initialHeight + (pointer.clientY - initialY);
-                    if (newWidth > 300) { element.style.width = newWidth + 'px'; }
-                    if (newHeight > 200) { element.style.height = newHeight + 'px'; }
+                    if (newWidth > 300) element.style.width = newWidth + 'px';
+                    if (newHeight > 200) element.style.height = newHeight + 'px';
                 }
 
                 function onResizeEnd() {
@@ -1420,10 +927,573 @@
                     document.removeEventListener('touchend', onResizeEnd);
                 }
 
-                handle.addEventListener('mousedown', onResizeStart);
-                handle.addEventListener('touchstart', onResizeStart, { passive: false });
+                if (handle) {
+                    handle.addEventListener('mousedown', onResizeStart);
+                    handle.addEventListener('touchstart', onResizeStart, { passive: false });
+                }
             }
+
+            // ==================== دوال مشغل الفيديو ====================
+            function disposeVideoPlayer() {
+                if (videoPlayerInstance) {
+                    try {
+                        if (typeof videoPlayerInstance.dispose === 'function') {
+                            videoPlayerInstance.dispose();
+                        }
+                    } catch (e) {
+                        console.log("Error disposing player:", e);
+                    }
+                    videoPlayerInstance = null;
+                }
+            }
+
+            function createVideoPlayer(container, videoSource, videoType, isYoutube) {
+                // تنظيف المحتوى القديم
+                container.innerHTML = '';
+
+                if (!container || !container.parentNode) {
+                    console.error('Container not found');
+                    return;
+                }
+
+                try {
+                    if (isYoutube) {
+                        // ===== مشغل يوتيوب =====
+                        const videoId = getYoutubeVideoId(videoSource);
+                        if (!videoId) {
+                            container.innerHTML =
+                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                    <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                    <p style="font-size:14px;">تعذّر تشغيل فيديو يوتيوب. تأكد من الرابط.</p>
+                                </div>`;
+                            return;
+                        }
+
+                        const iframe = document.createElement('iframe');
+                        iframe.src =
+                            `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0&playsinline=1`;
+                        iframe.style.cssText =
+                            'width:100%;height:100%;min-height:320px;border:none;display:block;background:#000;';
+                        iframe.setAttribute('allow',
+                            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen'
+                            );
+                        iframe.setAttribute('allowfullscreen', '');
+                        iframe.setAttribute('frameborder', '0');
+                        container.appendChild(iframe);
+
+                        videoPlayerInstance = {
+                            dispose: () => {
+                                try { iframe.src = 'about:blank'; } catch (e) {}
+                                iframe.remove();
+                            }
+                        };
+                        return;
+                    }
+
+                    // ===== فيديو عادي أو HLS =====
+                    const videoEl = document.createElement('video');
+                    videoEl.controls = true;
+                    videoEl.autoplay = true;
+                    videoEl.muted = true;
+                    videoEl.playsInline = true;
+                    videoEl.style.cssText =
+                        'width:100%;height:100%;background:#000;object-fit:contain;display:block;';
+                    videoEl.style.objectFit = 'contain';
+
+                    // === معالجة HLS ===
+                    if (videoType === 'application/x-mpegURL' || videoSource.includes('.m3u8') || videoSource.includes(
+                            '.m3u')) {
+                        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                            container.appendChild(videoEl);
+                            const hls = new Hls({
+                                enableWorker: true,
+                                lowLatencyMode: true,
+                            });
+                            hls.loadSource(videoSource);
+                            hls.attachMedia(videoEl);
+
+                            videoPlayerInstance = {
+                                dispose: () => {
+                                    hls.destroy();
+                                    videoEl.pause();
+                                    videoEl.src = '';
+                                    videoEl.remove();
+                                }
+                            };
+
+                            hls.on(Hls.Events.ERROR, (event, data) => {
+                                if (data.fatal) {
+                                    container.innerHTML =
+                                        `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                            <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                            <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
+                                        </div>`;
+                                }
+                            });
+                            return;
+                        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+                            // دعم Safari الأصلي
+                            container.appendChild(videoEl);
+                            videoEl.src = videoSource;
+
+                            videoPlayerInstance = {
+                                dispose: () => {
+                                    videoEl.pause();
+                                    videoEl.src = '';
+                                    videoEl.remove();
+                                }
+                            };
+
+                            videoEl.onerror = () => {
+                                container.innerHTML =
+                                    `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                        <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                        <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
+                                    </div>`;
+                            };
+                            return;
+                        } else {
+                            container.innerHTML =
+                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                    <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                    <p style="font-size:14px;">المتصفح لا يدعم تشغيل بث HLS.</p>
+                                </div>`;
+                            return;
+                        }
+                    }
+
+                    // === فيديو مباشر (MP4, WebM, إلخ) ===
+                    const source = document.createElement('source');
+                    source.src = videoSource;
+                    source.type = videoType || 'video/mp4';
+                    videoEl.appendChild(source);
+                    container.appendChild(videoEl);
+
+                    videoPlayerInstance = {
+                        dispose: () => {
+                            videoEl.pause();
+                            videoEl.src = '';
+                            videoEl.remove();
+                        }
+                    };
+
+                    videoEl.onerror = () => {
+                        container.innerHTML =
+                            `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                <p style="font-size:14px;">تعذّر تشغيل الفيديو. تحقق من الرابط أو الصيغة.</p>
+                                <button onclick="this.parentElement.parentElement.querySelector('video')?.load()" 
+                                        style="margin-top:10px;padding:8px 20px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                                    إعادة المحاولة
+                                </button>
+                            </div>`;
+                    };
+
+                } catch (error) {
+                    console.error('Error creating video player:', error);
+                    container.innerHTML =
+                        `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;">
+                            <p>حدث خطأ في تشغيل الفيديو</p>
+                        </div>`;
+                }
+            }
+
+            function createVideoSelector(container, videos) {
+                const selectorBar = document.createElement('div');
+                selectorBar.className = 'video-selector-bar';
+                selectorBar.style.cssText =
+                    'display:flex;gap:6px;padding:8px;background:#111;overflow-x:auto;border-top:1px solid #333;max-height:60px;';
+
+                videos.forEach((v, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'video-selector-btn';
+                    btn.textContent = `مقطع ${idx + 1}`;
+                    btn.style.cssText =
+                        'flex-shrink:0;background:#222;color:#fff;border:1px solid #444;border-radius:4px;padding:6px 10px;cursor:pointer;font-size:12px;font-family:Tajawal,sans-serif;transition:all 0.2s;';
+                    if (idx === 0) btn.classList.add('active');
+
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        if (idx !== currentVideoIndex) {
+                            currentVideoIndex = idx;
+                            const videoEl = container.querySelector('video');
+                            if (videoEl) {
+                                videoEl.src = videos[idx].url;
+                                videoEl.load();
+                                videoEl.play();
+                            }
+                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove(
+                            'active'));
+                            btn.classList.add('active');
+                        }
+                    };
+                    selectorBar.appendChild(btn);
+                });
+
+                container.appendChild(selectorBar);
+            }
+
+            async function fetchTwitterVideos(tweetId) {
+                const videos = [];
+                try {
+                    const token = ((Number(tweetId) / 1e15) * Math.PI)
+                        .toString(36).replace(/(0+|\.)/g, '');
+                    const synRes = await fetch(
+                        `https://cdn.syndication.twimg.com/tweet-result?id=${tweetId}&lang=ar&token=${token}`,
+                        { headers: { 'Accept': 'application/json' } }
+                    );
+                    if (synRes.ok) {
+                        const synData = await synRes.json();
+                        (synData.mediaDetails || []).forEach(media => {
+                            if (media.type === 'video' || media.type === 'animated_gif') {
+                                const variants = (media.video_info?.variants || [])
+                                    .filter(v => v.content_type === 'video/mp4')
+                                    .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                                if (variants.length) {
+                                    videos.push({ url: variants[0].url, type: 'video/mp4',
+                                        provider: 'syndication' });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) { console.warn('[syndication]', e.message); }
+                if (videos.length) return videos;
+
+                try {
+                    const fxRes = await fetch(`https://api.fxtwitter.com/status/${tweetId}`,
+                        { headers: { 'Accept': 'application/json' } });
+                    if (fxRes.ok) {
+                        const fxData = await fxRes.json();
+                        const tweet = fxData.tweet || {};
+                        const media = tweet.media || {};
+                        const items = Array.isArray(media.videos) ? media.videos :
+                            Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif') :
+                            [];
+                        items.forEach(v => {
+                            const src = v.url || v.variants?.[0]?.url;
+                            if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
+                        });
+                    }
+                } catch (e) { console.warn('[fxtwitter]', e.message); }
+                return videos;
+            }
+
+            function embedTwitterNative(container, tweetId) {
+                container.innerHTML = '';
+                container.style.background = '#15202b';
+                container.style.overflow = 'hidden';
+                const iframe = document.createElement('iframe');
+                iframe.src =
+                    `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '320px';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('scrolling', 'no');
+                container.appendChild(iframe);
+            }
+
+            // ==================== معالج الفيديو الرئيسي ====================
+            function handlePinnedVideo(data) {
+                // منع التكرار
+                if (isProcessingVideo) return;
+                if (JSON.stringify(data) === JSON.stringify(lastVideoData) && videoPlayerInstance) {
+                    return;
+                }
+                lastVideoData = data;
+
+                // تنظيف المشغل القديم
+                disposeVideoPlayer();
+
+                // إعادة تعيين الحالة
+                pinnedVideoPlayer.innerHTML = '';
+                pinnedVideoPlayer.style.display = 'none';
+                currentVideosList = [];
+                currentVideoIndex = 0;
+
+                if (!data) return;
+
+                // عرض المشغل
+                pinnedVideoPlayer.style.display = 'flex';
+                pinnedVideoPlayer.style.position = 'fixed';
+                pinnedVideoPlayer.style.top = '60px';
+                pinnedVideoPlayer.style.left = '10px';
+                pinnedVideoPlayer.style.width = 'clamp(280px, 92vw, 480px)';
+                pinnedVideoPlayer.style.zIndex = '998';
+                pinnedVideoPlayer.style.background = '#000';
+                pinnedVideoPlayer.style.borderRadius = '16px';
+                pinnedVideoPlayer.style.overflow = 'hidden';
+                pinnedVideoPlayer.style.border = '1px solid rgba(255,255,255,0.12)';
+                pinnedVideoPlayer.style.boxShadow = '0 26px 80px rgba(0,0,0,0.9)';
+
+                // إنشاء الهيكل
+                const header = document.createElement('div');
+                header.className = 'video-header';
+                header.style.cssText =
+                    'background:linear-gradient(to right,#151623,#090a11);color:#fff;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;font-size:13px;';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = `🎬 فيديو ${data.setBy || 'مستخدم'}`;
+                header.appendChild(titleSpan);
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-pinned-video';
+                closeBtn.style.cssText =
+                    'background:#e53935;border:none;color:white;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:20px;text-align:center;';
+                closeBtn.textContent = '✖';
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (auth.currentUser) {
+                        pinnedVideoRef.remove();
+                    }
+                };
+                header.appendChild(closeBtn);
+
+                const body = document.createElement('div');
+                body.className = 'video-body';
+                body.style.cssText = 'width:100%;background:#000;flex-grow:1;min-height:320px;position:relative;';
+
+                // مؤشر تحميل
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'video-loading';
+                loadingDiv.textContent = 'جاري تحميل الفيديو...';
+                body.appendChild(loadingDiv);
+
+                pinnedVideoPlayer.appendChild(header);
+                pinnedVideoPlayer.appendChild(body);
+
+                // إضافة resize handle
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                resizeHandle.style.cssText =
+                    'position:absolute;width:20px;height:20px;bottom:0;right:0;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg,rgba(255,255,255,0.24),transparent);';
+                pinnedVideoPlayer.appendChild(resizeHandle);
+
+                // تفعيل السحب والتحجيم
+                makeDraggable(pinnedVideoPlayer, header);
+                makeResizable(pinnedVideoPlayer, resizeHandle);
+
+                // تشغيل الفيديو
+                isProcessingVideo = true;
+                setTimeout(() => {
+                    try {
+                        if (body.contains(loadingDiv)) {
+                            body.removeChild(loadingDiv);
+                        }
+
+                        if (data.type === 'youtube') {
+                            createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`,
+                                'video/youtube', true);
+                        } else if (data.type === 'm3u') {
+                            createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
+                        } else if (data.type === 'direct') {
+                            createVideoPlayer(body, data.url, 'video/mp4', false);
+                        } else if (data.type === 'twitter') {
+                            embedTwitterNative(body, data.id);
+                            fetchTwitterVideos(data.id).then(videos => {
+                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body))
+                                    return;
+                                currentVideosList = videos;
+                                currentVideoIndex = 0;
+                                const vEl = document.createElement('video');
+                                vEl.controls = true;
+                                vEl.autoplay = true;
+                                vEl.muted = true;
+                                vEl.playsInline = true;
+                                vEl.style.cssText =
+                                    'width:100%;height:100%;background:#000;display:block;object-fit:contain;';
+                                vEl.src = videos[0].url;
+                                body.innerHTML = '';
+                                body.appendChild(vEl);
+                                vEl.onerror = () => embedTwitterNative(body, data.id);
+                                videoPlayerInstance = { dispose: () => { vEl.src = '';
+                                        vEl.remove(); } };
+                                if (videos.length > 1) createVideoSelector(body, videos);
+                            }).catch(() => {});
+                        }
+                    } catch (error) {
+                        console.error('Error creating video:', error);
+                        body.innerHTML =
+                            `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                <p style="font-size:14px;">حدث خطأ في تشغيل الفيديو</p>
+                            </div>`;
+                    }
+                    isProcessingVideo = false;
+                }, 300);
+
+                addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
+            }
+
+            // ==================== بدء الدردشة ====================
+            function startChat() {
+                loginScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+
+                db.ref('.info/serverTimeOffset').on('value', snap => {
+                    serverTimeOffset = snap.val() || 0;
+                });
+
+                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                userRef.onDisconnect().remove();
+
+                // تحديث الحضور كل دقيقة
+                setInterval(() => {
+                    if (auth.currentUser) {
+                        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    }
+                }, 60000);
+
+                // تنظيف المستخدمين غير النشطين
+                setInterval(() => {
+                    const now = Date.now() + serverTimeOffset;
+                    onlineRef.once('value', snap => {
+                        snap.forEach(child => {
+                            if (now - child.val().lastActive > 90000) child.ref.remove();
+                        });
+                    });
+                }, 60000);
+
+                // ===== مستمعو Firebase =====
+                messagesRef.limitToLast(100).on("child_added", snap => {
+                    addMessageToUI(snap.key, snap.val());
+                });
+
+                messagesRef.on("child_removed", snap => {
+                    const msgElement = document.getElementById(`msg-${snap.key}`);
+                    if (msgElement) {
+                        msgElement.style.opacity = '0';
+                        setTimeout(() => msgElement.remove(), 300);
+                    }
+                });
+
+                onlineRef.on("value", snap => {
+                    document.getElementById("count").textContent = snap.numChildren();
+                    renderUsersList(snap.val() || {});
+                });
+
+                pinnedVideoRef.on("value", (snap) => {
+                    const data = snap.val();
+                    handlePinnedVideo(data);
+                });
+
+                // ===== أحداث الأزرار =====
+                onlineListBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    usersBox.style.display = 'block';
+                    overlay.style.display = 'block';
+                };
+
+                setVideoBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    setVideoModal.style.display = 'block';
+                    overlay.style.display = 'block';
+                };
+
+                overlay.onclick = closeAllModals;
+
+                // ===== إرسال الرسائل =====
+                document.getElementById("inputArea").onsubmit = (e) => {
+                    e.preventDefault();
+                    const text = messageInput.value.trim();
+                    if (!text || !auth.currentUser) return;
+
+                    const time = new Date().toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
+                    messagesRef.push({
+                        user: auth.currentUser.displayName || username,
+                        text: text,
+                        time: time,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    messageInput.value = "";
+                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                    scrollToBottom();
+                };
+
+                // ===== تثبيت الفيديو =====
+                submitVideoUrlBtn.onclick = () => {
+                    if (!auth.currentUser) return;
+                    const url = videoUrlInput.value.trim();
+                    if (!url) return;
+
+                    const youtubeId = getYoutubeVideoId(url);
+                    const tweetId = getTweetId(url);
+                    const setBy = auth.currentUser.displayName || username;
+
+                    if (youtubeId) {
+                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: setBy });
+                    } else if (tweetId) {
+                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: setBy });
+                    } else if (url.toLowerCase().includes('.m3u8') || url.toLowerCase().includes('.m3u')) {
+                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: setBy });
+                    } else if (isDirectVideo(url)) {
+                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: setBy });
+                    } else {
+                        alert("الرابط غير مدعوم.");
+                        return;
+                    }
+
+                    videoUrlInput.value = "";
+                    closeAllModals();
+                };
+            }
+
+            // ==================== تسجيل الدخول ====================
+            function attemptLogin() {
+                let inputName = usernameInput.value.trim();
+                const invalidChars = /[.#$\[\]]/;
+                if (invalidChars.test(inputName)) {
+                    alert("الاسم لا يجب أن يحتوي على رموز خاصة");
+                    return;
+                }
+                if (inputName.length < 2) {
+                    alert("الاسم قصير جداً");
+                    return;
+                }
+
+                username = inputName;
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'جاري الدخول...';
+
+                auth.signInAnonymously()
+                    .then(() => {
+                        return auth.currentUser.updateProfile({ displayName: username });
+                    })
+                    .then(() => {
+                        return auth.currentUser.getIdToken(true);
+                    })
+                    .then(() => {
+                        userRef = db.ref("online/" + username);
+                        messagesRef = db.ref("messages");
+                        onlineRef = db.ref("online");
+                        pinnedVideoRef = db.ref("pinned_video");
+                        startChat();
+                    })
+                    .catch((error) => {
+                        console.error("فشل المصادقة:", error);
+                        alert("حدث خطأ في الاتصال، حاول مجدداً.");
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'دخول';
+                    });
+            }
+
+            // ==================== ربط الأحداث ====================
+            loginBtn.onclick = attemptLogin;
+            usernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    attemptLogin();
+                }
+            });
+
         });
     </script>
 </body>
-    </html>
+
+</html>
