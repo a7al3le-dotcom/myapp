@@ -29,6 +29,10 @@
             --danger: #e53935;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         html,
         body {
             height: 100%;
@@ -50,12 +54,13 @@
         }
 
         #chat-container {
-            display: flex;
+            display: none;
             flex-direction: column;
             height: 100%;
             height: 100dvh;
             -webkit-backdrop-filter: blur(16px);
             backdrop-filter: blur(16px);
+            position: relative;
         }
 
         #messages {
@@ -95,6 +100,7 @@
         .user {
             font-weight: bold;
             color: var(--accent);
+            white-space: nowrap;
         }
 
         .time {
@@ -102,6 +108,7 @@
             color: var(--text-muted);
             min-width: 32px;
             text-align: right;
+            margin-left: auto;
         }
 
         #inputArea {
@@ -264,6 +271,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
+            flex-shrink: 0;
         }
 
         .status-green {
@@ -327,10 +335,6 @@
             display: none;
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
-        }
-
-        .delete-btn {
-            display: none;
         }
 
         #loginScreen {
@@ -413,10 +417,14 @@
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.9);
         }
 
+        #loginBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         #pinnedVideoPlayer {
             position: fixed;
             top: 60px;
-            top: calc(60px + env(safe-area-inset-top));
             left: 10px;
             width: clamp(280px, 92vw, 480px);
             background: #000;
@@ -442,6 +450,7 @@
             flex-shrink: 0;
             touch-action: none;
             font-size: 13px;
+            user-select: none;
         }
 
         .video-body {
@@ -468,6 +477,7 @@
             line-height: 20px;
             text-align: center;
             border: none;
+            padding: 0;
         }
 
         .resize-handle {
@@ -479,75 +489,6 @@
             cursor: nwse-resize;
             z-index: 10;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent);
-        }
-
-        .video-js.vjs-netflix-theme {
-            background-color: #000;
-        }
-
-        .vjs-netflix-theme .vjs-control-bar {
-            height: 6em;
-            background: none;
-            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
-        }
-
-        .vjs-netflix-theme .vjs-big-play-button {
-            display: none !important;
-        }
-
-        .vjs-netflix-theme .vjs-progress-control {
-            position: absolute;
-            left: 0;
-            right: 0;
-            width: 100%;
-            top: -3em;
-            height: 2.5em;
-        }
-
-        .vjs-netflix-theme .vjs-progress-holder {
-            height: 0.3em;
-            margin: 1.1em 0;
-        }
-
-        .vjs-netflix-theme .vjs-play-progress,
-        .vjs-netflix-theme .vjs-load-progress {
-            height: 100%;
-        }
-
-        .vjs-netflix-theme .vjs-play-progress:before {
-            display: none;
-        }
-
-        .vjs-netflix-theme .vjs-play-progress {
-            background-color: #e50914;
-        }
-
-        .vjs-netflix-theme .vjs-load-progress {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        .vjs-netflix-theme .vjs-time-control {
-            line-height: 5em;
-            padding: 0 1em;
-        }
-
-        .vjs-netflix-theme .vjs-remaining-time {
-            line-height: 5em;
-        }
-
-        .vjs-netflix-theme .vjs-button>.vjs-icon-placeholder:before {
-            font-size: 2.2em;
-            line-height: 2.2;
-        }
-
-        .vjs-netflix-theme .vjs-volume-panel,
-        .vjs-netflix-theme .vjs-fullscreen-control {
-            margin-right: 1em;
-        }
-
-        .video-js.vjs-netflix-theme.vjs-has-started.vjs-user-inactive .vjs-control-bar {
-            opacity: 0;
-            visibility: hidden;
         }
 
         .video-selector-bar {
@@ -599,7 +540,7 @@
             width: 30px;
             height: 30px;
             margin-right: 10px;
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -655,11 +596,10 @@
         </div>
     </div>
 
-    <div id="chat-container" style="display: none;">
+    <div id="chat-container">
         <div id="topButtons">
             <div class="btn" id="setVideoBtn" title="تثبيت فيديو">📺</div>
-            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span>
-            </div>
+            <div class="btn" id="onlineListBtn" title="المتصلين الآن">👥 <span id="count" class="count-text">0</span></div>
         </div>
 
         <div id="pinnedVideoPlayer"></div>
@@ -680,13 +620,14 @@
         <div id="messages" role="list"></div>
 
         <form id="inputArea">
-            <button type="submit" id="sendBtn">إرسال</button>
             <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" />
+            <button type="submit" id="sendBtn">إرسال</button>
         </form>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
                 authDomain: "mychat-2d881.firebaseapp.com",
@@ -696,18 +637,25 @@
                 messagingSenderId: "532385733649",
                 appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
             };
+
+            // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
             const auth = firebase.auth();
 
+            // State variables
             let username = '';
-            let userRef, messagesRef, onlineRef, pinnedVideoRef;
+            let userRef = null;
+            let messagesRef = null;
+            let onlineRef = null;
+            let pinnedVideoRef = null;
             let serverTimeOffset = 0;
             let videoPlayerInstance = null;
             let currentVideoIndex = 0;
             let currentVideosList = [];
             let lastVideoData = null;
 
+            // DOM elements
             const loginScreen = document.getElementById('loginScreen');
             const usernameInput = document.getElementById('usernameInput');
             const loginBtn = document.getElementById('loginBtn');
@@ -723,37 +671,36 @@
             const pinnedVideoPlayer = document.getElementById("pinnedVideoPlayer");
             const overlay = document.getElementById("overlay");
 
+            // Login function
             function attemptLogin() {
-                let inputName = usernameInput.value.trim();
+                const inputName = usernameInput.value.trim();
                 const invalidChars = /[.#$\[\]]/;
+                
                 if (invalidChars.test(inputName)) {
                     alert("الاسم لا يجب أن يحتوي على رموز خاصة");
                     return;
                 }
+                
                 if (inputName.length < 2) {
                     alert("الاسم قصير جداً");
                     return;
                 }
 
                 username = inputName;
-
                 loginBtn.disabled = true;
                 loginBtn.textContent = 'جاري الدخول...';
 
                 auth.signInAnonymously()
                     .then(() => {
-                        return auth.currentUser.updateProfile({
-                            displayName: username
-                        });
-                    })
-                    .then(() => {
-                        return auth.currentUser.getIdToken(true);
-                    })
-                    .then(() => {
+                        // Store username in localStorage for reference
+                        localStorage.setItem('chatUsername', username);
+                        
+                        // Initialize database references
                         userRef = db.ref("online/" + username);
                         messagesRef = db.ref("messages");
                         onlineRef = db.ref("online");
                         pinnedVideoRef = db.ref("pinned_video");
+                        
                         startChat();
                     })
                     .catch((error) => {
@@ -764,63 +711,92 @@
                     });
             }
 
-            loginBtn.onclick = attemptLogin;
-            usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); attemptLogin(); } });
+            // Event listeners for login
+            loginBtn.addEventListener('click', attemptLogin);
+            usernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    attemptLogin();
+                }
+            });
 
+            // Start chat function
             function startChat() {
                 loginScreen.style.display = 'none';
                 chatContainer.style.display = 'flex';
 
-                db.ref('.info/serverTimeOffset').on('value', snap => serverTimeOffset = snap.val() || 0);
+                // Get server time offset
+                db.ref('.info/serverTimeOffset').on('value', snap => {
+                    serverTimeOffset = snap.val() || 0;
+                });
 
-                userRef.set({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                // Set user online status
+                userRef.set({ 
+                    lastActive: firebase.database.ServerValue.TIMESTAMP 
+                });
                 userRef.onDisconnect().remove();
 
+                // Update last active periodically
                 setInterval(() => {
                     if (auth.currentUser) {
-                        userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+                        userRef.update({ 
+                            lastActive: firebase.database.ServerValue.TIMESTAMP 
+                        });
                     }
                 }, 60000);
 
+                // Clean up inactive users
                 setInterval(() => {
                     const now = Date.now() + serverTimeOffset;
                     onlineRef.once('value', snap => {
                         snap.forEach(child => {
-                            if (now - child.val().lastActive > 90000) child.ref.remove();
+                            const lastActive = child.val().lastActive || 0;
+                            if (now - lastActive > 90000) {
+                                child.ref.remove();
+                            }
                         });
                     });
                 }, 60000);
 
-                onlineListBtn.onclick = (e) => { e.stopPropagation();
+                // Button click handlers
+                onlineListBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     usersBox.style.display = 'block';
-                    overlay.style.display = 'block'; };
-                setVideoBtn.onclick = (e) => { e.stopPropagation();
-                    setVideoModal.style.display = 'block';
-                    overlay.style.display = 'block'; };
-                overlay.onclick = closeAllModals;
+                    overlay.style.display = 'block';
+                });
 
-                document.getElementById("inputArea").onsubmit = (e) => {
+                setVideoBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setVideoModal.style.display = 'block';
+                    overlay.style.display = 'block';
+                });
+
+                overlay.addEventListener('click', closeAllModals);
+
+                // Message form submission
+                document.getElementById("inputArea").addEventListener('submit', (e) => {
                     e.preventDefault();
                     const text = messageInput.value.trim();
                     if (!text || !auth.currentUser) return;
 
-                    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit',
-                        hour12: false });
                     messagesRef.push({
-                        user: auth.currentUser.displayName || username,
+                        user: username,
                         text: text,
-                        time: time,
                         timestamp: firebase.database.ServerValue.TIMESTAMP
                     });
+                    
                     messageInput.value = "";
-                    userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
-                    scrollToBottom();
-                };
+                    userRef.update({ 
+                        lastActive: firebase.database.ServerValue.TIMESTAMP 
+                    });
+                });
 
+                // Listen for new messages
                 messagesRef.limitToLast(100).on("child_added", snap => {
                     addMessageToUI(snap.key, snap.val());
                 });
 
+                // Listen for removed messages
                 messagesRef.on("child_removed", snap => {
                     const msgElement = document.getElementById(`msg-${snap.key}`);
                     if (msgElement) {
@@ -829,12 +805,15 @@
                     }
                 });
 
+                // Listen for online users
                 onlineRef.on("value", snap => {
-                    document.getElementById("count").textContent = snap.numChildren();
+                    const userCount = snap.numChildren();
+                    document.getElementById("count").textContent = userCount;
                     renderUsersList(snap.val() || {});
                 });
 
-                submitVideoUrlBtn.onclick = () => {
+                // Video URL submission
+                submitVideoUrlBtn.addEventListener('click', () => {
                     if (!auth.currentUser) return;
 
                     const url = videoUrlInput.value.trim();
@@ -843,258 +822,212 @@
                     const youtubeId = getYoutubeVideoId(url);
                     const tweetId = getTweetId(url);
 
-                    const setBy = auth.currentUser.displayName || username;
+                    const videoData = {
+                        setBy: username,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
 
                     if (youtubeId) {
-                        pinnedVideoRef.set({ type: 'youtube', id: youtubeId, setBy: setBy });
+                        videoData.type = 'youtube';
+                        videoData.id = youtubeId;
                     } else if (tweetId) {
-                        pinnedVideoRef.set({ type: 'twitter', id: tweetId, setBy: setBy });
+                        videoData.type = 'twitter';
+                        videoData.id = tweetId;
                     } else if (url.toLowerCase().includes('.m3u8') || url.toLowerCase().includes('.m3u')) {
-                        pinnedVideoRef.set({ type: 'm3u', url: url, setBy: setBy });
+                        videoData.type = 'm3u';
+                        videoData.url = url;
                     } else if (isDirectVideo(url)) {
-                        pinnedVideoRef.set({ type: 'direct', url: url, setBy: setBy });
+                        videoData.type = 'direct';
+                        videoData.url = url;
                     } else {
                         alert("الرابط غير مدعوم.");
                         return;
                     }
 
+                    pinnedVideoRef.set(videoData);
                     videoUrlInput.value = "";
                     closeAllModals();
-                };
+                });
 
-                // تحسين مستمع الفيديو لمنع إعادة الإنشاء المتكررة
+                // Listen for pinned video changes
                 pinnedVideoRef.on("value", (snap) => {
                     const data = snap.val();
 
-                    // منع إعادة الإنشاء إذا كانت البيانات متطابقة
+                    // Check if data hasn't changed
                     if (JSON.stringify(data) === JSON.stringify(lastVideoData) && videoPlayerInstance) {
                         return;
                     }
 
                     lastVideoData = data;
 
-                    // تنظيف المشغل القديم
+                    // Clean up old player
                     if (videoPlayerInstance) {
                         try {
                             if (typeof videoPlayerInstance.dispose === 'function') {
                                 videoPlayerInstance.dispose();
                             }
-                            videoPlayerInstance = null;
                         } catch (e) {
                             console.log("Error disposing player:", e);
                         }
+                        videoPlayerInstance = null;
                     }
 
-                    // تنظيف المحتوى
-                    if (pinnedVideoPlayer) {
-                        pinnedVideoPlayer.innerHTML = '';
-                        pinnedVideoPlayer.style.display = 'none';
-                    }
-
+                    // Clean up container
+                    pinnedVideoPlayer.innerHTML = '';
+                    pinnedVideoPlayer.style.display = 'none';
                     currentVideosList = [];
                     currentVideoIndex = 0;
 
                     if (!data) return;
 
-                    // عرض المشغل
-                    if (pinnedVideoPlayer) {
-                        pinnedVideoPlayer.style.display = 'flex';
-                        pinnedVideoPlayer.style.position = 'fixed';
-                        pinnedVideoPlayer.style.top = '60px';
-                        pinnedVideoPlayer.style.left = '10px';
-                        pinnedVideoPlayer.style.width = 'clamp(280px, 92vw, 480px)';
-                        pinnedVideoPlayer.style.zIndex = '998';
-                        pinnedVideoPlayer.style.background = '#000';
-                        pinnedVideoPlayer.style.borderRadius = '16px';
-                        pinnedVideoPlayer.style.overflow = 'hidden';
-                        pinnedVideoPlayer.style.border = '1px solid rgba(255,255,255,0.12)';
-                        pinnedVideoPlayer.style.boxShadow = '0 26px 80px rgba(0,0,0,0.9)';
-                    }
+                    // Show player
+                    pinnedVideoPlayer.style.display = 'flex';
 
-                    // إنشاء هيكل المشغل
-                    const header = document.createElement('div');
-                    header.className = 'video-header';
-                    header.style.cssText =
-                        'background: linear-gradient(to right, #151623, #090a11);color:#fff;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;font-size:13px;';
-
-                    const titleSpan = document.createElement('span');
-                    titleSpan.textContent = `🎬 فيديو ${data.setBy || 'مستخدم'}`;
-                    header.appendChild(titleSpan);
-
-                    const closeBtn = document.createElement('button');
-                    closeBtn.className = 'close-pinned-video';
-                    closeBtn.style.cssText =
-                        'background:#e53935;border:1px solid #c62828;color:white;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:20px;text-align:center;border:none;';
-                    closeBtn.textContent = '✖';
-                    closeBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        if (auth.currentUser) {
-                            pinnedVideoRef.remove();
-                        }
-                    };
-                    header.appendChild(closeBtn);
-
-                    const body = document.createElement('div');
-                    body.className = 'video-body';
-                    body.style.cssText = 'width:100%;background:#000;flex-grow:1;min-height:320px;position:relative;';
-
-                    // إضافة مؤشر تحميل
-                    const loadingDiv = document.createElement('div');
-                    loadingDiv.className = 'video-loading';
-                    loadingDiv.textContent = 'جاري تحميل الفيديو...';
-                    body.appendChild(loadingDiv);
-
-                    pinnedVideoPlayer.appendChild(header);
-                    pinnedVideoPlayer.appendChild(body);
-
-                    // إضافة resize handle
-                    const resizeHandle = document.createElement('div');
-                    resizeHandle.className = 'resize-handle';
-                    resizeHandle.style.cssText =
-                        'position:absolute;width:20px;height:20px;bottom:0;right:0;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg,rgba(255,255,255,0.24),transparent);';
-                    pinnedVideoPlayer.appendChild(resizeHandle);
-
-                    // تفعيل السحب والتحجيم
-                    makeDraggable(pinnedVideoPlayer, header);
-                    makeResizable(pinnedVideoPlayer, resizeHandle);
-
-                    // تشغيل الفيديو
-                    setTimeout(() => {
-                        try {
-                            // إزالة مؤشر التحميل
-                            if (body.contains(loadingDiv)) {
-                                body.removeChild(loadingDiv);
-                            }
-
-                            if (data.type === 'youtube') {
-                                createVideoPlayer(body, `https://www.youtube.com/watch?v=${data.id}`,
-                                    'video/youtube', true);
-                            } else if (data.type === 'm3u') {
-                                createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
-                            } else if (data.type === 'direct') {
-                                createVideoPlayer(body, data.url, 'video/mp4', false);
-                            } else if (data.type === 'twitter') {
-                                embedTwitterNative(body, data.id);
-
-                                const _twId = data.id;
-                                fetchTwitterVideos(_twId).then(videos => {
-                                    if (!videos || !videos.length || !pinnedVideoPlayer.contains(
-                                        body)) return;
-                                    currentVideosList = videos;
-                                    currentVideoIndex = 0;
-
-                                    const vEl = document.createElement('video');
-                                    vEl.controls = true;
-                                    vEl.autoplay = true;
-                                    vEl.muted = true;
-                                    vEl.playsInline = true;
-                                    vEl.style.cssText = 'width:100%;height:100%;background:#000;display:block;';
-                                    vEl.src = videos[0].url;
-
-                                    body.innerHTML = '';
-                                    body.appendChild(vEl);
-                                    vEl.onerror = () => embedTwitterNative(body, _twId);
-
-                                    videoPlayerInstance = { dispose: () => { vEl.src = '';
-                                            vEl.remove(); } };
-                                    if (videos.length > 1) createVideoSelector(body, videos);
-                                }).catch(() => {});
-                            }
-                        } catch (error) {
-                            console.error('Error creating video:', error);
-                            body.innerHTML =
-                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">حدث خطأ في تشغيل الفيديو</p>
-                                <button onclick="this.parentElement.parentElement.querySelector('video')?.load()" 
-                                        style="margin-top:10px;padding:8px 20px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;">
-                                    إعادة المحاولة
-                                </button>
-                            </div>`;
-                        }
-                    }, 300);
-
-                    addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
+                    // Create player structure
+                    createVideoPlayerStructure(data);
                 });
             }
 
-            function embedTwitterNative(container, tweetId) {
-                container.innerHTML = '';
-                container.style.background = '#15202b';
-                container.style.overflow = 'hidden';
+            // Create video player structure
+            function createVideoPlayerStructure(data) {
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'video-header';
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = `🎬 فيديو ${data.setBy || 'مستخدم'}`;
+                header.appendChild(titleSpan);
 
-                const iframe = document.createElement('iframe');
-                iframe.src =
-                    `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.minHeight = '320px';
-                iframe.style.border = 'none';
-                iframe.setAttribute('allowfullscreen', '');
-                iframe.setAttribute('allow', 'autoplay; fullscreen');
-                iframe.setAttribute('scrolling', 'no');
-                container.appendChild(iframe);
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-pinned-video';
+                closeBtn.textContent = '✖';
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (auth.currentUser) {
+                        pinnedVideoRef.remove();
+                    }
+                });
+                header.appendChild(closeBtn);
+
+                // Create body
+                const body = document.createElement('div');
+                body.className = 'video-body';
+
+                // Create loading indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'video-loading';
+                loadingDiv.textContent = 'جاري تحميل الفيديو...';
+                body.appendChild(loadingDiv);
+
+                pinnedVideoPlayer.appendChild(header);
+                pinnedVideoPlayer.appendChild(body);
+
+                // Add resize handle
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                pinnedVideoPlayer.appendChild(resizeHandle);
+
+                // Enable dragging and resizing
+                makeDraggable(pinnedVideoPlayer, header);
+                makeResizable(pinnedVideoPlayer, resizeHandle);
+
+                // Load video
+                setTimeout(() => {
+                    try {
+                        if (body.contains(loadingDiv)) {
+                            body.removeChild(loadingDiv);
+                        }
+
+                        if (data.type === 'youtube') {
+                            createYoutubePlayer(body, data.id);
+                        } else if (data.type === 'm3u') {
+                            createVideoPlayer(body, data.url, 'application/x-mpegURL', false);
+                        } else if (data.type === 'direct') {
+                            createVideoPlayer(body, data.url, 'video/mp4', false);
+                        } else if (data.type === 'twitter') {
+                            embedTwitterNative(body, data.id);
+                            fetchTwitterVideos(data.id).then(videos => {
+                                if (!videos || !videos.length || !pinnedVideoPlayer.contains(body)) return;
+                                currentVideosList = videos;
+                                currentVideoIndex = 0;
+                                
+                                // Replace iframe with video element
+                                body.innerHTML = '';
+                                const vEl = document.createElement('video');
+                                vEl.controls = true;
+                                vEl.autoplay = true;
+                                vEl.muted = true;
+                                vEl.playsInline = true;
+                                vEl.style.cssText = 'width:100%;height:100%;background:#000;display:block;';
+                                vEl.src = videos[0].url;
+                                body.appendChild(vEl);
+                                
+                                videoPlayerInstance = {
+                                    dispose: () => {
+                                        vEl.src = '';
+                                        vEl.remove();
+                                    }
+                                };
+                                
+                                if (videos.length > 1) {
+                                    createVideoSelector(body, videos);
+                                }
+                            }).catch(() => {
+                                // Keep the iframe as fallback
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error creating video:', error);
+                        body.innerHTML = `
+                            <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                <p style="font-size:14px;">حدث خطأ في تشغيل الفيديو</p>
+                            </div>`;
+                    }
+                }, 300);
+
+                addNotification(`${data.setBy || 'مستخدم'} قام بتشغيل فيديو`);
             }
 
+            // Create YouTube player
+            function createYoutubePlayer(container, videoId) {
+                container.innerHTML = '';
+                
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0&playsinline=1`;
+                iframe.style.cssText = 'width:100%;height:100%;min-height:320px;border:none;display:block;';
+                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('frameborder', '0');
+                container.appendChild(iframe);
+
+                videoPlayerInstance = {
+                    dispose: () => {
+                        try { iframe.src = 'about:blank'; } catch (e) {}
+                        iframe.remove();
+                    }
+                };
+            }
+
+            // Create video player for M3U/Direct
             function createVideoPlayer(container, videoSource, videoType, isYoutube) {
-                // تنظيف المحتوى القديم
                 container.innerHTML = '';
 
-                // التأكد من وجود container في DOM
                 if (!container || !container.parentNode) {
                     console.error('Container not found');
                     return;
                 }
 
                 try {
-                    if (isYoutube) {
-                        // استخراج معرف الفيديو من الرابط
-                        const videoId = getYoutubeVideoId(videoSource);
-                        if (videoId) {
-                            // مشغل يوتيوب يجب أن يكون iframe وليس عنصر video
-                            // لأن رابط embed هو صفحة HTML وليس ملف وسائط، ولا يمكن
-                            // لعنصر <video> تشغيله مباشرة
-                            const iframe = document.createElement('iframe');
-                            iframe.src =
-                                `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&rel=0&playsinline=1`;
-                            iframe.style.cssText =
-                                'width:100%;height:100%;min-height:320px;border:none;display:block;';
-                            iframe.setAttribute('allow',
-                                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
-                            iframe.setAttribute('allowfullscreen', '');
-                            iframe.setAttribute('frameborder', '0');
-                            container.appendChild(iframe);
-
-                            videoPlayerInstance = {
-                                dispose: () => {
-                                    try { iframe.src = 'about:blank'; } catch (e) {}
-                                    iframe.remove();
-                                }
-                            };
-                            return;
-                        } else {
-                            container.innerHTML =
-                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">تعذّر تشغيل فيديو يوتيوب. تأكد من الرابط.</p>
-                            </div>`;
-                            return;
-                        }
-                    }
-
-                    // للملفات المباشرة و HLS
                     const videoEl = document.createElement('video');
                     videoEl.controls = true;
                     videoEl.autoplay = true;
                     videoEl.muted = true;
                     videoEl.playsInline = true;
-                    videoEl.style.cssText =
-                        'width:100%;height:100%;background:#000;object-fit:contain;display:block;';
-                    videoEl.style.objectFit = 'contain';
+                    videoEl.style.cssText = 'width:100%;height:100%;background:#000;object-fit:contain;display:block;';
 
-                    // معالجة HLS
-                    if (videoType === 'application/x-mpegURL' || videoSource.includes('.m3u8') || videoSource.includes(
-                            '.m3u')) {
+                    if (videoType === 'application/x-mpegURL' || videoSource.includes('.m3u8') || videoSource.includes('.m3u')) {
+                        // Handle HLS streams
                         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                             container.appendChild(videoEl);
                             const hls = new Hls({
@@ -1113,19 +1046,17 @@
                                 }
                             };
 
-                            // معالجة أخطاء HLS
                             hls.on(Hls.Events.ERROR, (event, data) => {
                                 if (data.fatal) {
-                                    container.innerHTML =
-                                        `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                    <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                    <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
-                                </div>`;
+                                    container.innerHTML = `
+                                        <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                            <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                            <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
+                                        </div>`;
                                 }
                             });
-                            return;
                         } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-                            // دعم Safari الأصلي لـ HLS
+                            // Native HLS support (Safari)
                             container.appendChild(videoEl);
                             videoEl.src = videoSource;
 
@@ -1136,79 +1067,74 @@
                                     videoEl.remove();
                                 }
                             };
-
-                            videoEl.onerror = (e) => {
-                                console.error('HLS video error:', e);
-                                container.innerHTML =
-                                    `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">تعذّر تشغيل بث HLS. تحقق من الرابط.</p>
-                            </div>`;
-                            };
-                            return;
                         } else {
-                            container.innerHTML =
-                                `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                                <p style="font-size:14px;">المتصفح لا يدعم تشغيل بث HLS.</p>
-                            </div>`;
-                            return;
+                            container.innerHTML = `
+                                <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                    <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                    <p style="font-size:14px;">المتصفح لا يدعم تشغيل بث HLS.</p>
+                                </div>`;
                         }
+                    } else {
+                        // Direct video
+                        container.appendChild(videoEl);
+                        videoEl.src = videoSource;
+
+                        videoPlayerInstance = {
+                            dispose: () => {
+                                videoEl.pause();
+                                videoEl.src = '';
+                                videoEl.remove();
+                            }
+                        };
                     }
 
-                    // فيديو مباشر
-                    const source = document.createElement('source');
-                    source.src = videoSource;
-                    source.type = videoType || 'video/mp4';
-                    videoEl.appendChild(source);
-                    container.appendChild(videoEl);
-
-                    videoPlayerInstance = {
-                        dispose: () => {
-                            videoEl.pause();
-                            videoEl.src = '';
-                            videoEl.remove();
-                        }
-                    };
-
-                    // معالجة الأخطاء
-                    videoEl.onerror = (e) => {
-                        console.error('Video error:', e);
-                        container.innerHTML =
-                            `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                            <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
-                            <p style="font-size:14px;">تعذّر تشغيل الفيديو. تحقق من الرابط أو الصيغة.</p>
-                            <button onclick="this.parentElement.parentElement.querySelector('video')?.load()" 
-                                    style="margin-top:10px;padding:8px 20px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;">
-                                إعادة المحاولة
-                            </button>
-                        </div>`;
+                    videoEl.onerror = () => {
+                        container.innerHTML = `
+                            <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                                <span style="font-size:48px;margin-bottom:12px;">⚠️</span>
+                                <p style="font-size:14px;">تعذّر تشغيل الفيديو. تحقق من الرابط أو الصيغة.</p>
+                            </div>`;
                     };
 
                 } catch (error) {
                     console.error('Error creating video player:', error);
-                    container.innerHTML =
-                        `<div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;">
-                        <p>حدث خطأ في تشغيل الفيديو</p>
-                    </div>`;
+                    container.innerHTML = `
+                        <div style="color:#ff6b6b;padding:20px;text-align:center;background:#1a1a1a;height:100%;display:flex;align-items:center;justify-content:center;">
+                            <p>حدث خطأ في تشغيل الفيديو</p>
+                        </div>`;
                 }
             }
 
+            // Embed Twitter native
+            function embedTwitterNative(container, tweetId) {
+                container.innerHTML = '';
+                container.style.background = '#15202b';
+                container.style.overflow = 'hidden';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&lang=ar&dnt=true`;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.minHeight = '320px';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('scrolling', 'no');
+                container.appendChild(iframe);
+            }
+
+            // Create video selector
             function createVideoSelector(container, videos) {
                 const selectorBar = document.createElement('div');
                 selectorBar.className = 'video-selector-bar';
-                selectorBar.style.cssText =
-                    'display:flex;gap:6px;padding:8px;background:#111;overflow-x:auto;border-top:1px solid #333;max-height:60px;';
 
                 videos.forEach((v, idx) => {
                     const btn = document.createElement('button');
                     btn.className = 'video-selector-btn';
                     btn.textContent = `مقطع ${idx + 1}`;
-                    btn.style.cssText =
-                        'flex-shrink:0;background:#222;color:#fff;border:1px solid #444;border-radius:4px;padding:6px 10px;cursor:pointer;font-size:12px;font-family:Tajawal,sans-serif;transition:all 0.2s;';
                     if (idx === 0) btn.classList.add('active');
 
-                    btn.onclick = (e) => {
+                    btn.addEventListener('click', (e) => {
                         e.preventDefault();
                         if (idx !== currentVideoIndex && videoPlayerInstance) {
                             currentVideoIndex = idx;
@@ -1219,17 +1145,17 @@
                                 videoEl.play();
                             }
 
-                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove(
-                            'active'));
+                            document.querySelectorAll('.video-selector-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
                         }
-                    };
+                    });
                     selectorBar.appendChild(btn);
                 });
 
                 container.appendChild(selectorBar);
             }
 
+            // Fetch Twitter videos
             async function fetchTwitterVideos(tweetId) {
                 const videos = [];
 
@@ -1248,8 +1174,7 @@
                                     .filter(v => v.content_type === 'video/mp4')
                                     .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
                                 if (variants.length) {
-                                    videos.push({ url: variants[0].url, type: 'video/mp4',
-                                        provider: 'syndication' });
+                                    videos.push({ url: variants[0].url, type: 'video/mp4', provider: 'syndication' });
                                 }
                             }
                         });
@@ -1266,8 +1191,7 @@
                         const tweet = fxData.tweet || {};
                         const media = tweet.media || {};
                         const items = Array.isArray(media.videos) ? media.videos :
-                            Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif') :
-                            [];
+                            Array.isArray(media.all) ? media.all.filter(v => v.type === 'video' || v.type === 'gif') : [];
                         items.forEach(v => {
                             const src = v.url || v.variants?.[0]?.url;
                             if (src) videos.push({ url: src, type: 'video/mp4', provider: 'fxtwitter' });
@@ -1278,14 +1202,9 @@
                 return videos;
             }
 
-            const messageTimestamps = new Map();
-            setInterval(() => {
-                messageTimestamps.forEach(({ timestamp, el }, key) => {
-                    updateTimeDisplay(key, timestamp, el);
-                });
-            }, 60000);
-
-            function addMessageToUI(key, { user, text, time, timestamp }) {
+            // Add message to UI
+            function addMessageToUI(key, data) {
+                const { user, text, timestamp } = data;
                 const div = document.createElement("div");
                 div.className = "msg";
                 div.id = `msg-${key}`;
@@ -1294,22 +1213,29 @@
                 timeElement.className = "time";
                 timeElement.id = `time-${key}`;
 
-                updateTimeDisplay(key, timestamp, timeElement);
-
                 div.innerHTML = `
                     <span class="user">${escapeHtml(user)}</span>
                     <span style="flex:1; word-break: break-word;">${escapeHtml(text)}</span>
                 `;
 
                 div.appendChild(timeElement);
-                messageTimestamps.set(key, { timestamp, el: timeElement });
-
+                updateTimeDisplay(timestamp, timeElement);
+                
                 messagesDiv.appendChild(div);
                 scrollToBottom();
+
+                // Update time display periodically
+                if (timestamp) {
+                    setInterval(() => updateTimeDisplay(timestamp, timeElement), 60000);
+                }
             }
 
-            function updateTimeDisplay(key, timestamp, timeElement) {
-                if (!timestamp) return;
+            // Update time display
+            function updateTimeDisplay(timestamp, timeElement) {
+                if (!timestamp) {
+                    timeElement.textContent = "الآن";
+                    return;
+                }
 
                 const now = Date.now() + serverTimeOffset;
                 const messageTime = timestamp + serverTimeOffset;
@@ -1347,6 +1273,7 @@
                 timeElement.textContent = timeText;
             }
 
+            // Add notification
             function addNotification(text) {
                 const div = document.createElement("div");
                 div.className = "sys";
@@ -1355,34 +1282,38 @@
                 scrollToBottom();
             }
 
+            // Render users list
             function renderUsersList(users) {
                 const list = document.getElementById("usersList");
                 list.innerHTML = '';
                 const now = Date.now() + serverTimeOffset;
+                
                 Object.keys(users).forEach(uName => {
                     const uData = users[uName];
                     const div = document.createElement("div");
                     div.className = "user-item";
+                    
                     let colorClass = 'status-green';
                     const diff = now - (uData.lastActive || 0);
                     if (diff > 60000) colorClass = 'status-gray';
                     else if (diff > 30000) colorClass = 'status-yellow';
-                    div.innerHTML =
-                        `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
+                    
+                    div.innerHTML = `<span class="status-indicator ${colorClass}"></span><span>${escapeHtml(uName)}</span>`;
                     list.appendChild(div);
                 });
             }
 
+            // Close all modals
             function closeAllModals() {
                 usersBox.style.display = 'none';
                 setVideoModal.style.display = 'none';
                 overlay.style.display = 'none';
             }
 
+            // Utility functions
             function getYoutubeVideoId(url) {
                 if (!url) return null;
-                const regex =
-                    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
                 return (url.match(regex) || [])[1] || null;
             }
 
@@ -1399,15 +1330,21 @@
                 return false;
             }
 
-            function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+            function scrollToBottom() {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
 
             function escapeHtml(unsafe) {
                 if (!unsafe) return "";
-                return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g,
-                    "&quot;").replace(/'/g, "&#039;");
+                return unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
             }
 
-            // دوال السحب والتحجيم
+            // Draggable function
             function makeDraggable(element, handle) {
                 let offsetX = 0, offsetY = 0;
                 let isDragging = false;
@@ -1415,14 +1352,16 @@
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
 
                 const onDragStart = (e) => {
-                    isDragging = true;
-                    const pointer = getPointerPosition(e);
-                    offsetX = pointer.clientX - element.offsetLeft;
-                    offsetY = pointer.clientY - element.offsetTop;
-                    document.addEventListener('mousemove', onDragMove);
-                    document.addEventListener('touchmove', onDragMove, { passive: false });
-                    document.addEventListener('mouseup', onDragEnd);
-                    document.addEventListener('touchend', onDragEnd);
+                    if (e.target === handle || handle.contains(e.target)) {
+                        isDragging = true;
+                        const pointer = getPointerPosition(e);
+                        offsetX = pointer.clientX - element.getBoundingClientRect().left;
+                        offsetY = pointer.clientY - element.getBoundingClientRect().top;
+                        document.addEventListener('mousemove', onDragMove);
+                        document.addEventListener('touchmove', onDragMove, { passive: false });
+                        document.addEventListener('mouseup', onDragEnd);
+                        document.addEventListener('touchend', onDragEnd);
+                    }
                 };
 
                 const onDragMove = (e) => {
@@ -1442,14 +1381,14 @@
                     document.removeEventListener('touchend', onDragEnd);
                 };
 
-                if (handle) {
-                    handle.addEventListener('mousedown', onDragStart);
-                    handle.addEventListener('touchstart', onDragStart, { passive: false });
-                }
+                handle.addEventListener('mousedown', onDragStart);
+                handle.addEventListener('touchstart', onDragStart, { passive: false });
             }
 
+            // Resizable function
             function makeResizable(element, handle) {
                 let initialWidth, initialHeight, initialX, initialY;
+
                 const getPointerPosition = (e) => e.touches ? e.touches[0] : e;
 
                 function onResizeStart(e) {
@@ -1481,13 +1420,10 @@
                     document.removeEventListener('touchend', onResizeEnd);
                 }
 
-                if (handle) {
-                    handle.addEventListener('mousedown', onResizeStart);
-                    handle.addEventListener('touchstart', onResizeStart, { passive: false });
-                }
+                handle.addEventListener('mousedown', onResizeStart);
+                handle.addEventListener('touchstart', onResizeStart, { passive: false });
             }
         });
     </script>
 </body>
-
     </html>
