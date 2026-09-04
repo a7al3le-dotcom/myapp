@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  
+
   <!-- Firebase مكتبات -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
-    /* ===== استايل هكر ===== */
+
     html, body {
       height: 100%;
       margin: 0;
@@ -21,7 +21,7 @@
       overflow: hidden;
       background: #0a0a0a;
     }
-    
+
     body {
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
       background: #0a0a0a;
@@ -29,22 +29,20 @@
       flex-direction: column;
       position: relative;
       color: #00ff41;
-      /* منع حركة الصفحة */
       position: fixed;
       width: 100%;
       height: 100%;
       top: 0;
       left: 0;
     }
-    
+
     #chat-container {
       display: flex;
       flex-direction: column;
       height: 100%;
       background: #0a0a0a;
     }
-    
-    /* ===== منطقة الرسائل ===== */
+
     #messages {
       flex: 1;
       overflow-y: auto;
@@ -52,7 +50,7 @@
       background: #0a0a0a;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .msg {
       margin: 2px 0;
       padding: 2px 4px;
@@ -67,30 +65,29 @@
       border: none;
       color: #00ff41;
     }
-    
+
     .msg .user {
       color: #00ff41;
       font-weight: bold;
       cursor: pointer;
       text-decoration: none;
     }
-    
+
     .msg .user:hover {
       color: #ffffff;
       text-shadow: 0 0 10px #00ff41;
     }
-    
+
     .msg .time {
       font-size: 10px;
       color: #004400;
       margin-right: auto;
     }
-    
+
     .msg .text {
       color: #00cc33;
     }
-    
-    /* ===== رسائل النظام ===== */
+
     .sys {
       text-align: center;
       color: #004400;
@@ -105,12 +102,33 @@
       border: 1px solid #003300;
       border-radius: 0;
     }
-    
+
     .sys.fade-out {
       opacity: 0;
     }
-    
-    /* ===== منطقة الإدخال - مع إصلاح التكبير ===== */
+
+    /* ===== مؤشر الكتابة - فوق مربع الإدخال، بارتفاع ثابت لمنع أي قفزة بالتخطيط ===== */
+    #typingIndicator {
+      flex-shrink: 0;
+      height: 18px;
+      line-height: 18px;
+      padding: 0 10px;
+      font-size: 11px;
+      font-style: italic;
+      color: #00cc33;
+      background: #050505;
+      border-top: 1px solid #003300;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    #typingIndicator.visible {
+      opacity: 1;
+    }
+
     #inputArea {
       display: flex;
       flex-direction: row;
@@ -122,14 +140,13 @@
       border-bottom: 1px solid #00ff41;
       flex-shrink: 0;
       min-height: 40px;
-      /* منع التغيير عند فتح لوحة المفاتيح */
       position: relative;
       z-index: 10;
     }
-    
+
     #messageInput {
       flex: 1;
-      font-size: 16px !important; /* 16px يمنع التكبير التلقائي في iOS */
+      font-size: 16px !important;
       padding: 4px 8px;
       border: 1px solid #00ff41;
       border-radius: 0;
@@ -144,17 +161,17 @@
       text-size-adjust: 100%;
       outline: none;
     }
-    
+
     #messageInput:focus {
       border-color: #ffffff;
       background: #050505;
       box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
     }
-    
+
     #messageInput::placeholder {
       color: #004400;
     }
-    
+
     #sendBtn {
       padding: 4px 12px;
       border: 1px solid #00ff41;
@@ -170,19 +187,18 @@
       flex-shrink: 0;
       touch-action: manipulation;
     }
-    
+
     #sendBtn:hover {
       background: #00ff41;
       color: #0a0a0a;
       box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
     }
-    
+
     #sendBtn:active {
       background: #004400;
       color: #00ff41;
     }
-    
-    /* ===== قائمة المتصلين ===== */
+
     #onlineList {
       position: fixed;
       top: 5px;
@@ -199,21 +215,21 @@
       color: #00ff41;
       transition: all 0.3s;
     }
-    
+
     #onlineList:hover {
       background: #00ff41;
       color: #0a0a0a;
       box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     }
-    
+
     #onlineList .fa {
       color: #00ff41;
     }
-    
+
     #onlineList:hover .fa {
       color: #0a0a0a;
     }
-    
+
     #usersBox {
       position: fixed;
       top: 32px;
@@ -229,12 +245,12 @@
       transition: opacity 0.2s ease;
       color: #00ff41;
     }
-    
+
     #usersBox.visible {
       opacity: 1;
       visibility: visible;
     }
-    
+
     #usersBox h4 {
       margin: 0 0 5px 0;
       color: #00ff41;
@@ -242,12 +258,12 @@
       border-bottom: 1px solid #004400;
       padding-bottom: 3px;
     }
-    
+
     #usersList {
       max-height: 200px;
       overflow-y: auto;
     }
-    
+
     .user-item {
       display: flex;
       align-items: center;
@@ -257,35 +273,35 @@
       font-size: 12px;
       cursor: default;
     }
-    
+
     .user-item .user-name {
       cursor: pointer;
       color: #00ff41;
     }
-    
+
     .user-item .user-name:hover {
       color: #ffffff;
       text-shadow: 0 0 10px #00ff41;
     }
-    
+
     .status-indicator {
       width: 6px;
       height: 6px;
       border-radius: 50%;
       border: 1px solid #00ff41;
+      flex-shrink: 0;
     }
-    
+
     .status-green {
       background-color: #00ff41;
       box-shadow: 0 0 10px #00ff41;
     }
-    
+
     .status-yellow {
       background-color: #ffaa00;
       box-shadow: 0 0 10px #ffaa00;
     }
-    
-    /* ===== حالة الاتصال ===== */
+
     #connection-status {
       position: fixed;
       bottom: 50px;
@@ -300,73 +316,69 @@
       background: #0a0a0a;
       font-family: 'Share Tech Mono', monospace;
     }
-    
+
     #connection-status.visible {
       display: block;
     }
-    
+
     #connection-status.online {
       color: #00ff41;
       border-color: #00ff41;
       box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     }
-    
+
     #connection-status.offline {
       color: #ff0044;
       border-color: #ff0044;
       box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
     }
-    
+
     #connection-status.reconnecting {
       color: #ffaa00;
       border-color: #ffaa00;
       box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
     }
-    
-    /* ===== تمرير ===== */
+
     #messages::-webkit-scrollbar {
       width: 6px;
     }
-    
+
     #messages::-webkit-scrollbar-track {
       background: #0a0a0a;
     }
-    
+
     #messages::-webkit-scrollbar-thumb {
       background: #00ff41;
       border: 1px solid #004400;
     }
-    
+
     #messages::-webkit-scrollbar-thumb:hover {
       background: #ffffff;
     }
-    
-    /* ===== إصلاح التكبير - منع تكبير الصفحة ===== */
+
     * {
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
     }
-    
-    /* منع التحديد التلقائي */
+
     input, textarea {
       -webkit-user-select: text;
       user-select: text;
     }
-    
-    /* تحسين اللمس على الهواتف */
+
     @media (max-width: 768px) {
       #messageInput {
         font-size: 16px !important;
         height: 32px;
         padding: 6px 8px;
       }
-      
+
       #sendBtn {
         height: 32px;
         padding: 6px 14px;
         font-size: 14px;
       }
-      
+
       #inputArea {
         padding: 6px 8px;
         min-height: 44px;
@@ -385,6 +397,7 @@
     <div id="usersBox"><h4>🖥️ المتصلين</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="connection-status"></div>
+    <div id="typingIndicator"></div>
     <form id="inputArea" action="javascript:void(0);">
       <button type="submit" id="sendBtn">➤ إرسال</button>
       <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
@@ -411,7 +424,7 @@
       // ===== الاسم مع حفظ =====
       let username = localStorage.getItem('chat_username');
       if (!username) {
-        username = "هكر_" + Math.floor(Math.random() * 9999);
+        username = "زائر" + Math.floor(Math.random() * 9999);
         localStorage.setItem('chat_username', username);
       }
 
@@ -419,21 +432,33 @@
       const onlineList = document.getElementById("onlineList");
       const usersBox = document.getElementById("usersBox");
       const usersList = document.getElementById("usersList");
-      const count = document.getElementById("count");
+      const onlineCountEl = document.getElementById("count");
       const messagesDiv = document.getElementById("messages");
       const connectionStatus = document.getElementById("connection-status");
-      
+      const typingIndicatorEl = document.getElementById("typingIndicator");
+
+      // ===== مراجع Firebase =====
       const userRef = db.ref("online/" + userId);
       const messagesRef = db.ref("messages");
       const onlineRef = db.ref("online");
+      // مسار منفصل لحالة الكتابة، بمعزل عن بيانات الحضور، حتى لا يتسبب
+      // كل ضغطة زر بإعادة رسم قائمة المتصلين كاملة.
+      const typingRef = db.ref("typing");
+      const myTypingRef = db.ref("typing/" + userId);
+
       const messageInput = document.getElementById("messageInput");
       const inputAreaForm = document.getElementById("inputArea");
-      
-      let typingTimer, serverTimeOffset = 0;
+
+      let typingTimer;
+      let isTypingLocally = false;
+      let serverTimeOffset = 0;
       let isConnected = false;
-      let reconnectAttempts = 0;
-      const MAX_RECONNECT_ATTEMPTS = 10;
-      
+
+      // ===== ذاكرة محلية لتفادي إعادة بناء الواجهة بالكامل =====
+      const onlineUsersCache = {};   // userKey -> data
+      const typingUsersCache = {};   // userKey -> data
+      let knownUserIds = new Set();  // لمعرفة من كان موجوداً مسبقاً (لتفادي رسائل "دخل" وهمية)
+
       // ===== مصفوفة حفظ الرسائل =====
       let pendingMessages = [];
 
@@ -457,7 +482,7 @@
       function showConnectionStatus(status, type) {
         connectionStatus.textContent = status;
         connectionStatus.className = 'visible ' + type;
-        
+
         if (type === 'online') {
           setTimeout(() => {
             connectionStatus.className = '';
@@ -465,120 +490,219 @@
         }
       }
 
-      // ===== إعادة الاتصال =====
-      function attemptReconnect() {
-        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-          showConnectionStatus('❌ فشل الاتصال، حاول تحديث الصفحة', 'offline');
-          return;
-        }
-        
-        reconnectAttempts++;
-        showConnectionStatus(`🔄 محاولة ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`, 'reconnecting');
-        
-        setTimeout(() => {
-          userRef.update({ 
-            lastActive: firebase.database.ServerValue.TIMESTAMP,
-            isTyping: false,
-            name: username,
-            userId: userId
-          }).then(() => {
-            userRef.onDisconnect().remove();
-            showConnectionStatus('✅ متصل', 'online');
-            reconnectAttempts = 0;
-          }).catch(() => {
-            attemptReconnect();
-          });
-        }, 3000 * reconnectAttempts);
-      }
-
-      // ===== مراقبة الاتصال =====
+      // ===== مراقبة الاتصال (Firebase SDK يتكفل تلقائياً بإعادة المحاولة) =====
       const connectedRef = firebase.database().ref(".info/connected");
       connectedRef.on("value", (snap) => {
         const connected = snap.val();
-        
+
         if (connected) {
           isConnected = true;
-          reconnectAttempts = 0;
           showConnectionStatus('✅ متصل', 'online');
-          
-          userRef.set({ 
+
+          userRef.set({
             lastActive: firebase.database.ServerValue.TIMESTAMP,
-            isTyping: false,
             name: username,
             userId: userId,
             joinedAt: firebase.database.ServerValue.TIMESTAMP
           });
           userRef.onDisconnect().remove();
-          
-          // ===== إعادة إرسال الرسائل المحفوظة =====
+          myTypingRef.onDisconnect().remove();
+
           resendPendingMessages();
-          
+
         } else {
           isConnected = false;
-          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة المحاولة...', 'offline');
-          attemptReconnect();
+          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال تلقائياً...', 'offline');
         }
       });
 
       // ===== وقت السيرفر =====
-      db.ref('.info/serverTimeOffset').on('value', snap => { 
-        serverTimeOffset = snap.val() || 0; 
+      db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverTimeOffset = snap.val() || 0;
       });
-      
-      // ===== تحديث النشاط =====
-      setInterval(() => { 
+
+      // ===== نبضة حضور دورية (كتابة واحدة صغيرة كل 30 ثانية فقط) =====
+      setInterval(() => {
         if (isConnected) {
-          userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP }); 
+          userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
         }
       }, 30000);
-      
-      // ===== تنظيف المستخدمين =====
-      setInterval(() => {
-        if (!isConnected) return;
-        const now = Date.now() + serverTimeOffset; 
-        const STALE_THRESHOLD = 90 * 1000;
-        onlineRef.once('value', snapshot => {
-          const users = snapshot.val(); 
-          if (!users) return;
-          Object.keys(users).forEach(u => { 
-            if (now - (users[u].lastActive || 0) > STALE_THRESHOLD) {
-              db.ref('online/' + u).remove(); 
-            }
-          });
-        });
-      }, 60000);
 
-      // ===== قائمة المتصلين =====
-      onlineList.onclick = e => { 
-        e.stopPropagation(); 
-        usersBox.classList.toggle('visible'); 
+      // ملاحظة أداء: تم حذف الفحص الدوري القديم الذي كان يسحب كامل قائمة
+      // المتصلين كل 60 ثانية لتنظيف الحسابات الميتة. onDisconnect() أعلاه
+      // كافٍ وموثوق لإزالة أي مستخدم عند انقطاع اتصاله فعلياً، بدون أي
+      // استعلامات دورية إضافية تستهلك بيانات ومعالجة بلا داعٍ.
+
+      // ===== قائمة المتصلين (فتح/إغلاق) =====
+      onlineList.onclick = e => {
+        e.stopPropagation();
+        usersBox.classList.toggle('visible');
       };
-      
-      document.onclick = () => { 
+
+      document.onclick = () => {
         if (usersBox.classList.contains('visible')) {
-          usersBox.classList.remove('visible'); 
+          usersBox.classList.remove('visible');
         }
       };
-      
+
       usersBox.onclick = e => e.stopPropagation();
 
-      // ===== مستخدمين =====
-      onlineRef.on("value", snap => {
-        const onlineUsers = snap.val() || {};
-        count.textContent = snap.numChildren();
-        renderUsersList(onlineUsers);
+      // =====================================================================
+      // ===== نظام الحضور: تحديثات جزئية بدل إعادة رسم القائمة كاملة =====
+      // =====================================================================
+      // بدل الاستماع إلى حدث "value" (الذي يرسل نسخة كاملة من كل المتصلين
+      // مع أي تغيير بسيط، حتى لو غيّر شخص واحد فقط lastActive الخاص به)،
+      // نستخدم child_added / child_changed / child_removed التي تصل فقط
+      // للعنصر المتغيّر، ونحدّث عنصر DOM واحد بدل إعادة بناء القائمة بأكملها.
+
+      function updateOnlineCount() {
+        onlineCountEl.textContent = Object.keys(onlineUsersCache).length;
+      }
+
+      function buildUserItem(userKey) {
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        userItem.id = "user-" + userKey;
+
+        const statusIndicator = document.createElement("span");
+        statusIndicator.className = "status-indicator";
+        userItem.appendChild(statusIndicator);
+
+        const userName = document.createElement("span");
+        userName.className = "user-name";
+        userItem.appendChild(userName);
+
+        if (userKey === userId) {
+          userName.onclick = (e) => {
+            e.stopPropagation();
+            const newName = prompt('الاسم الجديد:', username);
+            if (newName && newName.trim() !== '') {
+              changeUsername(newName.trim());
+            }
+          };
+        } else {
+          userName.style.cursor = 'default';
+        }
+
+        return userItem;
+      }
+
+      function applyUserItemData(userItem, userKey, userData) {
+        const isMe = userKey === userId;
+        const displayName = userData.name || userKey;
+        const now = Date.now() + serverTimeOffset;
+        const twoMinutesAgo = now - (2 * 60 * 1000);
+
+        const statusIndicator = userItem.querySelector('.status-indicator');
+        statusIndicator.classList.remove('status-green', 'status-yellow');
+        statusIndicator.classList.add((userData.lastActive || 0) < twoMinutesAgo ? 'status-yellow' : 'status-green');
+
+        const userName = userItem.querySelector('.user-name');
+        userName.textContent = displayName;
+        userName.title = isMe ? 'أنت' : `آخر نشاط: ${new Date(userData.lastActive || now).toLocaleTimeString()}`;
+
+        if (isMe) {
+          const badge = document.createElement('span');
+          badge.textContent = ' [أنت]';
+          badge.style.fontSize = '10px';
+          badge.style.color = '#004400';
+          userName.appendChild(badge);
+        }
+      }
+
+      function handleUserAdded(snap) {
+        const key = snap.key;
+        const data = snap.val();
+        onlineUsersCache[key] = data;
+
+        const item = buildUserItem(key);
+        applyUserItemData(item, key, data);
+        usersList.appendChild(item);
+        updateOnlineCount();
+
+        if (key !== userId && !knownUserIds.has(key)) {
+          showSystemMsg(`🟢 ${data.name || key} دخل`, true);
+        }
+        knownUserIds.add(key);
+      }
+
+      function handleUserChanged(snap) {
+        const key = snap.key;
+        const data = snap.val();
+        onlineUsersCache[key] = data;
+
+        const item = document.getElementById('user-' + key);
+        if (item) applyUserItemData(item, key, data);
+      }
+
+      function handleUserRemoved(snap) {
+        const key = snap.key;
+        const data = onlineUsersCache[key] || snap.val() || {};
+        delete onlineUsersCache[key];
+        knownUserIds.delete(key);
+
+        const item = document.getElementById('user-' + key);
+        if (item) item.remove();
+        updateOnlineCount();
+
+        showSystemMsg(`🔴 ${data.name || key} غادر`, true);
+      }
+
+      // نجلب قائمة المتصلين الحاليين مرة واحدة أولاً، لمعرفة من كان موجوداً
+      // فعلاً قبل انضمامنا (لتفادي رسائل "دخل" الوهمية)، ثم نفعّل الاستماع
+      // المستمر بأحداث الأطفال فقط.
+      onlineRef.once('value', snap => {
+        const data = snap.val() || {};
+        Object.keys(data).forEach(k => knownUserIds.add(k));
+
+        onlineRef.on('child_added', handleUserAdded);
+        onlineRef.on('child_changed', handleUserChanged);
+        onlineRef.on('child_removed', handleUserRemoved);
       });
 
-      onlineRef.on("child_added", snap => { 
-        if (snap.key !== userId) {
-          const userData = snap.val();
-          showSystemMsg(`🟢 ${userData.name || snap.key} دخل`, true);
+      // =====================================================================
+      // ===== مؤشر الكتابة: مسار منفصل + عرض فوق مربع الإدخال فقط =====
+      // =====================================================================
+      // تمت إزالته نهائياً من قائمة "المتصلين" بناءً على طلبك، وأصبح يظهر
+      // كسطر واحد ثابت الارتفاع فوق مربع الكتابة (بنفس أسلوب واتساب/تيليجرام)
+      // بدون أي قفزة في تخطيط الصفحة عند ظهوره واختفائه.
+
+      function renderTypingIndicator() {
+        const names = Object.values(typingUsersCache)
+          .map(u => u.name)
+          .filter(Boolean);
+
+        if (names.length === 0) {
+          typingIndicatorEl.classList.remove('visible');
+          typingIndicatorEl.textContent = '';
+        } else if (names.length === 1) {
+          typingIndicatorEl.textContent = `${names[0]} يكتب الآن...`;
+          typingIndicatorEl.classList.add('visible');
+        } else if (names.length === 2) {
+          typingIndicatorEl.textContent = `${names[0]} و ${names[1]} يكتبان الآن...`;
+          typingIndicatorEl.classList.add('visible');
+        } else {
+          typingIndicatorEl.textContent = `عدة أشخاص يكتبون الآن...`;
+          typingIndicatorEl.classList.add('visible');
         }
+      }
+
+      typingRef.on('child_added', snap => {
+        if (snap.key === userId) return;
+        typingUsersCache[snap.key] = snap.val();
+        renderTypingIndicator();
       });
-      
-      onlineRef.on("child_removed", snap => { 
-        const userData = snap.val();
-        showSystemMsg(`🔴 ${userData.name || snap.key} غادر`, true);
+
+      typingRef.on('child_changed', snap => {
+        if (snap.key === userId) return;
+        typingUsersCache[snap.key] = snap.val();
+        renderTypingIndicator();
+      });
+
+      typingRef.on('child_removed', snap => {
+        if (snap.key === userId) return;
+        delete typingUsersCache[snap.key];
+        renderTypingIndicator();
       });
 
       // ===== تغيير الاسم =====
@@ -586,51 +710,42 @@
         newName = newName.trim();
         if (!newName) {
           showSystemMsg('⚠️ الاسم لا يمكن أن يكون فارغاً', true);
-          return false;
+          return;
         }
-        
+
         if (newName.length > 20) {
           showSystemMsg('⚠️ الاسم طويل جداً (حد أقصى 20 حرف)', true);
-          return false;
+          return;
         }
-        
-        let nameExists = false;
+
         onlineRef.once('value', snapshot => {
           const users = snapshot.val() || {};
-          Object.keys(users).forEach(key => {
-            if (key !== userId && users[key].name === newName) {
-              nameExists = true;
-            }
-          });
-        });
-        
-        setTimeout(() => {
-          if (nameExists) {
+          const nameTaken = Object.keys(users).some(
+            key => key !== userId && users[key].name === newName
+          );
+
+          if (nameTaken) {
             showSystemMsg('⚠️ هذا الاسم مستخدم بالفعل', true);
-            return false;
+            return;
           }
-          
+
           const oldName = username;
           username = newName;
           localStorage.setItem('chat_username', username);
-          
+
           if (isConnected) {
-            userRef.update({ 
+            userRef.update({
               name: username,
               lastActive: firebase.database.ServerValue.TIMESTAMP
             });
           }
-          
+
           showSystemMsg(`✅ ${oldName} → ${username}`, true);
           updateAllMessagesUsername(oldName, username);
-          
-          return true;
-        }, 500);
-        
-        return true;
+        });
       }
 
-      // ===== تحديث الاسم في جميع الرسائل =====
+      // ===== تحديث الاسم في جميع الرسائل المعروضة حالياً =====
       function updateAllMessagesUsername(oldName, newName) {
         const allMessages = document.querySelectorAll('.msg');
         allMessages.forEach(msg => {
@@ -648,24 +763,24 @@
           time: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}),
           timestamp: Date.now()
         };
-        
+
         pendingMessages.push(message);
         localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
-        
+
         showSystemMsg(`💾 حفظت الرسالة (${pendingMessages.length})`, true);
       }
 
       // ===== إعادة إرسال الرسائل المحفوظة =====
       function resendPendingMessages() {
         if (pendingMessages.length === 0 || !isConnected) return;
-        
-        const count = pendingMessages.length;
-        showSystemMsg(`📤 إعادة إرسال ${count} رسالة...`, true);
-        
+
+        const pendingCount = pendingMessages.length;
+        showSystemMsg(`📤 إعادة إرسال ${pendingCount} رسالة...`, true);
+
         const messagesToSend = [...pendingMessages];
         pendingMessages = [];
         localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
-        
+
         messagesToSend.forEach((msg, index) => {
           setTimeout(() => {
             if (isConnected) {
@@ -676,12 +791,11 @@
                 time: msg.time,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
               });
-              
+
               if (index === messagesToSend.length - 1) {
                 showSystemMsg(`✅ تم إرسال ${messagesToSend.length} رسالة`, true);
               }
             } else {
-              // إذا انقطع مرة أخرى، أعد حفظها
               pendingMessages.push(msg);
               localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
             }
@@ -689,125 +803,77 @@
         });
       }
 
-      // ===== إرسال الرسالة =====
+      // =====================================================================
+      // ===== إرسال الرسالة + كتابة حالة "يكتب" بأقل عدد ممكن من الطلبات =====
+      // =====================================================================
       inputAreaForm.onsubmit = sendMessage;
-      
+
+      // FIX (الأداء): سابقاً كانت كل ضغطة زر تكتب إلى Firebase مباشرة.
+      // الآن نكتب "يكتب..." مرة واحدة فقط عند بداية الكتابة، ونحذفها مرة
+      // واحدة فقط بعد توقف المستخدم عن الكتابة لثانيتين. هذا يقلل عدد
+      // الكتابات لقاعدة البيانات من عشرات في الرسالة الواحدة إلى اثنتين فقط.
       messageInput.oninput = () => {
         clearTimeout(typingTimer);
-        if (isConnected) {
-          userRef.update({ 
-            isTyping: true, 
-            lastActive: firebase.database.ServerValue.TIMESTAMP 
+
+        if (isConnected && !isTypingLocally) {
+          isTypingLocally = true;
+          myTypingRef.set({
+            name: username,
+            ts: firebase.database.ServerValue.TIMESTAMP
           });
         }
-        typingTimer = setTimeout(() => { 
-          if (isConnected) {
-            userRef.update({ isTyping: false }); 
-          }
+
+        typingTimer = setTimeout(() => {
+          isTypingLocally = false;
+          if (isConnected) myTypingRef.remove();
         }, 2000);
       };
 
-      function sendMessage() {
+      function stopTypingNow() {
         clearTimeout(typingTimer);
-        userRef.update({ isTyping: false });
-        
+        isTypingLocally = false;
+        if (isConnected) myTypingRef.remove();
+      }
+
+      function sendMessage() {
+        stopTypingNow();
+
         const text = messageInput.value.trim();
         if (!text) {
           showSystemMsg('⚠️ اكتب شيئاً', true);
           return;
         }
-        
+
         if (text.length > 1000) {
           showSystemMsg('⚠️ الرسالة طويلة جداً', true);
           return;
         }
-        
-        // ===== التحقق من الاتصال =====
+
         if (!isConnected) {
           saveMessageOffline(text);
           messageInput.value = "";
           return;
         }
-        
-        // ===== إرسال عادي =====
+
         const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-        
-        messagesRef.push().set({ 
+
+        messagesRef.push().set({
           user: username,
           userId: userId,
           text: text,
           time: time,
           timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        
+
         messageInput.value = "";
         cleanupOldMessages();
-      }
-
-      // ===== عرض قائمة المستخدمين =====
-      function renderUsersList(onlineUsersData) {
-        usersList.innerHTML = '';
-        const now = Date.now() + serverTimeOffset;
-        const twoMinutesAgo = now - (2 * 60 * 1000);
-        
-        Object.keys(onlineUsersData).forEach(userKey => {
-          const userData = onlineUsersData[userKey];
-          const displayName = userData.name || userKey;
-          const isMe = userKey === userId;
-          
-          const userItem = document.createElement("div");
-          userItem.className = "user-item";
-          
-          const statusIndicator = document.createElement("span");
-          statusIndicator.className = "status-indicator";
-          
-          if (userData.lastActive < twoMinutesAgo) {
-            statusIndicator.classList.add('status-yellow');
-          } else {
-            statusIndicator.classList.add('status-green');
-          }
-          
-          const userName = document.createElement("span");
-          userName.className = "user-name";
-          userName.textContent = displayName;
-          userName.title = isMe ? 'أنت' : `آخر نشاط: ${new Date(userData.lastActive || now).toLocaleTimeString()}`;
-          
-          if (isMe) {
-            userName.onclick = (e) => {
-              e.stopPropagation();
-              const newName = prompt('الاسم الجديد:', displayName);
-              if (newName && newName.trim() !== '') {
-                changeUsername(newName.trim());
-              }
-            };
-            const meBadge = document.createElement("span");
-            meBadge.textContent = " [أنت]";
-            meBadge.style.fontSize = "10px";
-            meBadge.style.color = "#004400";
-            userName.appendChild(meBadge);
-          } else {
-            userName.style.cursor = 'default';
-          }
-          
-          if (userData.isTyping && !isMe) {
-            const typingIcon = document.createElement("span");
-            typingIcon.textContent = ' ✍️';
-            typingIcon.style.fontSize = '11px';
-            typingIcon.style.color = '#004400';
-            userName.appendChild(typingIcon);
-          }
-          
-          userItem.appendChild(statusIndicator);
-          userItem.appendChild(userName);
-          usersList.appendChild(userItem);
-        });
       }
 
       // ===== عرض الرسائل =====
       messagesRef.limitToLast(50).on("child_added", snap => {
         addMessage(snap.key, snap.val());
       });
-      
+
       messagesRef.on('child_removed', snap => {
         const el = document.getElementById('msg-' + snap.key);
         if (el) el.remove();
@@ -817,11 +883,11 @@
         const div = document.createElement("div");
         div.className = "msg";
         div.id = 'msg-' + key;
-        
+
         const userSpan = document.createElement("span");
         userSpan.className = "user";
         userSpan.textContent = user;
-        
+
         if (msgUserId === userId) {
           userSpan.onclick = (e) => {
             e.stopPropagation();
@@ -833,19 +899,19 @@
         } else {
           userSpan.style.cursor = 'default';
         }
-        
+
         const textSpan = document.createElement("span");
         textSpan.className = "text";
         textSpan.textContent = text;
-        
+
         const timeSpan = document.createElement("span");
         timeSpan.className = "time";
         timeSpan.textContent = time;
-        
+
         div.appendChild(userSpan);
         div.appendChild(textSpan);
         div.appendChild(timeSpan);
-        
+
         messagesDiv.appendChild(div);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
@@ -853,17 +919,17 @@
       // ===== تنظيف الرسائل القديمة =====
       function cleanupOldMessages() {
         if (!isConnected) return;
-        
+
         messagesRef.once('value', snapshot => {
           if (snapshot.numChildren() > 50) {
             let updates = {};
-            let count = 0;
+            let removeCount = 0;
             const limit = snapshot.numChildren() - 50;
             snapshot.forEach(child => {
-              if (count < limit) {
+              if (removeCount < limit) {
                 updates[child.key] = null;
               }
-              count++;
+              removeCount++;
             });
             messagesRef.update(updates);
           }
@@ -877,7 +943,7 @@
         div.textContent = text;
         messagesDiv.appendChild(div);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        
+
         if (isTemporary) {
           setTimeout(() => {
             div.classList.add('fade-out');
@@ -886,66 +952,54 @@
         }
       }
 
-      // ===== تنقية النص =====
-      function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe.toString()
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
-      }
-
       // =====================================================
       // ===== إصلاح مشكلة تكبير مربع الإدخال =====
       // =====================================================
-      
+
       let inputFocused = false;
 
-      // عند التركيز على مربع الإدخال
       messageInput.addEventListener('focus', function() {
         inputFocused = true;
-        // تأخير بسيط لمنع التمرير التلقائي
         setTimeout(() => {
           if (inputFocused) {
-            // الحفاظ على موضع مربع الإدخال في وسط الشاشة
             this.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 300);
       });
 
-      // عند فقدان التركيز
       messageInput.addEventListener('blur', function() {
         inputFocused = false;
-        // العودة لأعلى الصفحة عند إغلاق لوحة المفاتيح
+        stopTypingNow();
         setTimeout(() => {
           window.scrollTo(0, 0);
         }, 100);
       });
 
-      // منع التمرير التلقائي عند فتح لوحة المفاتيح
       window.addEventListener('focusin', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-          // منع التمرير التلقائي
           e.preventDefault();
         }
       });
 
-      // عند تغيير حجم الشاشة (فتح/إغلاق لوحة المفاتيح)
       let lastHeight = window.innerHeight;
       window.addEventListener('resize', function() {
         const currentHeight = window.innerHeight;
         const isKeyboardOpen = currentHeight < lastHeight;
-        
+
         if (isKeyboardOpen && document.activeElement === messageInput) {
-          // لوحة المفاتيح مفتوحة - تأكد من ظهور مربع الإدخال
           setTimeout(() => {
             messageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 100);
         }
-        
+
         lastHeight = currentHeight;
+      });
+
+      // ===== إيقاف حالة الكتابة عند إخفاء التبويب/الصفحة (توفير طاقة) =====
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          stopTypingNow();
+        }
       });
 
       // ===== رسالة ترحيب =====
