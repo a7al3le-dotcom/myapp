@@ -27,11 +27,11 @@ button{-webkit-appearance:none;appearance:none}
 .msg.mine .user:hover{color:#fff;text-shadow:0 0 10px var(--green)}
 .msg .text{flex:1 1 auto;min-width:0;color:var(--green2);direction:auto;unicode-bidi:plaintext;white-space:pre-wrap}
 .msg .time{flex:0 0 auto;margin-left:auto;color:var(--time);font-size:10px;white-space:nowrap}
-.sys{width:fit-content;max-width:95%;margin:5px auto;padding:3px 7px;border:1px solid var(--border);color:var(--dark-green);background:transparent;font-size:11px;text-align:center;direction:rtl;overflow-wrap:anywhere;transition:opacity 0.5s ease}
+.sys{width:fit-content;max-width:95%;margin:5px auto;padding:3px 7px;border:1px solid var(--time);color:var(--time);background:transparent;font-size:11px;text-align:center;direction:rtl;overflow-wrap:anywhere;transition:opacity 0.5s ease;text-shadow:0 0 8px var(--time)}
 .sys.fade-out{opacity:0}
-#typingIndicator{flex-shrink:0;min-height:20px;padding:0 10px;line-height:20px;font-size:11px;font-style:italic;color:var(--green2);background:var(--bg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;transition:opacity 0.15s ease}
+#typingIndicator{flex-shrink:0;min-height:20px;padding:0 10px;line-height:20px;font-size:11px;font-style:italic;color:var(--time);background:var(--bg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;transition:opacity 0.15s ease}
 #typingIndicator.visible{opacity:1;visibility:visible}
-#inputArea{display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0;min-height:46px;padding:6px 8px;background:var(--bg2);border-top:1px solid var(--green);border-bottom:1px solid var(--green);position:relative;z-index:10}
+#inputArea{display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0;min-height:46px;padding:6px 8px;background:var(--bg2);border-bottom:1px solid var(--green);position:relative;z-index:10}
 #messageInput{flex:1;min-width:0;width:100%;height:34px;padding:5px 8px;border:1px solid var(--green);border-radius:0;outline:none;background:var(--bg);color:var(--green);font-family:"Share Tech Mono","Tajawal",monospace;font-size:16px;line-height:22px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #messageInput:focus{border-color:#fff;background:var(--bg2);box-shadow:0 0 15px rgba(0,255,65,0.2)}
 #messageInput::placeholder{color:var(--dark-green)}
@@ -50,11 +50,11 @@ button{-webkit-appearance:none;appearance:none}
 .status-indicator{width:7px;height:7px;flex:0 0 7px;border-radius:50%;border:1px solid var(--green)}
 .status-green{background:var(--green);box-shadow:0 0 8px var(--green)}
 .status-yellow{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 8px var(--yellow)}
-#connection-status{position:fixed;bottom:55px;left:50%;z-index:999;display:none;transform:translateX(-50%);padding:3px 15px;border:1px solid var(--green);background:var(--bg);font-family:"Share Tech Mono",monospace;font-size:11px;font-weight:bold;white-space:nowrap}
+#connection-status{position:fixed;bottom:55px;left:50%;z-index:999;display:none;transform:translateX(-50%);padding:3px 15px;border:1px solid var(--time);background:var(--bg);font-family:"Share Tech Mono",monospace;font-size:11px;font-weight:bold;white-space:nowrap;text-shadow:0 0 8px var(--time)}
 #connection-status.visible{display:block}
-#connection-status.online{color:var(--green);border-color:var(--green)}
-#connection-status.offline{color:var(--red);border-color:var(--red)}
-#connection-status.reconnecting{color:var(--yellow);border-color:var(--yellow)}
+#connection-status.online{color:var(--time);border-color:var(--time)}
+#connection-status.offline{color:var(--time);border-color:var(--time)}
+#connection-status.reconnecting{color:var(--time);border-color:var(--time)}
 @media(max-width:768px){#messages{padding:6px}.msg{gap:6px;font-size:13px}#inputArea{min-height:48px;padding:6px}#messageInput{height:36px;font-size:16px}#sendBtn{height:36px;padding:6px 12px;font-size:14px}#connection-status{bottom:58px}}
 @media(max-width:360px){#onlineList{font-size:11px;padding:3px 7px}#sendBtn{padding-left:9px;padding-right:9px}}
 </style>
@@ -136,7 +136,7 @@ document.addEventListener("click",()=>{if(usersBox.classList.contains("visible")
 setInterval(()=>{document.querySelectorAll("#messages .time[data-timestamp]").forEach(element=>{const timestamp=Number(element.dataset.timestamp);if(Number.isFinite(timestamp)){element.textContent=formatRelativeTime(timestamp)}})},20000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){stopTypingNow()}else if(isConnected&&userRef){userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}});
 function showSystemMsg(text,temporary=true){const div=document.createElement("div");div.className="sys";div.textContent=text;messagesDiv.appendChild(div);messagesDiv.scrollTop=messagesDiv.scrollHeight;if(temporary){setTimeout(()=>{div.classList.add("fade-out");setTimeout(()=>{if(div.parentNode){div.remove()}},500)},4000)}}
-loadPendingMessages();username=getSavedUsername();saveUsername(username);showSystemMsg("🔓 مرحبًا "+username,true);const authenticated=await authenticate();if(!authenticated){return}initializeReferences();setupOnlineListeners();setupTypingListeners();setupMessageListeners();await setupPresence();setTimeout(()=>{showSystemMsg("💡 اضغط على اسمك في إحدى رسائلك لتغييره",true)},1200);if(pendingMessages.length>0){setTimeout(()=>{showSystemMsg("📦 لديك "+pendingMessages.length+" رسالة محفوظة",true)},1800)}
+loadPendingMessages();username=getSavedUsername();saveUsername(username);showSystemMsg("مرحبًا "+username,true);const authenticated=await authenticate();if(!authenticated){return}initializeReferences();setupOnlineListeners();setupTypingListeners();setupMessageListeners();await setupPresence();setTimeout(()=>{showSystemMsg("💡 اضغط على اسمك في إحدى رسائلك لتغييره",true)},1200);if(pendingMessages.length>0){setTimeout(()=>{showSystemMsg("📦 لديك "+pendingMessages.length+" رسالة محفوظة",true)},1800)}
 });
 </script>
 </body>
