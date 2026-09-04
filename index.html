@@ -25,7 +25,7 @@ button{-webkit-appearance:none;appearance:none}
 .msg .user{flex:0 0 auto;color:var(--green);font-weight:bold;cursor:default;direction:rtl;unicode-bidi:plaintext}
 .msg.mine .user{cursor:pointer}
 .msg.mine .user:hover{color:#fff;text-shadow:0 0 10px var(--green)}
-.msg .text{flex:1 1 auto;min-width:0;color:var(--green2);direction:auto;unicode-bidi:plaintext;white-space:pre-wrap}
+.msg .text{flex:1 1 auto;min-width:0;color:var(--green);direction:auto;unicode-bidi:plaintext;white-space:pre-wrap}
 .msg .time{flex:0 0 auto;margin-left:auto;color:var(--time);font-size:10px;white-space:nowrap}
 .sys{width:fit-content;max-width:95%;margin:5px auto;padding:3px 7px;border:1px solid var(--time);color:var(--time);background:transparent;font-size:11px;text-align:center;direction:rtl;overflow-wrap:anywhere;transition:opacity 0.5s ease;text-shadow:0 0 8px var(--time)}
 .sys.fade-out{opacity:0}
@@ -33,7 +33,7 @@ button{-webkit-appearance:none;appearance:none}
 #typingIndicator.visible{opacity:1;visibility:visible}
 #inputArea{display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0;min-height:46px;padding:6px 8px;background:var(--bg2);border-bottom:1px solid var(--green);position:relative;z-index:10}
 #messageInput{flex:1;min-width:0;width:100%;height:34px;padding:5px 8px;border:1px solid var(--green);border-radius:0;outline:none;background:var(--bg);color:var(--green);font-family:"Share Tech Mono","Tajawal",monospace;font-size:16px;line-height:22px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-#messageInput:focus{border-color:#fff;background:var(--bg2);box-shadow:0 0 15px rgba(0,255,65,0.2)}
+#messageInput:focus{background:var(--bg2);box-shadow:0 0 15px rgba(0,255,65,0.2)}
 #messageInput::placeholder{color:var(--dark-green)}
 #sendBtn{flex:0 0 auto;height:34px;padding:5px 13px;border:1px solid var(--green);border-radius:0;outline:none;background:var(--bg);color:var(--green);cursor:pointer;font-size:13px;font-weight:bold;touch-action:manipulation;transition:background 0.15s,color 0.15s}
 #sendBtn:hover,#sendBtn:focus-visible{background:var(--green);color:var(--bg)}
