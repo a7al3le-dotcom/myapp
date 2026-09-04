@@ -94,7 +94,7 @@ function generateUsername(){return "زائر"+Math.floor(1000+Math.random()*9000
 function getSavedUsername(){try{const saved=localStorage.getItem(USERNAME_KEY);const clean=sanitizeUsername(saved);if(clean){return clean}}catch(error){console.warn("localStorage read failed:",error)}return generateUsername()}
 function saveUsername(value){try{localStorage.setItem(USERNAME_KEY,value)}catch(error){console.warn("localStorage write failed:",error)}}
 function getServerNow(){return Date.now()+serverTimeOffset}
-const TIME_FORMS={seconds:{one:"ثانية",two:"ثانيتين",few:"ثوانٍ",many:"ثانية"},minutes:{one:"دقيقة",two:"دقيقتين",few:"دقائق",many:"دقيقة"},hours:{one:"ساعة",two:"ساعتين",few:"ساعات",many:"ساعة"},days:{one:"يوم",two:"يومين",few:"أيام",many:"يوم"}};
+const TIME_FORMS={seconds:{one:"ث",two:"ث",few:"ث",many:"ث"},minutes:{one:"د",two:"د",few:"د",many:"د"},hours:{one:"س",two:"س",few:"س",many:"س"},days:{one:"ي",two:"ي",few:"ي",many:"ي"}};
 function formatUnit(number,forms){if(number===1){return forms.one}if(number===2){return forms.two}if(number>=3&&number<=10){return number+" "+forms.few}return number+" "+forms.many}
 function formatRelativeTime(timestampMs){if(!timestampMs||!Number.isFinite(Number(timestampMs))){return""}const now=getServerNow();let diffSeconds=Math.floor((now-Number(timestampMs))/1000);if(diffSeconds<0){diffSeconds=0}if(diffSeconds<5){return"الآن"}if(diffSeconds<60){return formatUnit(diffSeconds,TIME_FORMS.seconds)}const minutes=Math.floor(diffSeconds/60);if(minutes<60){return formatUnit(minutes,TIME_FORMS.minutes)}const hours=Math.floor(minutes/60);if(hours<24){return formatUnit(hours,TIME_FORMS.hours)}const days=Math.floor(hours/24);return formatUnit(days,TIME_FORMS.days)}
 let statusTimer=null;
