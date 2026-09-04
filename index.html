@@ -1,2339 +1,595 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>شات خاص</title>
-
-  <!-- الخطوط -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Share+Tech+Mono&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-  >
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --bg2: #050505;
-      --green: #00ff41;
-      --green2: #00cc33;
-      --dark-green: #004400;
-      --border: #003300;
-      --red: #ff0044;
-      --yellow: #ffaa00;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--green);
-      overflow: hidden;
-    }
-
-    body {
-      font-family: "Share Tech Mono", "Tajawal", monospace;
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overscroll-behavior: none;
-    }
-
-    button,
-    input {
-      font: inherit;
-    }
-
-    button {
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    #chat-container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100dvh;
-      min-height: 0;
-      background: var(--bg);
-    }
-
-    /* =========================
-       الرسائل
-    ========================= */
-
-    #messages {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 8px;
-      background: var(--bg);
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      scrollbar-width: thin;
-      scrollbar-color: var(--green) var(--bg);
-    }
-
-    #messages::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    #messages::-webkit-scrollbar-track {
-      background: var(--bg);
-    }
-
-    #messages::-webkit-scrollbar-thumb {
-      background: var(--green);
-      border: 1px solid var(--dark-green);
-    }
-
-    .msg {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      width: 100%;
-      margin: 2px 0;
-      padding: 2px 4px;
-      direction: ltr;
-      text-align: left;
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--green);
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    .msg .user {
-      flex: 0 0 auto;
-      color: var(--green);
-      font-weight: bold;
-      cursor: default;
-      direction: rtl;
-      unicode-bidi: plaintext;
-    }
-
-    .msg.mine .user {
-      cursor: pointer;
-    }
-
-    .msg.mine .user:hover {
-      color: #fff;
-      text-shadow: 0 0 10px var(--green);
-    }
-
-    .msg .text {
-      flex: 1 1 auto;
-      min-width: 0;
-      color: var(--green2);
-      direction: auto;
-      unicode-bidi: plaintext;
-      white-space: pre-wrap;
-    }
-
-    .msg .time {
-      flex: 0 0 auto;
-      margin-left: auto;
-      color: var(--dark-green);
-      font-size: 10px;
-      white-space: nowrap;
-    }
-
-    /* =========================
-       رسائل النظام
-    ========================= */
-
-    .sys {
-      width: fit-content;
-      max-width: 95%;
-      margin: 5px auto;
-      padding: 3px 7px;
-      border: 1px solid var(--border);
-      color: var(--dark-green);
-      background: transparent;
-      font-size: 11px;
-      text-align: center;
-      direction: rtl;
-      overflow-wrap: anywhere;
-      transition: opacity 0.5s ease;
-    }
-
-    .sys.fade-out {
-      opacity: 0;
-    }
-
-    /* =========================
-       Typing
-    ========================= */
-
-    #typingIndicator {
-      flex-shrink: 0;
-      min-height: 20px;
-      padding: 0 10px;
-      line-height: 20px;
-      font-size: 11px;
-      font-style: italic;
-      color: var(--green2);
-      background: var(--bg2);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.15s ease;
-    }
-
-    #typingIndicator.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* =========================
-       منطقة الإدخال
-    ========================= */
-
-    #inputArea {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
-      min-height: 46px;
-      padding: 6px 8px;
-      background: var(--bg2);
-      border-top: 1px solid var(--green);
-      border-bottom: 1px solid var(--green);
-      position: relative;
-      z-index: 10;
-    }
-
-    #messageInput {
-      flex: 1;
-      min-width: 0;
-      width: 100%;
-      height: 34px;
-      padding: 5px 8px;
-      border: 1px solid var(--green);
-      border-radius: 0;
-      outline: none;
-      background: var(--bg);
-      color: var(--green);
-      font-family: "Share Tech Mono", "Tajawal", monospace;
-      font-size: 16px;
-      line-height: 22px;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-    }
-
-    #messageInput:focus {
-      border-color: #fff;
-      background: var(--bg2);
-      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-    }
-
-    #messageInput::placeholder {
-      color: var(--dark-green);
-    }
-
-    #sendBtn {
-      flex: 0 0 auto;
-      height: 34px;
-      padding: 5px 13px;
-      border: 1px solid var(--green);
-      border-radius: 0;
-      outline: none;
-      background: var(--bg);
-      color: var(--green);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: bold;
-      touch-action: manipulation;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    #sendBtn:hover,
-    #sendBtn:focus-visible {
-      background: var(--green);
-      color: var(--bg);
-    }
-
-    #sendBtn:active {
-      background: var(--dark-green);
-      color: var(--green);
-    }
-
-    #sendBtn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* =========================
-       المتصلون
-    ========================= */
-
-    #onlineList {
-      position: fixed;
-      top: 5px;
-      right: 5px;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
-      border: 1px solid var(--green);
-      background: var(--bg);
-      color: var(--green);
-      font-size: 12px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    #onlineList:hover {
-      background: var(--green);
-      color: var(--bg);
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-    }
-
-    #usersBox {
-      position: fixed;
-      top: 32px;
-      right: 5px;
-      z-index: 999;
-      min-width: 150px;
-      max-width: 220px;
-      max-height: 260px;
-      padding: 6px 10px;
-      border: 1px solid var(--green);
-      background: var(--bg);
-      color: var(--green);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    #usersBox.visible {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    #usersBox h4 {
-      margin: 0 0 5px;
-      padding-bottom: 3px;
-      border-bottom: 1px solid var(--dark-green);
-      color: var(--green);
-      font-size: 13px;
-    }
-
-    #usersList {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .user-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 2px;
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-    }
-
-    .user-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: var(--green);
-      direction: rtl;
-      unicode-bidi: plaintext;
-    }
-
-    .status-indicator {
-      width: 7px;
-      height: 7px;
-      flex: 0 0 7px;
-      border-radius: 50%;
-      border: 1px solid var(--green);
-    }
-
-    .status-green {
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-    }
-
-    .status-yellow {
-      background: var(--yellow);
-      border-color: var(--yellow);
-      box-shadow: 0 0 8px var(--yellow);
-    }
-
-    /* =========================
-       حالة الاتصال
-    ========================= */
-
-    #connection-status {
-      position: fixed;
-      bottom: 55px;
-      left: 50%;
-      z-index: 999;
-      display: none;
-      transform: translateX(-50%);
-      padding: 3px 15px;
-      border: 1px solid var(--green);
-      background: var(--bg);
-      font-family: "Share Tech Mono", monospace;
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    #connection-status.visible {
-      display: block;
-    }
-
-    #connection-status.online {
-      color: var(--green);
-      border-color: var(--green);
-    }
-
-    #connection-status.offline {
-      color: var(--red);
-      border-color: var(--red);
-    }
-
-    #connection-status.reconnecting {
-      color: var(--yellow);
-      border-color: var(--yellow);
-    }
-
-    /* =========================
-       Mobile
-    ========================= */
-
-    @media (max-width: 768px) {
-      #messages {
-        padding: 6px;
-      }
-
-      .msg {
-        gap: 6px;
-        font-size: 13px;
-      }
-
-      #inputArea {
-        min-height: 48px;
-        padding: 6px;
-      }
-
-      #messageInput {
-        height: 36px;
-        font-size: 16px;
-      }
-
-      #sendBtn {
-        height: 36px;
-        padding: 6px 12px;
-        font-size: 14px;
-      }
-
-      #connection-status {
-        bottom: 58px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      #onlineList {
-        font-size: 11px;
-        padding: 3px 7px;
-      }
-
-      #sendBtn {
-        padding-left: 9px;
-        padding-right: 9px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>شات خاص</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+:root{--bg:#0a0a0a;--bg2:#050505;--green:#00ff41;--green2:#00cc33;--dark-green:#004400;--border:#003300;--red:#ff0044;--yellow:#ffaa00}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;margin:0;padding:0;background:var(--bg);color:var(--green);overflow:hidden}
+body{font-family:"Share Tech Mono","Tajawal",monospace;position:fixed;inset:0;overscroll-behavior:none}
+button,input{font:inherit}button{-webkit-appearance:none;appearance:none}
+#chat-container{display:flex;flex-direction:column;width:100%;height:100dvh;min-height:0;background:var(--bg)}
+#messages{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:8px;background:var(--bg);-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:var(--green) var(--bg)}
+#messages::-webkit-scrollbar{width:6px}
+#messages::-webkit-scrollbar-track{background:var(--bg)}
+#messages::-webkit-scrollbar-thumb{background:var(--green);border:1px solid var(--dark-green)}
+.msg{display:flex;align-items:baseline;gap:8px;width:100%;margin:2px 0;padding:2px 4px;direction:ltr;text-align:left;font-size:13px;line-height:1.5;color:var(--green);overflow-wrap:anywhere;word-break:break-word}
+.msg .user{flex:0 0 auto;color:var(--green);font-weight:bold;cursor:default;direction:rtl;unicode-bidi:plaintext}
+.msg.mine .user{cursor:pointer}
+.msg.mine .user:hover{color:#fff;text-shadow:0 0 10px var(--green)}
+.msg .text{flex:1 1 auto;min-width:0;color:var(--green2);direction:auto;unicode-bidi:plaintext;white-space:pre-wrap}
+.msg .time{flex:0 0 auto;margin-left:auto;color:var(--dark-green);font-size:10px;white-space:nowrap}
+.sys{width:fit-content;max-width:95%;margin:5px auto;padding:3px 7px;border:1px solid var(--border);color:var(--dark-green);background:transparent;font-size:11px;text-align:center;direction:rtl;overflow-wrap:anywhere;transition:opacity .5s ease}
+.sys.fade-out{opacity:0}
+#typingIndicator{flex-shrink:0;min-height:20px;padding:0 10px;line-height:20px;font-size:11px;font-style:italic;color:var(--green2);background:var(--bg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;transition:opacity .15s ease}
+#typingIndicator.visible{opacity:1;visibility:visible}
+#inputArea{display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0;min-height:46px;padding:6px 8px;background:var(--bg2);border-top:1px solid var(--green);border-bottom:1px solid var(--green);position:relative;z-index:10}
+#messageInput{flex:1;min-width:0;width:100%;height:34px;padding:5px 8px;border:1px solid var(--green);border-radius:0;outline:none;background:var(--bg);color:var(--green);font-family:"Share Tech Mono","Tajawal",monospace;font-size:16px;line-height:22px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#messageInput:focus{border-color:#fff;background:var(--bg2);box-shadow:0 0 15px rgba(0,255,65,.2)}
+#messageInput::placeholder{color:var(--dark-green)}
+#sendBtn{flex:0 0 auto;height:34px;padding:5px 13px;border:1px solid var(--green);border-radius:0;outline:none;background:var(--bg);color:var(--green);cursor:pointer;font-size:13px;font-weight:bold;touch-action:manipulation;transition:background .15s,color .15s}
+#sendBtn:hover,#sendBtn:focus-visible{background:var(--green);color:var(--bg)}
+#sendBtn:active{background:var(--dark-green);color:var(--green)}
+#sendBtn:disabled{opacity:.5;cursor:not-allowed}
+#topControls{position:fixed;top:5px;right:5px;z-index:1000;display:flex;align-items:flex-start;gap:4px;direction:rtl}
+.top-btn{display:flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--green);background:var(--bg);color:var(--green);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap}
+.top-btn:hover{background:var(--green);color:var(--bg);box-shadow:0 0 20px rgba(0,255,65,.2)}
+.popup{position:fixed;top:32px;right:5px;z-index:999;min-width:170px;max-width:260px;max-height:300px;padding:6px 9px;border:1px solid var(--green);background:var(--bg);color:var(--green);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease}
+.popup.visible{opacity:1;visibility:visible;pointer-events:auto}
+.popup h4{margin:0 0 5px;padding-bottom:3px;border-bottom:1px solid var(--dark-green);color:var(--green);font-size:13px}
+#usersList{max-height:225px;overflow-y:auto}
+.user-item{display:flex;align-items:center;gap:5px;padding:3px 2px;border-bottom:1px solid var(--border);font-size:12px}
+.user-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--green);direction:rtl;unicode-bidi:plaintext}
+.status-indicator{width:7px;height:7px;flex:0 0 7px;border-radius:50%;border:1px solid var(--green)}
+.status-green{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status-yellow{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 8px var(--yellow)}
+#visitList{max-height:245px;overflow-y:auto;direction:ltr}
+.visit-item{display:grid;grid-template-columns:28px minmax(0,1fr) 76px;align-items:center;gap:5px;min-height:27px;padding:3px 1px;border-bottom:1px solid var(--border);font-size:12px;direction:ltr}
+.visit-flag{width:28px;text-align:center;font-family:"Tajawal",sans-serif;font-size:16px;line-height:1}
+.visit-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;direction:rtl;unicode-bidi:plaintext;color:var(--green)}
+.visit-time{width:76px;text-align:left;direction:ltr;font-family:"Share Tech Mono",monospace;font-variant-numeric:tabular-nums;color:var(--green2);white-space:nowrap}
+#connection-status{position:fixed;bottom:55px;left:50%;z-index:999;display:none;transform:translateX(-50%);padding:3px 15px;border:1px solid var(--green);background:var(--bg);font-family:"Share Tech Mono",monospace;font-size:11px;font-weight:bold;white-space:nowrap}
+#connection-status.visible{display:block}
+#connection-status.online{color:var(--green);border-color:var(--green)}
+#connection-status.offline{color:var(--red);border-color:var(--red)}
+#connection-status.reconnecting{color:var(--yellow);border-color:var(--yellow)}
+@media(max-width:768px){
+#messages{padding:6px}
+.msg{gap:6px;font-size:13px}
+#inputArea{min-height:48px;padding:6px}
+#messageInput{height:36px;font-size:16px}
+#sendBtn{height:36px;padding:6px 12px;font-size:14px}
+#connection-status{bottom:58px}
+}
+@media(max-width:420px){
+.top-btn{padding:3px 7px;font-size:11px}
+.popup{right:5px;min-width:165px}
+.visit-item{grid-template-columns:26px minmax(0,1fr) 72px}
+.visit-flag{width:26px}
+.visit-time{width:72px;font-size:11px}
+}
+@media(max-width:360px){
+.top-btn{font-size:10px;padding:3px 6px}
+#sendBtn{padding-left:9px;padding-right:9px}
+}
+</style>
 </head>
-
 <body>
-
-  <div id="chat-container">
-
-    <div
-      id="onlineList"
-      title="المتصلون الآن"
-      role="button"
-      tabindex="0"
-      aria-expanded="false"
-    >
-      <i class="fa fa-users" aria-hidden="true"></i>
-      <span id="count">0</span>
-      <span>متصل</span>
-    </div>
-
-    <div id="usersBox" aria-hidden="true">
-      <h4>🖥️ المتصلون</h4>
-      <div id="usersList"></div>
-    </div>
-
-    <div
-      id="messages"
-      aria-live="polite"
-      aria-label="الرسائل"
-    ></div>
-
-    <div id="connection-status"></div>
-
-    <div
-      id="typingIndicator"
-      aria-live="polite"
-    ></div>
-
-    <form id="inputArea">
-      <button
-        type="submit"
-        id="sendBtn"
-      >
-        ➤ إرسال
-      </button>
-
-      <input
-        type="text"
-        id="messageInput"
-        placeholder="اكتب رسالتك..."
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="sentences"
-        spellcheck="true"
-        maxlength="1000"
-        aria-label="حقل إدخال الرسالة"
-      >
-    </form>
-
-  </div>
-
+<div id="chat-container">
+<div id="topControls">
+<button id="onlineList" class="top-btn" type="button" title="المتصلون الآن" aria-expanded="false"><i class="fa fa-users" aria-hidden="true"></i><span id="count">0</span><span>متصل</span></button>
+<button id="visitListBtn" class="top-btn" type="button" title="سجل الدخول" aria-expanded="false">🕘 <span>السجل</span></button>
+</div>
+<div id="usersBox" class="popup" aria-hidden="true">
+<h4>🖥️ المتصلون</h4>
+<div id="usersList"></div>
+</div>
+<div id="visitsBox" class="popup" aria-hidden="true">
+<h4>🕘 السجل</h4>
+<div id="visitList"></div>
+</div>
+<div id="messages" aria-live="polite" aria-label="الرسائل"></div>
+<div id="connection-status"></div>
+<div id="typingIndicator" aria-live="polite"></div>
+<form id="inputArea">
+<button type="submit" id="sendBtn">➤ إرسال</button>
+<input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="true" maxlength="1000" aria-label="حقل إدخال الرسالة">
+</form>
+</div>
 <script>
 "use strict";
-
-document.addEventListener("DOMContentLoaded", async () => {
-
-  /* ============================================================
-     Firebase Configuration
-  ============================================================ */
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-    authDomain: "mychat-2d881.firebaseapp.com",
-    databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
-  };
-
-  try {
-    firebase.initializeApp(firebaseConfig);
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    showFatalError("تعذر تشغيل Firebase");
-    return;
-  }
-
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  /* ============================================================
-     Constants
-  ============================================================ */
-
-  const MAX_MESSAGE_LENGTH = 1000;
-  const MAX_USERNAME_LENGTH = 20;
-
-  const MAX_VISIBLE_MESSAGES = 50;
-
-  const TYPING_TIMEOUT = 2000;
-  const TYPING_STALE_TIME = 10000;
-
-  const PRESENCE_INTERVAL = 30000;
-  const INACTIVE_AFTER = 120000;
-
-  const SEND_COOLDOWN = 700;
-
-  const OFFLINE_QUEUE_KEY = "chat_pending_messages_v2";
-  const USERNAME_KEY = "chat_username_v2";
-
-  /* ============================================================
-     DOM
-  ============================================================ */
-
-  const onlineList = document.getElementById("onlineList");
-  const usersBox = document.getElementById("usersBox");
-  const usersList = document.getElementById("usersList");
-  const onlineCountEl = document.getElementById("count");
-
-  const messagesDiv = document.getElementById("messages");
-
-  const connectionStatus =
-    document.getElementById("connection-status");
-
-  const typingIndicatorEl =
-    document.getElementById("typingIndicator");
-
-  const messageInput =
-    document.getElementById("messageInput");
-
-  const inputAreaForm =
-    document.getElementById("inputArea");
-
-  const sendBtn =
-    document.getElementById("sendBtn");
-
-  /* ============================================================
-     Runtime State
-  ============================================================ */
-
-  let currentUser = null;
-  let username = "";
-
-  let userRef = null;
-  let messagesRef = null;
-  let onlineRef = null;
-  let typingRef = null;
-  let myTypingRef = null;
-
-  let isConnected = false;
-  let isSending = false;
-
-  let typingTimer = null;
-  let serverTimeOffset = 0;
-
-  let lastSendTime = 0;
-
-  const onlineUsersCache = Object.create(null);
-  const typingUsersCache = Object.create(null);
-
-  const renderedMessageIds = new Set();
-
-  let pendingMessages = [];
-
-  /* ============================================================
-     Helpers
-  ============================================================ */
-
-  function showFatalError(message) {
-    document.body.innerHTML = "";
-
-    const box = document.createElement("div");
-
-    box.style.cssText = `
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:#0a0a0a;
-      color:#ff0044;
-      font-family:monospace;
-      text-align:center;
-      direction:rtl;
-    `;
-
-    box.textContent = message;
-
-    document.body.appendChild(box);
-  }
-
-  function sanitizeUsername(value) {
-    return String(value || "")
-      .replace(/[\u0000-\u001F\u007F]/g, "")
-      .trim()
-      .slice(0, MAX_USERNAME_LENGTH);
-  }
-
-  function generateUsername() {
-    return "زائر" + Math.floor(1000 + Math.random() * 9000);
-  }
-
-  function getSavedUsername() {
-    try {
-      const saved = localStorage.getItem(USERNAME_KEY);
-
-      const clean = sanitizeUsername(saved);
-
-      if (clean) {
-        return clean;
-      }
-    } catch (error) {
-      console.warn("localStorage read failed:", error);
-    }
-
-    return generateUsername();
-  }
-
-  function saveUsername(value) {
-    try {
-      localStorage.setItem(USERNAME_KEY, value);
-    } catch (error) {
-      console.warn("localStorage write failed:", error);
-    }
-  }
-
-  function getServerNow() {
-    return Date.now() + serverTimeOffset;
-  }
-
-  /* ============================================================
-     Relative Time
-  ============================================================ */
-
-  const TIME_FORMS = {
-    seconds: {
-      one: "ثانية",
-      two: "ثانيتين",
-      few: "ثوانٍ",
-      many: "ثانية"
-    },
-
-    minutes: {
-      one: "دقيقة",
-      two: "دقيقتين",
-      few: "دقائق",
-      many: "دقيقة"
-    },
-
-    hours: {
-      one: "ساعة",
-      two: "ساعتين",
-      few: "ساعات",
-      many: "ساعة"
-    },
-
-    days: {
-      one: "يوم",
-      two: "يومين",
-      few: "أيام",
-      many: "يوم"
-    }
-  };
-
-  function formatUnit(number, forms) {
-    if (number === 1) {
-      return `قبل ${forms.one}`;
-    }
-
-    if (number === 2) {
-      return `قبل ${forms.two}`;
-    }
-
-    if (number >= 3 && number <= 10) {
-      return `قبل ${number} ${forms.few}`;
-    }
-
-    return `قبل ${number} ${forms.many}`;
-  }
-
-  function formatRelativeTime(timestampMs) {
-
-    if (!timestampMs || !Number.isFinite(Number(timestampMs))) {
-      return "";
-    }
-
-    const now = getServerNow();
-
-    let diffSeconds =
-      Math.floor((now - Number(timestampMs)) / 1000);
-
-    if (diffSeconds < 0) {
-      diffSeconds = 0;
-    }
-
-    if (diffSeconds < 5) {
-      return "الآن";
-    }
-
-    if (diffSeconds < 60) {
-      return formatUnit(
-        diffSeconds,
-        TIME_FORMS.seconds
-      );
-    }
-
-    const minutes =
-      Math.floor(diffSeconds / 60);
-
-    if (minutes < 60) {
-      return formatUnit(
-        minutes,
-        TIME_FORMS.minutes
-      );
-    }
-
-    const hours =
-      Math.floor(minutes / 60);
-
-    if (hours < 24) {
-      return formatUnit(
-        hours,
-        TIME_FORMS.hours
-      );
-    }
-
-    const days =
-      Math.floor(hours / 24);
-
-    return formatUnit(
-      days,
-      TIME_FORMS.days
-    );
-  }
-
-  /* ============================================================
-     Connection Status
-  ============================================================ */
-
-  let statusTimer = null;
-
-  function showConnectionStatus(status, type) {
-
-    connectionStatus.textContent = status;
-    connectionStatus.className =
-      "visible " + type;
-
-    clearTimeout(statusTimer);
-
-    if (type === "online") {
-
-      statusTimer = setTimeout(() => {
-        connectionStatus.className = "";
-      }, 2500);
-    }
-  }
-
-  /* ============================================================
-     Offline Queue
-  ============================================================ */
-
-  function loadPendingMessages() {
-
-    try {
-
-      const saved =
-        localStorage.getItem(OFFLINE_QUEUE_KEY);
-
-      if (!saved) {
-        pendingMessages = [];
-        return;
-      }
-
-      const parsed = JSON.parse(saved);
-
-      if (!Array.isArray(parsed)) {
-        pendingMessages = [];
-        return;
-      }
-
-      pendingMessages =
-        parsed.filter(item => {
-
-          return item &&
-            typeof item.text === "string" &&
-            item.text.length > 0 &&
-            item.text.length <= MAX_MESSAGE_LENGTH &&
-            typeof item.localId === "string";
-        });
-
-    } catch (error) {
-
-      console.warn(
-        "Offline queue error:",
-        error
-      );
-
-      pendingMessages = [];
-    }
-  }
-
-  function savePendingMessages() {
-
-    try {
-
-      localStorage.setItem(
-        OFFLINE_QUEUE_KEY,
-        JSON.stringify(pendingMessages)
-      );
-
-    } catch (error) {
-
-      console.warn(
-        "Could not save offline messages:",
-        error
-      );
-    }
-  }
-
-  function queueOfflineMessage(text) {
-
-    const item = {
-      localId:
-        "local_" +
-        Date.now() +
-        "_" +
-        Math.random()
-          .toString(36)
-          .slice(2, 10),
-
-      text: text,
-
-      createdAt: Date.now()
-    };
-
-    pendingMessages.push(item);
-
-    /*
-      حماية بسيطة من تضخم localStorage.
-    */
-    if (pendingMessages.length > 100) {
-      pendingMessages =
-        pendingMessages.slice(-100);
-    }
-
-    savePendingMessages();
-
-    showSystemMsg(
-      `💾 حفظت الرسالة (${pendingMessages.length})`,
-      true
-    );
-  }
-
-  /* ============================================================
-     Firebase Authentication
-  ============================================================ */
-
-  async function authenticate() {
-
-    try {
-
-      /*
-        Anonymous Authentication.
-
-        يجب تفعيل Anonymous من:
-        Firebase Console
-        → Authentication
-        → Sign-in method
-        → Anonymous
-      */
-
-      if (auth.currentUser) {
-        currentUser = auth.currentUser;
-      } else {
-        const result =
-          await auth.signInAnonymously();
-
-        currentUser = result.user;
-      }
-
-      if (!currentUser || !currentUser.uid) {
-        throw new Error(
-          "Authentication returned no user"
-        );
-      }
-
-      return true;
-
-    } catch (error) {
-
-      console.error(
-        "Authentication failed:",
-        error
-      );
-
-      showFatalError(
-        "تعذر تسجيل الدخول إلى النظام.\n\n" +
-        "تأكد من تفعيل Anonymous Authentication في Firebase."
-      );
-
-      return false;
-    }
-  }
-
-  /* ============================================================
-     Initialize User References
-  ============================================================ */
-
-  function initializeReferences() {
-
-    const uid = currentUser.uid;
-
-    userRef =
-      db.ref("online/" + uid);
-
-    messagesRef =
-      db.ref("messages");
-
-    onlineRef =
-      db.ref("online");
-
-    typingRef =
-      db.ref("typing");
-
-    myTypingRef =
-      db.ref("typing/" + uid);
-  }
-
-  /* ============================================================
-     Presence
-  ============================================================ */
-
-  async function setupPresence() {
-
-    const uid = currentUser.uid;
-
-    const connectedRef =
-      db.ref(".info/connected");
-
-    connectedRef.on("value", async snapshot => {
-
-      const connected =
-        snapshot.val() === true;
-
-      isConnected = connected;
-
-      if (!connected) {
-
-        showConnectionStatus(
-          "⚠️ انقطع الاتصال، جاري إعادة الاتصال...",
-          "offline"
-        );
-
-        return;
-      }
-
-      showConnectionStatus(
-        "✅ متصل",
-        "online"
-      );
-
-      try {
-
-        /*
-          مهم:
-          onDisconnect يجب ضبطه قبل كتابة حالة online.
-        */
-
-        await userRef.onDisconnect().remove();
-
-        await myTypingRef
-          .onDisconnect()
-          .remove();
-
-        await userRef.set({
-          name: username,
-          joinedAt:
-            firebase.database.ServerValue.TIMESTAMP,
-          lastActive:
-            firebase.database.ServerValue.TIMESTAMP
-        });
-
-        await resendPendingMessages();
-
-      } catch (error) {
-
-        console.error(
-          "Presence error:",
-          error
-        );
-
-        showConnectionStatus(
-          "⚠️ خطأ في الاتصال",
-          "reconnecting"
-        );
-      }
-    });
-
-    db.ref(".info/serverTimeOffset")
-      .on("value", snapshot => {
-
-        serverTimeOffset =
-          Number(snapshot.val()) || 0;
-      });
-  }
-
-  /*
-    Heartbeat
-  */
-
-  setInterval(() => {
-
-    if (!isConnected || !userRef) {
-      return;
-    }
-
-    userRef.update({
-      lastActive:
-        firebase.database.ServerValue.TIMESTAMP
-    }).catch(error => {
-
-      console.warn(
-        "Presence heartbeat failed:",
-        error
-      );
-    });
-
-  }, PRESENCE_INTERVAL);
-
-  /* ============================================================
-     Online Users
-  ============================================================ */
-
-  function updateOnlineCount() {
-
-    onlineCountEl.textContent =
-      String(
-        Object.keys(onlineUsersCache).length
-      );
-  }
-
-  function buildUserItem(userKey) {
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "user-item";
-
-    item.id =
-      "user-" + userKey;
-
-    const indicator =
-      document.createElement("span");
-
-    indicator.className =
-      "status-indicator";
-
-    const name =
-      document.createElement("span");
-
-    name.className =
-      "user-name";
-
-    item.appendChild(indicator);
-    item.appendChild(name);
-
-    return item;
-  }
-
-  function applyUserItemData(
-    item,
-    userKey,
-    userData
-  ) {
-
-    if (!item || !userData) {
-      return;
-    }
-
-    const isMe =
-      userKey === currentUser.uid;
-
-    const displayName =
-      sanitizeUsername(
-        userData.name
-      ) || "مستخدم";
-
-    const lastActive =
-      Number(userData.lastActive) || 0;
-
-    const inactive =
-      lastActive > 0 &&
-      getServerNow() - lastActive >
-      INACTIVE_AFTER;
-
-    const indicator =
-      item.querySelector(
-        ".status-indicator"
-      );
-
-    const name =
-      item.querySelector(".user-name");
-
-    if (indicator) {
-
-      indicator.classList.remove(
-        "status-green",
-        "status-yellow"
-      );
-
-      indicator.classList.add(
-        inactive
-          ? "status-yellow"
-          : "status-green"
-      );
-    }
-
-    if (name) {
-
-      name.textContent =
-        isMe
-          ? `${displayName} [أنت]`
-          : displayName;
-
-      name.title =
-        isMe
-          ? "أنت"
-          : inactive
-            ? "آخر نشاط منذ أكثر من دقيقتين"
-            : "متصل";
-    }
-  }
-
-  function handleUserAdded(snapshot) {
-
-    const key = snapshot.key;
-    const data = snapshot.val();
-
-    if (!key || !data) {
-      return;
-    }
-
-    onlineUsersCache[key] =
-      data;
-
-    const oldItem =
-      document.getElementById(
-        "user-" + key
-      );
-
-    if (oldItem) {
-      oldItem.remove();
-    }
-
-    const item =
-      buildUserItem(key);
-
-    applyUserItemData(
-      item,
-      key,
-      data
-    );
-
-    usersList.appendChild(item);
-
-    updateOnlineCount();
-  }
-
-  function handleUserChanged(snapshot) {
-
-    const key = snapshot.key;
-    const data = snapshot.val();
-
-    if (!key || !data) {
-      return;
-    }
-
-    onlineUsersCache[key] =
-      data;
-
-    let item =
-      document.getElementById(
-        "user-" + key
-      );
-
-    if (!item) {
-
-      item =
-        buildUserItem(key);
-
-      usersList.appendChild(item);
-    }
-
-    applyUserItemData(
-      item,
-      key,
-      data
-    );
-  }
-
-  function handleUserRemoved(snapshot) {
-
-    const key = snapshot.key;
-
-    delete onlineUsersCache[key];
-
-    const item =
-      document.getElementById(
-        "user-" + key
-      );
-
-    if (item) {
-      item.remove();
-    }
-
-    updateOnlineCount();
-  }
-
-  function setupOnlineListeners() {
-
-    onlineRef.on(
-      "child_added",
-      handleUserAdded
-    );
-
-    onlineRef.on(
-      "child_changed",
-      handleUserChanged
-    );
-
-    onlineRef.on(
-      "child_removed",
-      handleUserRemoved
-    );
-  }
-
-  /* ============================================================
-     Typing
-  ============================================================ */
-
-  function renderTypingIndicator() {
-
-    const names =
-      Object.entries(
-        typingUsersCache
-      )
-      .filter(([uid, data]) => {
-
-        return uid !== currentUser.uid &&
-          data &&
-          typeof data.name === "string" &&
-          data.name.trim();
-      })
-      .map(([, data]) =>
-        sanitizeUsername(data.name)
-      )
-      .filter(Boolean);
-
-    if (names.length === 0) {
-
-      typingIndicatorEl
-        .classList
-        .remove("visible");
-
-      typingIndicatorEl.textContent = "";
-
-      return;
-    }
-
-    let text;
-
-    if (names.length === 1) {
-
-      text =
-        `${names[0]} يكتب الآن...`;
-
-    } else if (names.length === 2) {
-
-      text =
-        `${names[0]} و ${names[1]} يكتبان الآن...`;
-
-    } else {
-
-      text =
-        "عدة أشخاص يكتبون الآن...";
-    }
-
-    typingIndicatorEl.textContent =
-      text;
-
-    typingIndicatorEl
-      .classList
-      .add("visible");
-  }
-
-  function setTyping() {
-
-    if (!isConnected || !myTypingRef) {
-      return;
-    }
-
-    clearTimeout(typingTimer);
-
-    if (!typingIndicatorEl) {
-      return;
-    }
-
-    myTypingRef.set({
-      name: username,
-      ts:
-        firebase.database.ServerValue.TIMESTAMP
-    }).catch(error => {
-
-      console.warn(
-        "Typing update failed:",
-        error
-      );
-    });
-
-    typingTimer =
-      setTimeout(
-        stopTypingNow,
-        TYPING_TIMEOUT
-      );
-  }
-
-  function stopTypingNow() {
-
-    clearTimeout(typingTimer);
-
-    if (!isConnected || !myTypingRef) {
-      return;
-    }
-
-    myTypingRef.remove()
-      .catch(error => {
-
-        console.warn(
-          "Typing removal failed:",
-          error
-        );
-      });
-  }
-
-  function setupTypingListeners() {
-
-    typingRef.on(
-      "child_added",
-      snapshot => {
-
-        if (
-          snapshot.key ===
-          currentUser.uid
-        ) {
-          return;
-        }
-
-        typingUsersCache[
-          snapshot.key
-        ] = snapshot.val();
-
-        renderTypingIndicator();
-      }
-    );
-
-    typingRef.on(
-      "child_changed",
-      snapshot => {
-
-        if (
-          snapshot.key ===
-          currentUser.uid
-        ) {
-          return;
-        }
-
-        typingUsersCache[
-          snapshot.key
-        ] = snapshot.val();
-
-        renderTypingIndicator();
-      }
-    );
-
-    typingRef.on(
-      "child_removed",
-      snapshot => {
-
-        delete typingUsersCache[
-          snapshot.key
-        ];
-
-        renderTypingIndicator();
-      }
-    );
-  }
-
-  /*
-    Remove stale typing states locally.
-  */
-
-  setInterval(() => {
-
-    const now =
-      getServerNow();
-
-    let changed = false;
-
-    Object.keys(
-      typingUsersCache
-    ).forEach(uid => {
-
-      const data =
-        typingUsersCache[uid];
-
-      const ts =
-        Number(data && data.ts);
-
-      if (
-        ts &&
-        now - ts >
-        TYPING_STALE_TIME
-      ) {
-
-        delete typingUsersCache[uid];
-
-        changed = true;
-      }
-    });
-
-    if (changed) {
-      renderTypingIndicator();
-    }
-
-  }, 5000);
-
-  /* ============================================================
-     Username
-  ============================================================ */
-
-  async function changeUsername(newName) {
-
-    newName =
-      sanitizeUsername(newName);
-
-    if (!newName) {
-
-      showSystemMsg(
-        "⚠️ الاسم لا يمكن أن يكون فارغًا",
-        true
-      );
-
-      return;
-    }
-
-    if (
-      newName.length >
-      MAX_USERNAME_LENGTH
-    ) {
-
-      showSystemMsg(
-        `⚠️ الاسم طويل جدًا (الحد ${MAX_USERNAME_LENGTH} حرف)`,
-        true
-      );
-
-      return;
-    }
-
-    if (newName === username) {
-      return;
-    }
-
-    if (!isConnected) {
-
-      showSystemMsg(
-        "⚠️ يجب الاتصال بالإنترنت لتغيير الاسم",
-        true
-      );
-
-      return;
-    }
-
-    /*
-      هذا الفحص واجهة فقط.
-      منع تكرار الاسم الحقيقي يجب أن يكون
-      عبر Backend/Rules إذا كان مطلوبًا أمنيًا.
-    */
-
-    const oldName =
-      username;
-
-    username =
-      newName;
-
-    saveUsername(username);
-
-    try {
-
-      await userRef.update({
-        name: username,
-        lastActive:
-          firebase.database.ServerValue.TIMESTAMP
-      });
-
-      showSystemMsg(
-        `✅ ${oldName} → ${username}`,
-        true
-      );
-
-      updateDisplayedOwnNames(
-        oldName,
-        username
-      );
-
-    } catch (error) {
-
-      username =
-        oldName;
-
-      saveUsername(username);
-
-      showSystemMsg(
-        "❌ تعذر تغيير الاسم",
-        true
-      );
-
-      console.error(
-        "Username update failed:",
-        error
-      );
-    }
-  }
-
-  function updateDisplayedOwnNames(
-    oldName,
-    newName
-  ) {
-
-    document
-      .querySelectorAll(".msg.mine .user")
-      .forEach(element => {
-
-        const text =
-          element.textContent;
-
-        if (
-          text === oldName
-        ) {
-          element.textContent =
-            newName;
-        }
-      });
-  }
-
-  /* ============================================================
-     Message Rendering
-  ============================================================ */
-
-  function isValidMessage(data) {
-
-    if (!data || typeof data !== "object") {
-      return false;
-    }
-
-    if (
-      typeof data.text !== "string" ||
-      data.text.length === 0 ||
-      data.text.length > MAX_MESSAGE_LENGTH
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  function addMessage(key, data) {
-
-    if (
-      !key ||
-      renderedMessageIds.has(key) ||
-      !isValidMessage(data)
-    ) {
-      return;
-    }
-
-    renderedMessageIds.add(key);
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "msg";
-
-    div.id =
-      "msg-" + key;
-
-    const msgUserId =
-      typeof data.userId === "string"
-        ? data.userId
-        : "";
-
-    const isMine =
-      msgUserId === currentUser.uid;
-
-    if (isMine) {
-      div.classList.add("mine");
-    }
-
-    const userSpan =
-      document.createElement("span");
-
-    userSpan.className =
-      "user";
-
-    userSpan.textContent =
-      sanitizeUsername(
-        data.user
-      ) || "مستخدم";
-
-    if (isMine) {
-
-      userSpan.title =
-        "اضغط لتغيير اسمك";
-
-      userSpan.addEventListener(
-        "click",
-        event => {
-
-          event.stopPropagation();
-
-          const newName =
-            window.prompt(
-              "الاسم الجديد:",
-              username
-            );
-
-          if (
-            newName !== null
-          ) {
-
-            changeUsername(
-              newName
-            );
-          }
-        }
-      );
-    }
-
-    const textSpan =
-      document.createElement("span");
-
-    textSpan.className =
-      "text";
-
-    /*
-      مهم جدًا:
-      textContent يمنع HTML/JS Injection.
-    */
-
-    textSpan.textContent =
-      data.text;
-
-    const timestamp =
-      Number(data.timestamp) ||
-      Date.now();
-
-    const timeSpan =
-      document.createElement("span");
-
-    timeSpan.className =
-      "time";
-
-    timeSpan.dataset.timestamp =
-      String(timestamp);
-
-    timeSpan.textContent =
-      formatRelativeTime(timestamp) ||
-      data.time ||
-      "";
-
-    timeSpan.title =
-      data.time ||
-      new Date(timestamp)
-        .toLocaleTimeString();
-
-    div.appendChild(userSpan);
-    div.appendChild(textSpan);
-    div.appendChild(timeSpan);
-
-    messagesDiv.appendChild(div);
-
-    /*
-      لا نعيد التمرير للأسفل إذا كان المستخدم
-      يقرأ رسائل قديمة.
-    */
-
-    const distanceFromBottom =
-      messagesDiv.scrollHeight -
-      messagesDiv.scrollTop -
-      messagesDiv.clientHeight;
-
-    if (distanceFromBottom < 180) {
-
-      messagesDiv.scrollTop =
-        messagesDiv.scrollHeight;
-    }
-  }
-
-  /* ============================================================
-     Message Listener
-  ============================================================ */
-
-  function setupMessageListeners() {
-
-    messagesRef
-      .limitToLast(MAX_VISIBLE_MESSAGES)
-      .on(
-        "child_added",
-        snapshot => {
-
-          addMessage(
-            snapshot.key,
-            snapshot.val()
-          );
-        }
-      );
-
-    messagesRef.on(
-      "child_removed",
-      snapshot => {
-
-        const element =
-          document.getElementById(
-            "msg-" + snapshot.key
-          );
-
-        if (element) {
-          element.remove();
-        }
-
-        renderedMessageIds.delete(
-          snapshot.key
-        );
-      }
-    );
-  }
-
-  /* ============================================================
-     Sending
-  ============================================================ */
-
-  async function sendMessage() {
-
-    stopTypingNow();
-
-    const now =
-      Date.now();
-
-    /*
-      Client-side anti-spam فقط.
-      الحماية الحقيقية يجب أن تكون Rules/Backend.
-    */
-
-    if (
-      now - lastSendTime <
-      SEND_COOLDOWN
-    ) {
-
-      return;
-    }
-
-    const text =
-      messageInput.value.trim();
-
-    if (!text) {
-
-      showSystemMsg(
-        "⚠️ اكتب شيئًا",
-        true
-      );
-
-      return;
-    }
-
-    if (
-      text.length >
-      MAX_MESSAGE_LENGTH
-    ) {
-
-      showSystemMsg(
-        "⚠️ الرسالة طويلة جدًا",
-        true
-      );
-
-      return;
-    }
-
-    lastSendTime =
-      now;
-
-    /*
-      إذا لا يوجد اتصال:
-      خزّن الرسالة.
-    */
-
-    if (!isConnected) {
-
-      queueOfflineMessage(text);
-
-      messageInput.value = "";
-
-      return;
-    }
-
-    if (isSending) {
-      return;
-    }
-
-    isSending = true;
-    sendBtn.disabled = true;
-
-    try {
-
-      const newMessageRef =
-        messagesRef.push();
-
-      await newMessageRef.set({
-
-        /*
-          Rules الآمنة ستتحقق من auth.uid.
-        */
-
-        userId:
-          currentUser.uid,
-
-        /*
-          الاسم للعرض فقط.
-        */
-
-        user:
-          username,
-
-        text:
-          text,
-
-        timestamp:
-          firebase.database.ServerValue.TIMESTAMP
-
-      });
-
-      messageInput.value = "";
-
-    } catch (error) {
-
-      console.error(
-        "Message send failed:",
-        error
-      );
-
-      /*
-        لا نفقد النص.
-      */
-
-      showSystemMsg(
-        "❌ تعذر إرسال الرسالة، تم حفظها للمحاولة لاحقًا",
-        true
-      );
-
-      queueOfflineMessage(text);
-
-    } finally {
-
-      isSending = false;
-      sendBtn.disabled = false;
-    }
-  }
-
-  /* ============================================================
-     Resend Offline Queue
-  ============================================================ */
-
-  async function resendPendingMessages() {
-
-    if (
-      !isConnected ||
-      !messagesRef ||
-      pendingMessages.length === 0
-    ) {
-      return;
-    }
-
-    /*
-      نسخ القائمة.
-      لا نمسح الأصل حتى ينجح الإرسال.
-    */
-
-    const queue =
-      [...pendingMessages];
-
-    showSystemMsg(
-      `📤 محاولة إرسال ${queue.length} رسالة محفوظة...`,
-      true
-    );
-
-    for (
-      const item of queue
-    ) {
-
-      if (!isConnected) {
-        break;
-      }
-
-      try {
-
-        const ref =
-          messagesRef.push();
-
-        await ref.set({
-
-          userId:
-            currentUser.uid,
-
-          user:
-            username,
-
-          text:
-            item.text,
-
-          timestamp:
-            firebase.database.ServerValue.TIMESTAMP
-
-        });
-
-        /*
-          احذف من Queue فقط بعد النجاح.
-        */
-
-        pendingMessages =
-          pendingMessages.filter(
-            msg =>
-              msg.localId !==
-              item.localId
-          );
-
-        savePendingMessages();
-
-      } catch (error) {
-
-        console.warn(
-          "Pending message failed:",
-          error
-        );
-
-        /*
-          توقف عند أول فشل.
-          لا نحذف الرسائل.
-        */
-
-        break;
-      }
-    }
-
-    if (
-      pendingMessages.length === 0
-    ) {
-
-      showSystemMsg(
-        "✅ تم إرسال الرسائل المحفوظة",
-        true
-      );
-
-    } else {
-
-      showSystemMsg(
-        `📦 بقيت ${pendingMessages.length} رسالة محفوظة`,
-        true
-      );
-    }
-  }
-
-  /* ============================================================
-     Form
-  ============================================================ */
-
-  inputAreaForm.addEventListener(
-    "submit",
-    event => {
-
-      event.preventDefault();
-
-      sendMessage();
-    }
-  );
-
-  messageInput.addEventListener(
-    "input",
-    () => {
-
-      if (
-        messageInput.value.trim()
-      ) {
-
-        setTyping();
-
-      } else {
-
-        stopTypingNow();
-      }
-    }
-  );
-
-  messageInput.addEventListener(
-    "blur",
-    stopTypingNow
-  );
-
-  /* ============================================================
-     Online Users Popup
-  ============================================================ */
-
-  function toggleUsersBox() {
-
-    const visible =
-      usersBox.classList.toggle(
-        "visible"
-      );
-
-    onlineList.setAttribute(
-      "aria-expanded",
-      String(visible)
-    );
-
-    usersBox.setAttribute(
-      "aria-hidden",
-      String(!visible)
-    );
-  }
-
-  onlineList.addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-      toggleUsersBox();
-    }
-  );
-
-  onlineList.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Enter" ||
-        event.key === " "
-      ) {
-
-        event.preventDefault();
-
-        toggleUsersBox();
-      }
-    }
-  );
-
-  usersBox.addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-    }
-  );
-
-  document.addEventListener(
-    "click",
-    () => {
-
-      if (
-        usersBox.classList.contains(
-          "visible"
-        )
-      ) {
-
-        usersBox.classList.remove(
-          "visible"
-        );
-
-        onlineList.setAttribute(
-          "aria-expanded",
-          "false"
-        );
-
-        usersBox.setAttribute(
-          "aria-hidden",
-          "true"
-        );
-      }
-    }
-  );
-
-  /* ============================================================
-     Relative Time Updates
-  ============================================================ */
-
-  setInterval(() => {
-
-    document
-      .querySelectorAll(
-        "#messages .time[data-timestamp]"
-      )
-      .forEach(element => {
-
-        const timestamp =
-          Number(
-            element.dataset.timestamp
-          );
-
-        if (
-          Number.isFinite(timestamp)
-        ) {
-
-          element.textContent =
-            formatRelativeTime(
-              timestamp
-            );
-        }
-      });
-
-  }, 20000);
-
-  /* ============================================================
-     Visibility
-  ============================================================ */
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if (
-        document.hidden
-      ) {
-
-        stopTypingNow();
-
-      } else if (
-        isConnected &&
-        userRef
-      ) {
-
-        userRef.update({
-          lastActive:
-            firebase.database.ServerValue.TIMESTAMP
-        }).catch(() => {});
-      }
-    }
-  );
-
-  /* ============================================================
-     Cleanup UI
-  ============================================================ */
-
-  function showSystemMsg(
-    text,
-    temporary = true
-  ) {
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "sys";
-
-    div.textContent =
-      text;
-
-    messagesDiv.appendChild(div);
-
-    messagesDiv.scrollTop =
-      messagesDiv.scrollHeight;
-
-    if (temporary) {
-
-      setTimeout(() => {
-
-        div.classList.add(
-          "fade-out"
-        );
-
-        setTimeout(() => {
-
-          if (div.parentNode) {
-            div.remove();
-          }
-
-        }, 500);
-
-      }, 4000);
-    }
-  }
-
-  /* ============================================================
-     Startup
-  ============================================================ */
-
-  loadPendingMessages();
-
-  username =
-    getSavedUsername();
-
-  saveUsername(username);
-
-  showSystemMsg(
-    `🔓 مرحبًا ${username}`,
-    true
-  );
-
-  const authenticated =
-    await authenticate();
-
-  if (!authenticated) {
-    return;
-  }
-
-  initializeReferences();
-
-  setupOnlineListeners();
-
-  setupTypingListeners();
-
-  setupMessageListeners();
-
-  await setupPresence();
-
-  setTimeout(() => {
-
-    showSystemMsg(
-      "💡 اضغط على اسمك في إحدى رسائلك لتغييره",
-      true
-    );
-
-  }, 1200);
-
-  if (
-    pendingMessages.length > 0
-  ) {
-
-    setTimeout(() => {
-
-      showSystemMsg(
-        `📦 لديك ${pendingMessages.length} رسالة محفوظة`,
-        true
-      );
-
-    }, 1800);
-  }
-
+document.addEventListener("DOMContentLoaded",async()=>{
+const firebaseConfig={apiKey:"AIzaSyB1AsEHXP05n8Q66jYPusheLaE60q_JwU",authDomain:"mychat-2d881.firebaseapp.com",databaseURL:"https://mychat-2d881-default-rtdb.firebaseio.com"};
+try{firebase.initializeApp(firebaseConfig)}catch(error){console.error(error);showFatalError("تعذر تشغيل Firebase");return}
+const auth=firebase.auth(),db=firebase.database();
+const MAX_MESSAGE_LENGTH=1000,MAX_USERNAME_LENGTH=20,MAX_VISIBLE_MESSAGES=50,MAX_VISITS=20;
+const TYPING_TIMEOUT=2000,TYPING_STALE_TIME=10000,PRESENCE_INTERVAL=30000,INACTIVE_AFTER=120000,SEND_COOLDOWN=700;
+const OFFLINE_QUEUE_KEY="chat_pending_messages_v2",USERNAME_KEY="chat_username_v2";
+const COUNTRY_CACHE_KEY="chat_country_v1";
+const onlineList=document.getElementById("onlineList"),visitListBtn=document.getElementById("visitListBtn");
+const usersBox=document.getElementById("usersBox"),visitsBox=document.getElementById("visitsBox");
+const usersList=document.getElementById("usersList"),visitList=document.getElementById("visitList"),onlineCountEl=document.getElementById("count");
+const messagesDiv=document.getElementById("messages"),connectionStatus=document.getElementById("connection-status"),typingIndicatorEl=document.getElementById("typingIndicator");
+const messageInput=document.getElementById("messageInput"),inputAreaForm=document.getElementById("inputArea"),sendBtn=document.getElementById("sendBtn");
+let currentUser=null,username="",countryCode="XX",userRef=null,messagesRef=null,onlineRef=null,typingRef=null,myTypingRef=null,visitRef=null,visitsQuery=null;
+let isConnected=false,isSending=false,typingTimer=null,serverTimeOffset=0,lastSendTime=0,visitsListening=false;
+const onlineUsersCache=Object.create(null),typingUsersCache=Object.create(null),visitCache=new Map(),renderedMessageIds=new Set();
+let pendingMessages=[];
+let statusTimer=null;
+
+function showFatalError(message){
+document.body.innerHTML="";
+const box=document.createElement("div");
+box.style.cssText="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#0a0a0a;color:#ff0044;font-family:monospace;text-align:center;direction:rtl;white-space:pre-line";
+box.textContent=message;
+document.body.appendChild(box)
+}
+function sanitizeUsername(value){return String(value||"").replace(/[\u0000-\u001F\u007F]/g,"").trim().slice(0,MAX_USERNAME_LENGTH)}
+function generateUsername(){return "زائر"+Math.floor(1000+Math.random()*9000)}
+function getSavedUsername(){try{const saved=sanitizeUsername(localStorage.getItem(USERNAME_KEY));if(saved)return saved}catch{}return generateUsername()}
+function saveUsername(value){try{localStorage.setItem(USERNAME_KEY,value)}catch{}}
+function getServerNow(){return Date.now()+serverTimeOffset}
+function countryCodeToFlag(code){
+code=String(code||"").toUpperCase();
+if(!/^[A-Z]{2}$/.test(code))return "🌐";
+return [...code].map(c=>String.fromCodePoint(127397+c.charCodeAt(0))).join("")
+}
+function normalizeCountryCode(code){code=String(code||"").trim().toUpperCase();return/^[A-Z]{2}$/.test(code)?code:"XX"}
+async function getCountryCode(){
+try{
+const cached=localStorage.getItem(COUNTRY_CACHE_KEY);
+if(cached&&/^[A-Z]{2}$/.test(cached))return cached
+}catch{}
+try{
+const response=await fetch("https://ipapi.co/country/",{method:"GET",cache:"no-store",headers:{Accept:"text/plain"}});
+if(!response.ok)throw new Error("Country request failed");
+const code=normalizeCountryCode(await response.text());
+if(code!=="XX"){try{localStorage.setItem(COUNTRY_CACHE_KEY,code)}catch{}return code}
+}catch(error){console.warn("Country detection failed:",error)}
+return "XX"
+}
+function showConnectionStatus(status,type){
+connectionStatus.textContent=status;
+connectionStatus.className="visible "+type;
+clearTimeout(statusTimer);
+if(type==="online")statusTimer=setTimeout(()=>{connectionStatus.className=""},2500)
+}
+function loadPendingMessages(){
+try{
+const saved=localStorage.getItem(OFFLINE_QUEUE_KEY);
+if(!saved){pendingMessages=[];return}
+const parsed=JSON.parse(saved);
+pendingMessages=Array.isArray(parsed)?parsed.filter(item=>item&&typeof item.text==="string"&&item.text.length>0&&item.text.length<=MAX_MESSAGE_LENGTH&&typeof item.localId==="string"):[] 
+}catch{pendingMessages=[]}
+}
+function savePendingMessages(){try{localStorage.setItem(OFFLINE_QUEUE_KEY,JSON.stringify(pendingMessages))}catch{}}
+function queueOfflineMessage(text){
+const item={localId:"local_"+Date.now()+"_"+Math.random().toString(36).slice(2,10),text,createdAt:Date.now()};
+pendingMessages.push(item);
+if(pendingMessages.length>100)pendingMessages=pendingMessages.slice(-100);
+savePendingMessages();
+showSystemMsg(`💾 حفظت الرسالة (${pendingMessages.length})`,true)
+}
+async function authenticate(){
+try{
+if(auth.currentUser)currentUser=auth.currentUser;
+else currentUser=(await auth.signInAnonymously()).user;
+if(!currentUser?.uid)throw new Error("No user");
+return true
+}catch(error){
+console.error(error);
+showFatalError("تعذر تسجيل الدخول إلى النظام.\n\nتأكد من تفعيل Anonymous Authentication في Firebase.");
+return false
+}
+}
+function initializeReferences(){
+const uid=currentUser.uid;
+userRef=db.ref("online/"+uid);
+messagesRef=db.ref("messages");
+onlineRef=db.ref("online");
+typingRef=db.ref("typing");
+myTypingRef=db.ref("typing/"+uid);
+visitRef=db.ref("visits/"+uid+"/"+createSessionId())
+}
+function createSessionId(){return Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9)}
+async function createVisitSession(){
+const sessionId=visitRef.key;
+const data={username,countryCode,startedAt:firebase.database.ServerValue.TIMESTAMP};
+try{
+await visitRef.onDisconnect().update({endedAt:firebase.database.ServerValue.TIMESTAMP});
+await visitRef.set(data);
+pruneVisits()
+}catch(error){console.warn("Visit creation failed:",error)}
+}
+async function pruneVisits(){
+try{
+const snapshot=await db.ref("visits").orderByChild("startedAt").limitToLast(MAX_VISITS+1).once("value");
+const entries=[];
+snapshot.forEach(child=>{
+if(child.key&&child.val()){
+const sessions=child.val();
+if(typeof sessions==="object"){
+Object.keys(sessions).forEach(sessionId=>{
+const data=sessions[sessionId];
+if(data&&Number.isFinite(Number(data.startedAt)))entries.push({uid:child.key,sessionId,startedAt:Number(data.startedAt)})
+}
+)}
+});
+entries.sort((a,b)=>b.startedAt-a.startedAt);
+if(entries.length<=MAX_VISITS)return;
+const updates={};
+entries.slice(MAX_VISITS).forEach(item=>{updates[item.uid+"/"+item.sessionId]=null});
+if(Object.keys(updates).length)await db.ref("visits").update(updates)
+}catch(error){console.warn("Visit cleanup failed:",error)}
+}
+async function setupPresence(){
+const connectedRef=db.ref(".info/connected");
+connectedRef.on("value",async snapshot=>{
+const connected=snapshot.val()===true;
+isConnected=connected;
+if(!connected){showConnectionStatus("⚠️ انقطع الاتصال، جاري إعادة الاتصال...","offline");return}
+showConnectionStatus("✅ متصل","online");
+try{
+await userRef.onDisconnect().remove();
+await myTypingRef.onDisconnect().remove();
+await userRef.set({name:username,joinedAt:firebase.database.ServerValue.TIMESTAMP,lastActive:firebase.database.ServerValue.TIMESTAMP});
+await resendPendingMessages()
+}catch(error){console.error(error);showConnectionStatus("⚠️ خطأ في الاتصال","reconnecting")}
+});
+db.ref(".info/serverTimeOffset").on("value",snapshot=>{serverTimeOffset=Number(snapshot.val())||0})
+}
+setInterval(()=>{
+if(isConnected&&userRef)userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})
+},PRESENCE_INTERVAL);
+
+function updateOnlineCount(){onlineCountEl.textContent=String(Object.keys(onlineUsersCache).length)}
+function buildUserItem(key){
+const item=document.createElement("div");
+item.className="user-item";
+item.id="user-"+key;
+const indicator=document.createElement("span");
+indicator.className="status-indicator";
+const name=document.createElement("span");
+name.className="user-name";
+item.append(indicator,name);
+return item
+}
+function applyUserItemData(item,key,data){
+if(!item||!data)return;
+const isMe=key===currentUser.uid;
+const displayName=sanitizeUsername(data.name)||"مستخدم";
+const lastActive=Number(data.lastActive)||0;
+const inactive=lastActive>0&&getServerNow()-lastActive>INACTIVE_AFTER;
+const indicator=item.querySelector(".status-indicator"),name=item.querySelector(".user-name");
+indicator.classList.remove("status-green","status-yellow");
+indicator.classList.add(inactive?"status-yellow":"status-green");
+name.textContent=isMe?`${displayName} [أنت]`:displayName;
+name.title=isMe?"أنت":inactive?"آخر نشاط منذ أكثر من دقيقتين":"متصل"
+}
+function handleUserAdded(snapshot){
+const key=snapshot.key,data=snapshot.val();
+if(!key||!data)return;
+onlineUsersCache[key]=data;
+document.getElementById("user-"+key)?.remove();
+const item=buildUserItem(key);
+applyUserItemData(item,key,data);
+usersList.appendChild(item);
+updateOnlineCount()
+}
+function handleUserChanged(snapshot){
+const key=snapshot.key,data=snapshot.val();
+if(!key||!data)return;
+onlineUsersCache[key]=data;
+let item=document.getElementById("user-"+key);
+if(!item){item=buildUserItem(key);usersList.appendChild(item)}
+applyUserItemData(item,key,data)
+}
+function handleUserRemoved(snapshot){
+const key=snapshot.key;
+delete onlineUsersCache[key];
+document.getElementById("user-"+key)?.remove();
+updateOnlineCount()
+}
+function setupOnlineListeners(){
+onlineRef.on("child_added",handleUserAdded);
+onlineRef.on("child_changed",handleUserChanged);
+onlineRef.on("child_removed",handleUserRemoved)
+}
+function renderTypingIndicator(){
+const names=Object.entries(typingUsersCache).filter(([uid,data])=>uid!==currentUser.uid&&data&&typeof data.name==="string"&&data.name.trim()).map(([,data])=>sanitizeUsername(data.name)).filter(Boolean);
+if(!names.length){typingIndicatorEl.classList.remove("visible");typingIndicatorEl.textContent="";return}
+typingIndicatorEl.textContent=names.length===1?`${names[0]} يكتب الآن...`:names.length===2?`${names[0]} و ${names[1]} يكتبان الآن...`:"عدة أشخاص يكتبون الآن...";
+typingIndicatorEl.classList.add("visible")
+}
+function setTyping(){
+if(!isConnected||!myTypingRef)return;
+clearTimeout(typingTimer);
+myTypingRef.set({name:username,ts:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});
+typingTimer=setTimeout(stopTypingNow,TYPING_TIMEOUT)
+}
+function stopTypingNow(){
+clearTimeout(typingTimer);
+if(!isConnected||!myTypingRef)return;
+myTypingRef.remove().catch(()=>{})
+}
+function setupTypingListeners(){
+typingRef.on("child_added",snapshot=>{if(snapshot.key!==currentUser.uid){typingUsersCache[snapshot.key]=snapshot.val();renderTypingIndicator()}});
+typingRef.on("child_changed",snapshot=>{if(snapshot.key!==currentUser.uid){typingUsersCache[snapshot.key]=snapshot.val();renderTypingIndicator()}});
+typingRef.on("child_removed",snapshot=>{delete typingUsersCache[snapshot.key];renderTypingIndicator()})
+}
+setInterval(()=>{
+const now=getServerNow();
+let changed=false;
+Object.keys(typingUsersCache).forEach(uid=>{
+const ts=Number(typingUsersCache[uid]?.ts);
+if(ts&&now-ts>TYPING_STALE_TIME){delete typingUsersCache[uid];changed=true}
+});
+if(changed)renderTypingIndicator()
+},5000);
+
+async function changeUsername(newName){
+newName=sanitizeUsername(newName);
+if(!newName){showSystemMsg("⚠️ الاسم لا يمكن أن يكون فارغًا",true);return}
+if(newName.length>MAX_USERNAME_LENGTH){showSystemMsg(`⚠️ الاسم طويل جدًا (الحد ${MAX_USERNAME_LENGTH} حرف)`,true);return}
+if(newName===username)return;
+if(!isConnected){showSystemMsg("⚠️ يجب الاتصال بالإنترنت لتغيير الاسم",true);return}
+const oldName=username;
+username=newName;
+saveUsername(username);
+try{
+await userRef.update({name:username,lastActive:firebase.database.ServerValue.TIMESTAMP});
+showSystemMsg(`✅ ${oldName} → ${username}`,true);
+updateDisplayedOwnNames(oldName,username)
+}catch(error){
+username=oldName;
+saveUsername(username);
+showSystemMsg("❌ تعذر تغيير الاسم",true)
+}
+}
+function updateDisplayedOwnNames(oldName,newName){
+document.querySelectorAll(".msg.mine .user").forEach(element=>{if(element.textContent===oldName)element.textContent=newName})
+}
+function isValidMessage(data){return!!(data&&typeof data==="object"&&typeof data.text==="string"&&data.text.length>0&&data.text.length<=MAX_MESSAGE_LENGTH)}
+function addMessage(key,data){
+if(!key||renderedMessageIds.has(key)||!isValidMessage(data))return;
+renderedMessageIds.add(key);
+const div=document.createElement("div");
+div.className="msg";
+div.id="msg-"+key;
+const isMine=typeof data.userId==="string"&&data.userId===currentUser.uid;
+if(isMine)div.classList.add("mine");
+const userSpan=document.createElement("span");
+userSpan.className="user";
+userSpan.textContent=sanitizeUsername(data.user)||"مستخدم";
+if(isMine){
+userSpan.title="اضغط لتغيير اسمك";
+userSpan.addEventListener("click",event=>{
+event.stopPropagation();
+const newName=window.prompt("الاسم الجديد:",username);
+if(newName!==null)changeUsername(newName)
+})
+}
+const textSpan=document.createElement("span");
+textSpan.className="text";
+textSpan.textContent=data.text;
+const timestamp=Number(data.timestamp)||Date.now();
+const timeSpan=document.createElement("span");
+timeSpan.className="time";
+timeSpan.dataset.timestamp=String(timestamp);
+timeSpan.textContent=formatRelativeTime(timestamp)||data.time||"";
+timeSpan.title=data.time||new Date(timestamp).toLocaleTimeString();
+div.append(userSpan,textSpan,timeSpan);
+messagesDiv.appendChild(div);
+const distance=messagesDiv.scrollHeight-messagesDiv.scrollTop-messagesDiv.clientHeight;
+if(distance<180)messagesDiv.scrollTop=messagesDiv.scrollHeight
+}
+function formatRelativeTime(timestampMs){
+if(!timestampMs||!Number.isFinite(Number(timestampMs)))return"";
+let diff=Math.floor((getServerNow()-Number(timestampMs))/1000);
+if(diff<0)diff=0;
+if(diff<5)return"الآن";
+if(diff<60)return diff===1?"قبل ثانية":diff===2?"قبل ثانيتين":`قبل ${diff} ثانية`;
+const minutes=Math.floor(diff/60);
+if(minutes<60)return minutes===1?"قبل دقيقة":minutes===2?"قبل دقيقتين":`قبل ${minutes} دقيقة`;
+const hours=Math.floor(minutes/60);
+if(hours<24)return hours===1?"قبل ساعة":hours===2?"قبل ساعتين":`قبل ${hours} ساعة`;
+const days=Math.floor(hours/24);
+return days===1?"قبل يوم":days===2?"قبل يومين":`قبل ${days} يوم`
+}
+function setupMessageListeners(){
+messagesRef.limitToLast(MAX_VISIBLE_MESSAGES).on("child_added",snapshot=>addMessage(snapshot.key,snapshot.val()));
+messagesRef.on("child_removed",snapshot=>{
+document.getElementById("msg-"+snapshot.key)?.remove();
+renderedMessageIds.delete(snapshot.key)
+})
+}
+async function sendMessage(){
+stopTypingNow();
+const now=Date.now();
+if(now-lastSendTime<SEND_COOLDOWN)return;
+const text=messageInput.value.trim();
+if(!text){showSystemMsg("⚠️ اكتب شيئًا",true);return}
+if(text.length>MAX_MESSAGE_LENGTH){showSystemMsg("⚠️ الرسالة طويلة جدًا",true);return}
+lastSendTime=now;
+if(!isConnected){queueOfflineMessage(text);messageInput.value="";return}
+if(isSending)return;
+isSending=true;
+sendBtn.disabled=true;
+try{
+const ref=messagesRef.push();
+await ref.set({userId:currentUser.uid,user:username,text,timestamp:firebase.database.ServerValue.TIMESTAMP});
+messageInput.value=""
+}catch(error){
+showSystemMsg("❌ تعذر إرسال الرسالة، تم حفظها للمحاولة لاحقًا",true);
+queueOfflineMessage(text)
+}finally{isSending=false;sendBtn.disabled=false}
+}
+async function resendPendingMessages(){
+if(!isConnected||!messagesRef||!pendingMessages.length)return;
+const queue=[...pendingMessages];
+for(const item of queue){
+if(!isConnected)break;
+try{
+const ref=messagesRef.push();
+await ref.set({userId:currentUser.uid,user:username,text:item.text,timestamp:firebase.database.ServerValue.TIMESTAMP});
+pendingMessages=pendingMessages.filter(msg=>msg.localId!==item.localId);
+savePendingMessages()
+}catch{break}
+}
+}
+function formatVisitTime(timestamp){
+const date=new Date(Number(timestamp));
+if(!Number.isFinite(date.getTime()))return"--:--:--";
+return date.toLocaleTimeString("en-GB",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"})
+}
+function normalizeVisitData(data){
+if(!data||typeof data!=="object")return null;
+const startedAt=Number(data.startedAt);
+if(!Number.isFinite(startedAt)||startedAt<=0)return null;
+return{username:sanitizeUsername(data.username)||"مستخدم",countryCode:normalizeCountryCode(data.countryCode),startedAt}
+}
+function collectVisitSnapshot(snapshot){
+const data=snapshot.val();
+if(!data||typeof data!=="object")return;
+Object.entries(data).forEach(([sessionId,session])=>{
+const normalized=normalizeVisitData(session);
+if(normalized)visitCache.set(snapshot.key+"/"+sessionId,{key:snapshot.key+"/"+sessionId,...normalized})
+})
+}
+function rebuildVisits(){
+const list=[...visitCache.values()].sort((a,b)=>b.startedAt-a.startedAt).slice(0,MAX_VISITS);
+visitList.replaceChildren();
+const fragment=document.createDocumentFragment();
+list.forEach(visit=>{
+const item=document.createElement("div");
+item.className="visit-item";
+item.dataset.key=visit.key;
+const flag=document.createElement("span");
+flag.className="visit-flag";
+flag.textContent=countryCodeToFlag(visit.countryCode);
+const name=document.createElement("span");
+name.className="visit-name";
+name.textContent=visit.username;
+const time=document.createElement("span");
+time.className="visit-time";
+time.textContent=formatVisitTime(visit.startedAt);
+item.append(flag,name,time);
+fragment.appendChild(item)
+});
+visitList.appendChild(fragment)
+}
+function clearVisitCache(){visitCache.clear();visitList.replaceChildren()}
+function setupVisitListeners(){
+if(visitsListening)return;
+visitsListening=true;
+clearVisitCache();
+visitsQuery=db.ref("visits").orderByChild("startedAt").limitToLast(MAX_VISITS);
+visitsQuery.on("child_added",snapshot=>{
+collectVisitSnapshot(snapshot);
+rebuildVisits()
+});
+visitsQuery.on("child_changed",snapshot=>{
+Object.keys(snapshot.val()||{}).forEach(sessionId=>{
+const normalized=normalizeVisitData(snapshot.child(sessionId).val());
+const key=snapshot.key+"/"+sessionId;
+if(normalized)visitCache.set(key,{key,...normalized})
+});
+rebuildVisits()
+});
+visitsQuery.on("child_removed",snapshot=>{
+const prefix=snapshot.key+"/";
+[...visitCache.keys()].forEach(key=>{if(key.startsWith(prefix))visitCache.delete(key)});
+rebuildVisits()
+})
+}
+function stopVisitListeners(){
+if(!visitsListening)return;
+visitsListening=false;
+if(visitsQuery){
+visitsQuery.off();
+visitsQuery=null
+}
+clearVisitCache()
+}
+function togglePopup(type){
+const usersOpen=type==="users";
+const target=usersOpen?usersBox:visitsBox;
+const other=usersOpen?visitsBox:usersBox;
+const button=usersOpen?onlineList:visitListBtn;
+const otherButton=usersOpen?visitListBtn:onlineList;
+const visible=!target.classList.contains("visible");
+other.classList.remove("visible");
+other.setAttribute("aria-hidden","true");
+otherButton.setAttribute("aria-expanded","false");
+target.classList.toggle("visible",visible);
+target.setAttribute("aria-hidden",String(!visible));
+button.setAttribute("aria-expanded",String(visible));
+if(usersOpen&&!visible)usersBox.classList.remove("visible");
+if(!usersOpen){if(visible)setupVisitListeners();else stopVisitListeners()}
+}
+onlineList.addEventListener("click",event=>{event.stopPropagation();togglePopup("users")});
+visitListBtn.addEventListener("click",event=>{event.stopPropagation();togglePopup("visits")});
+usersBox.addEventListener("click",event=>event.stopPropagation());
+visitsBox.addEventListener("click",event=>event.stopPropagation());
+document.addEventListener("click",()=>{
+usersBox.classList.remove("visible");
+visitsBox.classList.remove("visible");
+onlineList.setAttribute("aria-expanded","false");
+visitListBtn.setAttribute("aria-expanded","false");
+usersBox.setAttribute("aria-hidden","true");
+visitsBox.setAttribute("aria-hidden","true");
+stopVisitListeners()
+});
+onlineList.addEventListener("keydown",event=>{
+if(event.key==="Enter"||event.key===" "){event.preventDefault();togglePopup("users")}
+});
+visitListBtn.addEventListener("keydown",event=>{
+if(event.key==="Enter"||event.key===" "){event.preventDefault();togglePopup("visits")}
+});
+inputAreaForm.addEventListener("submit",event=>{event.preventDefault();sendMessage()});
+messageInput.addEventListener("input",()=>{messageInput.value.trim()?setTyping():stopTypingNow()});
+messageInput.addEventListener("blur",stopTypingNow);
+setInterval(()=>{
+document.querySelectorAll("#messages .time[data-timestamp]").forEach(element=>{
+const timestamp=Number(element.dataset.timestamp);
+if(Number.isFinite(timestamp))element.textContent=formatRelativeTime(timestamp)
+})
+},20000);
+document.addEventListener("visibilitychange",()=>{
+if(document.hidden)stopTypingNow();
+else if(isConnected&&userRef)userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})
+});
+function showSystemMsg(text,temporary=true){
+const div=document.createElement("div");
+div.className="sys";
+div.textContent=text;
+messagesDiv.appendChild(div);
+messagesDiv.scrollTop=messagesDiv.scrollHeight;
+if(temporary)setTimeout(()=>{div.classList.add("fade-out");setTimeout(()=>div.remove(),500)},4000)
+}
+loadPendingMessages();
+username=getSavedUsername();
+saveUsername(username);
+showSystemMsg(`🔓 مرحبًا ${username}`,true);
+const authenticated=await authenticate();
+if(!authenticated)return;
+countryCode=await getCountryCode();
+initializeReferences();
+setupOnlineListeners();
+setupTypingListeners();
+setupMessageListeners();
+await setupPresence();
+await createVisitSession();
+setTimeout(()=>showSystemMsg("💡 اضغط على اسمك في إحدى رسائلك لتغييره",true),1200);
+if(pendingMessages.length)setTimeout(()=>showSystemMsg(`📦 لديك ${pendingMessages.length} رسالة محفوظة`,true),1800);
 });
 </script>
-
 </body>
-  </html>
+</html>
