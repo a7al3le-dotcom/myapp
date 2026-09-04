@@ -1,890 +1,951 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>شات خاص</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<style>
-:root{
---bg:#07080d;
---panel:#0d0f17;
---panel2:#131622;
---input:#10131d;
---text:#f7f7f8;
---muted:#9298a8;
---accent:#ffd54a;
---blue:#45a3ff;
---green:#32d583;
---red:#ff5c5c;
---border:rgba(255,255,255,.07)
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;margin:0;overflow:hidden}
-body{font-family:Tajawal,Arial,sans-serif;background:var(--bg);color:var(--text)}
-button,input,textarea{font:inherit}
-button{border:0}
-.hidden{display:none!important}
+  <meta charset="UTF-8">
+  <title>شات خاص</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-#app{height:100dvh;display:flex;flex-direction:column;min-height:0}
-#loginScreen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
-.login-box{width:min(360px,100%);background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 20px 70px rgba(0,0,0,.35)}
-.login-box h2{margin:0 0 8px;font-size:23px}
-.login-box p{margin:0 0 20px;color:var(--muted);font-size:13px}
-#usernameInput{width:100%;height:48px;border-radius:15px;border:1px solid var(--border);outline:0;background:#080a10;color:#fff;padding:0 15px;font-size:16px;text-align:right}
-#loginBtn{width:100%;height:48px;margin-top:10px;border-radius:15px;background:var(--accent);color:#111;font-weight:700;font-size:16px;cursor:pointer}
+  <!-- Firebase مكتبات -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-#chat{display:flex;flex-direction:column;height:100%;min-height:0}
-#header{height:58px;min-height:58px;display:flex;align-items:center;justify-content:space-between;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:rgba(9,10,16,.96);border-bottom:1px solid var(--border);z-index:20}
-.header-title{font-weight:700;font-size:17px}
-.header-actions{display:flex;gap:7px}
-.header-btn{height:38px;min-width:38px;padding:0 11px;border-radius:13px;background:var(--panel2);color:#fff;border:1px solid var(--border);cursor:pointer}
-.online-count{color:var(--accent);font-weight:700;margin-right:3px}
+  <style>
 
-#messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:12px 12px 8px;scroll-behavior:auto}
-.message{display:flex;align-items:flex-start;gap:8px;margin:7px 0;direction:ltr;animation:messageIn .14s ease-out}
-@keyframes messageIn{from{opacity:.4;transform:translateY(2px)}to{opacity:1;transform:none}}
-.message-name{color:var(--accent);font-weight:700;white-space:nowrap;max-width:125px;overflow:hidden;text-overflow:ellipsis}
-.message-body{min-width:0;flex:1;text-align:left;direction:auto;word-break:break-word;white-space:pre-wrap;line-height:1.5;font-size:15px}
-.message-meta{display:flex;align-items:center;gap:4px;white-space:nowrap;color:var(--muted);font-size:10px;direction:ltr;padding-top:3px}
-.message-check{font-family:Arial,sans-serif;font-size:13px;letter-spacing:-3px;margin-left:1px;color:#8f96a5;min-width:17px}
-.message-check.read{color:var(--blue)}
-.message-check.sent{color:#a5abb9}
-.message-check.delivered{color:#a5abb9}
-.system-message{width:max-content;max-width:90%;margin:9px auto;padding:5px 11px;border-radius:20px;background:rgba(255,255,255,.04);color:var(--muted);font-size:11px;text-align:center}
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
 
-#typingArea{min-height:0;display:flex;align-items:center;padding:0 14px;overflow:hidden;transition:height .15s ease}
-#typingIndicator{display:flex;align-items:center;gap:7px;min-height:28px;color:var(--muted);font-size:12px;opacity:0;transform:translateY(4px);transition:opacity .15s ease,transform .15s ease}
-#typingIndicator.visible{opacity:1;transform:none}
-.typing-dots{display:flex;gap:3px;direction:ltr}
-.typing-dots i{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:typingDot 1.1s infinite ease-in-out}
-.typing-dots i:nth-child(2){animation-delay:.15s}
-.typing-dots i:nth-child(3){animation-delay:.3s}
-@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-3px);opacity:1}}
+    body {
+      font-family: 'Share Tech Mono', 'Tajawal', monospace;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      color: #00ff41;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
 
-#inputArea{display:flex;align-items:flex-end;gap:7px;padding:7px 10px calc(8px + env(safe-area-inset-bottom));background:#090a10;border-top:1px solid var(--border);z-index:20}
-#messageInput{flex:1;min-width:0;max-height:120px;min-height:44px;height:44px;resize:none;outline:0;border:1px solid var(--border);border-radius:17px;background:var(--input);color:#fff;padding:11px 14px;font-size:16px;line-height:21px;overflow-y:auto}
-#messageInput:focus{border-color:rgba(255,213,74,.35)}
-#sendBtn{height:44px;min-width:58px;border-radius:15px;background:var(--accent);color:#111;font-weight:700;cursor:pointer}
-#sendBtn:disabled{opacity:.45;cursor:default}
-#charCount{position:absolute;bottom:3px;left:76px;color:var(--muted);font-size:9px;pointer-events:none}
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #0a0a0a;
+    }
 
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:90;display:none}
-.modal{position:fixed;z-index:100;left:50%;top:50%;transform:translate(-50%,-50%);width:min(370px,calc(100% - 28px));max-height:80dvh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px;display:none;box-shadow:0 20px 80px rgba(0,0,0,.55)}
-.modal h3{margin:0 0 14px;font-size:17px}
-.modal input{width:100%;height:45px;border-radius:13px;background:#080a10;border:1px solid var(--border);outline:0;color:#fff;padding:0 12px}
-.modal-actions{display:flex;gap:8px;margin-top:10px}
-.modal-actions button{flex:1;height:43px;border-radius:13px;cursor:pointer}
-.primary{background:var(--accent);color:#111;font-weight:700}
-.secondary{background:var(--panel2);color:#fff;border:1px solid var(--border)!important}
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      background: #0a0a0a;
+      -webkit-overflow-scrolling: touch;
+    }
 
-.user-row{display:flex;align-items:center;gap:9px;padding:9px 3px;border-bottom:1px solid rgba(255,255,255,.045)}
-.user-dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
-.user-name{font-size:14px}
-.user-you{color:var(--muted);font-size:10px;margin-right:auto}
+    .msg {
+      margin: 2px 0;
+      padding: 2px 4px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      direction: ltr;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.5;
+      background: transparent;
+      border: none;
+      color: #00ff41;
+    }
 
-#videoPlayer{position:fixed;z-index:80;left:50%;top:72px;transform:translateX(-50%);width:min(94vw,560px);background:#000;border-radius:17px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,.65);display:none}
-.video-head{height:43px;background:#141620;display:flex;align-items:center;justify-content:space-between;padding:0 9px}
-.video-title{font-size:13px}
-.video-close{width:31px;height:31px;border-radius:50%;background:var(--red);color:#fff;cursor:pointer;font-size:15px}
-.video-body{aspect-ratio:16/9;background:#000}
-.video-body video{display:block;width:100%;height:100%;object-fit:contain}
-.video-body iframe{display:block;width:100%;height:100%;border:0}
-.video-error{padding:15px;background:#10090a;color:#ffb1b1;font-size:12px;line-height:1.5}
+    .msg .user {
+      color: #00ff41;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+    }
 
-@media(max-width:600px){
-#header{height:55px;min-height:55px}
-#messages{padding:9px 9px 5px}
-.message{gap:6px;margin:6px 0}
-.message-name{max-width:95px}
-.message-body{font-size:14px}
-.header-btn{height:36px;min-width:36px;padding:0 9px}
-#videoPlayer{width:96vw;top:62px}
-}
-</style>
+    .msg .user:hover {
+      color: #ffffff;
+      text-shadow: 0 0 10px #00ff41;
+    }
+
+    .msg .time {
+      font-size: 10px;
+      color: #004400;
+      margin-right: auto;
+    }
+
+    .msg .text {
+      color: #00cc33;
+    }
+
+    .sys {
+      text-align: center;
+      color: #004400;
+      font-size: 11px;
+      margin: 4px auto;
+      font-style: italic;
+      background: transparent;
+      padding: 2px 5px;
+      border: none;
+      transition: opacity 0.5s ease;
+      opacity: 1;
+      border: 1px solid #003300;
+      border-radius: 0;
+    }
+
+    .sys.fade-out {
+      opacity: 0;
+    }
+
+    #inputArea {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: #050505;
+      border-top: 1px solid #00ff41;
+      border-bottom: 1px solid #00ff41;
+      flex-shrink: 0;
+      min-height: 40px;
+      position: relative;
+      z-index: 10;
+    }
+
+    #messageInput {
+      flex: 1;
+      font-size: 16px !important;
+      padding: 4px 8px;
+      border: 1px solid #00ff41;
+      border-radius: 0;
+      font-family: 'Share Tech Mono', 'Tajawal', monospace;
+      background: #0a0a0a;
+      color: #00ff41;
+      height: 28px;
+      max-height: 50px;
+      touch-action: manipulation;
+      transition: none;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      outline: none;
+    }
+
+    #messageInput:focus {
+      border-color: #ffffff;
+      background: #050505;
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
+
+    #messageInput::placeholder {
+      color: #004400;
+    }
+
+    #sendBtn {
+      padding: 4px 12px;
+      border: 1px solid #00ff41;
+      border-radius: 0;
+      background: #0a0a0a;
+      color: #00ff41;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', 'Tajawal', monospace;
+      font-size: 13px;
+      font-weight: bold;
+      height: 28px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    #sendBtn:hover {
+      background: #00ff41;
+      color: #0a0a0a;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    #sendBtn:active {
+      background: #004400;
+      color: #00ff41;
+    }
+
+    #onlineList {
+      position: fixed;
+      top: 5px;
+      right: 5px;
+      border: 1px solid #00ff41;
+      background: #0a0a0a;
+      padding: 3px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #00ff41;
+      transition: all 0.3s;
+    }
+
+    #onlineList:hover {
+      background: #00ff41;
+      color: #0a0a0a;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    }
+
+    #onlineList .fa {
+      color: #00ff41;
+    }
+
+    #onlineList:hover .fa {
+      color: #0a0a0a;
+    }
+
+    #usersBox {
+      position: fixed;
+      top: 32px;
+      right: 5px;
+      background: #0a0a0a;
+      border: 1px solid #00ff41;
+      padding: 6px 10px;
+      z-index: 999;
+      min-width: 140px;
+      max-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+      color: #00ff41;
+    }
+
+    #usersBox.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #usersBox h4 {
+      margin: 0 0 5px 0;
+      color: #00ff41;
+      font-size: 13px;
+      border-bottom: 1px solid #004400;
+      padding-bottom: 3px;
+    }
+
+    #usersList {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 2px;
+      border-bottom: 1px solid #003300;
+      font-size: 12px;
+      cursor: default;
+    }
+
+    .user-item .user-name {
+      cursor: default;
+      color: #00ff41;
+    }
+
+    .status-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1px solid #00ff41;
+      flex-shrink: 0;
+    }
+
+    .status-green {
+      background-color: #00ff41;
+      box-shadow: 0 0 10px #00ff41;
+    }
+
+    .status-yellow {
+      background-color: #ffaa00;
+      box-shadow: 0 0 10px #ffaa00;
+    }
+
+    #connection-status {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 15px;
+      font-size: 11px;
+      font-weight: bold;
+      z-index: 999;
+      display: none;
+      border: 1px solid #00ff41;
+      background: #0a0a0a;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    #connection-status.visible {
+      display: block;
+    }
+
+    #connection-status.online {
+      color: #00ff41;
+      border-color: #00ff41;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    }
+
+    #connection-status.offline {
+      color: #ff0044;
+      border-color: #ff0044;
+      box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+    }
+
+    #connection-status.reconnecting {
+      color: #ffaa00;
+      border-color: #ffaa00;
+      box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
+    }
+
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: #00ff41;
+      border: 1px solid #004400;
+    }
+
+    #messages::-webkit-scrollbar-thumb:hover {
+      background: #ffffff;
+    }
+
+    * {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    @media (max-width: 768px) {
+      #messageInput {
+        font-size: 16px !important;
+        height: 32px;
+        padding: 6px 8px;
+      }
+
+      #sendBtn {
+        height: 32px;
+        padding: 6px 14px;
+        font-size: 14px;
+      }
+
+      #inputArea {
+        padding: 6px 8px;
+        min-height: 44px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div id="loginScreen">
-<div class="login-box">
-<h2>👋 أهلاً بك</h2>
-<p>اختر اسمك للدخول إلى الدردشة</p>
-<input id="usernameInput" maxlength="20" autocomplete="nickname" placeholder="اسمك">
-<button id="loginBtn">دخول</button>
-</div>
-</div>
-
-<div id="app" class="hidden">
-<div id="chat">
-<header id="header">
-<div class="header-title">ياسي</div>
-<div class="header-actions">
-<button class="header-btn" id="videoBtn" type="button">📺</button>
-<button class="header-btn" id="usersBtn" type="button">👥 <span class="online-count" id="onlineCount">0</span></button>
-</div>
-</header>
-
-<div id="videoPlayer"></div>
-
-<main id="messages"></main>
-
-<div id="typingArea">
-<div id="typingIndicator">
-<span id="typingText"></span>
-<span class="typing-dots"><i></i><i></i><i></i></span>
-</div>
-</div>
-
-<form id="inputArea">
-<textarea id="messageInput" maxlength="1000" rows="1" autocomplete="off" placeholder="اكتب رسالتك..."></textarea>
-<button id="sendBtn" type="submit">إرسال</button>
-</form>
-</div>
-</div>
-
-<div id="overlay"></div>
-
-<div class="modal" id="usersModal">
-<h3>المتصلون</h3>
-<div id="usersList"></div>
-<div class="modal-actions"><button class="secondary" type="button" data-close>إغلاق</button></div>
-</div>
-
-<div class="modal" id="videoModal">
-<h3>تثبيت فيديو</h3>
-<input id="videoUrl" type="url" placeholder="YouTube أو MP4 أو M3U8">
-<div class="modal-actions">
-<button class="secondary" type="button" data-close>إلغاء</button>
-<button class="primary" type="button" id="saveVideo">تثبيت</button>
-</div>
-</div>
-
-<script>
-"use strict";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
-    authDomain: "mychat-2d881.firebaseapp.com",
-    databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com"
-  };
-
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-
-const $=id=>document.getElementById(id);
-
-const els={
-login:$("loginScreen"),
-loginInput:$("usernameInput"),
-loginBtn:$("loginBtn"),
-app:$("app"),
-messages:$("messages"),
-input:$("messageInput"),
-form:$("inputArea"),
-send:$("sendBtn"),
-count:$("onlineCount"),
-typingArea:$("typingArea"),
-typing:$("typingIndicator"),
-typingText:$("typingText"),
-usersBtn:$("usersBtn"),
-usersModal:$("usersModal"),
-usersList:$("usersList"),
-videoBtn:$("videoBtn"),
-videoModal:$("videoModal"),
-videoUrl:$("videoUrl"),
-saveVideo:$("saveVideo"),
-overlay:$("overlay"),
-player:$("videoPlayer"),
-charCount:$("charCount")
-};
-
-const CONFIG={
-maxMessageLength:1000,
-maxNameLength:20,
-initialMessages:50,
-typingStopDelay:1800,
-typingRefreshDelay:2500,
-readDelay:350,
-presenceInterval:60000,
-onlineTimeout:120000
-};
-
-let uid="";
-let username="";
-let serverOffset=0;
-let messagesRef=null;
-let onlineRef=null;
-let typingRef=null;
-let videoRef=null;
-let connectedRef=null;
-let presenceRef=null;
-
-let typingTimer=0;
-let typingRefreshTimer=0;
-let readTimer=0;
-let presenceTimer=0;
-let currentVideo=null;
-
-const messageNodes=new Map();
-const messageData=new Map();
-const deliveredCache=new Set();
-const readCache=new Set();
-const pendingRead=new Set();
-
-function createUid(){
-let id=localStorage.getItem("yasi_uid");
-if(!/^[a-zA-Z0-9_-]{16,64}$/.test(id||"")){
-id=crypto?.randomUUID?.().replace(/-/g,"")||Math.random().toString(36).slice(2)+Date.now().toString(36);
-localStorage.setItem("yasi_uid",id);
-}
-return id;
-}
-
-function validName(value){
-return /^[\p{L}\p{N}_ -]{2,20}$/u.test(value);
-}
-
-function escapeText(value){
-return String(value??"");
-}
-
-function isNearBottom(){
-return els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<100;
-}
-
-function scrollBottom(force=false){
-if(force||isNearBottom())requestAnimationFrame(()=>{els.messages.scrollTop=els.messages.scrollHeight});
-}
-
-function formatTime(timestamp){
-const d=new Date(Number(timestamp));
-if(!Number.isFinite(d.getTime()))return "";
-return d.toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit",hour12:false});
-}
-
-function createMessageNode(key,data){
-if(messageNodes.has(key))return messageNodes.get(key);
-
-const row=document.createElement("div");
-row.className="message";
-row.dataset.id=key;
-
-const name=document.createElement("span");
-name.className="message-name";
-name.textContent=escapeText(data.user);
-
-const body=document.createElement("span");
-body.className="message-body";
-body.textContent=escapeText(data.text);
-
-const meta=document.createElement("span");
-meta.className="message-meta";
-
-const time=document.createElement("span");
-time.textContent=formatTime(data.timestamp);
-
-const checks=document.createElement("span");
-checks.className="message-check";
-
-if(data.uid===uid){
-checks.textContent="✓";
-checks.classList.add("sent");
-}
-
-meta.append(time,checks);
-row.append(name,body,meta);
-
-messageNodes.set(key,row);
-messageData.set(key,data);
-els.messages.appendChild(row);
-
-updateMessageStatus(key,data);
-return row;
-}
-
-function updateMessageStatus(key,data){
-const node=messageNodes.get(key);
-if(!node||data.uid!==uid)return;
-
-const checks=node.querySelector(".message-check");
-if(!checks)return;
-
-const delivered=data.deliveredBy&&Object.keys(data.deliveredBy).some(id=>id!==uid);
-const read=data.readBy&&Object.keys(data.readBy).some(id=>id!==uid);
-
-checks.className="message-check";
-
-if(read){
-checks.textContent="✓✓";
-checks.classList.add("read");
-}else if(delivered){
-checks.textContent="✓✓";
-checks.classList.add("delivered");
-}else{
-checks.textContent="✓";
-checks.classList.add("sent");
-}
-}
-
-function handleMessageAdded(snapshot){
-const key=snapshot.key;
-const data=snapshot.val();
-
-if(!data||typeof data!=="object")return;
-if(typeof data.text!=="string"||typeof data.user!=="string")return;
-if(data.text.length>CONFIG.maxMessageLength)return;
-
-const item={
-uid:String(data.uid||""),
-user:String(data.user||""),
-text:data.text,
-timestamp:Number(data.timestamp)||Date.now(),
-deliveredBy:data.deliveredBy||{},
-readBy:data.readBy||{}
-};
-
-const exists=messageNodes.has(key);
-
-if(!exists)createMessageNode(key,item);
-
-messageData.set(key,item);
-updateMessageStatus(key,item);
-
-if(item.uid!==uid){
-markDelivered(key,item);
-if(isNearBottom())scheduleRead(key);
-}
-
-if(!exists)scrollBottom();
-}
-
-function handleMessageChanged(snapshot){
-const key=snapshot.key;
-const data=snapshot.val();
-if(!data||typeof data!=="object")return;
-
-const node=messageNodes.get(key);
-if(!node)return;
-
-const item=messageData.get(key)||{};
-item.deliveredBy=data.deliveredBy||{};
-item.readBy=data.readBy||{};
-messageData.set(key,item);
-updateMessageStatus(key,item);
-
-if(item.uid!==uid&&isNearBottom())scheduleRead(key);
-}
-
-function handleMessageRemoved(snapshot){
-const key=snapshot.key;
-const node=messageNodes.get(key);
-if(node)node.remove();
-messageNodes.delete(key);
-messageData.delete(key);
-deliveredCache.delete(key);
-readCache.delete(key);
-pendingRead.delete(key);
-}
-
-function markDelivered(key,data){
-if(data.uid===uid||deliveredCache.has(key))return;
-if(data.deliveredBy&&data.deliveredBy[uid]){deliveredCache.add(key);return}
-
-deliveredCache.add(key);
-messagesRef.child(key).child("deliveredBy").child(uid).set(firebase.database.ServerValue.TIMESTAMP).catch(()=>deliveredCache.delete(key));
-}
-
-function scheduleRead(key){
-pendingRead.add(key);
-clearTimeout(readTimer);
-readTimer=setTimeout(flushReads,CONFIG.readDelay);
-}
-
-function flushReads(){
-const ids=[...pendingRead];
-pendingRead.clear();
-
-ids.forEach(key=>{
-const data=messageData.get(key);
-if(!data||data.uid===uid)return;
-if(readCache.has(key))return;
-if(data.readBy&&data.readBy[uid]){readCache.add(key);return}
-
-readCache.add(key);
-
-messagesRef.child(key).child("readBy").child(uid).set(firebase.database.ServerValue.TIMESTAMP).catch(()=>readCache.delete(key));
-});
-}
-
-function markVisibleMessagesRead(){
-if(!isNearBottom())return;
-
-for(const [key,data] of messageData){
-if(data.uid!==uid)scheduleRead(key);
-}
-}
-
-function updateTypingUI(users){
-const names=Object.entries(users||{})
-.filter(([id,value])=>id!==uid&&value&&Number(value.time)>Date.now()+serverOffset-5000)
-.map(([,value])=>String(value.name||""))
-.filter(Boolean)
-.slice(0,3);
-
-if(!names.length){
-els.typing.classList.remove("visible");
-els.typingArea.style.height="0px";
-return;
-}
-
-els.typingText.textContent=
-names.length===1?`${names[0]} يكتب الآن`:
-names.length===2?`${names[0]} و${names[1]} يكتبان الآن`:
-"عدة أشخاص يكتبون الآن";
-
-els.typingArea.style.height="30px";
-requestAnimationFrame(()=>els.typing.classList.add("visible"));
-}
-
-function startTyping(){
-if(!username)return;
-
-const hasText=els.input.value.trim().length>0;
-
-if(!hasText){
-stopTyping();
-return;
-}
-
-if(!typingRef)return;
-
-if(!typingTimer){
-typingRef.child(uid).set({
-name:username,
-time:firebase.database.ServerValue.TIMESTAMP
-}).catch(()=>{});
-}
-
-clearTimeout(typingTimer);
-typingTimer=setTimeout(()=>{
-typingRef.child(uid).remove().catch(()=>{});
-typingTimer=0;
-},CONFIG.typingStopDelay);
-
-clearTimeout(typingRefreshTimer);
-typingRefreshTimer=setTimeout(()=>{
-typingTimer=0;
-startTyping();
-},CONFIG.typingRefreshDelay);
-}
-
-function stopTyping(){
-clearTimeout(typingTimer);
-clearTimeout(typingRefreshTimer);
-typingTimer=0;
-typingRefreshTimer=0;
-if(typingRef)typingRef.child(uid).remove().catch(()=>{});
-}
-
-function updateInput(){
-const value=els.input.value;
-els.send.disabled=!value.trim();
-
-els.input.style.height="44px";
-const h=Math.min(els.input.scrollHeight,120);
-els.input.style.height=h+"px";
-}
-
-function cleanPresence(){
-const now=Date.now()+serverOffset;
-onlineRef.once("value").then(snapshot=>{
-const updates={};
-
-snapshot.forEach(child=>{
-const value=child.val();
-if(!value||now-Number(value.lastActive||0)>CONFIG.onlineTimeout){
-updates[child.key]=null;
-}
-});
-
-if(Object.keys(updates).length)onlineRef.update(updates).catch(()=>{});
-}).catch(()=>{});
-}
-
-function renderUsers(data){
-els.usersList.textContent="";
-
-const users=Object.entries(data||{})
-.sort((a,b)=>String(a[1]?.name||"").localeCompare(String(b[1]?.name||""),"ar"));
-
-users.forEach(([id,value])=>{
-if(!value)return;
-
-const row=document.createElement("div");
-row.className="user-row";
-
-const dot=document.createElement("span");
-dot.className="user-dot";
-
-const name=document.createElement("span");
-name.className="user-name";
-name.textContent=String(value.name||"مستخدم");
-
-const you=document.createElement("span");
-you.className="user-you";
-
-if(id===uid)you.textContent="أنت";
-
-row.append(dot,name,you);
-els.usersList.appendChild(row);
-});
-
-els.count.textContent=String(users.length);
-}
-
-function openModal(modal){
-els.overlay.style.display="block";
-modal.style.display="block";
-}
-
-function closeModals(){
-els.overlay.style.display="none";
-els.usersModal.style.display="none";
-els.videoModal.style.display="none";
-}
-
-function getYoutubeId(url){
-try{
-const u=new URL(url);
-if(u.hostname==="youtu.be")return u.pathname.slice(1).split("/")[0]||null;
-if(u.hostname.includes("youtube.com"))return u.searchParams.get("v")||u.pathname.split("/").filter(Boolean).pop()||null;
-}catch(e){}
-return null;
-}
-
-function isM3u8(url){
-return /\.m3u8(?:[?#].*)?$/i.test(url);
-}
-
-function isDirectVideo(url){
-return /\.(mp4|webm|m4v|mov)(?:[?#].*)?$/i.test(url);
-}
-
-function destroyVideo(){
-if(currentVideo){
-try{currentVideo.pause()}catch(e){}
-try{currentVideo.removeAttribute("src");currentVideo.load()}catch(e){}
-currentVideo.remove();
-currentVideo=null;
-}
-els.player.textContent="";
-els.player.style.display="none";
-}
-
-function showVideo(data){
-destroyVideo();
-
-if(!data||!data.url)return;
-
-els.player.style.display="block";
-
-const head=document.createElement("div");
-head.className="video-head";
-
-const title=document.createElement("span");
-title.className="video-title";
-title.textContent=`📺 ${String(data.by||"")}`;
-
-const close=document.createElement("button");
-close.className="video-close";
-close.type="button";
-close.textContent="×";
-close.onclick=()=>videoRef.remove().catch(()=>{});
-
-head.append(title,close);
-
-const body=document.createElement("div");
-body.className="video-body";
-
-els.player.append(head,body);
-
-const youtube=getYoutubeId(data.url);
-
-if(youtube){
-const iframe=document.createElement("iframe");
-iframe.src=`https://www.youtube.com/embed/${encodeURIComponent(youtube)}?playsinline=1&rel=0`;
-iframe.allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture";
-iframe.allowFullscreen=true;
-iframe.loading="lazy";
-body.appendChild(iframe);
-return;
-}
-
-if(isM3u8(data.url)){
-const video=document.createElement("video");
-video.controls=true;
-video.playsInline=true;
-video.preload="metadata";
-video.src=data.url;
-body.appendChild(video);
-currentVideo=video;
-return;
-}
-
-if(isDirectVideo(data.url)){
-const video=document.createElement("video");
-video.controls=true;
-video.playsInline=true;
-video.preload="metadata";
-video.src=data.url;
-body.appendChild(video);
-currentVideo=video;
-return;
-}
-
-const error=document.createElement("div");
-error.className="video-error";
-error.textContent="الرابط غير مدعوم.";
-body.appendChild(error);
-}
-
-async function sendMessage(){
-const text=els.input.value.trim();
-
-if(!text||text.length>CONFIG.maxMessageLength)return;
-if(!messagesRef||!connected)return;
-
-els.send.disabled=true;
-stopTyping();
-
-const ref=messagesRef.push();
-
-const payload={
-uid,
-user:username,
-text,
-timestamp:firebase.database.ServerValue.TIMESTAMP,
-deliveredBy:{[uid]:firebase.database.ServerValue.TIMESTAMP}
-};
-
-try{
-await ref.set(payload);
-els.input.value="";
-updateInput();
-scrollBottom(true);
-}catch(e){
-showSystem("تعذر إرسال الرسالة");
-}
-finally{
-updateInput();
-}
-}
-
-function showSystem(text){
-const el=document.createElement("div");
-el.className="system-message";
-el.textContent=text;
-els.messages.appendChild(el);
-scrollBottom(true);
-setTimeout(()=>el.remove(),3500);
-}
-
-let connected=false;
-
-function setupPresence(){
-presenceRef=onlineRef.child(uid);
-
-presenceRef.onDisconnect().remove().catch(()=>{});
-
-const writePresence=()=>{
-presenceRef.set({
-name:username,
-lastActive:firebase.database.ServerValue.TIMESTAMP
-}).catch(()=>{});
-};
-
-writePresence();
-
-clearInterval(presenceTimer);
-presenceTimer=setInterval(()=>{
-if(document.hidden)return;
-writePresence();
-},CONFIG.presenceInterval);
-}
-
-function setupFirebase(){
-messagesRef=db.ref("messages");
-onlineRef=db.ref("online");
-typingRef=db.ref("typing");
-videoRef=db.ref("pinned_video");
-connectedRef=db.ref(".info/connected");
-
-db.ref(".info/serverTimeOffset").on("value",snapshot=>{
-serverOffset=Number(snapshot.val()||0);
-});
-
-connectedRef.on("value",snapshot=>{
-const state=snapshot.val()===true;
-
-if(state===connected)return;
-connected=state;
-
-if(state){
-setupPresence();
-showSystem("متصل");
-}else{
-showSystem("انقطع الاتصال");
-}
-});
-
-messagesRef.limitToLast(CONFIG.initialMessages).on("child_added",handleMessageAdded);
-messagesRef.limitToLast(CONFIG.initialMessages).on("child_changed",handleMessageChanged);
-messagesRef.limitToLast(CONFIG.initialMessages).on("child_removed",handleMessageRemoved);
-
-onlineRef.on("value",snapshot=>{
-renderUsers(snapshot.val());
-});
-
-typingRef.on("value",snapshot=>{
-updateTypingUI(snapshot.val());
-});
-
-videoRef.on("value",snapshot=>{
-showVideo(snapshot.val());
-});
-
-setTimeout(cleanPresence,3000);
-}
-
-function login(){
-const value=els.loginInput.value.trim();
-
-if(!validName(value)){
-alert("الاسم يجب أن يكون بين حرفين و20 حرفاً.");
-return;
-}
-
-uid=createUid();
-username=value;
-
-localStorage.setItem("yasi_username",username);
-
-els.login.classList.add("hidden");
-els.app.classList.remove("hidden");
-
-setupFirebase();
-els.input.focus();
-}
-
-els.loginBtn.addEventListener("click",login);
-
-els.loginInput.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-e.preventDefault();
-login();
-}
-});
-
-els.form.addEventListener("submit",e=>{
-e.preventDefault();
-sendMessage();
-});
-
-els.input.addEventListener("input",()=>{
-updateInput();
-startTyping();
-});
-
-els.input.addEventListener("keydown",e=>{
-if(e.key==="Enter"&&!e.shiftKey){
-e.preventDefault();
-sendMessage();
-}
-});
-
-els.messages.addEventListener("scroll",()=>{
-if(isNearBottom())markVisibleMessagesRead();
-});
-
-els.usersBtn.addEventListener("click",()=>{
-openModal(els.usersModal);
-});
-
-els.videoBtn.addEventListener("click",()=>{
-els.videoUrl.value="";
-openModal(els.videoModal);
-setTimeout(()=>els.videoUrl.focus(),50);
-});
-
-els.overlay.addEventListener("click",closeModals);
-
-document.querySelectorAll("[data-close]").forEach(btn=>{
-btn.addEventListener("click",closeModals);
-});
-
-els.saveVideo.addEventListener("click",async()=>{
-const url=els.videoUrl.value.trim();
-
-if(!url)return;
-
-const youtube=getYoutubeId(url);
-
-if(!youtube&&!isM3u8(url)&&!isDirectVideo(url)){
-alert("الرابط غير مدعوم.");
-return;
-}
-
-try{
-await videoRef.set({
-url,
-by:username,
-timestamp:firebase.database.ServerValue.TIMESTAMP
-});
-closeModals();
-}catch(e){
-alert("تعذر تثبيت الفيديو.");
-}
-});
-
-document.addEventListener("visibilitychange",()=>{
-if(document.hidden){
-stopTyping();
-clearTimeout(readTimer);
-}else{
-if(connected){
-presenceRef?.set({
-name:username,
-lastActive:firebase.database.ServerValue.TIMESTAMP
-}).catch(()=>{});
-}
-markVisibleMessagesRead();
-}
-});
-
-window.addEventListener("pagehide",()=>{
-stopTyping();
-clearInterval(presenceTimer);
-});
-
-window.addEventListener("resize",()=>{
-if(document.activeElement===els.input){
-requestAnimationFrame(()=>{
-els.messages.scrollTop=els.messages.scrollHeight;
-});
-}
-});
-
-(function restore(){
-const savedName=localStorage.getItem("yasi_username");
-if(savedName&&validName(savedName)){
-els.loginInput.value=savedName;
-}
-updateInput();
-})();
-</script>
+  <!-- واجهة الدردشة -->
+  <div id="chat-container">
+    <div id="onlineList" title="المتصلون الآن">
+      <i class="fa fa-users"></i>
+      <span id="count">0</span>
+      <span>متصل</span>
+    </div>
+    <div id="usersBox"><h4>🖥️ المتصلين</h4><div id="usersList"></div></div>
+    <div id="messages"></div>
+    <div id="connection-status"></div>
+    <form id="inputArea" action="javascript:void(0);">
+      <button type="submit" id="sendBtn">➤ إرسال</button>
+      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+        authDomain: "mychat-2d881.firebaseapp.com",
+        databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      // ===== ID فريد للمستخدم =====
+      let userId = localStorage.getItem('chat_userId');
+      if (!userId) {
+        userId = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('chat_userId', userId);
+      }
+
+      // ===== الاسم مع حفظ =====
+      let username = localStorage.getItem('chat_username');
+      if (!username) {
+        username = "زائر" + Math.floor(Math.random() * 9999);
+        localStorage.setItem('chat_username', username);
+      }
+
+      // ===== عناصر الواجهة =====
+      const onlineList = document.getElementById("onlineList");
+      const usersBox = document.getElementById("usersBox");
+      const usersList = document.getElementById("usersList");
+      const onlineCountEl = document.getElementById("count");
+      const messagesDiv = document.getElementById("messages");
+      const connectionStatus = document.getElementById("connection-status");
+
+      // ===== مراجع Firebase =====
+      const userRef = db.ref("online/" + userId);
+      const messagesRef = db.ref("messages");
+      const onlineRef = db.ref("online");
+      const messageInput = document.getElementById("messageInput");
+      const inputAreaForm = document.getElementById("inputArea");
+
+      let serverTimeOffset = 0;
+      let isConnected = false;
+
+      // =====================================================================
+      // ===== تنسيق الوقت النسبي (قبل ثانية / قبل دقيقتين / ... إلخ) =====
+      // =====================================================================
+      // دالة واحدة تُستخدم لعرض وقت الرسائل ولآخر نشاط في قائمة المتصلين،
+      // بدل تكرار المنطق. التحديث خفيف جداً: مجرد استبدال نص عنصر موجود،
+      // بدون أي إعادة بناء أو طلبات شبكة.
+      const TIME_FORMS = {
+        seconds: { one: 'ثانية', two: 'ثانيتين', few: 'ثوانٍ', many: 'ثانية' },
+        minutes: { one: 'دقيقة', two: 'دقيقتين', few: 'دقائق', many: 'دقيقة' },
+        hours:   { one: 'ساعة',  two: 'ساعتين',  few: 'ساعات', many: 'ساعة' },
+        days:    { one: 'يوم',   two: 'يومين',   few: 'أيام',  many: 'يوم' }
+      };
+
+      function formatUnit(n, forms) {
+        if (n === 1) return forms.one;
+        if (n === 2) return forms.two;
+        if (n >= 3 && n <= 10) return `${n} ${forms.few}`;
+        return `${n} ${forms.many}`;
+      }
+
+      function formatRelativeTime(timestampMs) {
+        if (!timestampMs) return '';
+        const now = Date.now() + serverTimeOffset;
+        let diffSeconds = Math.floor((now - timestampMs) / 1000);
+        if (diffSeconds < 0) diffSeconds = 0;
+
+        if (diffSeconds < 5) return 'الآن';
+        if (diffSeconds < 60) return formatUnit(diffSeconds, TIME_FORMS.seconds);
+
+        const minutes = Math.floor(diffSeconds / 60);
+        if (minutes < 60) return formatUnit(minutes, TIME_FORMS.minutes);
+
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return formatUnit(hours, TIME_FORMS.hours);
+
+        const days = Math.floor(hours / 24);
+        return formatUnit(days, TIME_FORMS.days);
+      }
+
+      // ===== ذاكرة محلية لتفادي إعادة بناء الواجهة بالكامل =====
+      const onlineUsersCache = {};   // userKey -> data
+      let knownUserIds = new Set();  // لمعرفة من كان موجوداً مسبقاً (لتفادي رسائل "دخل" وهمية)
+
+      // ===== مصفوفة حفظ الرسائل =====
+      let pendingMessages = [];
+
+      // ===== تحميل الرسائل المحفوظة =====
+      function loadPendingMessages() {
+        const saved = localStorage.getItem('pendingMessages');
+        if (saved) {
+          try {
+            pendingMessages = JSON.parse(saved);
+            if (pendingMessages.length > 0) {
+              showSystemMsg(`📦 يوجد ${pendingMessages.length} رسالة محفوظة`, true);
+            }
+          } catch (e) {
+            pendingMessages = [];
+          }
+        }
+      }
+      loadPendingMessages();
+
+      // ===== عرض حالة الاتصال =====
+      function showConnectionStatus(status, type) {
+        connectionStatus.textContent = status;
+        connectionStatus.className = 'visible ' + type;
+
+        if (type === 'online') {
+          setTimeout(() => {
+            connectionStatus.className = '';
+          }, 2000);
+        }
+      }
+
+      // ===== مراقبة الاتصال (Firebase SDK يتكفل تلقائياً بإعادة المحاولة) =====
+      const connectedRef = firebase.database().ref(".info/connected");
+      connectedRef.on("value", (snap) => {
+        const connected = snap.val();
+
+        if (connected) {
+          isConnected = true;
+          showConnectionStatus('✅ متصل', 'online');
+
+          userRef.set({
+            lastActive: firebase.database.ServerValue.TIMESTAMP,
+            name: username,
+            userId: userId,
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
+          });
+          userRef.onDisconnect().remove();
+
+          resendPendingMessages();
+
+        } else {
+          isConnected = false;
+          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال تلقائياً...', 'offline');
+        }
+      });
+
+      // ===== وقت السيرفر =====
+      db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverTimeOffset = snap.val() || 0;
+      });
+
+      // ===== نبضة حضور دورية (كتابة واحدة صغيرة كل 30 ثانية فقط) =====
+      setInterval(() => {
+        if (isConnected) {
+          userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
+        }
+      }, 30000);
+
+      // ملاحظة أداء: تم حذف الفحص الدوري القديم الذي كان يسحب كامل قائمة
+      // المتصلين كل 60 ثانية لتنظيف الحسابات الميتة. onDisconnect() أعلاه
+      // كافٍ وموثوق لإزالة أي مستخدم عند انقطاع اتصاله فعلياً، بدون أي
+      // استعلامات دورية إضافية تستهلك بيانات ومعالجة بلا داعٍ.
+
+      // ===== قائمة المتصلين (فتح/إغلاق) =====
+      onlineList.onclick = e => {
+        e.stopPropagation();
+        usersBox.classList.toggle('visible');
+      };
+
+      document.onclick = () => {
+        if (usersBox.classList.contains('visible')) {
+          usersBox.classList.remove('visible');
+        }
+      };
+
+      usersBox.onclick = e => e.stopPropagation();
+
+      // =====================================================================
+      // ===== نظام الحضور: تحديثات جزئية بدل إعادة رسم القائمة كاملة =====
+      // =====================================================================
+      // بدل الاستماع إلى حدث "value" (الذي يرسل نسخة كاملة من كل المتصلين
+      // مع أي تغيير بسيط، حتى لو غيّر شخص واحد فقط lastActive الخاص به)،
+      // نستخدم child_added / child_changed / child_removed التي تصل فقط
+      // للعنصر المتغيّر، ونحدّث عنصر DOM واحد بدل إعادة بناء القائمة بأكملها.
+
+      function updateOnlineCount() {
+        onlineCountEl.textContent = Object.keys(onlineUsersCache).length;
+      }
+
+      function buildUserItem(userKey) {
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        userItem.id = "user-" + userKey;
+
+        const statusIndicator = document.createElement("span");
+        statusIndicator.className = "status-indicator";
+        userItem.appendChild(statusIndicator);
+
+        const userName = document.createElement("span");
+        userName.className = "user-name";
+        // تغيير الاسم أصبح متاحاً فقط من الدردشة (بالنقر على اسمك جنب
+        // رسالتك)، لتفادي تكرار نفس المنطق في مكانين. القائمة هنا للعرض فقط.
+        userName.style.cursor = 'default';
+        userItem.appendChild(userName);
+
+        return userItem;
+      }
+
+      function applyUserItemData(userItem, userKey, userData) {
+        const isMe = userKey === userId;
+        const displayName = userData.name || userKey;
+        const now = Date.now() + serverTimeOffset;
+        const twoMinutesAgo = now - (2 * 60 * 1000);
+
+        const statusIndicator = userItem.querySelector('.status-indicator');
+        statusIndicator.classList.remove('status-green', 'status-yellow');
+        statusIndicator.classList.add((userData.lastActive || 0) < twoMinutesAgo ? 'status-yellow' : 'status-green');
+
+        const userName = userItem.querySelector('.user-name');
+        userName.textContent = displayName;
+        userName.title = isMe ? 'أنت' : `آخر نشاط: ${formatRelativeTime(userData.lastActive) || 'الآن'}`;
+
+        if (isMe) {
+          const badge = document.createElement('span');
+          badge.textContent = ' [أنت]';
+          badge.style.fontSize = '10px';
+          badge.style.color = '#004400';
+          userName.appendChild(badge);
+        }
+      }
+
+      function handleUserAdded(snap) {
+        const key = snap.key;
+        const data = snap.val();
+        onlineUsersCache[key] = data;
+
+        const item = buildUserItem(key);
+        applyUserItemData(item, key, data);
+        usersList.appendChild(item);
+        updateOnlineCount();
+
+        if (key !== userId && !knownUserIds.has(key)) {
+          showSystemMsg(`🟢 ${data.name || key} دخل`, true);
+        }
+        knownUserIds.add(key);
+      }
+
+      function handleUserChanged(snap) {
+        const key = snap.key;
+        const data = snap.val();
+        onlineUsersCache[key] = data;
+
+        const item = document.getElementById('user-' + key);
+        if (item) applyUserItemData(item, key, data);
+      }
+
+      function handleUserRemoved(snap) {
+        const key = snap.key;
+        const data = onlineUsersCache[key] || snap.val() || {};
+        delete onlineUsersCache[key];
+        knownUserIds.delete(key);
+
+        const item = document.getElementById('user-' + key);
+        if (item) item.remove();
+        updateOnlineCount();
+
+        showSystemMsg(`🔴 ${data.name || key} غادر`, true);
+      }
+
+      // نجلب قائمة المتصلين الحاليين مرة واحدة أولاً، لمعرفة من كان موجوداً
+      // فعلاً قبل انضمامنا (لتفادي رسائل "دخل" الوهمية)، ثم نفعّل الاستماع
+      // المستمر بأحداث الأطفال فقط.
+      onlineRef.once('value', snap => {
+        const data = snap.val() || {};
+        Object.keys(data).forEach(k => knownUserIds.add(k));
+
+        onlineRef.on('child_added', handleUserAdded);
+        onlineRef.on('child_changed', handleUserChanged);
+        onlineRef.on('child_removed', handleUserRemoved);
+      });
+
+      // ===== تغيير الاسم =====
+      function changeUsername(newName) {
+        newName = newName.trim();
+        if (!newName) {
+          showSystemMsg('⚠️ الاسم لا يمكن أن يكون فارغاً', true);
+          return;
+        }
+
+        if (newName.length > 20) {
+          showSystemMsg('⚠️ الاسم طويل جداً (حد أقصى 20 حرف)', true);
+          return;
+        }
+
+        onlineRef.once('value', snapshot => {
+          const users = snapshot.val() || {};
+          const nameTaken = Object.keys(users).some(
+            key => key !== userId && users[key].name === newName
+          );
+
+          if (nameTaken) {
+            showSystemMsg('⚠️ هذا الاسم مستخدم بالفعل', true);
+            return;
+          }
+
+          const oldName = username;
+          username = newName;
+          localStorage.setItem('chat_username', username);
+
+          if (isConnected) {
+            userRef.update({
+              name: username,
+              lastActive: firebase.database.ServerValue.TIMESTAMP
+            });
+          }
+
+          showSystemMsg(`✅ ${oldName} → ${username}`, true);
+          updateAllMessagesUsername(oldName, username);
+        });
+      }
+
+      // ===== تحديث الاسم في جميع الرسائل المعروضة حالياً =====
+      function updateAllMessagesUsername(oldName, newName) {
+        const allMessages = document.querySelectorAll('.msg');
+        allMessages.forEach(msg => {
+          const userSpan = msg.querySelector('.user');
+          if (userSpan && userSpan.textContent === oldName) {
+            userSpan.textContent = newName;
+          }
+        });
+      }
+
+      // ===== حفظ رسالة للاستخدام دون اتصال =====
+      function saveMessageOffline(text) {
+        const message = {
+          text: text,
+          time: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}),
+          timestamp: Date.now()
+        };
+
+        pendingMessages.push(message);
+        localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
+
+        showSystemMsg(`💾 حفظت الرسالة (${pendingMessages.length})`, true);
+      }
+
+      // ===== إعادة إرسال الرسائل المحفوظة =====
+      function resendPendingMessages() {
+        if (pendingMessages.length === 0 || !isConnected) return;
+
+        const pendingCount = pendingMessages.length;
+        showSystemMsg(`📤 إعادة إرسال ${pendingCount} رسالة...`, true);
+
+        const messagesToSend = [...pendingMessages];
+        pendingMessages = [];
+        localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
+
+        messagesToSend.forEach((msg, index) => {
+          setTimeout(() => {
+            if (isConnected) {
+              messagesRef.push().set({
+                user: username,
+                userId: userId,
+                text: msg.text,
+                time: msg.time,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+              });
+
+              if (index === messagesToSend.length - 1) {
+                showSystemMsg(`✅ تم إرسال ${messagesToSend.length} رسالة`, true);
+              }
+            } else {
+              pendingMessages.push(msg);
+              localStorage.setItem('pendingMessages', JSON.stringify(pendingMessages));
+            }
+          }, index * 800);
+        });
+      }
+
+      // ===== إرسال الرسالة =====
+      inputAreaForm.onsubmit = sendMessage;
+
+      function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) {
+          showSystemMsg('⚠️ اكتب شيئاً', true);
+          return;
+        }
+
+        if (text.length > 1000) {
+          showSystemMsg('⚠️ الرسالة طويلة جداً', true);
+          return;
+        }
+
+        if (!isConnected) {
+          saveMessageOffline(text);
+          messageInput.value = "";
+          return;
+        }
+
+        const time = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+
+        messagesRef.push().set({
+          user: username,
+          userId: userId,
+          text: text,
+          time: time,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        messageInput.value = "";
+        cleanupOldMessages();
+      }
+
+      // ===== عرض الرسائل =====
+      messagesRef.limitToLast(50).on("child_added", snap => {
+        addMessage(snap.key, snap.val());
+      });
+
+      messagesRef.on('child_removed', snap => {
+        const el = document.getElementById('msg-' + snap.key);
+        if (el) el.remove();
+      });
+
+      function addMessage(key, { user, userId: msgUserId, text, time, timestamp }) {
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.id = 'msg-' + key;
+
+        const userSpan = document.createElement("span");
+        userSpan.className = "user";
+        userSpan.textContent = user;
+
+        if (msgUserId === userId) {
+          userSpan.onclick = (e) => {
+            e.stopPropagation();
+            const newName = prompt('الاسم الجديد:', user);
+            if (newName && newName.trim() !== '') {
+              changeUsername(newName.trim());
+            }
+          };
+        } else {
+          userSpan.style.cursor = 'default';
+        }
+
+        const textSpan = document.createElement("span");
+        textSpan.className = "text";
+        textSpan.textContent = text;
+
+        // FIX (تنسيق الوقت): بدل الوقت الثابت (HH:MM)، نعرض وقتاً نسبياً
+        // "قبل ثانية / قبل دقيقتين / ..." ونحتفظ بالوقت الفعلي كـ tooltip
+        // وكـ data-attribute حتى يقدر التحديث الدوري (كل 20 ثانية) يحسب
+        // القيمة الجديدة بدون أي طلب شبكة إضافي - مجرد استبدال نص.
+        const ts = timestamp || Date.now();
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "time";
+        timeSpan.dataset.timestamp = ts;
+        timeSpan.textContent = formatRelativeTime(ts) || time;
+        timeSpan.title = time || new Date(ts).toLocaleTimeString();
+
+        div.appendChild(userSpan);
+        div.appendChild(textSpan);
+        div.appendChild(timeSpan);
+
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      // تحديث دوري خفيف جداً لأوقات الرسائل المعروضة (نص فقط، بدون أي
+      // اتصال بالشبكة أو إعادة بناء). كل 20 ثانية كافٍ لأن أصغر وحدة "قبل
+      // ثانية/ثانيتين" لا تحتاج دقة أعلى من هذا لمستخدم يقرأ الشات.
+      setInterval(() => {
+        document.querySelectorAll('#messages .time[data-timestamp]').forEach(el => {
+          const ts = parseInt(el.dataset.timestamp, 10);
+          if (!isNaN(ts)) {
+            el.textContent = formatRelativeTime(ts);
+          }
+        });
+      }, 20000);
+
+      // ===== تنظيف الرسائل القديمة =====
+      // FIX (الأداء): سابقاً كان هذا يسحب كامل عقدة الرسائل من Firebase
+      // (بدون أي حد) مع كل رسالة تُرسل، فقط للتحقق من وجود أكثر من 50.
+      // الآن مقيّد بـ limitToLast(60) — يكفي لتغطية أي تراكم منطقي، ويحمي
+      // من سحب بيانات غير محدودة مهما كبر تاريخ الرسائل مستقبلاً.
+      function cleanupOldMessages() {
+        if (!isConnected) return;
+
+        messagesRef.limitToLast(60).once('value', snapshot => {
+          if (snapshot.numChildren() > 50) {
+            let updates = {};
+            let removeCount = 0;
+            const limit = snapshot.numChildren() - 50;
+            snapshot.forEach(child => {
+              if (removeCount < limit) {
+                updates[child.key] = null;
+              }
+              removeCount++;
+            });
+            messagesRef.update(updates);
+          }
+        });
+      }
+
+      // ===== رسائل النظام =====
+      function showSystemMsg(text, isTemporary) {
+        const div = document.createElement("div");
+        div.className = "sys";
+        div.textContent = text;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        if (isTemporary) {
+          setTimeout(() => {
+            div.classList.add('fade-out');
+            setTimeout(() => div.remove(), 500);
+          }, 4000);
+        }
+      }
+
+      // =====================================================
+      // ===== إصلاح مشكلة تكبير مربع الإدخال =====
+      // =====================================================
+
+      let inputFocused = false;
+
+      messageInput.addEventListener('focus', function() {
+        inputFocused = true;
+        setTimeout(() => {
+          if (inputFocused) {
+            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      });
+
+      messageInput.addEventListener('blur', function() {
+        inputFocused = false;
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 100);
+      });
+
+      window.addEventListener('focusin', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          e.preventDefault();
+        }
+      });
+
+      let lastHeight = window.innerHeight;
+      window.addEventListener('resize', function() {
+        const currentHeight = window.innerHeight;
+        const isKeyboardOpen = currentHeight < lastHeight;
+
+        if (isKeyboardOpen && document.activeElement === messageInput) {
+          setTimeout(() => {
+            messageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+
+        lastHeight = currentHeight;
+      });
+
+      // ===== رسالة ترحيب =====
+      setTimeout(() => {
+        showSystemMsg(`🔓 مرحباً ${username}`, true);
+        setTimeout(() => {
+          showSystemMsg(`💡 انقر على اسمك لتغييره`, true);
+        }, 1200);
+        setTimeout(() => {
+          if (pendingMessages.length > 0) {
+            showSystemMsg(`📦 ${pendingMessages.length} رسالة محفوظة`, true);
+          }
+        }, 2000);
+      }, 500);
+    });
+  </script>
 </body>
 </html>
