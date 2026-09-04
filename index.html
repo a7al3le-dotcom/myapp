@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>شات خاص</title>
+  <title>شات خاص - تحديث شامل</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -13,283 +13,329 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
+    /* ===== تحديث شامل للتصميم ===== */
+    :root {
+      --primary: #00ff41;
+      --primary-glow: rgba(0, 255, 65, 0.3);
+      --bg-dark: #0a0a0a;
+      --bg-input: #0d1117;
+      --text-secondary: #00cc33;
+      --border-dim: #003300;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     html, body {
       height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #0a0a0a;
-    }
-
-    body {
-      font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      background: #0a0a0a;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      color: #00ff41;
-      position: fixed;
       width: 100%;
-      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Share Tech Mono', 'Tajawal', monospace;
+      color: var(--primary);
+      position: fixed;
       top: 0;
       left: 0;
+      touch-action: manipulation;
     }
 
     #chat-container {
       display: flex;
       flex-direction: column;
-      height: 100%;
-      background: #0a0a0a;
+      height: 100vh;
+      height: 100dvh; /* للهواتف */
+      background: var(--bg-dark);
     }
 
+    /* ===== منطقة الرسائل ===== */
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 8px;
-      background: #0a0a0a;
+      padding: 12px 8px;
+      background: var(--bg-dark);
       -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
     }
 
     .msg {
-      margin: 2px 0;
-      padding: 2px 4px;
+      margin: 6px 0;
+      padding: 8px 12px;
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      align-items: center;
+      align-items: baseline;
       direction: ltr;
       text-align: left;
-      font-size: 13px;
-      line-height: 1.5;
-      background: transparent;
-      border: none;
-      color: #00ff41;
+      font-size: 14px;
+      line-height: 1.6;
+      background: rgba(0, 255, 65, 0.03);
+      border-right: 2px solid transparent;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+    }
+
+    .msg:hover {
+      background: rgba(0, 255, 65, 0.06);
+      border-right-color: var(--primary);
     }
 
     .msg .user {
-      color: #00ff41;
+      color: var(--primary);
       font-weight: bold;
       cursor: pointer;
       text-decoration: none;
+      transition: all 0.2s;
+      flex-shrink: 0;
     }
 
     .msg .user:hover {
       color: #ffffff;
-      text-shadow: 0 0 10px #00ff41;
+      text-shadow: 0 0 12px var(--primary-glow);
     }
 
     .msg .time {
-      font-size: 10px;
-      color: #004400;
+      font-size: 11px;
+      color: #005a00;
       margin-right: auto;
+      flex-shrink: 0;
     }
 
     .msg .text {
-      color: #00cc33;
+      color: var(--text-secondary);
+      word-break: break-word;
     }
 
     .sys {
       text-align: center;
-      color: #004400;
-      font-size: 11px;
-      margin: 4px auto;
+      color: #008800;
+      font-size: 12px;
+      margin: 8px auto;
       font-style: italic;
-      background: transparent;
-      padding: 2px 5px;
-      border: none;
+      background: rgba(0, 255, 65, 0.05);
+      padding: 6px 12px;
+      border: 1px solid var(--border-dim);
+      border-radius: 16px;
       transition: opacity 0.5s ease;
-      opacity: 1;
-      border: 1px solid #003300;
-      border-radius: 0;
+      width: fit-content;
+      max-width: 90%;
     }
 
     .sys.fade-out {
       opacity: 0;
     }
 
-    /* ===== مؤشر الكتابة - فوق مربع الإدخال، بارتفاع ثابت لمنع أي قفزة بالتخطيط ===== */
+    /* ===== مؤشر الكتابة - محسّن ===== */
     #typingIndicator {
       flex-shrink: 0;
-      height: 18px;
-      line-height: 18px;
-      padding: 0 10px;
-      font-size: 11px;
+      min-height: 28px;
+      line-height: 28px;
+      padding: 0 16px;
+      font-size: 12px;
       font-style: italic;
-      color: #00cc33;
-      background: #050505;
-      border-top: 1px solid #003300;
+      color: var(--text-secondary);
+      background: rgba(0, 255, 65, 0.04);
+      border-top: 1px solid var(--border-dim);
+      border-bottom: 1px solid var(--border-dim);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       opacity: 0;
-      transition: opacity 0.15s ease;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      letter-spacing: 0.5px;
     }
 
     #typingIndicator.visible {
       opacity: 1;
+      animation: typingPulse 1.5s infinite;
     }
 
+    @keyframes typingPulse {
+      0%, 100% { background: rgba(0, 255, 65, 0.04); }
+      50% { background: rgba(0, 255, 65, 0.08); }
+    }
+
+    /* ===== منطقة الإدخال - إعادة تصميم كاملة ===== */
     #inputArea {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 4px;
-      padding: 4px 8px;
-      background: #050505;
-      border-top: 1px solid #00ff41;
-      border-bottom: 1px solid #00ff41;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--bg-input);
+      border-top: 2px solid var(--primary);
       flex-shrink: 0;
-      min-height: 40px;
+      min-height: 60px;
       position: relative;
       z-index: 10;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
 
     #messageInput {
       flex: 1;
       font-size: 16px !important;
-      padding: 4px 8px;
-      border: 1px solid #00ff41;
-      border-radius: 0;
+      padding: 12px 16px;
+      border: 2px solid var(--primary);
+      border-radius: 24px;
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      background: #0a0a0a;
-      color: #00ff41;
-      height: 28px;
-      max-height: 50px;
+      background: var(--bg-dark);
+      color: var(--primary);
+      height: 48px;
+      line-height: 1.5;
       touch-action: manipulation;
-      transition: none;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 0 rgba(0, 255, 65, 0);
     }
 
     #messageInput:focus {
       border-color: #ffffff;
       background: #050505;
-      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+      box-shadow: 0 0 20px var(--primary-glow);
+      transform: translateY(-2px);
     }
 
     #messageInput::placeholder {
-      color: #004400;
+      color: #005a00;
+      opacity: 0.7;
     }
 
     #sendBtn {
-      padding: 4px 12px;
-      border: 1px solid #00ff41;
-      border-radius: 0;
-      background: #0a0a0a;
-      color: #00ff41;
+      padding: 12px 20px;
+      border: 2px solid var(--primary);
+      border-radius: 24px;
+      background: var(--bg-dark);
+      color: var(--primary);
       cursor: pointer;
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
-      height: 28px;
-      transition: all 0.3s;
+      height: 48px;
+      transition: all 0.3s ease;
       flex-shrink: 0;
       touch-action: manipulation;
+      white-space: nowrap;
+      box-shadow: 0 0 0 rgba(0, 255, 65, 0);
     }
 
     #sendBtn:hover {
-      background: #00ff41;
-      color: #0a0a0a;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+      background: var(--primary);
+      color: var(--bg-dark);
+      box-shadow: 0 0 30px var(--primary-glow);
+      transform: translateY(-2px);
     }
 
     #sendBtn:active {
       background: #004400;
-      color: #00ff41;
+      color: var(--primary);
+      transform: translateY(0);
+      box-shadow: 0 0 10px var(--primary-glow);
     }
 
+    /* ===== قائمة المتصلين ===== */
     #onlineList {
       position: fixed;
-      top: 5px;
-      right: 5px;
-      border: 1px solid #00ff41;
-      background: #0a0a0a;
-      padding: 3px 10px;
+      top: 10px;
+      right: 10px;
+      border: 2px solid var(--primary);
+      background: var(--bg-dark);
+      padding: 8px 16px;
       font-size: 12px;
       cursor: pointer;
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 4px;
-      color: #00ff41;
+      gap: 8px;
+      color: var(--primary);
       transition: all 0.3s;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
     }
 
     #onlineList:hover {
-      background: #00ff41;
-      color: #0a0a0a;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+      background: var(--primary);
+      color: var(--bg-dark);
+      box-shadow: 0 0 25px var(--primary-glow);
     }
 
     #onlineList .fa {
-      color: #00ff41;
+      color: var(--primary);
+      font-size: 14px;
     }
 
     #onlineList:hover .fa {
-      color: #0a0a0a;
+      color: var(--bg-dark);
     }
 
     #usersBox {
       position: fixed;
-      top: 32px;
-      right: 5px;
-      background: #0a0a0a;
-      border: 1px solid #00ff41;
-      padding: 6px 10px;
+      top: 45px;
+      right: 10px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+      padding: 12px 16px;
       z-index: 999;
-      min-width: 140px;
-      max-width: 200px;
+      min-width: 180px;
+      max-width: 240px;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.2s ease;
-      color: #00ff41;
+      transition: all 0.3s ease;
+      color: var(--primary);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     }
 
     #usersBox.visible {
       opacity: 1;
       visibility: visible;
+      transform: translateY(0);
     }
 
     #usersBox h4 {
-      margin: 0 0 5px 0;
-      color: #00ff41;
-      font-size: 13px;
-      border-bottom: 1px solid #004400;
-      padding-bottom: 3px;
+      margin: 0 0 8px 0;
+      color: var(--primary);
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 8px;
     }
 
     #usersList {
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
     .user-item {
       display: flex;
       align-items: center;
-      gap: 5px;
-      padding: 2px 2px;
-      border-bottom: 1px solid #003300;
+      gap: 8px;
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(0, 51, 0, 0.5);
       font-size: 12px;
       cursor: default;
+      transition: all 0.2s;
     }
 
-    .user-item .user-name {
-      cursor: default;
-      color: #00ff41;
+    .user-item:hover {
+      background: rgba(0, 255, 65, 0.05);
     }
 
     .status-indicator {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      border: 1px solid #00ff41;
+      border: 1px solid var(--primary);
       flex-shrink: 0;
     }
 
     .status-green {
-      background-color: #00ff41;
-      box-shadow: 0 0 10px #00ff41;
+      background-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
     }
 
     .status-yellow {
@@ -297,86 +343,121 @@
       box-shadow: 0 0 10px #ffaa00;
     }
 
+    /* ===== حالة الاتصال ===== */
     #connection-status {
       position: fixed;
-      bottom: 50px;
+      bottom: 80px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 3px 15px;
-      font-size: 11px;
+      padding: 8px 20px;
+      font-size: 12px;
       font-weight: bold;
       z-index: 999;
       display: none;
-      border: 1px solid #00ff41;
-      background: #0a0a0a;
+      border: 2px solid var(--primary);
+      background: var(--bg-dark);
       font-family: 'Share Tech Mono', monospace;
+      border-radius: 20px;
     }
 
     #connection-status.visible {
       display: block;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
     #connection-status.online {
-      color: #00ff41;
-      border-color: #00ff41;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+      color: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 30px var(--primary-glow);
     }
 
     #connection-status.offline {
       color: #ff0044;
       border-color: #ff0044;
-      box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
+      box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
     }
 
     #connection-status.reconnecting {
       color: #ffaa00;
       border-color: #ffaa00;
-      box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
+      box-shadow: 0 0 30px rgba(255, 170, 0, 0.3);
     }
 
+    /* ===== سكرول بار ===== */
     #messages::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
 
     #messages::-webkit-scrollbar-track {
-      background: #0a0a0a;
+      background: var(--bg-dark);
     }
 
     #messages::-webkit-scrollbar-thumb {
-      background: #00ff41;
-      border: 1px solid #004400;
+      background: var(--primary);
+      border: 2px solid var(--border-dim);
+      border-radius: 8px;
     }
 
     #messages::-webkit-scrollbar-thumb:hover {
       background: #ffffff;
     }
 
-    * {
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-    }
-
-    input, textarea {
-      -webkit-user-select: text;
-      user-select: text;
-    }
-
+    /* ===== للهواتف المحمولة ===== */
     @media (max-width: 768px) {
       #messageInput {
         font-size: 16px !important;
-        height: 32px;
-        padding: 6px 8px;
+        height: 44px;
+        padding: 10px 14px;
+        border-radius: 20px;
       }
 
       #sendBtn {
-        height: 32px;
-        padding: 6px 14px;
-        font-size: 14px;
+        height: 44px;
+        padding: 10px 16px;
+        font-size: 13px;
+        border-radius: 20px;
       }
 
       #inputArea {
-        padding: 6px 8px;
-        min-height: 44px;
+        padding: 10px 12px;
+        min-height: 56px;
+        gap: 8px;
+      }
+
+      .msg {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+
+      #onlineList {
+        top: 6px;
+        right: 6px;
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+
+      #typingIndicator {
+        min-height: 24px;
+        line-height: 24px;
+        font-size: 11px;
+        padding: 0 12px;
+      }
+    }
+
+    /* للشاشات الصغيرة جداً */
+    @media (max-width: 480px) {
+      #sendBtn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      
+      #messageInput {
+        font-size: 14px !important;
       }
     }
   </style>
@@ -392,10 +473,12 @@
     <div id="usersBox"><h4>🖥️ المتصلين</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="connection-status"></div>
-    <div id="typingIndicator"></div>
+    <div id="typingIndicator">💬 شخص يكتب...</div>
     <form id="inputArea" action="javascript:void(0);">
-      <button type="submit" id="sendBtn">➤ إرسال</button>
-      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
+      <input type="text" id="messageInput" placeholder="✍️ اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة" />
+      <button type="submit" id="sendBtn">
+        <i class="fa fa-send"></i> إرسال
+      </button>
     </form>
   </div>
 
@@ -436,8 +519,6 @@
       const userRef = db.ref("online/" + userId);
       const messagesRef = db.ref("messages");
       const onlineRef = db.ref("online");
-      // مسار منفصل لحالة الكتابة، بمعزل عن بيانات الحضور، حتى لا يتسبب
-      // كل ضغطة زر بإعادة رسم قائمة المتصلين كاملة.
       const typingRef = db.ref("typing");
       const myTypingRef = db.ref("typing/" + userId);
 
@@ -449,12 +530,7 @@
       let serverTimeOffset = 0;
       let isConnected = false;
 
-      // =====================================================================
-      // ===== تنسيق الوقت النسبي (قبل ثانية / قبل دقيقتين / ... إلخ) =====
-      // =====================================================================
-      // دالة واحدة تُستخدم لعرض وقت الرسائل ولآخر نشاط في قائمة المتصلين،
-      // بدل تكرار المنطق. التحديث خفيف جداً: مجرد استبدال نص عنصر موجود،
-      // بدون أي إعادة بناء أو طلبات شبكة.
+      // ===== تنسيق الوقت النسبي =====
       const TIME_FORMS = {
         seconds: { one: 'ثانية', two: 'ثانيتين', few: 'ثوانٍ', many: 'ثانية' },
         minutes: { one: 'دقيقة', two: 'دقيقتين', few: 'دقائق', many: 'دقيقة' },
@@ -488,12 +564,10 @@
         return formatUnit(days, TIME_FORMS.days);
       }
 
-      // ===== ذاكرة محلية لتفادي إعادة بناء الواجهة بالكامل =====
-      const onlineUsersCache = {};   // userKey -> data
-      const typingUsersCache = {};   // userKey -> data
-      let knownUserIds = new Set();  // لمعرفة من كان موجوداً مسبقاً (لتفادي رسائل "دخل" وهمية)
-
-      // ===== مصفوفة حفظ الرسائل =====
+      // ===== ذاكرة محلية للواجهة =====
+      const onlineUsersCache = {};
+      const typingUsersCache = {};
+      let knownUserIds = new Set();
       let pendingMessages = [];
 
       // ===== تحميل الرسائل المحفوظة =====
@@ -520,18 +594,18 @@
         if (type === 'online') {
           setTimeout(() => {
             connectionStatus.className = '';
-          }, 2000);
+          }, 2500);
         }
       }
 
-      // ===== مراقبة الاتصال (Firebase SDK يتكفل تلقائياً بإعادة المحاولة) =====
+      // ===== مراقبة الاتصال =====
       const connectedRef = firebase.database().ref(".info/connected");
       connectedRef.on("value", (snap) => {
         const connected = snap.val();
 
         if (connected) {
           isConnected = true;
-          showConnectionStatus('✅ متصل', 'online');
+          showConnectionStatus('✅ متصل بالخادم', 'online');
 
           userRef.set({
             lastActive: firebase.database.ServerValue.TIMESTAMP,
@@ -543,10 +617,9 @@
           myTypingRef.onDisconnect().remove();
 
           resendPendingMessages();
-
         } else {
           isConnected = false;
-          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال تلقائياً...', 'offline');
+          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال...', 'offline');
         }
       });
 
@@ -555,19 +628,14 @@
         serverTimeOffset = snap.val() || 0;
       });
 
-      // ===== نبضة حضور دورية (كتابة واحدة صغيرة كل 30 ثانية فقط) =====
+      // ===== نبضة حضور دورية =====
       setInterval(() => {
         if (isConnected) {
           userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
         }
       }, 30000);
 
-      // ملاحظة أداء: تم حذف الفحص الدوري القديم الذي كان يسحب كامل قائمة
-      // المتصلين كل 60 ثانية لتنظيف الحسابات الميتة. onDisconnect() أعلاه
-      // كافٍ وموثوق لإزالة أي مستخدم عند انقطاع اتصاله فعلياً، بدون أي
-      // استعلامات دورية إضافية تستهلك بيانات ومعالجة بلا داعٍ.
-
-      // ===== قائمة المتصلين (فتح/إغلاق) =====
+      // ===== قائمة المتصلين =====
       onlineList.onclick = e => {
         e.stopPropagation();
         usersBox.classList.toggle('visible');
@@ -580,14 +648,6 @@
       };
 
       usersBox.onclick = e => e.stopPropagation();
-
-      // =====================================================================
-      // ===== نظام الحضور: تحديثات جزئية بدل إعادة رسم القائمة كاملة =====
-      // =====================================================================
-      // بدل الاستماع إلى حدث "value" (الذي يرسل نسخة كاملة من كل المتصلين
-      // مع أي تغيير بسيط، حتى لو غيّر شخص واحد فقط lastActive الخاص به)،
-      // نستخدم child_added / child_changed / child_removed التي تصل فقط
-      // للعنصر المتغيّر، ونحدّث عنصر DOM واحد بدل إعادة بناء القائمة بأكملها.
 
       function updateOnlineCount() {
         onlineCountEl.textContent = Object.keys(onlineUsersCache).length;
@@ -604,8 +664,6 @@
 
         const userName = document.createElement("span");
         userName.className = "user-name";
-        // تغيير الاسم أصبح متاحاً فقط من الدردشة (بالنقر على اسمك جنب
-        // رسالتك)، لتفادي تكرار نفس المنطق في مكانين. القائمة هنا للعرض فقط.
         userName.style.cursor = 'default';
         userItem.appendChild(userName);
 
@@ -673,9 +731,6 @@
         showSystemMsg(`🔴 ${data.name || key} غادر`, true);
       }
 
-      // نجلب قائمة المتصلين الحاليين مرة واحدة أولاً، لمعرفة من كان موجوداً
-      // فعلاً قبل انضمامنا (لتفادي رسائل "دخل" الوهمية)، ثم نفعّل الاستماع
-      // المستمر بأحداث الأطفال فقط.
       onlineRef.once('value', snap => {
         const data = snap.val() || {};
         Object.keys(data).forEach(k => knownUserIds.add(k));
@@ -685,13 +740,7 @@
         onlineRef.on('child_removed', handleUserRemoved);
       });
 
-      // =====================================================================
-      // ===== مؤشر الكتابة: مسار منفصل + عرض فوق مربع الإدخال فقط =====
-      // =====================================================================
-      // تمت إزالته نهائياً من قائمة "المتصلين" بناءً على طلبك، وأصبح يظهر
-      // كسطر واحد ثابت الارتفاع فوق مربع الكتابة (بنفس أسلوب واتساب/تيليجرام)
-      // بدون أي قفزة في تخطيط الصفحة عند ظهوره واختفائه.
-
+      // ===== مؤشر الكتابة - محسّن =====
       function renderTypingIndicator() {
         const names = Object.values(typingUsersCache)
           .map(u => u.name)
@@ -701,13 +750,13 @@
           typingIndicatorEl.classList.remove('visible');
           typingIndicatorEl.textContent = '';
         } else if (names.length === 1) {
-          typingIndicatorEl.textContent = `${names[0]} يكتب الآن...`;
+          typingIndicatorEl.textContent = `💬 ${names[0]} يكتب الآن...`;
           typingIndicatorEl.classList.add('visible');
         } else if (names.length === 2) {
-          typingIndicatorEl.textContent = `${names[0]} و ${names[1]} يكتبان الآن...`;
+          typingIndicatorEl.textContent = `💬 ${names[0]} و ${names[1]} يكتبان الآن...`;
           typingIndicatorEl.classList.add('visible');
         } else {
-          typingIndicatorEl.textContent = `عدة أشخاص يكتبون الآن...`;
+          typingIndicatorEl.textContent = `💬 عدة أشخاص يكتبون الآن...`;
           typingIndicatorEl.classList.add('visible');
         }
       }
@@ -770,7 +819,6 @@
         });
       }
 
-      // ===== تحديث الاسم في جميع الرسائل المعروضة حالياً =====
       function updateAllMessagesUsername(oldName, newName) {
         const allMessages = document.querySelectorAll('.msg');
         allMessages.forEach(msg => {
@@ -828,15 +876,9 @@
         });
       }
 
-      // =====================================================================
-      // ===== إرسال الرسالة + كتابة حالة "يكتب" بأقل عدد ممكن من الطلبات =====
-      // =====================================================================
+      // ===== إرسال الرسالة =====
       inputAreaForm.onsubmit = sendMessage;
 
-      // FIX (الأداء): سابقاً كانت كل ضغطة زر تكتب إلى Firebase مباشرة.
-      // الآن نكتب "يكتب..." مرة واحدة فقط عند بداية الكتابة، ونحذفها مرة
-      // واحدة فقط بعد توقف المستخدم عن الكتابة لثانيتين. هذا يقلل عدد
-      // الكتابات لقاعدة البيانات من عشرات في الرسالة الواحدة إلى اثنتين فقط.
       messageInput.oninput = () => {
         clearTimeout(typingTimer);
 
@@ -929,10 +971,6 @@
         textSpan.className = "text";
         textSpan.textContent = text;
 
-        // FIX (تنسيق الوقت): بدل الوقت الثابت (HH:MM)، نعرض وقتاً نسبياً
-        // "قبل ثانية / قبل دقيقتين / ..." ونحتفظ بالوقت الفعلي كـ tooltip
-        // وكـ data-attribute حتى يقدر التحديث الدوري (كل 20 ثانية) يحسب
-        // القيمة الجديدة بدون أي طلب شبكة إضافي - مجرد استبدال نص.
         const ts = timestamp || Date.now();
         const timeSpan = document.createElement("span");
         timeSpan.className = "time";
@@ -948,9 +986,7 @@
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
 
-      // تحديث دوري خفيف جداً لأوقات الرسائل المعروضة (نص فقط، بدون أي
-      // اتصال بالشبكة أو إعادة بناء). كل 20 ثانية كافٍ لأن أصغر وحدة "قبل
-      // ثانية/ثانيتين" لا تحتاج دقة أعلى من هذا لمستخدم يقرأ الشات.
+      // ===== تحديث دوري لأوقات الرسائل =====
       setInterval(() => {
         document.querySelectorAll('#messages .time[data-timestamp]').forEach(el => {
           const ts = parseInt(el.dataset.timestamp, 10);
@@ -996,10 +1032,7 @@
         }
       }
 
-      // =====================================================
       // ===== إصلاح مشكلة تكبير مربع الإدخال =====
-      // =====================================================
-
       let inputFocused = false;
 
       messageInput.addEventListener('focus', function() {
@@ -1039,7 +1072,7 @@
         lastHeight = currentHeight;
       });
 
-      // ===== إيقاف حالة الكتابة عند إخفاء التبويب/الصفحة (توفير طاقة) =====
+      // ===== إيقاف حالة الكتابة عند إخفاء التبويب =====
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           stopTypingNow();
@@ -1061,4 +1094,4 @@
     });
   </script>
 </body>
-</html>
+        </html>
