@@ -742,18 +742,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function formatUnit(number, forms) {
     if (number === 1) {
-      return `قبل ${forms.one}`;
+      return forms.one;
     }
 
     if (number === 2) {
-      return `قبل ${forms.two}`;
+      return forms.two;
     }
 
     if (number >= 3 && number <= 10) {
-      return `قبل ${number} ${forms.few}`;
+      return `${number} ${forms.few}`;
     }
 
-    return `قبل ${number} ${forms.many}`;
+    return `${number} ${forms.many}`;
   }
 
   function formatRelativeTime(timestampMs) {
@@ -2336,4 +2336,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 </body>
-  </html>
+</html>
