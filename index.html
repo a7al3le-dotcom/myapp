@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
+
     html, body {
       height: 100%;
       margin: 0;
@@ -104,28 +105,6 @@
 
     .sys.fade-out {
       opacity: 0;
-    }
-
-    /* ===== مؤشر الكتابة - ثابت فوق مربع الإدخال ===== */
-    #typingIndicator {
-      flex-shrink: 0;
-      height: 20px;
-      line-height: 20px;
-      padding: 0 10px;
-      font-size: 11px;
-      font-style: italic;
-      color: #00cc33;
-      background: #050505;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-      border: none;
-    }
-
-    #typingIndicator.visible {
-      opacity: 1;
     }
 
     #inputArea {
@@ -391,7 +370,6 @@
     <div id="usersBox"><h4>🖥️ المتصلين</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="connection-status"></div>
-    <div id="typingIndicator"></div>
     <form id="inputArea" action="javascript:void(0);">
       <button type="submit" id="sendBtn">➤ إرسال</button>
       <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
@@ -429,24 +407,23 @@
       const onlineCountEl = document.getElementById("count");
       const messagesDiv = document.getElementById("messages");
       const connectionStatus = document.getElementById("connection-status");
-      const typingIndicatorEl = document.getElementById("typingIndicator");
 
       // ===== مراجع Firebase =====
       const userRef = db.ref("online/" + userId);
       const messagesRef = db.ref("messages");
       const onlineRef = db.ref("online");
-      const typingRef = db.ref("typing");
-      const myTypingRef = db.ref("typing/" + userId);
-
       const messageInput = document.getElementById("messageInput");
       const inputAreaForm = document.getElementById("inputArea");
 
-      let typingTimer;
-      let isTypingLocally = false;
       let serverTimeOffset = 0;
       let isConnected = false;
 
-      // ===== تنسيق الوقت النسبي =====
+      // =====================================================================
+      // ===== تنسيق الوقت النسبي (قبل ثانية / قبل دقيقتين / ... إلخ) =====
+      // =====================================================================
+      // دالة واحدة تُستخدم لعرض وقت الرسائل ولآخر نشاط في قائمة المتصلين،
+      // بدل تكرار المنطق. التحديث خفيف جداً: مجرد استبدال نص عنصر موجود،
+      // بدون أي إعادة بناء أو طلبات شبكة.
       const TIME_FORMS = {
         seconds: { one: 'ثانية', two: 'ثانيتين', few: 'ثوانٍ', many: 'ثانية' },
         minutes: { one: 'دقيقة', two: 'دقيقتين', few: 'دقائق', many: 'دقيقة' },
@@ -455,10 +432,10 @@
       };
 
       function formatUnit(n, forms) {
-        if (n === 1) return `قبل ${forms.one}`;
-        if (n === 2) return `قبل ${forms.two}`;
-        if (n >= 3 && n <= 10) return `قبل ${n} ${forms.few}`;
-        return `قبل ${n} ${forms.many}`;
+        if (n === 1) return forms.one;
+        if (n === 2) return forms.two;
+        if (n >= 3 && n <= 10) return `${n} ${forms.few}`;
+        return `${n} ${forms.many}`;
       }
 
       function formatRelativeTime(timestampMs) {
@@ -480,10 +457,11 @@
         return formatUnit(days, TIME_FORMS.days);
       }
 
-      // ===== ذاكرة محلية =====
-      const onlineUsersCache = {};
-      const typingUsersCache = {};
-      let knownUserIds = new Set();
+      // ===== ذاكرة محلية لتفادي إعادة بناء الواجهة بالكامل =====
+      const onlineUsersCache = {};   // userKey -> data
+      let knownUserIds = new Set();  // لمعرفة من كان موجوداً مسبقاً (لتفادي رسائل "دخل" وهمية)
+
+      // ===== مصفوفة حفظ الرسائل =====
       let pendingMessages = [];
 
       // ===== تحميل الرسائل المحفوظة =====
@@ -514,7 +492,7 @@
         }
       }
 
-      // ===== مراقبة الاتصال =====
+      // ===== مراقبة الاتصال (Firebase SDK يتكفل تلقائياً بإعادة المحاولة) =====
       const connectedRef = firebase.database().ref(".info/connected");
       connectedRef.on("value", (snap) => {
         const connected = snap.val();
@@ -530,9 +508,9 @@
             joinedAt: firebase.database.ServerValue.TIMESTAMP
           });
           userRef.onDisconnect().remove();
-          myTypingRef.onDisconnect().remove();
 
           resendPendingMessages();
+
         } else {
           isConnected = false;
           showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال تلقائياً...', 'offline');
@@ -544,14 +522,19 @@
         serverTimeOffset = snap.val() || 0;
       });
 
-      // ===== نبضة حضور دورية =====
+      // ===== نبضة حضور دورية (كتابة واحدة صغيرة كل 30 ثانية فقط) =====
       setInterval(() => {
         if (isConnected) {
           userRef.update({ lastActive: firebase.database.ServerValue.TIMESTAMP });
         }
       }, 30000);
 
-      // ===== قائمة المتصلين =====
+      // ملاحظة أداء: تم حذف الفحص الدوري القديم الذي كان يسحب كامل قائمة
+      // المتصلين كل 60 ثانية لتنظيف الحسابات الميتة. onDisconnect() أعلاه
+      // كافٍ وموثوق لإزالة أي مستخدم عند انقطاع اتصاله فعلياً، بدون أي
+      // استعلامات دورية إضافية تستهلك بيانات ومعالجة بلا داعٍ.
+
+      // ===== قائمة المتصلين (فتح/إغلاق) =====
       onlineList.onclick = e => {
         e.stopPropagation();
         usersBox.classList.toggle('visible');
@@ -564,6 +547,14 @@
       };
 
       usersBox.onclick = e => e.stopPropagation();
+
+      // =====================================================================
+      // ===== نظام الحضور: تحديثات جزئية بدل إعادة رسم القائمة كاملة =====
+      // =====================================================================
+      // بدل الاستماع إلى حدث "value" (الذي يرسل نسخة كاملة من كل المتصلين
+      // مع أي تغيير بسيط، حتى لو غيّر شخص واحد فقط lastActive الخاص به)،
+      // نستخدم child_added / child_changed / child_removed التي تصل فقط
+      // للعنصر المتغيّر، ونحدّث عنصر DOM واحد بدل إعادة بناء القائمة بأكملها.
 
       function updateOnlineCount() {
         onlineCountEl.textContent = Object.keys(onlineUsersCache).length;
@@ -580,6 +571,8 @@
 
         const userName = document.createElement("span");
         userName.className = "user-name";
+        // تغيير الاسم أصبح متاحاً فقط من الدردشة (بالنقر على اسمك جنب
+        // رسالتك)، لتفادي تكرار نفس المنطق في مكانين. القائمة هنا للعرض فقط.
         userName.style.cursor = 'default';
         userItem.appendChild(userName);
 
@@ -647,6 +640,9 @@
         showSystemMsg(`🔴 ${data.name || key} غادر`, true);
       }
 
+      // نجلب قائمة المتصلين الحاليين مرة واحدة أولاً، لمعرفة من كان موجوداً
+      // فعلاً قبل انضمامنا (لتفادي رسائل "دخل" الوهمية)، ثم نفعّل الاستماع
+      // المستمر بأحداث الأطفال فقط.
       onlineRef.once('value', snap => {
         const data = snap.val() || {};
         Object.keys(data).forEach(k => knownUserIds.add(k));
@@ -655,60 +651,6 @@
         onlineRef.on('child_changed', handleUserChanged);
         onlineRef.on('child_removed', handleUserRemoved);
       });
-
-      // ===== مؤشر الكتابة - إصلاح كامل =====
-      function renderTypingIndicator() {
-        const typingUsers = Object.values(typingUsersCache).filter(u => u && u.name);
-        
-        if (typingUsers.length === 0) {
-          typingIndicatorEl.classList.remove('visible');
-          typingIndicatorEl.textContent = '';
-          return;
-        }
-
-        let text;
-        if (typingUsers.length === 1) {
-          text = `${typingUsers[0].name} يكتب الآن...`;
-        } else if (typingUsers.length === 2) {
-          text = `${typingUsers[0].name} و ${typingUsers[1].name} يكتبان الآن...`;
-        } else {
-          text = `عدة أشخاص يكتبون الآن...`;
-        }
-        
-        typingIndicatorEl.textContent = text;
-        typingIndicatorEl.classList.add('visible');
-      }
-
-      // الاستماع لتغييرات حالة الكتابة
-      typingRef.on('child_added', (snap) => {
-        if (snap.key === userId) return;
-        typingUsersCache[snap.key] = snap.val();
-        renderTypingIndicator();
-      });
-
-      typingRef.on('child_changed', (snap) => {
-        if (snap.key === userId) return;
-        typingUsersCache[snap.key] = snap.val();
-        renderTypingIndicator();
-      });
-
-      typingRef.on('child_removed', (snap) => {
-        if (snap.key === userId) return;
-        delete typingUsersCache[snap.key];
-        renderTypingIndicator();
-      });
-
-      // تنظيف دوري لحالات الكتابة القديمة
-      setInterval(() => {
-        const now = Date.now() + serverTimeOffset;
-        Object.keys(typingUsersCache).forEach(key => {
-          const user = typingUsersCache[key];
-          if (user && user.ts && (now - user.ts > 10000)) { // أكثر من 10 ثواني
-            delete typingUsersCache[key];
-          }
-        });
-        renderTypingIndicator();
-      }, 5000);
 
       // ===== تغيير الاسم =====
       function changeUsername(newName) {
@@ -750,6 +692,7 @@
         });
       }
 
+      // ===== تحديث الاسم في جميع الرسائل المعروضة حالياً =====
       function updateAllMessagesUsername(oldName, newName) {
         const allMessages = document.querySelectorAll('.msg');
         allMessages.forEach(msg => {
@@ -810,32 +753,7 @@
       // ===== إرسال الرسالة =====
       inputAreaForm.onsubmit = sendMessage;
 
-      messageInput.oninput = () => {
-        clearTimeout(typingTimer);
-
-        if (isConnected && !isTypingLocally) {
-          isTypingLocally = true;
-          myTypingRef.set({
-            name: username,
-            ts: firebase.database.ServerValue.TIMESTAMP
-          });
-        }
-
-        typingTimer = setTimeout(() => {
-          isTypingLocally = false;
-          if (isConnected) myTypingRef.remove();
-        }, 2000);
-      };
-
-      function stopTypingNow() {
-        clearTimeout(typingTimer);
-        isTypingLocally = false;
-        if (isConnected) myTypingRef.remove();
-      }
-
       function sendMessage() {
-        stopTypingNow();
-
         const text = messageInput.value.trim();
         if (!text) {
           showSystemMsg('⚠️ اكتب شيئاً', true);
@@ -902,6 +820,10 @@
         textSpan.className = "text";
         textSpan.textContent = text;
 
+        // FIX (تنسيق الوقت): بدل الوقت الثابت (HH:MM)، نعرض وقتاً نسبياً
+        // "قبل ثانية / قبل دقيقتين / ..." ونحتفظ بالوقت الفعلي كـ tooltip
+        // وكـ data-attribute حتى يقدر التحديث الدوري (كل 20 ثانية) يحسب
+        // القيمة الجديدة بدون أي طلب شبكة إضافي - مجرد استبدال نص.
         const ts = timestamp || Date.now();
         const timeSpan = document.createElement("span");
         timeSpan.className = "time";
@@ -917,7 +839,9 @@
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
 
-      // ===== تحديث دوري لأوقات الرسائل =====
+      // تحديث دوري خفيف جداً لأوقات الرسائل المعروضة (نص فقط، بدون أي
+      // اتصال بالشبكة أو إعادة بناء). كل 20 ثانية كافٍ لأن أصغر وحدة "قبل
+      // ثانية/ثانيتين" لا تحتاج دقة أعلى من هذا لمستخدم يقرأ الشات.
       setInterval(() => {
         document.querySelectorAll('#messages .time[data-timestamp]').forEach(el => {
           const ts = parseInt(el.dataset.timestamp, 10);
@@ -928,10 +852,14 @@
       }, 20000);
 
       // ===== تنظيف الرسائل القديمة =====
+      // FIX (الأداء): سابقاً كان هذا يسحب كامل عقدة الرسائل من Firebase
+      // (بدون أي حد) مع كل رسالة تُرسل، فقط للتحقق من وجود أكثر من 50.
+      // الآن مقيّد بـ limitToLast(60) — يكفي لتغطية أي تراكم منطقي، ويحمي
+      // من سحب بيانات غير محدودة مهما كبر تاريخ الرسائل مستقبلاً.
       function cleanupOldMessages() {
         if (!isConnected) return;
 
-        messagesRef.once('value', snapshot => {
+        messagesRef.limitToLast(60).once('value', snapshot => {
           if (snapshot.numChildren() > 50) {
             let updates = {};
             let removeCount = 0;
@@ -963,7 +891,10 @@
         }
       }
 
+      // =====================================================
       // ===== إصلاح مشكلة تكبير مربع الإدخال =====
+      // =====================================================
+
       let inputFocused = false;
 
       messageInput.addEventListener('focus', function() {
@@ -977,7 +908,6 @@
 
       messageInput.addEventListener('blur', function() {
         inputFocused = false;
-        stopTypingNow();
         setTimeout(() => {
           window.scrollTo(0, 0);
         }, 100);
@@ -1001,13 +931,6 @@
         }
 
         lastHeight = currentHeight;
-      });
-
-      // ===== إيقاف حالة الكتابة عند إخفاء التبويب =====
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          stopTypingNow();
-        }
       });
 
       // ===== رسالة ترحيب =====
