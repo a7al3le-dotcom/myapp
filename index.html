@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>شات خاص - تحديث شامل</title>
+  <title>شات خاص</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -13,329 +13,282 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <style>
-    /* ===== تحديث شامل للتصميم ===== */
-    :root {
-      --primary: #00ff41;
-      --primary-glow: rgba(0, 255, 65, 0.3);
-      --bg-dark: #0a0a0a;
-      --bg-input: #0d1117;
-      --text-secondary: #00cc33;
-      --border-dim: #003300;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
     html, body {
       height: 100%;
-      width: 100%;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
-      background: var(--bg-dark);
+      background: #0a0a0a;
+    }
+
+    body {
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      color: var(--primary);
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      color: #00ff41;
       position: fixed;
+      width: 100%;
+      height: 100%;
       top: 0;
       left: 0;
-      touch-action: manipulation;
     }
 
     #chat-container {
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      height: 100dvh; /* للهواتف */
-      background: var(--bg-dark);
+      height: 100%;
+      background: #0a0a0a;
     }
 
-    /* ===== منطقة الرسائل ===== */
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 8px;
-      background: var(--bg-dark);
+      padding: 8px;
+      background: #0a0a0a;
       -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
     }
 
     .msg {
-      margin: 6px 0;
-      padding: 8px 12px;
+      margin: 2px 0;
+      padding: 2px 4px;
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
-      align-items: baseline;
+      align-items: center;
       direction: ltr;
       text-align: left;
-      font-size: 14px;
-      line-height: 1.6;
-      background: rgba(0, 255, 65, 0.03);
-      border-right: 2px solid transparent;
-      transition: all 0.2s ease;
-      border-radius: 4px;
-    }
-
-    .msg:hover {
-      background: rgba(0, 255, 65, 0.06);
-      border-right-color: var(--primary);
+      font-size: 13px;
+      line-height: 1.5;
+      background: transparent;
+      border: none;
+      color: #00ff41;
     }
 
     .msg .user {
-      color: var(--primary);
+      color: #00ff41;
       font-weight: bold;
       cursor: pointer;
       text-decoration: none;
-      transition: all 0.2s;
-      flex-shrink: 0;
     }
 
     .msg .user:hover {
       color: #ffffff;
-      text-shadow: 0 0 12px var(--primary-glow);
+      text-shadow: 0 0 10px #00ff41;
     }
 
     .msg .time {
-      font-size: 11px;
-      color: #005a00;
+      font-size: 10px;
+      color: #004400;
       margin-right: auto;
-      flex-shrink: 0;
     }
 
     .msg .text {
-      color: var(--text-secondary);
-      word-break: break-word;
+      color: #00cc33;
     }
 
     .sys {
       text-align: center;
-      color: #008800;
-      font-size: 12px;
-      margin: 8px auto;
+      color: #004400;
+      font-size: 11px;
+      margin: 4px auto;
       font-style: italic;
-      background: rgba(0, 255, 65, 0.05);
-      padding: 6px 12px;
-      border: 1px solid var(--border-dim);
-      border-radius: 16px;
+      background: transparent;
+      padding: 2px 5px;
+      border: none;
       transition: opacity 0.5s ease;
-      width: fit-content;
-      max-width: 90%;
+      opacity: 1;
+      border: 1px solid #003300;
+      border-radius: 0;
     }
 
     .sys.fade-out {
       opacity: 0;
     }
 
-    /* ===== مؤشر الكتابة - محسّن ===== */
+    /* ===== مؤشر الكتابة - ثابت فوق مربع الإدخال ===== */
     #typingIndicator {
       flex-shrink: 0;
-      min-height: 28px;
-      line-height: 28px;
-      padding: 0 16px;
-      font-size: 12px;
+      height: 20px;
+      line-height: 20px;
+      padding: 0 10px;
+      font-size: 11px;
       font-style: italic;
-      color: var(--text-secondary);
-      background: rgba(0, 255, 65, 0.04);
-      border-top: 1px solid var(--border-dim);
-      border-bottom: 1px solid var(--border-dim);
+      color: #00cc33;
+      background: #050505;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      letter-spacing: 0.5px;
+      transition: opacity 0.15s ease;
+      border: none;
     }
 
     #typingIndicator.visible {
       opacity: 1;
-      animation: typingPulse 1.5s infinite;
     }
 
-    @keyframes typingPulse {
-      0%, 100% { background: rgba(0, 255, 65, 0.04); }
-      50% { background: rgba(0, 255, 65, 0.08); }
-    }
-
-    /* ===== منطقة الإدخال - إعادة تصميم كاملة ===== */
     #inputArea {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--bg-input);
-      border-top: 2px solid var(--primary);
+      gap: 4px;
+      padding: 4px 8px;
+      background: #050505;
+      border-top: 1px solid #00ff41;
+      border-bottom: 1px solid #00ff41;
       flex-shrink: 0;
-      min-height: 60px;
+      min-height: 40px;
       position: relative;
       z-index: 10;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
 
     #messageInput {
       flex: 1;
       font-size: 16px !important;
-      padding: 12px 16px;
-      border: 2px solid var(--primary);
-      border-radius: 24px;
+      padding: 4px 8px;
+      border: 1px solid #00ff41;
+      border-radius: 0;
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      background: var(--bg-dark);
-      color: var(--primary);
-      height: 48px;
-      line-height: 1.5;
+      background: #0a0a0a;
+      color: #00ff41;
+      height: 28px;
+      max-height: 50px;
       touch-action: manipulation;
+      transition: none;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       outline: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 0 rgba(0, 255, 65, 0);
     }
 
     #messageInput:focus {
       border-color: #ffffff;
       background: #050505;
-      box-shadow: 0 0 20px var(--primary-glow);
-      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
     }
 
     #messageInput::placeholder {
-      color: #005a00;
-      opacity: 0.7;
+      color: #004400;
     }
 
     #sendBtn {
-      padding: 12px 20px;
-      border: 2px solid var(--primary);
-      border-radius: 24px;
-      background: var(--bg-dark);
-      color: var(--primary);
+      padding: 4px 12px;
+      border: 1px solid #00ff41;
+      border-radius: 0;
+      background: #0a0a0a;
+      color: #00ff41;
       cursor: pointer;
       font-family: 'Share Tech Mono', 'Tajawal', monospace;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      height: 48px;
-      transition: all 0.3s ease;
+      height: 28px;
+      transition: all 0.3s;
       flex-shrink: 0;
       touch-action: manipulation;
-      white-space: nowrap;
-      box-shadow: 0 0 0 rgba(0, 255, 65, 0);
     }
 
     #sendBtn:hover {
-      background: var(--primary);
-      color: var(--bg-dark);
-      box-shadow: 0 0 30px var(--primary-glow);
-      transform: translateY(-2px);
+      background: #00ff41;
+      color: #0a0a0a;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
     }
 
     #sendBtn:active {
       background: #004400;
-      color: var(--primary);
-      transform: translateY(0);
-      box-shadow: 0 0 10px var(--primary-glow);
+      color: #00ff41;
     }
 
-    /* ===== قائمة المتصلين ===== */
     #onlineList {
       position: fixed;
-      top: 10px;
-      right: 10px;
-      border: 2px solid var(--primary);
-      background: var(--bg-dark);
-      padding: 8px 16px;
+      top: 5px;
+      right: 5px;
+      border: 1px solid #00ff41;
+      background: #0a0a0a;
+      padding: 3px 10px;
       font-size: 12px;
       cursor: pointer;
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: var(--primary);
+      gap: 4px;
+      color: #00ff41;
       transition: all 0.3s;
-      border-radius: 20px;
-      box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
     }
 
     #onlineList:hover {
-      background: var(--primary);
-      color: var(--bg-dark);
-      box-shadow: 0 0 25px var(--primary-glow);
+      background: #00ff41;
+      color: #0a0a0a;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     }
 
     #onlineList .fa {
-      color: var(--primary);
-      font-size: 14px;
+      color: #00ff41;
     }
 
     #onlineList:hover .fa {
-      color: var(--bg-dark);
+      color: #0a0a0a;
     }
 
     #usersBox {
       position: fixed;
-      top: 45px;
-      right: 10px;
-      background: var(--bg-dark);
-      border: 2px solid var(--primary);
-      padding: 12px 16px;
+      top: 32px;
+      right: 5px;
+      background: #0a0a0a;
+      border: 1px solid #00ff41;
+      padding: 6px 10px;
       z-index: 999;
-      min-width: 180px;
-      max-width: 240px;
+      min-width: 140px;
+      max-width: 200px;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s ease;
-      color: var(--primary);
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+      transition: opacity 0.2s ease;
+      color: #00ff41;
     }
 
     #usersBox.visible {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
     }
 
     #usersBox h4 {
-      margin: 0 0 8px 0;
-      color: var(--primary);
-      font-size: 14px;
-      border-bottom: 1px solid var(--border-dim);
-      padding-bottom: 8px;
+      margin: 0 0 5px 0;
+      color: #00ff41;
+      font-size: 13px;
+      border-bottom: 1px solid #004400;
+      padding-bottom: 3px;
     }
 
     #usersList {
-      max-height: 250px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
     .user-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 4px;
-      border-bottom: 1px solid rgba(0, 51, 0, 0.5);
+      gap: 5px;
+      padding: 2px 2px;
+      border-bottom: 1px solid #003300;
       font-size: 12px;
       cursor: default;
-      transition: all 0.2s;
     }
 
-    .user-item:hover {
-      background: rgba(0, 255, 65, 0.05);
+    .user-item .user-name {
+      cursor: default;
+      color: #00ff41;
     }
 
     .status-indicator {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      border: 1px solid var(--primary);
+      border: 1px solid #00ff41;
       flex-shrink: 0;
     }
 
     .status-green {
-      background-color: var(--primary);
-      box-shadow: 0 0 10px var(--primary);
+      background-color: #00ff41;
+      box-shadow: 0 0 10px #00ff41;
     }
 
     .status-yellow {
@@ -343,121 +296,86 @@
       box-shadow: 0 0 10px #ffaa00;
     }
 
-    /* ===== حالة الاتصال ===== */
     #connection-status {
       position: fixed;
-      bottom: 80px;
+      bottom: 50px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 8px 20px;
-      font-size: 12px;
+      padding: 3px 15px;
+      font-size: 11px;
       font-weight: bold;
       z-index: 999;
       display: none;
-      border: 2px solid var(--primary);
-      background: var(--bg-dark);
+      border: 1px solid #00ff41;
+      background: #0a0a0a;
       font-family: 'Share Tech Mono', monospace;
-      border-radius: 20px;
     }
 
     #connection-status.visible {
       display: block;
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translate(-50%, 20px); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
     #connection-status.online {
-      color: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 0 30px var(--primary-glow);
+      color: #00ff41;
+      border-color: #00ff41;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
     }
 
     #connection-status.offline {
       color: #ff0044;
       border-color: #ff0044;
-      box-shadow: 0 0 30px rgba(255, 0, 68, 0.3);
+      box-shadow: 0 0 20px rgba(255, 0, 68, 0.2);
     }
 
     #connection-status.reconnecting {
       color: #ffaa00;
       border-color: #ffaa00;
-      box-shadow: 0 0 30px rgba(255, 170, 0, 0.3);
+      box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
     }
 
-    /* ===== سكرول بار ===== */
     #messages::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
 
     #messages::-webkit-scrollbar-track {
-      background: var(--bg-dark);
+      background: #0a0a0a;
     }
 
     #messages::-webkit-scrollbar-thumb {
-      background: var(--primary);
-      border: 2px solid var(--border-dim);
-      border-radius: 8px;
+      background: #00ff41;
+      border: 1px solid #004400;
     }
 
     #messages::-webkit-scrollbar-thumb:hover {
       background: #ffffff;
     }
 
-    /* ===== للهواتف المحمولة ===== */
+    * {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
     @media (max-width: 768px) {
       #messageInput {
         font-size: 16px !important;
-        height: 44px;
-        padding: 10px 14px;
-        border-radius: 20px;
+        height: 32px;
+        padding: 6px 8px;
       }
 
       #sendBtn {
-        height: 44px;
-        padding: 10px 16px;
-        font-size: 13px;
-        border-radius: 20px;
+        height: 32px;
+        padding: 6px 14px;
+        font-size: 14px;
       }
 
       #inputArea {
-        padding: 10px 12px;
-        min-height: 56px;
-        gap: 8px;
-      }
-
-      .msg {
-        font-size: 13px;
-        padding: 6px 10px;
-      }
-
-      #onlineList {
-        top: 6px;
-        right: 6px;
-        padding: 6px 12px;
-        font-size: 11px;
-      }
-
-      #typingIndicator {
-        min-height: 24px;
-        line-height: 24px;
-        font-size: 11px;
-        padding: 0 12px;
-      }
-    }
-
-    /* للشاشات الصغيرة جداً */
-    @media (max-width: 480px) {
-      #sendBtn {
-        padding: 8px 12px;
-        font-size: 12px;
-      }
-      
-      #messageInput {
-        font-size: 14px !important;
+        padding: 6px 8px;
+        min-height: 44px;
       }
     }
   </style>
@@ -473,12 +391,10 @@
     <div id="usersBox"><h4>🖥️ المتصلين</h4><div id="usersList"></div></div>
     <div id="messages"></div>
     <div id="connection-status"></div>
-    <div id="typingIndicator">💬 شخص يكتب...</div>
+    <div id="typingIndicator"></div>
     <form id="inputArea" action="javascript:void(0);">
-      <input type="text" id="messageInput" placeholder="✍️ اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة" />
-      <button type="submit" id="sendBtn">
-        <i class="fa fa-send"></i> إرسال
-      </button>
+      <button type="submit" id="sendBtn">➤ إرسال</button>
+      <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off" aria-label="حقل إدخال الرسالة"/>
     </form>
   </div>
 
@@ -564,7 +480,7 @@
         return formatUnit(days, TIME_FORMS.days);
       }
 
-      // ===== ذاكرة محلية للواجهة =====
+      // ===== ذاكرة محلية =====
       const onlineUsersCache = {};
       const typingUsersCache = {};
       let knownUserIds = new Set();
@@ -594,7 +510,7 @@
         if (type === 'online') {
           setTimeout(() => {
             connectionStatus.className = '';
-          }, 2500);
+          }, 2000);
         }
       }
 
@@ -605,7 +521,7 @@
 
         if (connected) {
           isConnected = true;
-          showConnectionStatus('✅ متصل بالخادم', 'online');
+          showConnectionStatus('✅ متصل', 'online');
 
           userRef.set({
             lastActive: firebase.database.ServerValue.TIMESTAMP,
@@ -619,7 +535,7 @@
           resendPendingMessages();
         } else {
           isConnected = false;
-          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال...', 'offline');
+          showConnectionStatus('⚠️ انقطع الاتصال، جاري إعادة الاتصال تلقائياً...', 'offline');
         }
       });
 
@@ -740,44 +656,59 @@
         onlineRef.on('child_removed', handleUserRemoved);
       });
 
-      // ===== مؤشر الكتابة - محسّن =====
+      // ===== مؤشر الكتابة - إصلاح كامل =====
       function renderTypingIndicator() {
-        const names = Object.values(typingUsersCache)
-          .map(u => u.name)
-          .filter(Boolean);
-
-        if (names.length === 0) {
+        const typingUsers = Object.values(typingUsersCache).filter(u => u && u.name);
+        
+        if (typingUsers.length === 0) {
           typingIndicatorEl.classList.remove('visible');
           typingIndicatorEl.textContent = '';
-        } else if (names.length === 1) {
-          typingIndicatorEl.textContent = `💬 ${names[0]} يكتب الآن...`;
-          typingIndicatorEl.classList.add('visible');
-        } else if (names.length === 2) {
-          typingIndicatorEl.textContent = `💬 ${names[0]} و ${names[1]} يكتبان الآن...`;
-          typingIndicatorEl.classList.add('visible');
-        } else {
-          typingIndicatorEl.textContent = `💬 عدة أشخاص يكتبون الآن...`;
-          typingIndicatorEl.classList.add('visible');
+          return;
         }
+
+        let text;
+        if (typingUsers.length === 1) {
+          text = `${typingUsers[0].name} يكتب الآن...`;
+        } else if (typingUsers.length === 2) {
+          text = `${typingUsers[0].name} و ${typingUsers[1].name} يكتبان الآن...`;
+        } else {
+          text = `عدة أشخاص يكتبون الآن...`;
+        }
+        
+        typingIndicatorEl.textContent = text;
+        typingIndicatorEl.classList.add('visible');
       }
 
-      typingRef.on('child_added', snap => {
+      // الاستماع لتغييرات حالة الكتابة
+      typingRef.on('child_added', (snap) => {
         if (snap.key === userId) return;
         typingUsersCache[snap.key] = snap.val();
         renderTypingIndicator();
       });
 
-      typingRef.on('child_changed', snap => {
+      typingRef.on('child_changed', (snap) => {
         if (snap.key === userId) return;
         typingUsersCache[snap.key] = snap.val();
         renderTypingIndicator();
       });
 
-      typingRef.on('child_removed', snap => {
+      typingRef.on('child_removed', (snap) => {
         if (snap.key === userId) return;
         delete typingUsersCache[snap.key];
         renderTypingIndicator();
       });
+
+      // تنظيف دوري لحالات الكتابة القديمة
+      setInterval(() => {
+        const now = Date.now() + serverTimeOffset;
+        Object.keys(typingUsersCache).forEach(key => {
+          const user = typingUsersCache[key];
+          if (user && user.ts && (now - user.ts > 10000)) { // أكثر من 10 ثواني
+            delete typingUsersCache[key];
+          }
+        });
+        renderTypingIndicator();
+      }, 5000);
 
       // ===== تغيير الاسم =====
       function changeUsername(newName) {
@@ -1094,4 +1025,4 @@
     });
   </script>
 </body>
-        </html>
+</html>
