@@ -24,7 +24,7 @@ button,input{font:inherit}button{-webkit-appearance:none;appearance:none}
 .msg.mine .user{cursor:pointer}.msg .text{flex:1 1 auto;min-width:0;color:var(--text);direction:auto;unicode-bidi:plaintext;white-space:pre-wrap}.msg .time{flex:0 0 auto;margin-left:auto;color:var(--time);font-size:10px;white-space:nowrap}.msg.mine{background:transparent;border:0;box-shadow:none}
 .sys{position:relative;z-index:2;width:fit-content;max-width:95%;margin:8px auto;padding:6px 12px;border:1px solid rgba(245,185,66,.24);border-radius:10px;color:var(--gold-soft);background:rgba(245,185,66,.045);box-shadow:0 5px 18px rgba(0,0,0,.15);font-family:"Tajawal",Arial,sans-serif;font-size:11px;text-align:center;direction:rtl;overflow-wrap:anywhere;transition:opacity .5s ease}
 .sys.fade-out{opacity:0}
-#typingIndicator{position:relative;z-index:3;flex-shrink:0;min-height:25px;padding:2px 16px;line-height:21px;font-family:"Tajawal",Arial,sans-serif;font-size:11px;color:var(--text-dim);background:rgba(13,15,19,.94);border-top:1px solid rgba(255,255,255,.025);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;transition:opacity .18s ease}
+#typingIndicator{position:relative;z-index:3;flex-shrink:0;min-height:25px;padding:2px 16px;line-height:21px;font-family:"Tajawal",Arial,sans-serif;font-size:11px;color:#f5b942;background:rgba(13,15,19,.94);border-top:1px solid rgba(255,255,255,.025);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;visibility:hidden;transition:opacity .18s ease}
 #typingIndicator.visible{opacity:1;visibility:visible}
 #inputArea{position:relative;z-index:10;display:flex;flex-direction:row;align-items:center;gap:9px;flex-shrink:0;min-height:70px;padding:11px 13px calc(11px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(13,15,19,.96),rgba(8,9,12,.99));border-top:1px solid var(--border);box-shadow:0 -12px 35px rgba(0,0,0,.24)}
 #inputArea::before{content:"";position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,185,66,.28),transparent);pointer-events:none}
@@ -78,15 +78,177 @@ function savePendingMessages(){try{localStorage.setItem(OFFLINE_QUEUE_KEY,JSON.s
 function queueOfflineMessage(text){const item={localId:"local_"+Date.now()+"_"+Math.random().toString(36).slice(2,10),text:text,createdAt:Date.now()};pendingMessages.push(item);if(pendingMessages.length>100)pendingMessages=pendingMessages.slice(-100);savePendingMessages();showSystemMsg("💾 حفظت الرسالة ("+pendingMessages.length+")",true)}
 async function authenticate(){try{if(auth.currentUser){currentUser=auth.currentUser}else{const result=await auth.signInAnonymously();currentUser=result.user}if(!currentUser||!currentUser.uid)throw new Error("Authentication returned no user");return true}catch(error){console.error("Authentication failed:",error);showFatalError("تعذر تسجيل الدخول إلى النظام.\n\nتأكد من تفعيل Anonymous Authentication في Firebase.");return false}}
 function initializeReferences(){const uid=currentUser.uid;userRef=db.ref("online/"+uid);messagesRef=db.ref("messages");onlineRef=db.ref("online");typingRef=db.ref("typing");myTypingRef=db.ref("typing/"+uid)}
-async function setupPresence(){const connectedRef=db.ref(".info/connected");connectedRef.on("value",async snapshot=>{const connected=snapshot.val()===true;isConnected=connected;if(!connected){showConnectionStatus("⚠️ انقطع الاتصال، جاري إعادة الاتصال...","offline");return}showConnectionStatus("✅ متصل","online");try{await userRef.onDisconnect().remove();await myTypingRef.onDisconnect().remove();await userRef.set({name:username,joinedAt:firebase.database.ServerValue.TIMESTAMP,lastActive:firebase.database.ServerValue.TIMESTAMP});await resendPendingMessages()}catch(error){console.error("Presence error:",error);showConnectionStatus("⚠️ خطأ في الاتصال","reconnecting")}});db.ref(".info/serverTimeOffset").on("value",snapshot=>{serverTimeOffset=Number(snapshot.val())||0})}
-setInterval(()=>{if(!isConnected||!userRef)return;userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(error=>console.warn("Presence heartbeat failed:",error))},PRESENCE_INTERVAL);
-function updateOnlineCount(){onlineCountEl.textContent=String(Object.keys(onlineUsersCache).length)}
-function buildUserItem(userKey){const item=document.createElement("div");item.className="user-item";item.id="user-"+userKey;const indicator=document.createElement("span");indicator.className="status-indicator";const name=document.createElement("span");name.className="user-name";item.appendChild(indicator);item.appendChild(name);return item}
-function applyUserItemData(item,userKey,userData){if(!item||!userData)return;const isMe=userKey===currentUser.uid,displayName=sanitizeUsername(userData.name)||"مستخدم",lastActive=Number(userData.lastActive)||0,inactive=lastActive>0&&getServerNow()-lastActive>INACTIVE_AFTER,indicator=item.querySelector(".status-indicator"),name=item.querySelector(".user-name");if(indicator){indicator.classList.remove("status-green","status-yellow");indicator.classList.add(inactive?"status-yellow":"status-green")}if(name){name.textContent=isMe?displayName+" [أنت]":displayName;name.title=isMe?"أنت":inactive?"آخر نشاط منذ أكثر من دقيقتين":"متصل"}}
-function handleUserAdded(snapshot){const key=snapshot.key,data=snapshot.val();if(!key||!data)return;onlineUsersCache[key]=data;const oldItem=document.getElementById("user-"+key);if(oldItem)oldItem.remove();const item=buildUserItem(key);applyUserItemData(item,key,data);usersList.appendChild(item);updateOnlineCount()}
-function handleUserChanged(snapshot){const key=snapshot.key,data=snapshot.val();if(!key||!data)return;onlineUsersCache[key]=data;let item=document.getElementById("user-"+key);if(!item){item=buildUserItem(key);usersList.appendChild(item)}applyUserItemData(item,key,data)}
-function handleUserRemoved(snapshot){const key=snapshot.key;delete onlineUsersCache[key];const item=document.getElementById("user-"+key);if(item)item.remove();updateOnlineCount()}
-function setupOnlineListeners(){onlineRef.on("child_added",handleUserAdded);onlineRef.on("child_changed",handleUserChanged);onlineRef.on("child_removed",handleUserRemoved)}
+let presenceSyncing=false,presenceHeartbeatTimer=null,presenceSweepTimer=null;
+
+async function syncMyPresence(){
+  if(!isConnected||!userRef||!currentUser||presenceSyncing)return;
+  presenceSyncing=true;
+  try{
+    await userRef.onDisconnect().remove();
+    if(myTypingRef)await myTypingRef.onDisconnect().remove();
+    await userRef.set({
+      name:username,
+      joinedAt:firebase.database.ServerValue.TIMESTAMP,
+      lastActive:firebase.database.ServerValue.TIMESTAMP
+    });
+    const localNow=getServerNow();
+    onlineUsersCache[currentUser.uid]={
+      name:username,
+      joinedAt:localNow,
+      lastActive:localNow
+    };
+    const ownItem=document.getElementById("user-"+currentUser.uid);
+    if(ownItem)applyUserItemData(ownItem,currentUser.uid,onlineUsersCache[currentUser.uid]);
+    updateOnlineCount();
+    await resendPendingMessages();
+  }catch(error){
+    console.error("Presence sync error:",error);
+    showConnectionStatus("⚠️ خطأ في الاتصال","reconnecting");
+  }finally{
+    presenceSyncing=false;
+  }
+}
+
+async function setupPresence(){
+  const connectedRef=db.ref(".info/connected");
+  connectedRef.on("value",async snapshot=>{
+    const connected=snapshot.val()===true;
+    isConnected=connected;
+    if(!connected){
+      showConnectionStatus("⚠️ انقطع الاتصال، جاري إعادة الاتصال...","offline");
+      return;
+    }
+    showConnectionStatus("✅ متصل","online");
+    await syncMyPresence();
+  });
+  db.ref(".info/serverTimeOffset").on("value",snapshot=>{
+    serverTimeOffset=Number(snapshot.val())||0;
+    refreshOnlineUsers();
+  });
+}
+
+function isUserActive(userData){
+  const lastActive=Number(userData&&userData.lastActive)||0;
+  return lastActive>0&&getServerNow()-lastActive<=INACTIVE_AFTER;
+}
+
+function updateOnlineCount(){
+  let activeCount=0;
+  Object.values(onlineUsersCache).forEach(userData=>{
+    if(isUserActive(userData))activeCount++;
+  });
+  onlineCountEl.textContent=String(activeCount);
+}
+
+function refreshOnlineUsers(){
+  Object.entries(onlineUsersCache).forEach(([userKey,userData])=>{
+    const item=document.getElementById("user-"+userKey);
+    if(item)applyUserItemData(item,userKey,userData);
+  });
+  updateOnlineCount();
+}
+
+function startPresenceHeartbeat(){
+  if(presenceHeartbeatTimer)clearInterval(presenceHeartbeatTimer);
+  presenceHeartbeatTimer=setInterval(()=>{
+    if(!isConnected||!userRef)return;
+    userRef.update({
+      name:username,
+      lastActive:firebase.database.ServerValue.TIMESTAMP
+    }).then(()=>{
+      const now=getServerNow();
+      const cached=onlineUsersCache[currentUser.uid]||{};
+      onlineUsersCache[currentUser.uid]={
+        ...cached,
+        name:username,
+        lastActive:now
+      };
+      const ownItem=document.getElementById("user-"+currentUser.uid);
+      if(ownItem)applyUserItemData(ownItem,currentUser.uid,onlineUsersCache[currentUser.uid]);
+      updateOnlineCount();
+    }).catch(error=>console.warn("Presence heartbeat failed:",error));
+  },PRESENCE_INTERVAL);
+}
+
+function startPresenceSweep(){
+  if(presenceSweepTimer)clearInterval(presenceSweepTimer);
+  presenceSweepTimer=setInterval(()=>{
+    if(!currentUser)return;
+    refreshOnlineUsers();
+  },5000);
+}
+
+function buildUserItem(userKey){
+  const item=document.createElement("div");
+  item.className="user-item";
+  item.id="user-"+userKey;
+  const indicator=document.createElement("span");
+  indicator.className="status-indicator";
+  const name=document.createElement("span");
+  name.className="user-name";
+  item.appendChild(indicator);
+  item.appendChild(name);
+  return item
+}
+
+function applyUserItemData(item,userKey,userData){
+  if(!item||!userData)return;
+  const isMe=userKey===currentUser.uid,
+        displayName=sanitizeUsername(userData.name)||"مستخدم",
+        lastActive=Number(userData.lastActive)||0,
+        inactive=!isUserActive(userData),
+        indicator=item.querySelector(".status-indicator"),
+        name=item.querySelector(".user-name");
+  if(indicator){
+    indicator.classList.remove("status-green","status-yellow");
+    indicator.classList.add(inactive?"status-yellow":"status-green");
+  }
+  if(name){
+    name.textContent=isMe?displayName+" [أنت]":displayName;
+    name.title=isMe?"أنت":inactive?"آخر نشاط منذ أكثر من دقيقتين":"متصل";
+  }
+}
+
+function handleUserAdded(snapshot){
+  const key=snapshot.key,data=snapshot.val();
+  if(!key||!data)return;
+  onlineUsersCache[key]=data;
+  const oldItem=document.getElementById("user-"+key);
+  if(oldItem)oldItem.remove();
+  const item=buildUserItem(key);
+  applyUserItemData(item,key,data);
+  usersList.appendChild(item);
+  updateOnlineCount();
+}
+
+function handleUserChanged(snapshot){
+  const key=snapshot.key,data=snapshot.val();
+  if(!key||!data)return;
+  onlineUsersCache[key]=data;
+  let item=document.getElementById("user-"+key);
+  if(!item){
+    item=buildUserItem(key);
+    usersList.appendChild(item);
+  }
+  applyUserItemData(item,key,data);
+  updateOnlineCount();
+}
+
+function handleUserRemoved(snapshot){
+  const key=snapshot.key;
+  delete onlineUsersCache[key];
+  const item=document.getElementById("user-"+key);
+  if(item)item.remove();
+  updateOnlineCount();
+}
+
+function setupOnlineListeners(){
+  onlineRef.on("child_added",handleUserAdded);
+  onlineRef.on("child_changed",handleUserChanged);
+  onlineRef.on("child_removed",handleUserRemoved);
+  startPresenceSweep();
+}
+
 function renderTypingIndicator(){const names=Object.entries(typingUsersCache).filter(([uid,data])=>uid!==currentUser.uid&&data&&typeof data.name==="string"&&data.name.trim()).map(([,data])=>sanitizeUsername(data.name)).filter(Boolean);if(names.length===0){typingIndicatorEl.classList.remove("visible");typingIndicatorEl.textContent="";return}let text;if(names.length===1)text=names[0]+" يكتب الآن...";else if(names.length===2)text=names[0]+" و "+names[1]+" يكتبان الآن...";else text="عدة أشخاص يكتبون الآن...";typingIndicatorEl.textContent=text;typingIndicatorEl.classList.add("visible")}
 function setTyping(){if(!isConnected||!myTypingRef)return;clearTimeout(typingTimer);myTypingRef.set({name:username,ts:firebase.database.ServerValue.TIMESTAMP}).catch(error=>console.warn("Typing update failed:",error));typingTimer=setTimeout(stopTypingNow,TYPING_TIMEOUT)}
 function stopTypingNow(){clearTimeout(typingTimer);if(!isConnected||!myTypingRef)return;myTypingRef.remove().catch(error=>console.warn("Typing removal failed:",error))}
@@ -108,9 +270,9 @@ onlineList.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key=
 usersBox.addEventListener("click",event=>event.stopPropagation());
 document.addEventListener("click",()=>{if(usersBox.classList.contains("visible")){usersBox.classList.remove("visible");onlineList.setAttribute("aria-expanded","false");usersBox.setAttribute("aria-hidden","true")}});
 setInterval(()=>{document.querySelectorAll("#messages .time[data-timestamp]").forEach(element=>{const timestamp=Number(element.dataset.timestamp);if(Number.isFinite(timestamp))element.textContent=formatRelativeTime(timestamp)})},20000);
-document.addEventListener("visibilitychange",()=>{if(document.hidden)stopTypingNow();else if(isConnected&&userRef)userRef.update({lastActive:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){stopTypingNow()}else if(isConnected&&userRef){syncMyPresence()}});
 function showSystemMsg(text,temporary=true){const div=document.createElement("div");div.className="sys";div.textContent=text;messagesDiv.appendChild(div);messagesDiv.scrollTop=messagesDiv.scrollHeight;if(temporary)setTimeout(()=>{div.classList.add("fade-out");setTimeout(()=>{if(div.parentNode)div.remove()},500)},4000)}
-loadPendingMessages();username=getSavedUsername();saveUsername(username);showSystemMsg("مرحبًا "+username,true);const authenticated=await authenticate();if(!authenticated)return;initializeReferences();setupOnlineListeners();setupTypingListeners();setupMessageListeners();await setupPresence();setTimeout(()=>{showSystemMsg("💡 اضغط على اسمك في إحدى رسائلك لتغييره",true)},1200);if(pendingMessages.length>0)setTimeout(()=>{showSystemMsg("📦 لديك "+pendingMessages.length+" رسالة محفوظة",true)},1800);
+loadPendingMessages();username=getSavedUsername();saveUsername(username);showSystemMsg("مرحبًا "+username,true);const authenticated=await authenticate();if(!authenticated)return;initializeReferences();setupOnlineListeners();setupTypingListeners();setupMessageListeners();await setupPresence();startPresenceHeartbeat();setTimeout(()=>{showSystemMsg("💡 اضغط على اسمك في إحدى رسائلك لتغييره",true)},1200);if(pendingMessages.length>0)setTimeout(()=>{showSystemMsg("📦 لديك "+pendingMessages.length+" رسالة محفوظة",true)},1800);
 });
 </script>
 </body>
