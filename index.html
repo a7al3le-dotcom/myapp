@@ -143,7 +143,17 @@ function updateOnlineCount(){
 function refreshOnlineUsers(){
   Object.entries(onlineUsersCache).forEach(([userKey,userData])=>{
     const item=document.getElementById("user-"+userKey);
-    if(item)applyUserItemData(item,userKey,userData);
+    if(isUserActive(userData)){
+      if(item){
+        applyUserItemData(item,userKey,userData);
+      }else{
+        const newItem=buildUserItem(userKey);
+        applyUserItemData(newItem,userKey,userData);
+        usersList.appendChild(newItem);
+      }
+    }else if(item){
+      item.remove();
+    }
   });
   updateOnlineCount();
 }
@@ -163,9 +173,7 @@ function startPresenceHeartbeat(){
         name:username,
         lastActive:now
       };
-      const ownItem=document.getElementById("user-"+currentUser.uid);
-      if(ownItem)applyUserItemData(ownItem,currentUser.uid,onlineUsersCache[currentUser.uid]);
-      updateOnlineCount();
+      refreshOnlineUsers();
     }).catch(error=>console.warn("Presence heartbeat failed:",error));
   },PRESENCE_INTERVAL);
 }
@@ -195,17 +203,15 @@ function applyUserItemData(item,userKey,userData){
   if(!item||!userData)return;
   const isMe=userKey===currentUser.uid,
         displayName=sanitizeUsername(userData.name)||"مستخدم",
-        lastActive=Number(userData.lastActive)||0,
-        inactive=!isUserActive(userData),
         indicator=item.querySelector(".status-indicator"),
         name=item.querySelector(".user-name");
   if(indicator){
     indicator.classList.remove("status-green","status-yellow");
-    indicator.classList.add(inactive?"status-yellow":"status-green");
+    indicator.classList.add("status-green");
   }
   if(name){
     name.textContent=isMe?displayName+" [أنت]":displayName;
-    name.title=isMe?"أنت":inactive?"آخر نشاط منذ أكثر من دقيقتين":"متصل";
+    name.title=isMe?"أنت":"متصل";
   }
 }
 
@@ -215,9 +221,11 @@ function handleUserAdded(snapshot){
   onlineUsersCache[key]=data;
   const oldItem=document.getElementById("user-"+key);
   if(oldItem)oldItem.remove();
-  const item=buildUserItem(key);
-  applyUserItemData(item,key,data);
-  usersList.appendChild(item);
+  if(isUserActive(data)){
+    const item=buildUserItem(key);
+    applyUserItemData(item,key,data);
+    usersList.appendChild(item);
+  }
   updateOnlineCount();
 }
 
@@ -225,12 +233,14 @@ function handleUserChanged(snapshot){
   const key=snapshot.key,data=snapshot.val();
   if(!key||!data)return;
   onlineUsersCache[key]=data;
-  let item=document.getElementById("user-"+key);
-  if(!item){
-    item=buildUserItem(key);
-    usersList.appendChild(item);
+  const item=document.getElementById("user-"+key);
+  if(isUserActive(data)){
+    const activeItem=item||buildUserItem(key);
+    applyUserItemData(activeItem,key,data);
+    if(!item)usersList.appendChild(activeItem);
+  }else if(item){
+    item.remove();
   }
-  applyUserItemData(item,key,data);
   updateOnlineCount();
 }
 
