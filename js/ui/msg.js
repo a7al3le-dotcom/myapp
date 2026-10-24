@@ -41,7 +41,7 @@ export function renderMsg(m, opts = {}) {
   fillUser($e, u, { msg: false });
   const open = () => { if (m.uid) emit("profile", m.uid); };
   $e.find(".u-pic").first().on("click", open);
-  $e.find(".u-topic").first().on("click", open);
+  if (!opts.picOnly) $e.find(".u-topic").first().on("click", open);
   $e.find(".tago").attr("data-ts", m.ts || 0).text(ago(m.ts));
 
   const $b = $e.find(".u-msg").first();

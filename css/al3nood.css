@@ -141,3 +141,4 @@ body:not(.p-delbc) #d2bc .mm:not(.mine) .bdel, body:not(.p-delbc) #rpl .mm:not(.
 /* الجوال: لا تكبير (ضغطتين/أصابع) ولا سحب الصفحة */
 html, body { touch-action: manipulation; overscroll-behavior: none; }
 body { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
+html, body { max-width: 100vw; overflow: hidden !important; }

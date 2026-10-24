@@ -13,7 +13,8 @@ export const hiddenFor = (uid, u) => !!(u && u.s && uid !== S.uid && (!S.inChat 
 const $ = window.jQuery;
 const elL = {}, elC = {};
 
-const sortKey = (u) => (u.g ? "1" : "0") + String(u.topic || "").toLowerCase();
+// الترتيب: الصلاحية الأعلى أول، ثم الأعضاء قبل الزوار، ثم الحروف
+const sortKey = (u, uid) => String(1e10 - Math.min(1e10, rankOf(uid))).padStart(11, "0") + (u.g ? "1" : "0") + String(u.topic || "").toLowerCase();
 
 function insertSorted($list, $e, key) {
   $e.attr("data-k", key);
@@ -46,7 +47,7 @@ function place(uid) {
   if (!u || !$e) return;
   const inroom = S.room && u.room === S.room;
   $e.toggleClass("inroom", !!inroom);
-  insertSorted(inroom ? $("#uin") : $("#uout"), $e, sortKey(u));
+  insertSorted(inroom ? $("#uin") : $("#uout"), $e, sortKey(u, uid));
 }
 
 function refreshHeader() {
@@ -64,7 +65,7 @@ function upsert(uid, u) {
   S.users[uid] = u;
   if (!elL[uid]) { elL[uid] = tpl("uhtml").removeClass("hand"); }
   draw(elL[uid], u, uid, true);
-  insertSorted($("#lonline"), elL[uid], sortKey(u));
+  insertSorted($("#lonline"), elL[uid], sortKey(u, uid));
   if (!elC[uid]) {
     elC[uid] = tpl("uhtml").attr("data-uid", uid);
     elC[uid].on("click", () => emit("profile", uid));

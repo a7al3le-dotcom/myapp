@@ -51,10 +51,11 @@ async function loginGuest() {
   if (nameTakenOnline(name)) return warn("يرجى إختيار أسم آخر");
   if (auth.currentUser && !auth.currentUser.isAnonymous) await signOut(auth);
   if (!auth.currentUser) await signInAnonymously(auth);
+  const ghost = Object.values(S.users).find((u) => u.off && u.g && myIh && u.ih === myIh && nameKey(u.topic) === nameKey(name));
   await clearMyGhosts(name);
   setv("isl", "no");
   setv("u1", name);
-  await enter({ topic: name, msg: "(غير مسجل)" }, false);
+  await enter({ topic: name, msg: "(غير مسجل)", _ghost: ghost }, false);
 }
 
 async function loginMember() {

@@ -24,6 +24,7 @@ function add(rid, key, m) {
   const own = m.uid === S.uid;
   const stick = atBottom() || own;
   const $e = renderMsg(m, {
+    picOnly: true, // داخل الغرفة: الصورة بس تفتح البروفايل
     id: key,
     likes: m.t !== "j", // يظهر/يختفي مباشرة حسب "ﻻيكات العام" (site.js)
     reply: false,

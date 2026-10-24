@@ -34,6 +34,16 @@ await loadSite();
 
 // iOS يتجاهل user-scalable: نمنع التكبير بالأصابع والضغطتين
 document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
+document.addEventListener("touchmove", (e) => {
+  if (e.touches.length > 1) return e.preventDefault(); // تكبير بالأصابع
+  let el = e.target;
+  while (el && el !== document.body) {
+    const st = getComputedStyle(el);
+    if (/(auto|scroll)/.test(st.overflowY + st.overflowX) && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)) return;
+    el = el.parentElement;
+  }
+  e.preventDefault();
+}, { passive: false });
 let lastTap = 0;
 document.addEventListener("touchend", (e) => { const t = Date.now(); if (t - lastTap < 300 && !e.target.closest("input,textarea,select")) e.preventDefault(); lastTap = t; }, { passive: false });
 

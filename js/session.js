@@ -20,7 +20,7 @@ let presenceBound = false;
 async function writePresence() {
   const me = r("online/" + S.uid);
   const d = { ts: serverTimestamp(), la: serverTimestamp() };
-  for (const k of ["topic", "msg", "pic", "ucol", "mcol", "bg", "co", "g", "h", "busy", "room", "ih", "fp", "f1", "f2", "f3", "f4", "fd", "s", "sid"]) if (S.me[k]) d[k] = S.me[k];
+  for (const k of ["topic", "msg", "pic", "ucol", "mcol", "bg", "co", "g", "h", "busy", "room", "ih", "fp", "f1", "f2", "f3", "f4", "fd", "s", "sid", "nn"]) if (S.me[k]) d[k] = S.me[k];
   if (S.me.busy === false) d.busy = false;
   await set(me, d);
   // لو انقطع الاتصال: الاسم يبقى معلّق بلون باهت (مثل العنود) بدل ما ينحذف
@@ -197,7 +197,13 @@ export async function enter(profile, isMember) {
   }
   if (wantStealth && S.perms.stealth) S.me.s = true;
   await remove(r("kicks/" + S.uid)).catch(() => {});
+  S.me.nn = !!S.nonot;
   S.me.sid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+  // كان معلّق (حدّث الصفحة أو انقطع): نكتب "غادر الدردشه" في غرفته القديمة قبل الدخول
+  const prev = S.users[S.uid] || profile._ghost;
+  if (prev && prev.room && !S.me.s) {
+    await push(r("msgs/" + prev.room), { t: "x", uid: S.uid, room: prev.room, ts: serverTimestamp(), u: snap(prev.topic ? { ...S.me, topic: prev.topic } : S.me) }).catch(() => {});
+  }
   await writePresence();
   S.inChat = true;
   try { sessionStorage.setItem("al3_in", JSON.stringify({ uid: S.uid, m: S.member ? 1 : 0, t: S.me.topic, msg: S.me.msg, s: S.me.s ? 1 : 0 })); } catch {}

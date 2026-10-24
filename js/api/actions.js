@@ -76,10 +76,12 @@ const local = {
     if (!okId(uid)) throw new Error("bad");
     // الحد مرة بالدقيقة لنفس البروفايل (تقدر تعجب بأشخاص مختلفين ورا بعض)
     if (now() - (lastLike[uid] || 0) < 60000) throw new Error("rate");
-    try {
-      await update(r(), { [`ucount/${uid}`]: increment(1), [`ulast/${S.uid}/${uid}`]: serverTimestamp() });
-    } catch (e) { throw new Error("rate"); }
     lastLike[uid] = now();
+    // العدد يزيد مرة وحدة كل 24 ساعة لنفس الشخص — الضغطات الثانية توصل كإعجاب بس ما تنحسب
+    const last = (await get(r(`ulast/${S.uid}/${uid}`)).catch(() => null))?.val() || 0;
+    if (now() - last >= 864e5) {
+      try { await update(r(), { [`ucount/${uid}`]: increment(1), [`ulast/${S.uid}/${uid}`]: serverTimestamp() }); } catch {}
+    }
     return true;
   },
   // إنشاء غرفة

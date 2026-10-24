@@ -79,6 +79,7 @@ export function initSettings() {
   $("#nonot").on("click", function () {
     S.nonot = !S.nonot;
     setv("nonot", S.nonot ? "1" : null);
+    saveMe({ nn: S.nonot }).catch(() => {});
     $(this).find("span").toggleClass("fa-check", S.nonot);
   });
   $("#redit").on("click", openRoomEdit);

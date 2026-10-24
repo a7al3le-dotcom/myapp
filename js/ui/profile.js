@@ -11,6 +11,7 @@ import { roomCount } from "./rooms.js";
 import { SITE } from "../config.js";
 import { snap, touch } from "../session.js";
 import { openPm } from "./pm.js";
+import { noteUser } from "./notify.js";
 
 const $ = window.jQuery;
 let cur = null;
@@ -207,6 +208,9 @@ export function initProfile() {
     if (!raw || !to) return;
     if (needLikes(SITE.alertLikes, "التنبيهات تتطلب منك الحصول على N إعجاب")) return $("#mmnot").modal("hide");
     if (waitBlock("nots")) return $("#mmnot").modal("hide");
+    // معطّل التنبيهات: مثل الخاص — ما يوصل ويطلع تنبيه باسمه
+    const tu = S.users[to];
+    if (tu && tu.nn && to !== S.uid) { $("#mmnot").modal("hide"); return noteUser(tu, "هذا المستخدم لا يقبل التنبيهات"); }
     const { text: m, blocked } = prep(raw);
     if (blocked) { $("#mmnot").modal("hide"); if (cur === to) $("#upro .unot").css("background-color", "indianred"); return; }
     try {
