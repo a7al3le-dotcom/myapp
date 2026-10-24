@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" style="height:100%;">
+<head>
+<meta charset="utf-8">
+<!-- مثل لوحة العنود: الصفحة بعرض كمبيوتر 1920 على كل الأجهزة، والجوال يصغّرها ويكبّرها بالأصابع -->
+<meta name="viewport" content="user-scalable=1, width=1920, interactive-widget=resizes-content">
+<meta name="google" content="notranslate">
+<title>لوحه التحكم</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="css/al3nood.css">
+<style>
+  /* نفس تركيب لوحة العنود (من صفحتها المحفوظة) */
+  html, body { height: 100%; margin: 0; background-color: #fefefe !important; overflow: hidden; }
+  .nav-pills li a { border-radius: 0 !important; }
+  #cp .tab-content .tab-pane { min-width: 400px !important; }
+  .tab-pane { padding: 0; width: 100%; }
+  /* أزرار اللوحة بلون "لون الأزرار" في إداره الموقع (cp.js يحط اللون الفعلي) */
+  #cp .btn-primary, #cp .btn-primary:hover, #cp .btn-primary:focus { background-color: var(--sbtn, #8C5D73) !important; }
+  /* الجداول */
+  .tablesorter { border-collapse: collapse; }
+  .tablesorter th { background-color: cornflowerblue; color: white; padding: 5px; border: 1px solid black; text-align: center; vertical-align: middle; }
+  .tablesorter td { border: 1px solid grey; padding: 0; overflow-x: auto; overflow-y: hidden; }
+  .tablesorter tbody { vertical-align: top; }
+  /* القوائم المنبثقة (بحث/حظر عميق، الترس): أزرار تحت بعض */
+  .cpmenu { position: fixed; z-index: 9999; min-width: 66px; margin-top: 4px; padding: 2px; max-height: 80%; overflow-y: auto; }
+  .cpmenu .btn { display: block; width: 100%; padding: 2px 4px; margin-top: 1px; }
+  /* الصلاحيات: العناوين label-primary بلون أزرار الموقع */
+  #cp .label-primary { background-color: var(--sbtn, #8C5D73) !important; }
+  .sico img { max-height: 32px; max-width: 100%; margin: 4px; padding: 4px; cursor: pointer; }
+  /* تصحيح المالك: أزرار الفلتر والرسائل تحت بعض بدون فراغات */
+  .stack { display: block; margin: 0 5px !important; }
+  /* زر الحذف (x) صغير */
+  .xbtn { padding: 1px 5px !important; }
+  .p-site img, .p-sico img, .p-dro3 img, .p-emo img { cursor: pointer; }
+  /* نافذة تعديل الاسم الوهمي */
+  #botbox { position: fixed; z-index: 3000; top: 60px; left: 140px; width: 300px; padding: 5px; background: #efefef; }
+  #botbox input, #botbox select { width: 200px; margin: 1px 0; }
+</style>
+</head>
+<body>
+<div id="cp" class="break d-flex" style="width:100%;height:100%;position:fixed;top:0;left:0;overflow-x:auto;zoom:95%;background-color:#fefefe;flex:0 1 auto;">
+  <div style="margin:1px;width:120px;" class="fl borderg" id="m1">
+    <ul id="cpnav" class="nav nav-pills nav-stacked" style="margin-top:0;">
+      <li data-tab="fps"><a href="#fps">السجل</a></li>
+      <li data-tab="actions"><a href="#actions">الحالات</a></li>
+      <li data-tab="logins"><a href="#logins">الأعضاء</a></li>
+      <li data-tab="bans"><a href="#bans">الحظر</a></li>
+      <li data-tab="powers"><a href="#powers">الصلاحيات</a></li>
+      <li data-tab="fltr"><a href="#fltr">فلتر</a></li>
+      <li data-tab="cp_rooms"><a href="#cp_rooms">الغرف</a></li>
+      <li data-tab="shrt"><a href="#shrt">الإختصارات</a></li>
+      <li data-tab="subs"><a href="#subs">الإشتراكات</a></li>
+      <li data-tab="msgs"><a href="#msgs">الرسائل</a></li>
+      <li data-tab="wrooms"><a href="#wrooms">غرفه الإنتظار</a></li>
+      <li data-tab="sett"><a href="#sett">إداره الموقع</a></li>
+      <li data-tab="domains"><a href="#domains">النطاقات</a></li>
+      <li data-tab="cp_bots"><a href="#cp_bots">Bots</a></li>
+    </ul>
+  </div>
+  <div id="cpc" class="fl tab-content" style="height:100%;width:100%;min-width:200px;margin-left:0;min-height:100%;">
+    <button id="cprefresh" class="fa fa-refresh btn btn-success" style="position:fixed;top:6px;right:8px;"></button>
+    <div id="fps" class="tab-pane cpane">
+      <span class="tbar">
+        <button disabled class="fa fa-arrow-left btn btn-primary" style="width:60px;">0</button>
+        <button class="fa fa-arrow-right btn btn-primary" style="width:60px;text-align:end;">200</button>
+        <input autocomplete="off" placeholder="البحث">
+      </span>
+    </div>
+    <div id="actions" class="tab-pane cpane">
+      <span class="tbar">
+        <button disabled class="fa fa-arrow-left btn btn-primary" style="width:60px;">0</button>
+        <button class="fa fa-arrow-right btn btn-primary" style="width:60px;text-align:end;">200</button>
+        <input autocomplete="off" placeholder="البحث">
+      </span>
+    </div>
+    <div id="logins" class="tab-pane cpane" style="width:100%;">
+      <span class="tbar">
+        <button disabled class="fa fa-arrow-left btn btn-primary" style="width:60px;"></button>
+        <button disabled class="fa fa-arrow-right btn btn-primary" style="width:60px;text-align:end;"></button>
+        <input autocomplete="off" placeholder="البحث اسم العضو\الآي بي\الجهاز">
+      </span>
+    </div>
+    <div id="bans" class="tab-pane cpane">
+      <div style="width:150%;"> <input autocomplete="off" class="banit banv" placeholder="رقم الجهاز \\ الدوله \\ الاي بي">
+        <button class="btn btn-danger bandd">حظر</button>
+        <button class="btn btn-success unbandd">سماح</button>
+      </div>
+    </div>
+    <div id="powers" class="tab-pane cpane" style="width:500px;">
+      <input id="psearch" class="psearch" style="width:200px;display:block;margin-bottom:2px;" placeholder="البحث في الصلاحيات">
+      <select style="width:200px;display:inline;" class="powerbox selbox form-control plist"></select>
+      <button class="delp pdel btn btn-danger fa fa-times">حذف</button>
+      <div class="sico sicobox border fr break" style="width:220px;margin-top:1px;margin-right:4px;"></div>
+      <div class="json pform" style="width:260px;"></div>
+    </div>
+
+    <!-- ===== فلتر ===== -->
+    <div id="fltr" class="tab-pane cpane fltr">
+      <input class="fltrit" placeholder="اضافه كلمه\موقع">
+      <button style="width:200px;" class="fa fa-check btn btn-success stack" data-t="a">إضافه ألى الكلمات المسموحه</button>
+      <button style="width:200px;" class="fa fa-times btn btn-danger stack" data-t="b">إضافه ألى الكلمات الممنوعه</button>
+      <button style="width:200px;" class="fa fa-warning btn btn-info stack" data-t="m">إضافه ألى الكلمات المراقبه</button>
+      <b>آخر الكلمات الممنوعه</b>
+      <div class="d-flex fltbar" style="gap:2px;margin:2px 0;align-items:center;">
+        <input class="fltq" style="width:220px;" placeholder="بحث: الاسم \ الكلمه \ الآي بي \ الرساله">
+        <button class="btn btn-primary xbtn fltt active" data-k="">الكل</button>
+        <button class="btn btn-danger xbtn fltt" data-k="b">ممنوعه</button>
+        <button class="btn btn-info xbtn fltt" data-k="m">مراقبه</button>
+      </div>
+      <div id="fltred" class="break" style="max-width:100%;height:220px;overflow:auto;margin-bottom:4px;"></div>
+    </div>
+
+    <!-- ===== الغرف ===== -->
+    <div id="cp_rooms" class="tab-pane cpane">
+      <div id="entry_room_panel" class="border corner" style="display:inline-block;margin:4px 0 6px 2px;padding:4px;background-color:#fff;direction:rtl;">
+        <label class="label label-info fa fa-home">غرفة الدخول التلقائي</label>
+        <br>
+        <label class="checkbox-inline" style="margin:4px 0 2px 10px;">
+          <input type="radio" name="entry_room_mode" id="entry_mode_auto" value="auto" checked="checked">
+          تلقائي (يوزع حسب الامتلاء)
+        </label>
+        <label class="checkbox-inline" style="margin:4px 0 2px 6px;">
+          <input type="radio" name="entry_room_mode" id="entry_mode_fixed" value="fixed">
+          غرفة محددة
+        </label>
+        <select id="entry_room_select" disabled="disabled" class="form-control" style="width:180px;display:inline;height:28px;padding:3px 6px;margin:2px 0 2px 4px;"></select>
+        <button id="entry_room_save_btn" class="btn btn-danger fa fa-save" style="height:28px;padding:3px 10px;">حفظ</button>
+        <span id="entry_room_status" class="label" style="margin-right:4px;"></span>
+      </div>
+    </div>
+
+    <!-- ===== الإختصارات ===== -->
+    <div id="shrt" class="tab-pane cpane">
+      <input style="margin:4px;" class="shrtname" placeholder="الإختصار \ س1">
+      <br><input style="margin:4px;" class="shrtvalue" placeholder="الزخرفه \ السلام عليكم">
+      <br><button style="margin:5px;width:200px;" class="fa fa-check btn btn-success shrtadd">إضافه</button>
+      <br>
+    </div>
+
+    <div id="subs" class="tab-pane cpane"></div>
+
+    <!-- ===== الرسائل ===== -->
+    <div id="msgs" class="tab-pane cpane msgs" style="padding:2px;">
+      <input class="msgt" style="width:200px;" placeholder="عنوان الرساله">
+      <br>
+      <textarea class="msgm" style="width:200px;" placeholder="الرساله" maxlength="250"></textarea>
+      <button style="width:200px;" class="fa fa-check btn btn-success stack" data-k="w">إضافه ألى رسائل الترحيب</button>
+      <button style="width:200px;" class="fa fa-check btn btn-danger stack" data-k="a">إضافه ألى الرسائل التلقائيه</button>
+      <b>الرسائل</b><br>
+    </div>
+
+    <!-- ===== غرفه الإنتظار ===== -->
+    <div id="wrooms" class="tab-pane cpane">
+      <label class="label label-primary">غرفه الانتظار</label>
+      <br>
+      <input id="owr_active" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_active" class="checkbox-inline">تفعيل غرفه الانتظار</label>
+      <br>
+      <input id="owr_move" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_move" class="checkbox-inline">نقل تلقائي للغرف العامه بعد اكتمال الايكات</label>
+      <br>
+      <input id="owr_pm" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_pm" class="checkbox-inline">منع الخاص</label>
+      <br>
+      <input id="owr_allowlikes" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_allowlikes" class="checkbox-inline">منع الايكات</label>
+      <br>
+      <input id="owr_nots" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_nots" class="checkbox-inline">منع التنبيهات</label>
+      <br>
+      <input id="owr_autoAllow" type="checkbox" class="dots" autocomplete="off">
+      <label for="owr_autoAllow" class="checkbox-inline">سماح تلقائي بعد اكتمال الايكات</label>
+      <br>
+      <input id="owr_likes" type="number" min="0" value="0" class="dots" style="width:80px;" autocomplete="off"><b>عدد
+        الايكات لمغادره غرفه الانتظار</b>
+      <br>
+      <label id="owr_save" class="btn btn-danger label fa fa-save border">حفظ</label>
+      <br>
+      <br>
+      <div style="width:150%;"> <input autocomplete="off" class="wroomit" placeholder="رقم الجهاز \\ الدوله \\ الاي بي">
+        <button class="btn btn-danger wadd">إضافه</button>
+        <button class="btn btn-success wallow">سماح</button>
+      </div>
+    </div>
+
+    <!-- ===== إداره الموقع ===== -->
+    <div id="sett" class="tab-pane cpane">
+      <div class="border corner" style="padding:4px;">
+        <label class="label label-info fa fa-home">إعدادات الموقع</label>
+        <br>
+        <label class="label label-primary">إسم الموقع</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="sett_name" placeholder="اسم الموقع: شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">عنوان الصفحه</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="sett_title" placeholder="عنوان الصفحه:شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">وصف الموقع</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="sett_description" placeholder="وصف الموقع: مثال شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">الكلمات الدلاليه</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="sett_keywords" placeholder="الكلمات الدلاليه: كلمه1,كلمه2,كلمه3"></textarea>
+        <br>
+        <label class="label label-primary">السكربت JavaScript</label>
+        <br>
+        <textarea maxlength="10240" style="width:260px;" id="sett_scr" class="ownonly" placeholder="للمبرمجين فقط"></textarea>
+        <br>
+        <label class="label label-primary">كود haed</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="sett_customHead" class="ownonly" placeholder="&lt;meta name=&quot;google-site-verification&quot; content=&quot;...&quot;&gt;"></textarea>
+        <br>
+        <label class="label label-primary">الوصف الداخلي html SEO</label>
+        <br>
+        <textarea maxlength="10240" style="width:310px;height:100px;" id="sett_html" class="ownonly" placeholder="شات الكتابي
+&lt;div&gt;شات الكتابي&lt;/div&gt;
+&lt;a href='/'&gt;شات الكتابي&lt;/a&gt;"></textarea>
+        <br>
+        <label class="label label-primary">لون القوالب</label>
+        <br>
+        <input class="color sbg dots" data-k="sbg" style="width:80px;background-image:none;" autocomplete="off" value="733E4C">
+        <br>
+        <label class="label label-primary">لون المحتوى</label>
+        <br>
+        <input class="color sbackground dots" data-k="sbackground" style="width:80px;background-image:none;" autocomplete="off" value="FAFAFA">
+        <br>
+        <label class="label label-primary">لون الأزرار</label>
+        <br>
+        <input class="color sbuttons dots" data-k="sbuttons" style="width:80px;background-image:none;" autocomplete="off" value="733E4C">
+        <br>
+        <label class="label label-primary">الرسائل</label>
+        <br> <input type="number" min="5" value="5" class="msgstt dots" data-n="msgstt" style="width:80px;" autocomplete="off"><b>المده بالدقائق للرسائل التلقائيه</b>
+        <br>
+        <label class="label label-primary">الحائط</label>
+        <br><input type="number" min="0" value="100" class="wall_likes dots" data-n="wall_likes" style="width:80px;" autocomplete="off"><b>عدد الايكات</b>
+        <br> <input type="number" min="0" value="0" class="wall_minutes dots" data-n="wall_minutes" style="width:80px;" autocomplete="off"><b>المده بين رسائل الحائط بالدقيقه</b>
+        <br>
+        <label class="label label-primary">الزوار</label>
+        <br>
+        <input id="allowg" type="checkbox" class="allowg dots" data-b="allowg" autocomplete="off" checked="checked">
+        <label for="allowg" class="checkbox-inline">السماح بدخول الزوار</label>
+        <br>
+        <input id="allowreg" type="checkbox" class="allowreg corner dots" data-b="allowreg" autocomplete="off" checked="checked">
+        <label for="allowreg" class="checkbox-inline">السماح بتسجيل العضويات</label>
+        <br><input type="number" min="1" max="50" value="50" class="guestNameMax dots" data-n="guestNameMax" style="width:80px;" autocomplete="off"><b>عدد أحرف أسماء الزوار</b>
+        <br><input type="number" min="1" max="50" value="50" class="registerNameMax dots" data-n="registerNameMax" style="width:80px;" autocomplete="off"><b>عدد أحرف تسجيل العضويات</b>
+        <br>
+        <input id="rc" type="checkbox" class="rc dots" data-b="rc" autocomplete="off" checked="checked">
+        <label for="rc" class="checkbox-inline">إستعاده الاتصال</label>
+        <br>
+        <input id="bclikes" type="checkbox" class="dots" data-b="bclikes" autocomplete="off" checked="checked">
+        <label for="bclikes" class="checkbox-inline">ﻻيكات الحائط</label>
+        <br>
+        <input id="mlikes" type="checkbox" class=" dots" data-b="mlikes" autocomplete="off">
+        <label for="mlikes" class="checkbox-inline">ﻻيكات العام</label>
+        <br>
+        <input id="mreply" type="checkbox" class=" dots" data-b="mreply" autocomplete="off">
+        <label for="mreply" class="checkbox-inline">ردود العام</label>
+        <br>
+        <input id="bcreply" type="checkbox" class=" dots" data-b="bcreply" autocomplete="off" checked="checked">
+        <label for="bcreply" class="checkbox-inline">ردود الحايط</label>
+        <br>
+        <br><input type="number" min="0" value="0" class="roomMsgLikes dots" data-n="roomMsgLikes" style="width:80px;" autocomplete="off"><b>عدد الايكات المطلوبة للرسائل بالغرف</b>
+        <br><input type="number" min="0" value="100" class="pmlikes dots" data-n="pmLikes" style="width:80px;" autocomplete="off"><b>عدد الايكات للمحادثات الخاصه</b>
+        <br><input type="number" min="0" value="500" class="notlikes dots" data-n="alertLikes" style="width:80px;" autocomplete="off"><b>عدد الايكات للتنبيهات</b>
+        <br><input type="number" min="0" value="1000" class="fileslikes dots" data-n="fileslikes" style="width:80px;" autocomplete="off"><b>عدد الايكات لإرسال صور\فيديو</b>
+        <br><input type="number" min="0" value="100" class="proflikes dots" data-n="proflikes" style="width:80px;" autocomplete="off"><b>عدد الايكات لتغير الزخرفه والحاله</b>
+        <br><input type="number" min="0" value="100" class="piclikes dots" data-n="piclikes" style="width:80px;" autocomplete="off"><b>عدد الايكات لتغير الصوره</b>
+        <br><input type="number" min="1" value="5" max="10" class="maxshrt dots" data-n="maxshrt" style="width:80px;" autocomplete="off"><b>عدد الاختصارت في الرساله الواحده</b>
+        <br><input type="number" min="2" value="5" class="maxIP dots" data-n="maxIP" style="width:80px;" autocomplete="off"><b>تعدد النكات من نفس الجهاز</b>
+        <br><input type="number" min="1" value="600" class="stay dots" data-n="ghostMins" style="width:80px;" autocomplete="off"><b>تثبيت النكات بعد انقطاع النت</b>
+        <br>
+        <input id="calls" type="checkbox" class=" dots" data-b="calls" autocomplete="off">
+        <label for="calls" class="checkbox-inline">تفعيل المكالمات</label>
+        <br><input type="number" min="0" value="1000" class="callsLike dots" data-n="callsLike" style="width:80px;" autocomplete="off"><b>الايكات المطلوبه لإجراء مكالمات</b>
+        <br>
+        <input id="vpnBlock" type="checkbox" class=" dots" data-b="vpnBlock" autocomplete="off">
+        <label for="vpnBlock" class="checkbox-inline">حظر مستخدمي VPN</label>
+        <br>
+        <label class="btn btn-danger label fa fa-save border settsave">حفظ</label>
+        <br>
+      </div>
+      <div class="border ownbox" style="padding:4px;margin-top:-1px;display:none;">
+        <label class="label label-danger fa fa-trash">التفريغ والصيانه</label>
+        <br>
+        <button class="btn btn-danger xbtn wipe" data-w="fps" style="margin:2px;">تفريغ السجل</button>
+        <button class="btn btn-danger xbtn wipe" data-w="acts" style="margin:2px;">تفريغ الحالات</button>
+        <button class="btn btn-danger xbtn wipe" data-w="fltlog" style="margin:2px;">تفريغ سجل الفلتر</button>
+        <button class="btn btn-danger xbtn wipe" data-w="wall" style="margin:2px;">تفريغ الحائط</button>
+        <button class="btn btn-danger xbtn wipe" data-w="msgs" style="margin:2px;">تفريغ رسائل الغرف</button>
+        <button class="btn btn-danger xbtn wipe" data-w="ann" style="margin:2px;">تفريغ الإعلانات</button>
+        <button class="btn btn-danger xbtn wipe" data-w="reports" style="margin:2px;">تفريغ التبليغات</button>
+        <br>
+        <button class="btn btn-success fa fa-wrench cleanup" style="margin:2px;"> صيانه</button>
+        <span class="cleanres minix" style="color:green;"></span>
+      </div>
+      <div class="border" style="padding:4px;margin-top:-1px;">
+        <label class="label label-info fa fa-gear">خيارات الموقع</label>
+        <br>
+        <label class="label label-primary">الايقونات</label>
+        <div style="width:360px;" class="p-site break">
+          <label class="label label-primary">ايقونه الموقع favicon.ico</label><br>
+          <img data-w="favicon" style="width:32px;height:32px;object-fit:contain;object-position:top;" src="favicon.ico" alt="">
+          <br>
+          <label class="label label-primary">صوره الموقع prv1.png</label><br>
+          <img data-w="prv1" style="width:32px;height:32px;object-fit:contain;object-position:top;" src="prv1.png" alt="">
+          <br>
+          <label class="label label-primary">صوره العضو pic.png</label><br>
+          <img data-w="pic" style="width:32px;height:32px;object-fit:contain;object-position:top;" src="pic.png" alt="">
+          <br>
+          <label class="label label-primary">صوره الغرف room.png</label><br>
+          <img data-w="room" style="width:32px;height:32px;object-fit:contain;object-position:top;" src="room.png" alt="">
+          <br>
+        </div>
+        <br>
+        <label class="label label-primary fa fa-image">ايقونات السوابر</label><span class="btn btn-primary minix fa fa-plus border aadd" data-kind="sico"></span>
+        <div style="width:360px;" class="p-sico break" data-kind="sico"></div>
+        <br>
+        <label class="label label-primary fa fa-image">ايقونات الهدايا</label><span class="btn btn-primary minix fa fa-plus border aadd" data-kind="dro3"></span>
+        <div style="width:360px;" class="p-dro3 break" data-kind="dro3"></div>
+        <br>
+        <label class="label label-primary fa fa-image">الإبتسامات</label><span class="btn btn-primary minix fa fa-plus border aadd" data-kind="emo"></span><span class="btn emo_order btn-primary minix fa fa-save border">حفظ</span>
+        <div style="width:360px;" class="p-emo break" data-kind="emo"></div>
+      </div>
+    </div>
+
+    <!-- ===== النطاقات ===== -->
+    <div id="domains" class="tab-pane cpane">
+      <div class="border corner" style="padding:4px;">
+        <label class="label label-success fa fa-home">النطاقات</label>
+        <br>
+        <input maxlength="5120" style="width:286px;margin:6px 0;" id="domain_search" type="text" class="form-control" placeholder="بحث النطاقات">
+        <select style="width:200px;display:inline;" id="domain_list" class="form-control"></select> <label id="domain_delete_btn" class="btn btn-danger label fa fa-times border">إزاله</label>
+        <br>
+        <label id="domain_status" style="color:green;"></label>
+        <br>
+        <label class="label label-primary">إسم النطاق site.com?</label>
+        <br>
+        <input maxlength="5120" style="width:260px;" id="domain" type="text" placeholder="site.com">
+        <br>
+        <label class="label label-primary">إسم الموقع</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="domain_name" placeholder="اسم الموقع: شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">عنوان الصفحه</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="domain_title" placeholder="عنوان الصفحه:شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">وصف الموقع</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="domain_description" placeholder="وصف الموقع: مثال شات كتابي"></textarea>
+        <br>
+        <label class="label label-primary">الكلمات الدلاليه</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="domain_keywords" placeholder="الكلمات الدلاليه: كلمه1,كلمه2,كلمه3"></textarea>
+        <br>
+        <label class="label label-primary">السكربت JavaScript</label>
+        <br>
+        <textarea maxlength="10240" style="width:260px;" id="domain_scr" class="ownonly" placeholder="للمبرمجين فقط"></textarea>
+        <br>
+        <label class="label label-primary">كود haed</label>
+        <br>
+        <textarea maxlength="5120" style="width:260px;" id="domain_customHead" class="ownonly" placeholder="&lt;meta name=&quot;google-site-verification&quot; content=&quot;...&quot;&gt;"></textarea>
+        <br>
+        <label class="label label-primary">الوصف الداخلي html SEO</label>
+        <br>
+        <textarea maxlength="10240" style="width:310px;height:100px;" id="sett_htmld" class="ownonly" placeholder="شات الكتابي
+&lt;div&gt;شات الكتابي&lt;/div&gt;
+&lt;a href='/'&gt;شات الكتابي&lt;/a&gt;"></textarea>
+        <br>
+        <label class="label label-primary">لون القوالب</label>
+        <br>
+        <input class="color domain_sbg dots" data-k="sbg" style="width:80px;background-image:none;" autocomplete="off" value="733E4C">
+        <br>
+        <label class="label label-primary">لون المحتوى</label>
+        <br>
+        <input class="color domain_sbackground dots" data-k="sbackground" style="width:80px;background-image:none;" autocomplete="off" value="FAFAFA">
+        <br>
+        <label class="label label-primary">لون الأزرار</label>
+        <br>
+        <input class="color domain_sbuttons dots" data-k="sbuttons" style="width:80px;background-image:none;" autocomplete="off" value="733E4C">
+        <br>
+        <div style="margin:6px 0;">
+          <label class="label label-primary" style="cursor:pointer;display:inline-block;padding:4px 8px;">بنر الموقع</label><span id="banner_arrow" style="display:inline-block;width:26px;height:22px;text-align:center;background:#333;color:#fff;cursor:pointer;border-radius:3px;line-height:22px;font-size:12px;">◀</span>
+        </div>
+        <div id="banner_section" style="display:none;border:1px solid #999;padding:8px;margin-bottom:8px;width:fit-content;">
+          <input id="bannerEnabled" type="checkbox" class="dots" autocomplete="off">
+          <label for="bannerEnabled">إظهار البنر في الواجهة الرئيسية</label>
+          <div id="banner_preview" style="border:1px solid #ccc;border-radius:6px;padding:15px;margin:8px 0;min-height:50px;text-align:center;background:#f9f9f9;width:280px;"><span class="banner_empty" style="color:#888;">لا يوجد بنر</span></div>
+          <label class="btn btn-default border bup" style="background:#222;color:#fff;padding:3px 12px;margin:2px;cursor:pointer;">رفع بنر</label>
+          <label class="btn btn-danger border bdel" style="padding:3px 12px;margin:2px;cursor:pointer;">إزالة ✕</label>
+        </div>
+        <label id="domain_save_btn" class="btn btn-danger label fa fa-save border">حفظ</label>
+        <br>
+      </div>
+    </div>
+
+    <!-- ===== Bots ===== -->
+    <div id="cp_bots" class="tab-pane cpane">
+      <label class="label label-primary">الاعدادات</label><br>
+      <input type="number" min="0" value="0" class="bots_minStay dots" style="width:100px;" autocomplete="off"><b>اقل مده تواجد</b><br>
+      <input type="number" min="0" value="0" class="bots_maxStay dots" style="width:100px;" autocomplete="off"><b>اطول مده تواجد</b><br>
+      <input type="number" min="0" value="0" class="bots_minLeave dots" style="width:100px;" autocomplete="off"><b>اقل مده غياب</b><br>
+      <input type="number" min="0" value="0" class="bots_maxLeave dots" style="width:100px;" autocomplete="off"><b>اطول مده غياب</b><br>
+      <select style="width:100px;" class="bots_active btn btn-secondary">
+        <option value="true">نعم</option>
+        <option value="false" selected="selected">ﻻ</option>
+      </select><b>تفعيل الوهمي</b><br>
+      <label class="botsb" style="width:100px;">0/0</label>
+      <b>الرصيد</b><br>
+      <label class="botso" style="width:100px;">0/0</label>
+      <b>التواجد</b><br>
+      <button style="width:100px;margin-top:4px;" class="fa fa-user btn btn-danger botsave">حفظ</button><br>
+      <button style="width:100px;margin-top:4px;" class="fa fa-user btn btn-success botadd">إضافه</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== إداره الغرفه (نفس نافذة الشات) ===== -->
+<div class="modal" id="mkr" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:310px;">
+      <div style="color:white;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-comments modal-title">إداره الغرفه</label>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+        <div class="break" style="background-color:#efefef;padding:5px;position:relative;">
+          <input class="rtopic" style="width:200px;" type="text" placeholder="عنوان الغرفه" maxlength="40">
+          <input class="rabout" style="width:200px;" type="text" placeholder="الوصف" maxlength="200">
+          <input class="rwelcome" style="width:200px;" type="text" placeholder="رساله الترحيب" maxlength="300">
+          <input autocomplete="off" class="rpwd" style="width:200px;" type="text" placeholder="كلمه المرور" maxlength="30">
+          <input class="rmax" style="width:200px;" type="number" placeholder="حجم الغرفه من 2 ألى 40" min="2" max="40">
+          <input class="rl" style="width:200px;" type="number" placeholder="عدد الايكات للدخول" min="0">
+          <input class="rvl" style="width:200px;" type="number" placeholder="عدد الايكات للصوتيه" min="0">
+          <br>
+          <label class="checkbox-inline"><input class="rdel" type="checkbox">تثبيت الغرفه</label><br><br>
+          <label class="checkbox-inline"><input class="rv" type="checkbox">تفعيل الصوتيه</label><br><br>
+          <div class="border btn rnopic" style="width:84px;position:absolute;top:96px;right:4px;padding:4px;">بدون صوره</div>
+          <div class="cpick border btn rcolor" style="width:84px;height:44px;background-image:none;position:absolute;top:140px;right:4px;background-color:#000;"></div>
+          <button class="rsave btn btn-primary fl"><span class="fa fa-edit">حفظ التعديلات</span></button>
+          <button class="rdelete btn btn-danger fr"><span class="fa fa-times">حذف</span></button>
+          <div class="rpic fr border hand" style="width:84px;height:84px;"><img style="max-width:100%;height:100%;" src="room.png" alt=""></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="filepick" accept="image/*" style="display:none;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script type="module" src="js/cp.js"></script>
+</body>
+</html>
