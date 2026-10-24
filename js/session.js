@@ -1,5 +1,5 @@
 // الجلسة: تسجيل التواجد، الدخول للشات، الخروج، الطرد
-import { r, db, auth } from "./firebase.js";
+import { r, db, auth, now } from "./firebase.js";
 import { S, emit, on, setv } from "./state.js";
 import { ref, get, set, push, remove, update, onValue, onChildAdded, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -19,7 +19,8 @@ let presenceBound = false;
 
 async function writePresence() {
   const me = r("online/" + S.uid);
-  const d = { ts: serverTimestamp(), la: serverTimestamp() };
+  // la = آخر نشاط (كتابة/إعجاب) — إعادة الاتصال ما ترجّع اللون أخضر
+  const d = { ts: serverTimestamp(), la: S.lastLa || serverTimestamp() };
   for (const k of ["topic", "msg", "pic", "ucol", "mcol", "bg", "co", "g", "h", "busy", "room", "ih", "fp", "f1", "f2", "f3", "f4", "fd", "s", "sid", "nn"]) if (S.me[k]) d[k] = S.me[k];
   if (S.me.busy === false) d.busy = false;
   await set(me, d);
@@ -43,6 +44,7 @@ export function touch() {
   if (!S.inChat) return;
   if (Date.now() - lastTouch < 30000) return; // مرة كل 30 ثانية تكفي
   lastTouch = Date.now();
+  S.lastLa = now() - 2000; // بوقت السيرفر (القواعد ترفض وقت بالمستقبل)
   update(r("online/" + S.uid), { la: serverTimestamp() }).catch(() => {});
 }
 

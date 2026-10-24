@@ -79,7 +79,7 @@ function upsert(uid, u) {
 function applySearch($e) {
   const q = String($("#usearch").val() || "").trim().toLowerCase();
   const uid = $e.attr("data-uid"), u = S.users[uid];
-  $e.toggle(!hiddenFor(uid, u) && (!q || String(u?.topic || "").toLowerCase().includes(q)));
+  $e.toggle(!hiddenFor(uid, u) && (!q || String(u?.topic || "").toLowerCase().includes(q) || String(u?.h ?? "") === q.replace("#", "")));
 }
 
 export const userEl = (uid) => elC[uid];

@@ -33,7 +33,7 @@ function openFor(box) {
   const ta = $(box).closest(".tablebox").find("textarea")[0];
   if ($pop.is(":visible") && target === ta) return closeEmo();
   target = ta;
-  $pop.css({ left: 0, top: 0 }).show();
+  $pop.css({ left: 0, top: 0 }).show().scrollTop(0);
   const b = box.getBoundingClientRect(), w = $pop.outerWidth(), h = $pop.outerHeight();
   // يمين اللوحة عند يسار الزر +2، وتحتها عند أعلى الزر +2
   const left = Math.max(0, Math.min(b.left + 2 - w, window.innerWidth - w));
