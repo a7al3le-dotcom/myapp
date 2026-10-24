@@ -32,6 +32,11 @@ const $ = window.jQuery;
 // إعدادات الموقع من لوحة التحكم قبل رسم الصفحة (الاسم، الألوان، طول الأسماء...)
 await loadSite();
 
+// iOS يتجاهل user-scalable: نمنع التكبير بالأصابع والضغطتين
+document.addEventListener("gesturestart", (e) => e.preventDefault(), { passive: false });
+let lastTap = 0;
+document.addEventListener("touchend", (e) => { const t = Date.now(); if (t - lastTap < 300 && !e.target.closest("input,textarea,select")) e.preventDefault(); lastTap = t; }, { passive: false });
+
 initPanel();
 initEmoji();
 initColors();

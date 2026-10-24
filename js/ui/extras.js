@@ -199,7 +199,7 @@ export function initExtras() {
   onValue(r("entry"), (s) => { S.entry = s.val() || {}; }, () => {});
   onValue(r("wroom"), (s) => { S.wroom = s.val() || {}; refreshWaiting(false); }, () => {});
   // صار عنده مجموعة (أو انسحبت): نعيد حساب غرفه الإنتظار
-  on("perms", () => { refreshWaiting(false); if (welcomed) superNote(); });
+  on("perms", () => refreshWaiting(false));
 
   on("enter", () => {
     onValue(r("shrt"), (s) => { shorts = Object.values(s.val() || {}).filter((x) => x && x.k); }, () => {});
@@ -227,7 +227,7 @@ export function initExtras() {
     if (!rid || welcomed) return;
     welcomed = true;
     lastAuto = Date.now();
-    setTimeout(() => { cmsgs.filter((x) => x.k === "w").forEach((x) => toRoom(sysMsg(x))); superNote(); }, 400);
+    setTimeout(() => cmsgs.filter((x) => x.k === "w").forEach((x) => toRoom(sysMsg(x))), 400);
   });
   // الرسائل التلقائيه: وحدة كل SITE.msgstt دقيقة بالدور
   setInterval(() => {

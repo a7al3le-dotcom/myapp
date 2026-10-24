@@ -14,6 +14,7 @@ import { openPm } from "./pm.js";
 
 const $ = window.jQuery;
 let cur = null;
+const likeCache = {};
 
 async function likesOf(uid) {
   try { return (await get(r("ucount/" + uid))).val() || 0; }
@@ -56,11 +57,12 @@ export async function openProfile(uid) {
   $m.find(".uunmute").toggle(S.ignored.has(uid));
   // لون الضغط يختفي كل ما انفتح الملف من جديد
   $m.find(".ulike, .unot").css("background-color", "");
-  $m.find(".ulike").text("..");
+  $m.find(".ulike").text(likeCache[uid] != null ? shortNum(likeCache[uid]) : "");
   adminBox(uid, u);
   $m.modal("show");
   // الاسم الوهمي (Bots): الإعجابات = رصيده + اللي انضافت له
   const n = (await likesOf(uid)) + (u.bot ? +u.likes || 0 : 0);
+  likeCache[uid] = n;
   if (cur === uid) { $m.find(".ulike").text(shortNum(n)); $m.find(".likebox .likec").val(n); }
 }
 

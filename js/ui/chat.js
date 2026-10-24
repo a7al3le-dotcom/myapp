@@ -20,6 +20,7 @@ const toBottom = () => { const d = $("#d2")[0]; d.scrollTop = d.scrollHeight; };
 
 function add(rid, key, m) {
   if (!m) return;
+  if (m.t === "v" && m.uid === S.uid) return; // انتقالي أنا يطلع عندي كـ"دخل" بس
   const own = m.uid === S.uid;
   const stick = atBottom() || own;
   const $e = renderMsg(m, {
@@ -59,12 +60,7 @@ function start(rid) {
   unsubs.push(onChildRemoved(curQ, (s) => $(`#d2 > [data-id="${s.key}"]`).remove()));
   // المخفي ما تطلع له رسالة دخول
   if (!S.me.s) set(joinRef, { t: "j", uid: S.uid, room: rid, rt: ((S.rooms[rid] && S.rooms[rid].topic) || "").slice(0, 40), ts: serverTimestamp(), u: snap() }).catch(() => {});
-  const rm = S.rooms[rid];
-  if (rm && rm.welcome) {
-    const $w = localMsg("╠ ترحيب ╣", rm.welcome, "red", rm.pic);
-    const $j = $(`#d2 > [data-id="${joinRef.key}"]`);
-    $j.length ? $w.insertAfter($j) : $("#d2").append($w);
-  }
+  // ترحيب الغرفة انشال: الرسائل كلها من تبويب الرسائل في اللوحة (طلب المالك)
 }
 
 // نحذف الرسائل الأقدم من يوم (القواعد تسمح لأي أحد يحذف القديم)
