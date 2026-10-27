@@ -1,11 +1,7 @@
 /* تنسيق الشات — القيم مطابقة لقياسات العنود (SPEC.md §2) */
 
-html { height: 100%; width: 100%; overflow: hidden; max-width: 100%; }
-body {
-  background-color: #40404f;
-  height: 100%; max-height: 100%; min-height: 100%;
-  margin: 0; padding: 0; overflow: hidden;
-}
+html { height: 100vh; width: 100vw; overflow: hidden; }
+body { background-color: #40404f; height: 100%; max-height: 100%; min-height: 100%; margin: 0; padding: 0; overflow: hidden; }
 
 * {
   font-family: serif;
@@ -22,7 +18,7 @@ body {
 .hid { display: none; }
 .noflow { overflow: hidden; }
 .hand { cursor: pointer; }
-img { vertical-align: middle; max-width: 100%; height: auto; }
+img { vertical-align: middle; }
 .break { overflow: auto; word-wrap: break-word; overflow-x: hidden; overflow-wrap: break-word; }
 .mini { font-size: 90% !important; }
 .minix { font-size: 80% !important; }
@@ -146,100 +142,3 @@ body:not(.p-delbc) #d2bc .mm:not(.mine) .bdel, body:not(.p-delbc) #rpl .mm:not(.
 html, body { touch-action: manipulation; overscroll-behavior: none; }
 body { position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
 html, body { max-width: 100vw; overflow: hidden !important; }
-
-/* ===== نافذة إنشاء الغرفه (#mkr) — مثل صورة المالك ===== */
-.mkr-box { overflow: hidden; border-radius: 4px; }
-.mkr-head { color: white; padding: 6px 8px; display: flex; align-items: center; gap: 6px; }
-.mkr-head .modal-title { margin: 0; flex: 1 1 auto; }
-.mkr-x { width: 22px; height: 22px; border-radius: 50%; background: white; color: #337ab7; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; flex: 0 0 auto; }
-.mkr-body { display: flex; align-items: flex-start; gap: 8px; padding: 10px 8px; background: white; }
-.mkr-side { flex: 0 0 auto; width: 96px; display: flex; flex-direction: column; gap: 6px; }
-.mkr-side .rpic { width: 84px; height: 84px; border: 1px solid #555; background: #fff; }
-.mkr-side .rpic img { max-width: 100%; height: 100%; }
-.mkr-side .btn { width: 84px; margin: 0; padding: 4px 0; font-size: 12px; }
-.mkr-side .rcolor { height: 44px; background-color: #000; background-image: none; }
-.mkr-form { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.mkr-form .form-control { width: 100%; height: 28px; padding: 2px 8px; border: 1px solid #c9c9c9; border-bottom-color: #9a9a9a; border-radius: 6px; box-shadow: none; font-size: 12px; }
-.mkr-chk { margin: 2px 0 0; font-size: 12px; font-weight: normal; }
-.mkr-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.mkr-actions .btn { margin: 0; font-size: 12px; }
-.mkr-actions .rmake, .mkr-actions .rsave { flex: 1 1 auto; }
-
-/* ===== كشف النكات (#uh) ===== */
-.uht { width: 100%; border-collapse: collapse; font-size: 11px; background: white; }
-.uht th { background: cornflowerblue; color: white; font-weight: normal; padding: 4px 3px; text-align: center; }
-.uht td { border: 1px solid #eee; padding: 3px; text-align: center; vertical-align: middle; word-break: break-all; }
-.uht .uht-fp td { font-size: 10px; text-align: left; direction: ltr; background: #fafafa; color: #333; }
-
-/* ================================================
-   ===== تحسينات الآيفون (iOS / Safari) =====
-   ================================================ */
-
-/* 1) ارتفاع صحيح يراعي شريط Safari — dvh بدل 100vh */
-html { height: 100%; width: 100%; }
-html, body { max-width: 100%; }
-body {
-  height: 100dvh;
-  max-height: 100dvh;
-  min-height: 0;
-  /* المناطق الآمنة: النوتش وشريط الهوم */
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  box-sizing: border-box;
-}
-
-/* 2) منع تكبير iOS التلقائي عند الكتابة (يلزم 16px للحقول) */
-input, textarea, select,
-.tbox, .form-control,
-.mkr-form .form-control {
-  font-size: 16px !important;
-  -webkit-appearance: none;
-}
-
-/* 3) صندوق الكتابة أنسب للمس */
-.tbox {
-  min-height: 40px;
-  height: 40px;
-  max-height: 40px;
-  padding: 8px;
-}
-
-/* 4) أزرار الشريط السفلي: حجم مناسب للمس */
-.ae {
-  min-height: 40px;
-  min-width: 44px;
-  padding: 8px 0;
-  box-sizing: border-box;
-}
-
-/* 5) اللوحة الجانبية تراعي المناطق الآمنة */
-.dpnl {
-  top: env(safe-area-inset-top);
-  bottom: calc(36px + env(safe-area-inset-bottom));
-}
-
-/* 6) القوائم المنبثقة واللوحات الثابتة تراعي المناطق الآمنة */
-.ppop {
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-/* 7) شاشات الجوال الصغيرة (آيفون SE وغيره) */
-@media (max-width: 480px) {
-  .msgimg { max-width: 140px; max-height: 140px; }
-  .emoi { max-height: 22px; }
-  .mkr-side { width: 84px; }
-  .mkr-side .rpic, .mkr-side .btn { width: 76px; }
-  .mkr-body { flex-wrap: wrap; }
-  .mkr-form .form-control { height: 32px; font-size: 16px !important; }
-  .uhtml .u-pic { min-width: 44px; width: 44px; }
-  .uht { font-size: 10px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  button.btn { padding: 8px 6px; min-height: 40px; }
-}
-
-/* 8) تمرير سلس طبيعي داخل القوائم */
-#lonline, #rooms, #users, .break {
-  -webkit-overflow-scrolling: touch;
-}
