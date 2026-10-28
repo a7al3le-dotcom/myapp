@@ -84,6 +84,7 @@ export function fillUser($e, u, opts = {}) {
 // أيقونة جنب الاسم: اسم ملف من sico، أو مسار (dro3/..)، أو صورة مرفوعة (db:..)
 export function setIco(img, ico) {
   if (!img) return;
+  if (ico && (String(ico).includes("://") || String(ico).startsWith("//"))) ico = ""; // لا روابط خارجية
   if (!ico) { img.removeAttribute("src"); img.style.display = "none"; return; }
   img.style.display = "";
   if (ico.startsWith("db:")) setPic(img, ico);

@@ -210,10 +210,13 @@ const local = {
   // كشف النكات: كل دخول من نفس بصمة الجهاز (سجل fps)، الأحدث أولاً
   async history({ uid }) {
     const u = target(uid);
-    if (!u.fp) return [];
-    const v = (await get(query(r("fps"), orderByChild("fp"), equalTo(u.fp), limitToLast(100)))).val() || {};
+    // سجل fps يحفظ البصمة الكاملة (fd)، أما u.fp فهو مفتاح مختصر لا يطابقها
+    // البصمة الكاملة تُقرأ من سجل الاتصال نفسه (online) لأن بيانات المستخدم في الذاكرة قد لا تحتويها
+    const fp = u.fd || (await get(r(`online/${uid}/fd`))).val() || (await privOf(uid, "fp")) || "";
+    if (!fp) return [];
+    const v = (await get(query(r("fps"), orderByChild("fp"), equalTo(fp), limitToLast(30)))).val() || {};
     return Object.values(v).sort((a, b) => (b.ts || 0) - (a.ts || 0))
-      .map((x) => ({ ts: x.ts, ip: x.ip || "", t: x.t || "", un: x.un || "", fp: x.fp || "" }));
+      .map((x) => ({ ts: x.ts, ip: x.ip || "", t: x.t || "", un: x.un || "", fp: x.fp || "", st: x.st || "" }));
   },
   // حذف العضويه (إدارة العضويات): الاسم يرجع متاح، وبياناته واشتراكه ينشالون، ويطلع لو متصل.
   // حساب الدخول نفسه في Firebase ينحذف عند Blaze (Admin SDK).

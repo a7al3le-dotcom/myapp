@@ -181,7 +181,7 @@ export function initLogin() {
   // الروابط تنحط بعد #loginstat بنفس ترتيب القائمة
   let $after = $("#loginstat");
   SITE.loginLinks.forEach((l) => {
-    const $d = $('<div class="fr borderg minix" style="padding:2px;background-color:white!important;font-size:10px;margin-top:0;"> <a></a></div>');
+    const $d = $('<div class="fr borderg minix" style="padding:2px;background-color:white!important;margin-top:0;"> <a></a></div>');
     $d.find("a").attr({ href: l.url, title: l.title }).text(l.title);
     $d.insertAfter($after);
     $after = $d;

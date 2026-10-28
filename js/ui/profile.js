@@ -10,7 +10,8 @@ import { icoOf, rankOf, sortedPowers, above } from "../perms.js";
 import { roomCount } from "./rooms.js";
 import { SITE } from "../config.js";
 import { snap, touch } from "../session.js";
-import { openPm } from "./pm.js";
+import { openPm } from "./pm.js";
+import { closePanel } from "./panel.js";
 import { noteUser } from "./notify.js";
 
 const $ = window.jQuery;
@@ -58,13 +59,13 @@ export async function openProfile(uid) {
   $m.find(".uunmute").toggle(S.ignored.has(uid));
   // لون الضغط يختفي كل ما انفتح الملف من جديد
   $m.find(".ulike, .unot").css("background-color", "");
-  $m.find(".ulike").text(likeCache[uid] != null ? shortNum(likeCache[uid]) : "");
+  $m.find(".ulike").text(likeCache[uid] != null ? Number(likeCache[uid]).toLocaleString("en-US") : "");
   adminBox(uid, u);
   $m.modal("show");
   // الاسم الوهمي (Bots): الإعجابات = رصيده + اللي انضافت له
   const n = (await likesOf(uid)) + (u.bot ? +u.likes || 0 : 0);
   likeCache[uid] = n;
-  if (cur === uid) { $m.find(".ulike").text(shortNum(n)); $m.find(".likebox .likec").val(n); }
+  if (cur === uid) { $m.find(".ulike").text(Number(n).toLocaleString("en-US")); $m.find(".likebox .likec").val(n); }
 }
 
 // ===== أزرار الإدارة =====
@@ -130,50 +131,103 @@ async function run(btn, type, payload, close, noColor) {
   catch (e) { console.error(e); toast(e.msg || (/permission|PERMISSION/.test(String(e && (e.code || e.message))) ? "ليس لديك صلاحيه" : "فشل الحفظ")); }
 }
 
-// كشف النكات: جدول الدخول من نفس الجهاز — زر البحث في الصف يفلتر بنفس الآي بي (ضغطه ثانية = إلغاء)
-function showHistory(rows) {
-  $("#uh").closest(".bgg").remove();
-  const $p = tpl("pop");
-  $p.find(".title").html('<i class="fa fa-search"></i> كشف النكات');
-  const $b = $p.find(".body").attr("id", "uh").css({ "background-color": "white" });
-  const draw = (ip) => {
-    $b.empty();
-    if (ip) {
-      $('<div class="uht-filter-badge"></div>')
-        .append($("<span></span>").append('<i class="fa fa-filter"></i> تصفية حسب IP: ', $("<b></b>").text(ip)), '<span class="clear-filter" title="إلغاء التصفية"><i class="fa fa-times"></i> إلغاء</span>')
-        .find(".clear-filter").on("click", () => draw("")).end()
-        .appendTo($b);
-    }
-    const list = ip ? rows.filter((x) => x.ip === ip) : rows;
-    if (!list.length) return $b.append('<div style="padding:15px;text-align:center;color:#888;">لا يوجد سجل لهذا العضو</div>');
-    const $tb = $("<tbody></tbody>");
-    list.forEach((x) => {
-      const activeFilter = x.ip && x.ip === ip;
-      $tb.append(
-        $("<tr></tr>").append(
-          $('<td style="width:34px;"></td>').append(
-            $(`<button class="btn ${activeFilter ? 'btn-success' : 'btn-primary'} uht-search-btn fa fa-search" title="تصفية بهذا الآي بي"></button>`)
-              .on("click", () => draw(x.ip === ip ? "" : x.ip))
-          ),
-          $('<td style="width:62px;white-space:nowrap;"></td>').text(x.ts ? new Date(x.ts).toLocaleTimeString("en-GB") : "--"),
-          $('<td class="uht-ip" style="width:110px;"></td>').text(x.ip || "--"),
-          $('<td class="dots" style="max-width:80px;"></td>').text(x.t || "--"),
-          $('<td style="width:64px;font-weight:bold;"></td>').text(x.un || "***")
-        ),
-        $('<tr class="uht-fp"></tr>').append($('<td colspan="5"></td>').append(x.fp ? [$('<i class="fa fa-desktop" style="margin-left:4px;color:#999;"></i>'), $("<span></span>").text(x.fp)] : $('<span style="color:#aaa;">--</span>')))
-      );
-    });
-    const $table = $('<table class="uht"></table>').append(
-      '<thead><tr><th style="width:34px;">#</th><th style="width:62px;">الوقت</th><th style="width:110px;">IP</th><th style="max-width:80px;">الزخرفه</th><th style="width:64px;">العضو</th></tr></thead>',
-      $tb
-    );
-    $('<div class="uht-wrap"></div>').append($table).appendTo($b);
-  };
-  draw("");
-  $p.find(".pphide").on("click", () => $p.remove());
-  $("#room").append($p);
-}
-
+// كشف النكات: بطاقات الدخول من نفس الجهاز، الأحدث أولاً — زر التصفية يفلتر بنفس الآي بي (ضغطه ثانية = إلغاء)
+const UHC_COLORS = ["#e67e22", "#2980b9", "#27ae60", "#8e44ad", "#c0392b", "#16a085"];
+function fmtTs(ts) {
+  if (!ts) return "--";
+  const o = {};
+  new Date(ts).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
+    .replace(/(\d+)/g, (m) => { (o.a = o.a || []).push(m); return m; });
+  const a = o.a || [];
+  return a.length >= 5 ? `${a[0]}/${a[1]} ${a[2]}:${a[3]}:${a[4]}` : "--";
+}
+function showHistory(rows) {
+  $("#uh").closest(".bgg").remove();
+  const $p = tpl("pop");
+  $p.find(".title").html('<i class="fa fa-search"></i> كشف النكات');
+  const $b = $p.find(".body").attr("id", "uh").css({ "background-color": "white" });
+  const ipCount = {};
+  rows.forEach((x) => { if (x.ip) ipCount[x.ip] = (ipCount[x.ip] || 0) + 1; });
+  const colorOf = {};
+  let ci = 0;
+  Object.keys(ipCount).forEach((k) => { if (ipCount[k] > 1) colorOf[k] = UHC_COLORS[ci++ % UHC_COLORS.length]; });
+  const nNames = new Set(rows.map((x) => x.un).filter(Boolean)).size;
+  const nIps = Object.keys(ipCount).length;
+  let curIp = "";
+  const draw = (ip) => {
+    curIp = ip;
+    $b.empty();
+    const $sum = $('<div class="uhc-sum"></div>').appendTo($b);
+    $("<span></span>").text(`${rows.length} سجل · ${nNames} اسم · ${nIps} آي بي`).appendTo($sum);
+    if (S.perms && S.perms.ban && !(S.users[cur] && S.users[cur].bot)) {
+      $('<button class="btn uhc-ban" data-a="ban"></button>').append('<i class="fa fa-ban"></i> ', document.createTextNode("حظر")).appendTo($sum);
+    }
+    if (ip) {
+      $('<div class="uht-filter-badge"></div>')
+        .append($("<span></span>").append('<i class="fa fa-filter"></i> تصفية حسب IP: ', $("<b></b>").text(ip)), '<span class="clear-filter" data-a="clear" title="إلغاء التصفية"><i class="fa fa-times"></i> إلغاء</span>')
+        .appendTo($b);
+    }
+    const list = ip ? rows.filter((x) => x.ip === ip) : rows;
+    if (!list.length) return $("<div class=\"uhc-empty\"></div>").text("لا توجد سجلات لهذا الجهاز").appendTo($b);
+    const frag = document.createDocumentFragment();
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const head = mk("div", "uhc-head");
+    ["العضو", "الزخرفه", "الآي بي", "الوقت", "#"].forEach((t) => head.appendChild(mk("div", "", t)));
+    frag.appendChild(head);
+    list.forEach((x) => {
+      const card = mk("div", "uhc");
+      card.setAttribute("data-ip", x.ip || "");
+      if (colorOf[x.ip]) card.style.borderRightColor = colorOf[x.ip], card.classList.add("uhc-link");
+      const row = mk("div", "uhc-row");
+      const c1 = mk("div", "uhc-c");
+      c1.appendChild(mk("span", "uhc-name", x.un || "زائر"));
+      if (x.st) c1.appendChild(mk("span", "uhc-st", x.st));
+      const c2 = mk("div", "uhc-c", x.t || "--");
+      const c3 = mk("div", "uhc-c");
+      c3.appendChild(mk("span", "uhc-ip", x.ip || "--"));
+      if (x.ip) {
+        const cb = mk("button", "btn uhc-btn uhc-copy"); cb.setAttribute("data-a", "copy"); cb.title = "نسخ";
+        cb.appendChild(mk("i", "fa fa-copy"));
+        c3.appendChild(cb);
+      }
+      const c4 = mk("div", "uhc-c", fmtTs(x.ts));
+      const c5 = mk("div", "uhc-c");
+      const on = !!x.ip && x.ip === ip;
+      const fb = mk("button", "btn uhc-btn uhc-filter " + (on ? "btn-success" : "btn-primary"));
+      fb.setAttribute("data-a", "filter"); fb.title = "تصفية بهذا الآي بي";
+      fb.appendChild(mk("i", "fa fa-search"));
+      c5.appendChild(fb);
+      [c1, c2, c3, c4, c5].forEach((c) => row.appendChild(c));
+      card.appendChild(row);
+      card.appendChild(mk("div", "uhc-fp", x.fp || "--"));
+      frag.appendChild(card);
+    });
+    $b[0].appendChild(frag);
+  };
+  $b.on("click", async (e) => {
+    const t = $(e.target).closest("[data-a]")[0];
+    if (!t || !$b[0].contains(t)) return;
+    const a = t.getAttribute("data-a");
+    const ipOf = () => t.closest(".uhc") ? t.closest(".uhc").getAttribute("data-ip") : "";
+    if (a === "clear") draw("");
+    else if (a === "filter") { const v = ipOf(); draw(v === curIp ? "" : v); }
+    else if (a === "copy") {
+      let ok = false;
+      try { await navigator.clipboard.writeText(ipOf()); ok = true; } catch (_) {}
+      const ic = t.querySelector("i");
+      if (ic) { ic.className = ok ? "fa fa-check" : "fa fa-times"; setTimeout(() => { ic.className = "fa fa-copy"; }, 1200); }
+      toast(ok ? "تم النسخ" : "تعذر النسخ");
+    } else if (a === "ban") {
+      if (!confirm("حظر هذا العضو؟")) return;
+      try { await perform("ban", { uid: cur }); toast("تم الحظر"); $p.remove(); $("#upro").modal("hide"); }
+      catch (err) { console.error(err); toast(err.msg || (/permission|PERMISSION/.test(String(err && (err.code || err.message))) ? "ليس لديك صلاحيه" : "فشل الحفظ")); }
+    }
+  });
+  draw("");
+  $p.find(".pphide").on("click", () => $p.remove());
+  $("#room").append($p);
+}
+
 function bindAdmin() {
   const $m = $("#upro");
   $m.find(".ukick").on("click", function () { run(this, "kick", { uid: cur }, true); });
@@ -208,7 +262,7 @@ export function initProfile() {
   on("profile", openProfile);
   const $m = $("#upro");
   bindAdmin();
-  $m.find(".upm").on("click", () => { $m.modal("hide"); openPm(cur); });
+  $m.find(".upm").on("click", () => { $m.modal("hide"); openPm(cur); closePanel(); });
   $m.find(".unot").on("click", () => {
     if (!S.users[cur]) return;
     $("#mmnot textarea").val("");

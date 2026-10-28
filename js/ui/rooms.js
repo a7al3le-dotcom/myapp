@@ -12,13 +12,14 @@ import { waitMsg } from "./extras.js";
 import { hiddenFor } from "./users.js";
 import { snap } from "../session.js";
 import { renderMsg } from "./msg.js";
-import { push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { push, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 // رسالة في الغرفة القديمة: l = غادر الغرفه · v = أنتقل ألى (to)
 function roomEvent(rid, t, to) {
   if (!rid || S.me?.s || !S.rooms[rid]) return Promise.resolve();
   const d = { t, uid: S.uid, room: rid, ts: serverTimestamp(), u: snap() };
   if (to) { d.to = to; d.rt = String(S.rooms[to]?.topic || "").slice(0, 40); }
-  return push(r("msgs/" + rid), d).catch(() => {});
+  const ref = push(r("msgs/" + rid));
+  return update(r(), { [`msgs/${rid}/${ref.key}`]: d, [`lastsys/${S.uid}/ts`]: serverTimestamp() }).catch(() => {});
 }
 
 const $ = window.jQuery;
@@ -166,7 +167,27 @@ function openMkr(rid) {
   $m.find(".rmake").toggle(!rid);
   $m.find(".rsave, .rdelete").toggle(!!rid);
   $m.find(".rdelete").toggle(!!rid && rid !== SITE.defaultRoom);
+  $m.toggleClass("mkr-manage", !!rid);
+  drawMembers();
   $m.modal("show");
+}
+
+// قائمة أعضاء الغرفة (وضع الإدارة) مع زر طرد من الغرفة
+function drawMembers() {
+  const $l = $("#mkr .mkr-members").empty().toggle(!!editing);
+  if (!editing) return;
+  const rid = editing, rm = S.rooms[rid] || {};
+  const mod = !!S.perms.roomowner || rm.owner === S.uid || !!(rm.ops && rm.ops[S.uid]);
+  Object.entries(S.users).filter(([uid, u]) => u.room === rid && !hiddenFor(uid, u)).forEach(([uid, u]) => {
+    const $row = $('<div class="mkr-mem"></div>');
+    $('<span class="mn"></span>').text(u.topic || "").appendTo($row);
+    if (mod && uid !== S.uid && !u.bot) {
+      $('<button class="btn btn-danger btn-xs fa fa-times" title="طرد من الغرفه"></button>').on("click", async () => {
+        try { await perform("roomkick", { uid }); $row.remove(); } catch (e) { toast(e.msg || "فشل الحفظ"); }
+      }).appendTo($row);
+    }
+    $row.appendTo($l);
+  });
 }
 
 function formData() {

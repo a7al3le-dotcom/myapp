@@ -20,13 +20,16 @@ function table(heads, widths) {
   const $t = $('<table class="tablesorter"><thead><tr></tr></thead><tbody></tbody></table>');
   // مثل العنود: رأس العمود بدون عرض ثابت، والخلايا لها حد أقصى بس (العمود يضيق حسب محتواه)
   heads.forEach((h) => $('<th class="border header"></th>').text(h).appendTo($t.find("tr")));
-  $t.data("w", widths);
+  $t.data("w", widths).data("h", heads).addClass("cptbl");
+  // سطح المكتب: عرض الجدول = مجموع الأعمدة (CSS يقرأ --tw/--cw، والجوال يتجاهلها)
+  $t.css("--tw", widths.reduce((a, b) => a + b, 0) + "px");
+  $t.find("th").each((i, th) => th.style.setProperty("--cw", (widths[i] || 80) + "px"));
   return $t;
 }
 function row($t, cells) {
   const $r = $("<tr></tr>");
-  const w = $t.data("w") || [];
-  cells.forEach((c, i) => $("<td></td>").css("max-width", (w[i] || 80) + "px").append(c instanceof $ ? c : document.createTextNode(c ?? "")).appendTo($r));
+  const w = $t.data("w") || [], hd = $t.data("h") || [];
+  cells.forEach((c, i) => $("<td></td>").attr("data-label", hd[i] || "").css("max-width", (w[i] || 80) + "px").append(c instanceof $ ? c : document.createTextNode(c ?? "")).appendTo($r));
   $t.find("tbody").append($r);
 }
 const stripe = ($t) => $t.find("tbody tr").each((i, tr) => $(tr).css("background-color", i % 2 ? "#fafaff" : "#fffafa"));
@@ -130,7 +133,7 @@ const textMatch = (q, ...v) => { q = q.toLowerCase(); return v.some((x) => Strin
 // السجل: كل دخول
 const fps = paged("fps", 200, async () => byTs(await A.read("fps", 5000)),
   (list) => {
-    const $t = table("الحاله,العضو,الزخرفه,الآي بي,الدوله,الجهاز,المصدر,الدعوه,الوقت,".split(","), [80, 80, 120, 120, 80, 194, 160, 120, 100, 60]);
+    const $t = table("الحاله,العضو,الزخرفه,الآي بي,الدوله,الجهاز,المصدر,الدعوه,الوقت,".split(","), [37, 54, 114, 114, 38, 184, 104, 41, 54, 25]);
     list.forEach((x) => row($t, [x.st, x.un, x.t, x.ip, String(x.co || "").toUpperCase(), x.fp, x.refr, x.r, el(x.ts), searchBtn(x.fp, x.t)]));
     return $t;
   },
@@ -139,7 +142,7 @@ const fps = paged("fps", 200, async () => byTs(await A.read("fps", 5000)),
 // الحالات
 const acts = paged("actions", 200, async () => byTs(await A.read("acts", 5000)),
   (list) => {
-    const $t = table(["الحاله", "العضو", "العضو الثاني", "الغرفه", "الاي بي", "الوقت"], [100, 130, 230, 130, 130, 130]);
+    const $t = table(["الحاله", "العضو", "العضو الثاني", "الغرفه", "الاي بي", "الوقت"], [69, 124, 219, 124, 124, 73]);
     list.forEach((x) => row($t, [x.type, x.u1, x.u2, x.room, x.ip, el(x.ts)]));
     return $t;
   },
@@ -161,7 +164,7 @@ const logins = paged("logins", 100, async () => {
     return { uid, name: u.name, topic: u.topic, ip: p.ip, fp: p.fp, power: powerName(uid), likes: cnt[uid] || 0, ls: S.users[uid] && !S.users[uid].off ? Date.now() : p.ls, reg: u.reg };
   }).sort((a, b) => (b.ls || 0) - (a.ls || 0));
 }, (list) => {
-  const $t = table(["العضو", "الزخرفه", "الآي بي", "الجهاز", "صلاحيات", "لايكات", "آخر تواجد", "التسجيل", ""], [80, 120, 120, 194, 120, 80, 70, 70, 154]);
+  const $t = table(["العضو", "الزخرفه", "الآي بي", "الجهاز", "صلاحيات", "لايكات", "آخر تواجد", "التسجيل", ""], [66, 106, 114, 184, 54, 41, 67, 67, 74]);
   list.forEach((x) => {
     const $b = $('<div class="d-flex"></div>').append(searchBtn(x.fp, x.topic));
     if (P().edituser) $b.append(gearBtn(x.uid, x.name));
@@ -176,7 +179,7 @@ let bansData = {};
 function drawBans() {
   const $p = $("#bans");
   $p.find(".tablesorter").remove();
-  const $t = table(["العضو", "الحظر", "ينتهي في", "الحالات", "آخر حاله", ""], [80, 194, 120, 60, 120, 60]);
+  const $t = table(["العضو", "الحظر", "ينتهي في", "الحالات", "آخر حاله", ""], [40, 181, 53, 44, 88, 73]);
   byTs(bansData).forEach((x) => {
     const $b = $('<div class="d-flex"></div>')
       .append($('<a class="btn btn-danger fa fa-times"></a>').on("click", () => run("unban", { id: x.id })))
@@ -267,7 +270,7 @@ async function drawSubs() {
   try { c = await loadUsers(); } catch {}
   const users = c?.users || {}, prv = c?.prv || {};
   $p.find(".tablesorter").remove();
-  const $t = table(["الإشتراك", "العضو", "الزخرفه", "المده", "المتبقي", "آخر تواجد", ""], [120, 80, 120, 60, 70, 100, 40]);
+  const $t = table(["الإشتراك", "العضو", "الزخرفه", "المده", "المتبقي", "آخر تواجد", ""], [122, 70, 114, 33, 44, 57, 72]);
   Object.entries(S.upow || {}).map(([uid, x]) => ({ uid, ...x }))
     .sort((a, b) => (S.powers[b.p]?.rank || 0) - (S.powers[a.p]?.rank || 0))
     .forEach((x) => {
@@ -304,8 +307,8 @@ let fltData = {};
 function drawFltr() {
   const $p = $("#fltr");
   $p.find(".tablesorter").remove();
-  const $t = table(["حذف", "الكلمه", "التصنيف"], [40, 200, 80]);
-  byTs(fltData).forEach((x) => row($t, [xBtn(() => run("filter_del", { id: x.id })), x.w, FT[x.t] || x.t]));
+  const $t = table(["التصنيف", "الكلمه", "حذف"], [61, 49, 36]);
+  byTs(fltData).forEach((x) => row($t, [FT[x.t] || x.t, x.w, xBtn(() => run("filter_del", { id: x.id }))]));
   stripe($t);
   $p.append($t);
 }
@@ -374,15 +377,15 @@ $("#entry_room_save_btn").on("click", () => {
 function drawRooms() {
   const $p = $("#cp_rooms");
   $p.find(".tablesorter").remove();
-  const $t = table(["اعدادات", "صاحب الغرفه", "الغرفه"], [90, 140, 220]);
+  const $t = table(["الغرفه", "صاحب الغرفه", "اعدادات"], [119, 74, 79]);
   const names = usersCache?.users || {};
   Object.entries(S.rooms).sort(([, a], [, b]) => (a.no || 0) - (b.no || 0)).forEach(([id, x]) => {
     const $c = $('<div class="d-flex"></div>');
-    $('<a class="btn btn-primary fa fa-gear"></a>').on("click", () => openMkr(id)).appendTo($c);
+    $('<a class="btn btn-info fa fa-gear"></a>').on("click", () => openMkr(id)).appendTo($c);
     const $i = $('<img style="width:40px;height:40px;object-fit:cover;" alt="">').appendTo($c);
     showPic($i[0], x.pic, "room.png");
     const own = x.owner ? (S.users[x.owner]?.topic || names[x.owner]?.topic || x.owner) : "";
-    row($t, [$c, own, `${x.topic || ""} (${A.roomCount(id)}/${x.max || 40})`]);
+    row($t, [`${x.topic || ""} (${A.roomCount(id)}/${x.max || 40})`, own, $c]);
   });
   stripe($t);
   $p.append($t);
@@ -429,7 +432,7 @@ let shrtData = {};
 function drawShrt() {
   const $p = $("#shrt");
   $p.find(".tablesorter").remove();
-  const $t = table(["الإختصار", "الزخرفه", "حذف"], [100, 260, 40]);
+  const $t = table(["الإختصار", "الزخرفه", "حذف"], [53, 380, 36]);
   byTs(shrtData).forEach((x) => row($t, [x.k, x.v, xBtn(() => run("shrt_del", { id: x.id }))]));
   stripe($t);
   $p.append($t);
@@ -445,8 +448,8 @@ let msgsData = {};
 function drawMsgs() {
   const $p = $("#msgs");
   $p.find(".tablesorter").remove();
-  const $t = table(["", "الرساله", "العنوان", "التصنيف"], [40, 260, 120, 80]);
-  byTs(msgsData).forEach((x) => row($t, [xBtn(() => run("cmsg_del", { id: x.id })), x.m, x.t || "", x.k === "w" ? "ترحيب" : "تلقائيه"]));
+  const $t = table(["التصنيف", "العنوان", "الرساله", ""], [51, 96, 177, 36]);
+  byTs(msgsData).forEach((x) => row($t, [x.k === "w" ? "ترحيب" : "تلقائيه", x.t || "", x.m, xBtn(() => run("cmsg_del", { id: x.id }))]));
   stripe($t);
   $p.append($t);
 }
@@ -472,7 +475,7 @@ let wlistData = {};
 function drawWlist() {
   const $p = $("#wrooms");
   $p.find(".tablesorter").remove();
-  const $t = table(["العضو", "الحظر", "المده", "الحالات", "آخر حاله", ""], [80, 194, 80, 60, 140, 60]);
+  const $t = table(["العضو", "الحظر", "المده", "الحالات", "آخر حاله", ""], [40, 38, 33, 44, 151, 73]);
   byTs(wlistData).forEach((x) => {
     const $b = $('<div class="d-flex"></div>')
       .append(xBtn(() => run("wlist_del", { id: x.id })))

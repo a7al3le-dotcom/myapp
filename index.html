@@ -1,467 +1,478 @@
-<!DOCTYPE html>
-<html lang="ar" style="height:100%;">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=400, maximum-scale=1, user-scalable=no">
-<meta name="HandheldFriendly" content="True">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="google" content="notranslate">
-<title></title>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="preload" href="prv1.png" as="image" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="css/al3nood.css">
-</head>
-<body class="bg" style="background-color:#40404f;height:100%;max-height:100%;min-height:100%;margin:0;padding:0;overflow:hidden;">
-<div style="width:100%;height:100%;max-height:100%;max-width:394px;padding:0;" class="center-block bg dad" role="main">
-
-  <!-- ===== صفحة الدخول ===== -->
-  <div id="tlogins" class="border light fr break c-flex" style="z-index:1000;margin-left:-4px;height:100%;width:100%;max-width:390px;min-height:100%;">
-    <div style="width:100%;display:block;">
-      <a href="./" class="label bg d-flex fl" style="width:100%;padding:6px;border-radius:0;text-align:left;">
-        <img src="prv1.png" alt="" width="24" height="24" class="fl sprv1" style="margin-right:2px;">
-        <span class="flex-grow-1 dots sitename"></span>
-        <span class="btn fr btn-success fa fa-refresh" style="margin:0;margin-top:-2px;width:39px;"></span>
-      </a>
-      <div id="bnr" style="width:100%;"></div>
-      <ul class="nav nav-tabs fl" style="margin:0;background-color:white;height:44px;width:100%;">
-        <li class="active"><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user" href="#l1">دخول الزوار</a></li>
-        <li><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user" href="#l2">دخول الاعضاء</a></li>
-        <li><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user-plus" href="#l3"> تسجيل عضويه</a></li>
-      </ul>
-      <div style="width:100%;height:74px;" class="tab-content fl">
-        <div id="l1" style="padding:4px;width:100%;" class="tab-pane in active">
-          <input style="width:206px;margin-top:33px;padding:5px;border-radius:2px;height:33px;" autocomplete="off" type="search" class="border corner" id="u1" placeholder="أكتب الاسم المستعار">
-          <button style="margin-top:1px;" data-login="1" class="btn btn-primary">دخول</button>
-        </div>
-        <div id="l2" style="padding:4px;width:100%;" class="tab-pane">
-          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="u2" class="border corner" placeholder="اكتب اسم العضو" autocomplete="username">
-          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="pass1" class="border corner" type="password" placeholder="اكتب كلمه المرور" autocomplete="current-password">
-          <button data-login="2" class="btn btn-primary">دخول</button>
-          <span id="stealthbtn" style="color:black;padding:4px;margin:2px;border-radius:4px;" class="btn fr fa fa-eye"></span>
-          <input style="display:none;" id="stealth" type="checkbox">
-        </div>
-        <div id="l3" style="padding:4px;width:100%;" class="tab-pane">
-          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="u3" class="border corner" placeholder="اكتب اسم العضو" autocomplete="off">
-          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="pass2" class="border corner" type="password" placeholder="اكتب كلمه المرور" autocomplete="new-password">
-          <button data-login="3" class="btn btn-primary">دخول</button>
-        </div>
-      </div>
-      <div class="bg mini fl" style="width:100%;border-radius:0;padding:0;height:25px;">
-        <label id="loginstat" class="fl label label-warning loginstat" style="border-radius:1px;margin:0;height:25px;min-width:120px;">يتم الاتصال ..</label>
-        <span id="s1" class="s1 fr fa fa-user label badgex label-success" style="border-radius:0;min-width:38px;height:25px;">0</span>
-      </div>
-    </div>
-    <div id="lonline" class="lonline light break flex-grow-1" style="width:100%;outline:lightgray solid 1px;padding-left:1px;background-color:#fafafa;"></div>
-    <div class="fr borderg minix cop" style="padding:2px;background-color:white;z-index:1;color:#5f6b7a;font-size:small!important;height:22px;">Copyright © <span class="sitename"></span>. All Rights Reserved</div>
-  </div>
-</div>
-
-  <!-- ===== الغرفة ===== -->
-  <div id="room" style="height:100%;width:100%;display:none;" class="break c-flex fr">
-    <div id="mic" style="width:100%;border:none;padding:2px;height:54px;display:none;" class="nosel bg"></div>
-    <div id="d2" class="d2 flex-grow-1 light break"></div>
-    <div class="tablebox d-flex footer fl light" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
-      <button id="rleave" style="margin-left:-2px;margin-top:2px;border-radius:2px;" class="fa fa-sign-out fl btn btn-primary">&nbsp;</button>
-      <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
-      <textarea id="tbox" placeholder="اكتب رسالتك هنا" class="fl tbox flex-fill"></textarea>
-      <button id="tsend" style="margin-left:2px;" class="fa fa-send fl btn btn-primary">إرسال</button>
-    </div>
-    <div id="d0" class="nosel fl bg" style="padding-left:1px;margin-top:1px;width:100%;flex:0 0 auto;">
-      <button title="المتواجدين" data-target="#users" class="ae fa label label-primary fa-user" style="width:18%;"><span id="busers" style="padding:1px 4px;"></span></button>
-      <button title="المحادثات الخاصه" data-target="#chats" class="ae fa chats label label-primary fa-comment" style="width:21%;" id="pmb"><span style="padding:1px 4px;"></span>خاص</button>
-      <button title="غرف الدردشه" id="brooms" data-target="#rooms" class="ae fa label label-primary fa-users" style="width:19%;"><span style="padding:1px 4px;"></span>الغرف</button>
-      <button title="الحائط" data-target="#wall" class="ae fa label label-primary fa-commenting"><span id="bwall" style="padding:1px 4px;"></span>الحائط</button>
-      <button title="الإعدادات" data-target="#settings" class="ae label label-primary fa fa-gear" style="width:18%;"><span style="padding:1px 4px;"></span>الضبط</button>
-    </div>
-  </div>
-
-  <!-- ===== اللوحة الجانبية ===== -->
-  <div id="dpnl" class="dpnl bg tab-content c-flex" style="display:none;border:1px solid;max-width:340px;min-width:300px;top:0;right:0;">
-    <div style="width:100%;flex:0 0 auto;">
-      <label id="dpnlclose" class="label label-danger border nosel fa fa-close fr" style="margin-bottom:0;margin-right:2px;border:1px solid black;border-radius:6px;padding:6px 8px;">&nbsp;</label>
-      <label class="fl nosel label pnhead" style="margin:3px;padding-left:10px;padding-right:10px;">المتواجدين</label>
-    </div>
-    <div id="users" style="height:100%;width:100%;" class="light break tab-pane active">
-      <textarea id="usearch" placeholder=".. البحث" class="tbox bg border" style="width:100%;padding-left:5px;display:block;border-radius:0;"></textarea>
-      <div id="uin"></div>
-      <label style="margin:0!important;width:100%;border:none;padding:4px;border-radius:0;display:none;" class="nosel ninr fl uzr label bg">المتواجدين في الدردشه</label>
-      <div id="uout"></div>
-    </div>
-    <div id="chats" style="height:100%;width:100%;" class="break light tab-pane"></div>
-    <div id="wall" style="height:100%;width:100%;" class="break tab-pane">
-      <div style="width:100%;height:100%;" class="c-flex">
-        <div id="d2bc" class="d2 light d2bc flex-grow-1 break" style="width:100%;padding-top:1px;">
-          <button class="fa fa-comments btn border btn-info" style="display:none;position:absolute;top:32px;z-index:1;left:50px;width:70%;text-align:center;" id="bcmore">رسائل جديدة</button>
-        </div>
-        <div class="tablebox light d-flex" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
-          <button style="margin-left:2px;margin-right:3px;margin-top:2px;border-radius:2px;" class="fr fa fa-share-alt sndfilebc fl btn btn-primary"></button>
-          <button id="ytSearchBtn" title="البحث في اليوتيوب" style="margin-left:2px;margin-right:2px;margin-top:2px;border-radius:2px;background:#ff0000;border-color:#cc0000;color:#fff;" class="fa fa-youtube-play fl btn"></button>
-          <img role="button" class="fl emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
-          <textarea placeholder="اكتب رسالتك هنا" class="fl tbox tboxbc flex-fill"></textarea>
-          <button style="margin-left:2px;" class="fa fa-send sndbc fl btn btn-primary">إرسال</button>
-        </div>
-      </div>
-    </div>
-    <div id="rooms" style="height:100%;width:100%;" class="light break tab-pane">
-      <div style="width:100%;margin:0;border:none;border-radius:0;" class="nosel label-primary fl bgg">
-        <button id="mkroom" class="border btn label label-success fl fa fa-plus" style="margin:1px;">غرفه جديدة</button>
-      </div>
-      <div id="rlist"></div>
-    </div>
-    <div id="settings" style="height:100%;width:100%;padding:0;" class="break light tab-pane">
-      <div class="borderg corner" style="background-color:white;width:100%;margin-top:-2px;">
-        <div style="display:inline-block;width:132px;margin-top:2px;height:25px;padding:1px;" class="label label-primary">الزخرفه</div>
-        <br><input class="stopic dots" style="width:99%;">
-        <br><div style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;" class="label label-primary">الحاله</div>
-        <br><input class="smsg dots" style="width:99%;">
-        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الإسم</div>
-        <div class="cpick border scolor btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
-        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الخط</div>
-        <div class="cpick border mcolor btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
-        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الخلفيه</div>
-        <div class="cpick border sbg btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
-        <button id="setprofile" class="border btn mini btn-success hand fl" style="padding:6px;width:98%;margin-left:3px;margin-top:2px;margin-bottom:4px;"><span class="fl fa fa-edit"></span> حـفـظ</button>
-      </div>
-      <select id="zoom" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
-        <option value="1">%100 - حجم الخطوط</option>
-        <option value="1.20">%120 - حجم الخطوط</option>
-        <option value="1.10">%110 - حجم الخطوط</option>
-        <option value="1.05">%105 - حجم الخطوط</option>
-        <option value="0.95">%95 - حجم الخطوط</option>
-        <option value="0.9">%90 - حجم الخطوط</option>
-      </select>
-      <select id="turn_server" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
-        <option value="1">السيرفر الصوتي: الاساسي</option>
-        <option value="2">السيرفر الصوتي: TCP</option>
-        <option value="3">السيرفر الصوتي: UDP</option>
-        <option value="4">السيرفر الصوتي: TCP+Relay</option>
-        <option value="5">السيرفر الصوتي: UDP+Relay</option>
-        <option value="6">السيرفر الصوتي: openrelay</option>
-      </select>
-      <select id="turn_bitrate" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
-        <option value="24">جودة المايك: الاساسيه</option>
-        <option value="8">جودة المايك: ضعيفه</option>
-        <option value="16">جودة المايك: متوسطه</option>
-        <option value="64">جودة المايك: عاليه</option>
-      </select>
-      <label id="changepic" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label changepic tc border btn label-info fl"><img style="width:32px;height:32px;margin:-8px;" class="fitimg fl borderg spic corner hand" src="pic.png" alt="">تغير الصوره</label>
-      <label id="delpic" style="color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn label-danger fl"><span class="fl fa fa-user-times"></span>حذف الصوره</label>
-      <label id="nopm" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn fl"><span class="fa fl"></span>تعطيل المحادثات الخاصه</label>
-      <br>
-      <label id="nonot" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn bb4 fl"><span class="fa fl"></span>تعطيل التنبيهات</label>
-      <br>
-      <label id="pmsg" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border pmsg btn label-info fl"><span class="fl fa fa-send"></span>إرسال إعلان</label>
-      <br>
-      <label id="redit" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border redit btn label-info fl"><span class="fl fa fa-home"></span>إداره الغرفه</label>
-      <br>
-      <a href="cp.html" target="_blank" id="cplink" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border cp btn label-danger fl"><span class="fl fa fa-star"></span>لوحه التحكم</a>
-      <br>
-      <label id="logout" style="margin:2px 4px;padding:8px;width:98%;" class="label border btn label-danger tc fl"><span class="fl fa fa-sign-out"></span>تسجيل خروج</label>
-    </div>
-  </div>
-
-<!-- ===== يوتيوب ===== -->
-<div class="modal" id="ytModal" role="dialog" style="z-index:2150;">
-  <div class="modal-dialog">
-    <div class="modal-content" style="width:310px;">
-      <div style="color:white;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;" class="mini fa fa-youtube-play modal-title"> ارسل مقطع الى الحائط</label>
-      </div>
-      <div class="modal-body" style="padding:1px;">
-        <div class="break" style="background-color:#efefef;padding:5px;">
-          <input id="ytSearchInput" type="text" class="border corner" placeholder="...البحث في اليوتيوب" autocomplete="off" style="width:100%;height:33px;padding:5px;border-radius:2px;margin-bottom:4px;">
-          <div id="ytResults" class="break" style="max-height:340px;overflow-y:auto;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== ملف العضو ===== -->
-<div class="modal" id="upro" role="dialog" style="z-index:2100">
-  <div class="modal-dialog">
-    <div class="modal-content" style="width:340px;margin:-1px;">
-      <div style="color:white;margin-top:-1px;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;max-width:90%;" class="mini dots nosel modal-title"></label>
-      </div>
-      <div class="modal-body" style="padding:1px;">
-        <div class="light fl pro break" style="width:100%;border:1px solid lightgrey;padding:0;margin:0;">
-          <center>
-            <div style="width:100%;height:200px;background-size:cover;" class="fitimg fl u-pic">
-              <div style="width:100%;height:100%;" class="fitimg bgf fl u-pic u-pic2"></div>
-            </div>
-            <label style="width:100%;text-align:end;margin-bottom:0;">
-              <div style="width:100%;padding:2px;text-align:center;" class="fl u-msg"></div>
-              <div class="fl mini u-co" style="margin:4px;"></div>
-              <div class="fr u-room"></div>
-            </label>
-          </center>
-          <span class="fl fa fa-comment btn upm borderg" style="color:black;margin:2px;width:106px;text-align:center;">محادثه خاصه</span>
-          <span class="fl fa fa-envelope-o btn unot borderg" style="color:black;margin:2px;width:106px;text-align:center;">تنبيه</span>
-          <span class="fl fa fa-heart btn ulike borderg" style="margin:2px;color:red;width:106px;text-align:center;">0</span>
-          <span class="fl fa fa-microphone-slash btn uml borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">سحب المايك</span>
-          <span class="fl fa fa-microphone-slash btn umm borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">كتم المايك</span>
-          <span class="fl fa fa-microphone btn uma borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">سماح</span>
-          <span class="fl fa fa-diamond btn ugift borderg" style="color:blue;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">ارسل هديه</span>
-          <span class="fl fa fa-search btn uh borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">كشف النكات</span>
-          <span class="fl fa fa-star btn ubnr borderg" style="color:deeppink;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">البنر</span>
-          <span class="fl fa fa-ban btn udelpic borderg" style="color:maroon;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">حذف الصوره</span>
-          <span class="fl fa fa-user-times btn urkick borderg" style="color:darkorchid;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">طرد من الغرفه</span>
-          <span class="fl fa fa-star btn umod borderg" style="color:green;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">ترقيه الى مراقب</span>
-          <span class="fl fa fa-ban btn ukick borderg" style="color:crimson;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">طرد</span>
-          <span class="fl fa fa-ban btn uban borderg" style="color:crimson;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">باند</span>
-          <span class="fl fa fa-warning btn ureport borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;">تبليغ</span>
-          <span class="fl fa fa-ban btn umute borderg" style="color:red;margin:2px;margin-top:4px;width:106px;text-align:center;">تجاهل</span>
-          <span class="fl fa fa-check btn uunmute borderg" style="color:red;margin:2px;margin-top:4px;width:106px;text-align:center;">إلغاء التجاهل</span>
-          <div class="border nickbox fl" style="padding:4px;margin-top:2px;width:100%;display:none;">
-            <label class="label fl label-primary" style="height:32px;padding:8px;">الزخرفه</label>
-            <textarea class="borderg corner fl u-topic" style="height:32px;padding:4px;width:60%;resize:none;"></textarea>
-            <label class="btn btn-primary u-nickc fr fa fa-save">تغير</label>
-          </div>
-          <div class="border fl likebox" style="width:100%;padding:4px;margin-top:2px;display:none;">
-            <label style="color:red;">♥الايكات</label>
-            <input type="number" style="width:160px;" class="likec">
-            <span class="fa fr fa-check btn ulikec border" style="margin:2px;">حفظ</span>
-          </div>
-          <div class="border fl powerbox" style="width:100%;padding:4px;margin-top:2px;display:none;">
-            <label>المجموعه</label><br>
-            <input id="upsearch" style="width:200px;display:block;margin-bottom:2px;" placeholder="البحث في الصلاحيات">
-            <select style="width:200px;display:inline;" class="userpower selbox form-control"></select><br>
-            <label>المده بالأيام</label><br>
-            <input type="number" class="userdays">
-            <span class="fa fr fa-check btn upower border" style="margin:2px;">حفظ</span>
-          </div>
-          <div class="border fl roomzbox" style="width:100%;padding:4px;margin-top:2px;display:none;">
-            <label>الغرفه</label><br>
-            <select style="width:200px;display:inline;" class="roomz selbox form-control"></select><br>
-            <label>كلمه المرور(إختياري)</label><br>
-            <input type="text" class="rpwd">
-            <span class="fa fr fa-check btn uroomz border" style="margin:2px;">نقل</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== القوالب ===== -->
-<x id="uhtml" style="display:none;">
-  <div class="fl hand nosel uzr uhtml">
-    <div class="d-flex fl" style="padding-right:16px;width:100%;">
-      <img class="ustat" style="width:4px;min-height:100%;max-height:62px;" alt="" src="imgs/s0.png">
-      <div class="fitimg u-pic"></div>
-      <span class="muted fa fa-ban" style="color:indianred;display:none;width:16px;margin-right:-16px;"></span>
-      <div style="padding:0 3px;overflow:hidden;" class="flex-grow-1 break">
-        <div style="width:100%;display:flex;margin-top:1px;height:21px;" class="d-flex dots">
-          <img class="u-ico" style="min-height:14px;margin-top:1px;" alt="">
-          <div class="flex-grow-1"><span style="padding-top:1px;max-width:100%;border-radius:2px;" class="u-topic"></span></div>
-        </div>
-        <div style="color:#888;padding:1px;max-height:40px;" class="mini u-msg"></div>
-      </div>
-    </div>
-    <div class="c-flex fr" style="margin-left:-32px;">
-      <img class="co ico" alt="">
-      <span class="uhash" style="color:grey;font-size:70%!important;"></span>
-    </div>
-  </div>
-</x>
-
-<x id="umsg" style="display:none;">
-  <div class="uzr d-flex mm" style="border-bottom:1px solid lavender;margin:0;width:100%;padding:0;background-color:#fafafa;padding-left:2px;">
-    <div style="min-width:52px;width:52px;height:46px;background-color:#f3f3f3;" class="fitimg u-pic borderg"></div>
-    <div class="uzr flex-fill break" style="padding-top:1px;padding-left:1px;">
-      <div style="width:100%;display:flex;height:21px;" class="d-flex">
-        <div class="d-flex flex-grow-1" style="overflow:hidden;"><img class="u-ico" style="min-height:14px;" alt="">
-          <span style="padding:1px 4px;display:block;margin-left:1px;border-radius:2px;" class="nosel u-topic dots hand"></span>
-        </div>
-        <div class="flex-grow-1 d-flex" style="height:21px;overflow-y:visible;">
-          <span class="flex-grow-1"></span>
-          <span style="padding:0 2px;margin-right:4px;color:grey;text-align:end;" class="minix tago">..</span>
-        </div>
-      </div>
-      <div style="padding:0 5px;width:100%;padding-right:1px;padding-bottom:1px;" class="u-msg break"></div>
-      <div class="reply break" style="max-height:0;"></div>
-    </div>
-  </div>
-</x>
-
-<x id="mbtns" style="display:none;">
-  <div class="d-flex fr mbtns" style="max-width:92px;height:21px;">
-    <button style="padding:3px;width:28px;" class="blike corner btn minix btn-danger fa fa-heart"></button>
-    <button style="padding:3px;width:28px;" class="breply corner btn minix btn-primary fa fa-comments"></button>
-    <button style="padding:3px;width:26px;" class="bdel corner btn minix btn-primary fa fa-times"></button>
-  </div>
-</x>
-
-<x id="rhtml" style="display:none;">
-  <div class="nosel d-flex room hand" style="text-align:left;width:100%;border-bottom:1px solid lavender;padding:0;padding-left:1px;background-color:#fafafa;">
-    <div class="d-flex flex-grow-1" style="overflow:hidden;padding:1px;">
-      <div style="min-width:52px;width:52px;min-height:50px;max-height:50px;background-color:#f3f3f3;" class="fitimg u-pic borderg"></div>
-      <div style="padding:0 2px;overflow:hidden;" class="flex-grow-1 break">
-        <div style="width:100%;display:flex;overflow:hidden;line-height:normal;margin-top:1px;" class="d-flex">
-          <div class="flex-grow-1"><span style="padding:0 4px;max-width:100%;border-radius:2px;" class="u-topic dots"></span></div>
-        </div>
-        <div style="color:#888;margin-top:-1px;" class="dots mini u-msg"></div>
-      </div>
-    </div>
-    <div class="c-flex">
-      <span class="corner fa fa-user label label-primary uc" style="padding:3px;margin:1px;border-radius:2px;min-width:60px;text-align:center;"></span>
-    </div>
-  </div>
-</x>
-
-<x id="uhead" style="display:none;">
-  <div class="fl d-flex uzr flex-grow-1 dots" style="margin:3px;">
-    <img class="fl ustat" style="width:4px;height:22px;" src="imgs/s1.png" alt="">
-    <div style="width:36px;height:36px;" class="fitimg fl hand u-pic"></div>
-    <div style="width:100%;margin-top:0;" class="fl dots d-flex flex-grow-1">
-      <img class="fl u-ico" alt="">
-      <span style="max-width:100%;padding:0 4px;border-radius:0;margin-left:1px;" class="nosel flex-grow-1 u-topic dots"></span>
-    </div>
-  </div>
-</x>
-
-<x id="cw" style="display:none;">
-  <div class="c-flex bgg border cw" style="border-radius:2px;position:absolute;top:1px;min-height:190px;max-height:500px;bottom:46%;width:99.8%;max-width:500px;z-index:6;">
-    <div style="width:100%;height:30px;flex:0 0 auto;" class="head d-flex nosel bg fl">
-      <label class="label fl hand fa border fa-user cwpro" style="margin:2px;margin-right:2px;">&nbsp;</label>
-      <div class="cwhead flex-grow-1 d-flex dots" style="overflow:hidden;"></div>
-      <label style="padding:8px;" class="btn btn-info fr border fa fa-expand cwexp">&nbsp;&nbsp;</label>
-      <label style="padding:8px;" class="btn minix btn-danger phide fr border fa fa-minus">&nbsp;&nbsp;</label>
-    </div>
-    <div class="cont break fr c-flex flex-grow-1" style="width:100%;">
-      <div class="d2 flex-grow-1 break light"></div>
-      <div class="tablebox footer d-flex light fl" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
-        <div class="typ" style="display:none;position:absolute;right:20px;margin-top:-12px;">
-          <div class="typingIndicatorBubbleDot"></div><div class="typingIndicatorBubbleDot"></div><div class="typingIndicatorBubbleDot"></div>
-        </div>
-        <span class="btn btn-success fa fa-phone callx" style="margin-right:3px;margin-top:2px;border-radius:2px;display:none;"></span>
-        <button style="margin-right:3px;margin-top:2px;border-radius:2px;" class="fr fa fa-share-alt sndfile fl btn btn-primary">&nbsp;&nbsp;&nbsp;&nbsp;</button>
-        <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
-        <textarea placeholder="اكتب رسالتك هنا" class="fl flex-fill tbox"></textarea>
-        <button style="margin-left:2px;" class="fa fa-send sndpm fl btn btn-primary">&nbsp;&nbsp;&nbsp;</button>
-      </div>
-    </div>
-  </div>
-</x>
-
-<x id="pop" style="display:none;">
-  <div class="bgg corner c-flex" style="outline:1px solid gray;overflow-y:hidden;position:absolute;top:1px;min-height:180px;max-height:70%;max-width:420px;width:100%;z-index:10;">
-    <div style="width:100%;height:30px;flex:0 0 auto;" class="head nosel bg fl">
-      <label class="label fl hand fa fa-info title" style="margin:2px;margin-right:2px;">&nbsp;</label>
-      <label style="padding:8px;" class="btn minix btn-danger pphide fr border fa fa-close">&nbsp;&nbsp;</label>
-    </div>
-    <div class="body fl flex-grow-1 break" style="width:100%;overflow:auto;"></div>
-  </div>
-</x>
-
-<x id="not" style="display:none;">
-  <div style="min-width:180px;max-width:260px;border:1px solid black;z-index:2110;background-color:#efefef;position:absolute;top:30%;margin-left:30px;padding:5px;" class="hand corner nosel notbox">
-    <center><div class="corner border label label-primary nottitle" style="padding-top:6px;padding-left:15px;width:50%;padding-right:15px;">تنبيه</div></center>
-    <div class="nothead d-flex" style="width:100%;"></div>
-    <div style="width:100%;display:block;padding:0 5px;overflow:hidden;" class="break m fl notmsg"></div>
-  </div>
-</x>
-
-<!-- ===== التنبيه ===== -->
-<div class="modal" id="mmnot" role="dialog" style="z-index:99999;">
-  <div class="modal-dialog">
-    <div class="modal-content" style="width:310px;">
-      <div style="color:white;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;" class="mini fa fa-comments modal-title">تنبيه</label>
-      </div>
-      <div class="modal-body" style="padding:1px;">
-        <div class="break" style="background-color:#efefef;padding:5px;">
-          <textarea placeholder="اكتب رسالتك هنا" class="fl" style="width:100%;resize:none;" maxlength="300"></textarea>
-          <button class="rsave btn btn-primary fr"><span class="fa fa-send">إرسال</span></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== إعلان (publicmsg / ppmsg) ===== -->
-<div class="modal" id="mnot" role="dialog" style="z-index:99999;">
-  <div class="modal-dialog">
-    <div class="modal-content" style="width:310px;">
-      <div style="color:white;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;" class="mini fa fa-comments modal-title">إعلان</label>
-      </div>
-      <div class="modal-body" style="padding:1px;">
-        <div class="break" style="background-color:#efefef;padding:5px;">
-          <textarea placeholder="اكتب رسالتك هنا" class="fl" style="width:100%;resize:none;" maxlength="300"></textarea>
-          <label class="checkbox-inline ppbox"><input type="checkbox" class="ppmsg ispp" disabled="disabled">إعلان خاص للسوابر؟</label>
-          <button class="rsave btn btn-primary fr"><span class="fa fa-send">إرسال</span></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== إنشاء / تعديل غرفة ===== -->
-<div class="modal" id="mkr" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content" style="width:310px;">
-      <div style="color:white;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;" class="mini fa fa-comments modal-title">إنشاء غرفه جديدة</label>
-      </div>
-      <div class="modal-body" style="padding:1px;">
-        <div class="break" style="background-color:#efefef;padding:5px;position:relative;">
-          <input class="rtopic" style="width:200px;" type="text" placeholder="عنوان الغرفه" maxlength="40">
-          <input class="rabout" style="width:200px;" type="text" placeholder="الوصف" maxlength="200">
-          <input class="rwelcome" style="width:200px;" type="text" placeholder="رساله الترحيب" maxlength="300">
-          <input autocomplete="off" class="rpwd" style="width:200px;" type="text" placeholder="كلمه المرور" maxlength="30">
-          <input class="rmax" style="width:200px;" type="number" placeholder="حجم الغرفه من 2 ألى 40" min="2" max="40">
-          <input class="rl" style="width:200px;" type="number" placeholder="عدد الايكات للدخول" min="0">
-          <input class="rvl" style="width:200px;" type="number" placeholder="عدد الايكات للصوتيه" min="0">
-          <br>
-          <label class="checkbox-inline"><input class="rdel" type="checkbox">تثبيت الغرفه</label><br><br>
-          <label class="checkbox-inline"><input class="rv" type="checkbox">تفعيل الصوتيه</label><br><br>
-          <div class="border btn rnopic" style="width:84px;position:absolute;top:96px;right:4px;padding:4px;">بدون صوره</div>
-          <div class="cpick border btn rcolor" style="width:84px;height:44px;background-image:none;position:absolute;top:140px;right:4px;background-color:#000;"></div>
-          <button class="rmake btn btn-primary fl"><span class="fa fa-plus">إنشاء الغرفه</span></button>
-          <button class="rsave btn btn-primary fl"><span class="fa fa-edit">حفظ التعديلات</span></button>
-          <button class="rdelete btn btn-danger fr"><span class="fa fa-times">حذف</span></button>
-          <div class="rpic fr border hand" style="width:84px;height:84px;"><img style="max-width:100%;height:100%;" src="room.png" alt=""></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== التعليقات ===== -->
-<div class="modal break" id="rpl" role="dialog" style="margin:5px;">
-  <div class="modal-dialog fr break" style="height:50%;min-height:300px;overflow:visible;margin-top:2px;">
-    <div class="modal-content c-flex break" style="width:306px;height:100%;">
-      <div style="color:white;flex:0 0 auto;" class="modal-header label-primary mclose">
-        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
-        <label style="margin:1px;" class="mini fa fa-comments modal-title">التعليقات</label>
-      </div>
-      <div class="modal-body break flex-grow-1 c-flex" style="padding:0;">
-        <div style="width:100%;border-bottom:1px solid black;flex:0 0 auto;" class="rmsg"></div>
-        <div class="break flex-grow-1 r" style="background-color:#efefef;border-left:4px solid grey;"></div>
-        <div class="tablebox footer d-flex light fl" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
-          <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
-          <textarea placeholder="اكتب رسالتك هنا" class="fl flex-fill tbox"></textarea>
-          <button style="margin-left:2px;" class="fa fa-send sndrpl fl btn btn-primary">&nbsp;&nbsp;&nbsp;</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<input type="file" id="filepick" accept="image/*" style="display:none;">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<script type="module" src="js/main.js"></script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="ar" style="height:100%;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+<script>try{if(Math.min(screen.width,screen.height)<=600)document.querySelector('meta[name=viewport]').setAttribute("content","width=400, maximum-scale=5");}catch(e){}</script>
+<meta name="HandheldFriendly" content="True">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="google" content="notranslate">
+<title></title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preload" href="prv1.png" as="image" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="css/al3nood.css">
+</head>
+<body class="bg" style="background-color:#40404f;height:100%;max-height:100%;min-height:100%;margin:0;padding:0;overflow:hidden;">
+<div style="width:100%;height:100%;max-height:100%;max-width:394px;padding:0;" class="center-block bg dad" role="main">
+
+  <!-- ===== صفحة الدخول ===== -->
+  <div id="tlogins" class="border light fr break c-flex" style="z-index:1000;margin-left:-4px;height:100%;width:100%;max-width:390px;min-height:100%;">
+    <div style="width:100%;display:block;">
+      <a href="./" class="label bg d-flex fl" style="width:100%;padding:6px;border-radius:0;text-align:left;">
+        <img src="prv1.png" alt="" width="24" height="24" class="fl sprv1" style="margin-right:2px;">
+        <span class="flex-grow-1 dots sitename"></span>
+        <span class="btn fr btn-success fa fa-refresh" style="margin:0;margin-top:-2px;width:39px;"></span>
+      </a>
+      <div id="bnr" style="width:100%;"></div>
+      <ul class="nav nav-tabs fl" style="margin:0;background-color:white;height:44px;width:100%;">
+        <li class="active"><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user" href="#l1">دخول الزوار</a></li>
+        <li><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user" href="#l2">دخول الاعضاء</a></li>
+        <li><a data-toggle="tab" style="padding:10px 6px;" class="fa fa-user-plus" href="#l3"> تسجيل عضويه</a></li>
+      </ul>
+      <div style="width:100%;height:74px;" class="tab-content fl">
+        <div id="l1" style="padding:4px;width:100%;" class="tab-pane in active">
+          <input style="width:206px;margin-top:33px;padding:5px;border-radius:2px;height:33px;" autocomplete="off" type="search" class="border corner" id="u1" placeholder="أكتب الاسم المستعار">
+          <button style="margin-top:1px;" data-login="1" class="btn btn-primary">دخول</button>
+        </div>
+        <div id="l2" style="padding:4px;width:100%;" class="tab-pane">
+          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="u2" class="border corner" placeholder="اكتب اسم العضو" autocomplete="username">
+          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="pass1" class="border corner" type="password" placeholder="اكتب كلمه المرور" autocomplete="current-password">
+          <button data-login="2" class="btn btn-primary">دخول</button>
+          <span id="stealthbtn" style="color:black;padding:4px;margin:2px;border-radius:4px;" class="btn fr fa fa-eye"></span>
+          <input style="display:none;" id="stealth" type="checkbox">
+        </div>
+        <div id="l3" style="padding:4px;width:100%;" class="tab-pane">
+          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="u3" class="border corner" placeholder="اكتب اسم العضو" autocomplete="off">
+          <input style="width:206px;padding:5px;border-radius:2px;height:33px;" id="pass2" class="border corner" type="password" placeholder="اكتب كلمه المرور" autocomplete="new-password">
+          <button data-login="3" class="btn btn-primary">دخول</button>
+        </div>
+      </div>
+      <div class="bg mini fl" style="width:100%;border-radius:0;padding:0;height:25px;">
+        <label id="loginstat" class="fl label label-warning loginstat" style="border-radius:1px;margin:0;height:25px;min-width:120px;">يتم الاتصال ..</label>
+        <span id="s1" class="s1 fr fa fa-user label badgex label-success" style="border-radius:0;min-width:38px;height:25px;">0</span>
+      </div>
+    </div>
+    <div id="lonline" class="lonline light break flex-grow-1" style="width:100%;outline:lightgray solid 1px;padding-left:1px;background-color:#fafafa;"></div>
+    <div class="fr borderg minix cop" style="padding:2px;background-color:white;z-index:1;color:#5f6b7a;font-size:small!important;height:22px;">Copyright © <span class="sitename"></span>. All Rights Reserved</div>
+  </div>
+</div>
+
+  <!-- ===== الغرفة ===== -->
+  <div id="room" style="height:100%;width:100%;display:none;" class="break c-flex fr">
+    <div id="mic" style="width:100%;border:none;padding:2px;height:54px;display:none;" class="nosel bg"></div>
+    <div id="d2" class="d2 flex-grow-1 light break"></div>
+    <div class="tablebox d-flex footer fl light" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
+      <button id="rleave" style="margin-left:-2px;margin-top:2px;border-radius:2px;" class="fa fa-sign-out fl btn btn-primary">&nbsp;</button>
+      <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
+      <textarea id="tbox" placeholder="اكتب رسالتك هنا" class="fl tbox flex-fill"></textarea>
+      <button id="tsend" style="margin-left:2px;" class="fa fa-send fl btn btn-primary">إرسال</button>
+    </div>
+    <div id="d0" class="nosel fl bg" style="padding-left:1px;margin-top:1px;width:100%;flex:0 0 auto;">
+      <button title="المتواجدين" data-target="#users" class="ae fa label label-primary fa-user" style="width:18%;"><span id="busers" style="padding:1px 4px;"></span></button>
+      <button title="المحادثات الخاصه" data-target="#chats" class="ae fa chats label label-primary fa-comment" style="width:21%;" id="pmb"><span style="padding:1px 4px;"></span>خاص</button>
+      <button title="غرف الدردشه" id="brooms" data-target="#rooms" class="ae fa label label-primary fa-users" style="width:19%;"><span style="padding:1px 4px;"></span>الغرف</button>
+      <button title="الحائط" data-target="#wall" class="ae fa label label-primary fa-commenting"><span id="bwall" style="padding:1px 4px;"></span>الحائط</button>
+      <button title="الإعدادات" data-target="#settings" class="ae label label-primary fa fa-gear" style="width:18%;"><span style="padding:1px 4px;"></span>الضبط</button>
+    </div>
+  </div>
+
+  <!-- ===== اللوحة الجانبية ===== -->
+  <div id="dpnl" class="dpnl bg tab-content c-flex" style="display:none;border:1px solid;max-width:340px;min-width:300px;top:0;right:0;">
+    <div style="width:100%;flex:0 0 auto;">
+      <label id="dpnlclose" class="label label-danger border nosel fa fa-close fr" style="margin-bottom:0;margin-right:2px;border:1px solid black;border-radius:6px;padding:6px 8px;">&nbsp;</label>
+      <label class="fl nosel label pnhead" style="margin:3px;padding-left:10px;padding-right:10px;">المتواجدين</label>
+    </div>
+    <div id="users" style="height:100%;width:100%;" class="light break tab-pane active">
+      <textarea id="usearch" placeholder=".. البحث" class="tbox bg border" style="width:100%;padding-left:5px;display:block;border-radius:0;"></textarea>
+      <div id="uin"></div>
+      <label style="margin:0!important;width:100%;border:none;padding:4px;border-radius:0;display:none;" class="nosel ninr fl uzr label bg">المتواجدين في الدردشه</label>
+      <div id="uout"></div>
+    </div>
+    <div id="chats" style="height:100%;width:100%;" class="break light tab-pane"></div>
+    <div id="wall" style="height:100%;width:100%;" class="break tab-pane">
+      <div style="width:100%;height:100%;" class="c-flex">
+        <div id="d2bc" class="d2 light d2bc flex-grow-1 break" style="width:100%;padding-top:1px;">
+          <button class="fa fa-comments btn border btn-info" style="display:none;position:absolute;top:32px;z-index:1;left:50px;width:70%;text-align:center;" id="bcmore">رسائل جديدة</button>
+        </div>
+        <div class="tablebox light d-flex" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
+          <button style="margin-left:2px;margin-right:3px;margin-top:2px;border-radius:2px;" class="fr fa fa-share-alt sndfilebc fl btn btn-primary"></button>
+          <button id="ytSearchBtn" title="البحث في اليوتيوب" style="margin-left:2px;margin-right:2px;margin-top:2px;border-radius:2px;background:#ff0000;border-color:#cc0000;color:#fff;" class="fa fa-youtube-play fl btn"></button>
+          <img role="button" class="fl emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
+          <textarea placeholder="اكتب رسالتك هنا" class="fl tbox tboxbc flex-fill"></textarea>
+          <button style="margin-left:2px;" class="fa fa-send sndbc fl btn btn-primary">إرسال</button>
+        </div>
+      </div>
+    </div>
+    <div id="rooms" style="height:100%;width:100%;" class="light break tab-pane">
+      <div style="width:100%;margin:0;border:none;border-radius:0;" class="nosel label-primary fl bgg">
+        <button id="mkroom" class="border btn label label-success fl fa fa-plus" style="margin:1px;">غرفه جديدة</button>
+      </div>
+      <div id="rlist"></div>
+    </div>
+    <div id="settings" style="height:100%;width:100%;padding:0;" class="break light tab-pane">
+      <div class="borderg corner" style="background-color:white;width:100%;margin-top:-2px;">
+        <div style="display:inline-block;width:132px;margin-top:2px;height:25px;padding:1px;" class="label label-primary">الزخرفه</div>
+        <br><input class="stopic dots" style="width:99%;">
+        <br><div style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;" class="label label-primary">الحاله</div>
+        <br><input class="smsg dots" style="width:99%;">
+        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الإسم</div>
+        <div class="cpick border scolor btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
+        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الخط</div>
+        <div class="cpick border mcolor btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
+        <br><div class="label label-primary" style="display:inline-block;width:132px;margin-top:1px;height:25px;padding:1px;">لون الخلفيه</div>
+        <div class="cpick border sbg btn" style="width:64px;height:22px;background-image:none;background-color:#fff;"></div>
+        <button id="setprofile" class="border btn mini btn-success hand fl" style="padding:6px;width:98%;margin-left:3px;margin-top:2px;margin-bottom:4px;"><span class="fl fa fa-edit"></span> حـفـظ</button>
+      </div>
+      <select id="zoom" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
+        <option value="1">%100 - حجم الخطوط</option>
+        <option value="1.20">%120 - حجم الخطوط</option>
+        <option value="1.10">%110 - حجم الخطوط</option>
+        <option value="1.05">%105 - حجم الخطوط</option>
+        <option value="0.95">%95 - حجم الخطوط</option>
+        <option value="0.9">%90 - حجم الخطوط</option>
+      </select>
+      <select id="turn_server" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
+        <option value="1">السيرفر الصوتي: الاساسي</option>
+        <option value="2">السيرفر الصوتي: TCP</option>
+        <option value="3">السيرفر الصوتي: UDP</option>
+        <option value="4">السيرفر الصوتي: TCP+Relay</option>
+        <option value="5">السيرفر الصوتي: UDP+Relay</option>
+        <option value="6">السيرفر الصوتي: openrelay</option>
+      </select>
+      <select id="turn_bitrate" style="width:98%;margin:2px 4px;" class="fl btn btn-primary">
+        <option value="24">جودة المايك: الاساسيه</option>
+        <option value="8">جودة المايك: ضعيفه</option>
+        <option value="16">جودة المايك: متوسطه</option>
+        <option value="64">جودة المايك: عاليه</option>
+      </select>
+      <label id="changepic" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label changepic tc border btn label-info fl"><img style="width:32px;height:32px;margin:-8px;" class="fitimg fl borderg spic corner hand" src="pic.png" alt="">تغير الصوره</label>
+      <label id="delpic" style="color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn label-danger fl"><span class="fl fa fa-user-times"></span>حذف الصوره</label>
+      <label id="nopm" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn fl"><span class="fa fl"></span>تعطيل المحادثات الخاصه</label>
+      <br>
+      <label id="nonot" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;" class="label tc border btn bb4 fl"><span class="fa fl"></span>تعطيل التنبيهات</label>
+      <br>
+      <label id="pmsg" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border pmsg btn label-info fl"><span class="fl fa fa-send"></span>إرسال إعلان</label>
+      <br>
+      <label id="redit" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border redit btn label-info fl"><span class="fl fa fa-home"></span>إداره الغرفه</label>
+      <br>
+      <a href="cp.html" target="_blank" id="cplink" style="background-color:ghostwhite;color:black;margin:2px 4px;padding:8px;width:98%;display:none;" class="label tc border cp btn label-danger fl"><span class="fl fa fa-star"></span>لوحه التحكم</a>
+      <br>
+      <label id="logout" style="margin:2px 4px;padding:8px;width:98%;" class="label border btn label-danger tc fl"><span class="fl fa fa-sign-out"></span>تسجيل خروج</label>
+    </div>
+  </div>
+
+<!-- ===== يوتيوب ===== -->
+<div class="modal" id="ytModal" role="dialog" style="z-index:2150;">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:310px;">
+      <div style="color:white;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-youtube-play modal-title"> ارسل مقطع الى الحائط</label>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+        <div class="break" style="background-color:#efefef;padding:5px;">
+          <input id="ytSearchInput" type="text" class="border corner" placeholder="...البحث في اليوتيوب" autocomplete="off" style="width:100%;height:33px;padding:5px;border-radius:2px;margin-bottom:4px;">
+          <div id="ytResults" class="break" style="max-height:340px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ملف العضو ===== -->
+<div class="modal" id="upro" role="dialog" style="z-index:2100">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:340px;margin:-1px;">
+      <div style="color:white;margin-top:-1px;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;max-width:90%;" class="mini dots nosel modal-title"></label>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+        <div class="light fl pro break" style="width:100%;border:1px solid lightgrey;padding:0;margin:0;">
+          <center>
+            <div style="width:100%;height:200px;background-size:cover;" class="fitimg fl u-pic">
+              <div style="width:100%;height:100%;" class="fitimg bgf fl u-pic u-pic2"></div>
+            </div>
+            <label style="width:100%;text-align:end;margin-bottom:0;">
+              <div style="width:100%;padding:2px;text-align:center;" class="fl u-msg"></div>
+              <div class="fl mini u-co" style="margin:4px;"></div>
+              <div class="fr u-room"></div>
+            </label>
+          </center>
+          <span class="fl fa fa-comment btn upm borderg" style="color:black;margin:2px;width:106px;text-align:center;">محادثه خاصه</span>
+          <span class="fl fa fa-envelope-o btn unot borderg" style="color:black;margin:2px;width:106px;text-align:center;">تنبيه</span>
+          <span class="fl fa fa-heart btn ulike borderg" style="margin:2px;color:red;width:106px;text-align:center;">0</span>
+          <span class="fl fa fa-microphone-slash btn uml borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">سحب المايك</span>
+          <span class="fl fa fa-microphone-slash btn umm borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">كتم المايك</span>
+          <span class="fl fa fa-microphone btn uma borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">سماح</span>
+          <span class="fl fa fa-diamond btn ugift borderg" style="color:blue;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">ارسل هديه</span>
+          <span class="fl fa fa-search btn uh borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">كشف النكات</span>
+          <span class="fl fa fa-star btn ubnr borderg" style="color:deeppink;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">البنر</span>
+          <span class="fl fa fa-ban btn udelpic borderg" style="color:maroon;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">حذف الصوره</span>
+          <span class="fl fa fa-user-times btn urkick borderg" style="color:darkorchid;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">طرد من الغرفه</span>
+          <span class="fl fa fa-star btn umod borderg" style="color:green;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">ترقيه الى مراقب</span>
+          <span class="fl fa fa-ban btn ukick borderg" style="color:crimson;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">طرد</span>
+          <span class="fl fa fa-ban btn uban borderg" style="color:crimson;margin:2px;margin-top:4px;width:106px;text-align:center;display:none;">باند</span>
+          <span class="fl fa fa-warning btn ureport borderg" style="color:black;margin:2px;margin-top:4px;width:106px;text-align:center;">تبليغ</span>
+          <span class="fl fa fa-ban btn umute borderg" style="color:red;margin:2px;margin-top:4px;width:106px;text-align:center;">تجاهل</span>
+          <span class="fl fa fa-check btn uunmute borderg" style="color:red;margin:2px;margin-top:4px;width:106px;text-align:center;">إلغاء التجاهل</span>
+          <div class="border nickbox fl" style="padding:4px;margin-top:2px;width:100%;display:none;">
+            <label class="label fl label-primary" style="height:32px;padding:8px;">الزخرفه</label>
+            <textarea class="borderg corner fl u-topic" style="height:32px;padding:4px;width:60%;resize:none;"></textarea>
+            <label class="btn btn-primary u-nickc fr fa fa-save">تغير</label>
+          </div>
+          <div class="border fl likebox" style="width:100%;padding:4px;margin-top:2px;display:none;">
+            <label style="color:red;">♥الايكات</label>
+            <input type="number" style="width:160px;" class="likec">
+            <span class="fa fr fa-check btn ulikec border" style="margin:2px;">حفظ</span>
+          </div>
+          <div class="border fl powerbox" style="width:100%;padding:4px;margin-top:2px;display:none;">
+            <label>المجموعه</label><br>
+            <input id="upsearch" style="width:200px;display:block;margin-bottom:2px;" placeholder="البحث في الصلاحيات">
+            <select style="width:200px;display:inline;" class="userpower selbox form-control"></select><br>
+            <label>المده بالأيام</label><br>
+            <input type="number" class="userdays">
+            <span class="fa fr fa-check btn upower border" style="margin:2px;">حفظ</span>
+          </div>
+          <div class="border fl roomzbox" style="width:100%;padding:4px;margin-top:2px;display:none;">
+            <label>الغرفه</label><br>
+            <select style="width:200px;display:inline;" class="roomz selbox form-control"></select><br>
+            <label>كلمه المرور(إختياري)</label><br>
+            <input type="text" class="rpwd">
+            <span class="fa fr fa-check btn uroomz border" style="margin:2px;">نقل</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== القوالب ===== -->
+<x id="uhtml" style="display:none;">
+  <div class="fl hand nosel uzr uhtml">
+    <div class="d-flex fl" style="padding-right:16px;width:100%;">
+      <img class="ustat" style="width:4px;min-height:100%;max-height:62px;" alt="" src="imgs/s0.png">
+      <div class="fitimg u-pic"></div>
+      <span class="muted fa fa-ban" style="color:indianred;display:none;width:16px;margin-right:-16px;"></span>
+      <div style="padding:0 3px;overflow:hidden;" class="flex-grow-1 break">
+        <div style="width:100%;display:flex;margin-top:1px;height:21px;" class="d-flex dots">
+          <img class="u-ico" style="min-height:14px;margin-top:1px;" alt="">
+          <div class="flex-grow-1"><span style="padding-top:1px;max-width:100%;border-radius:2px;" class="u-topic"></span></div>
+        </div>
+        <div style="color:#888;padding:1px;max-height:40px;" class="mini u-msg"></div>
+      </div>
+    </div>
+    <div class="c-flex fr" style="margin-left:-32px;">
+      <img class="co ico" alt="">
+      <span class="uhash" style="color:grey;font-size:70%!important;"></span>
+    </div>
+  </div>
+</x>
+
+<x id="umsg" style="display:none;">
+  <div class="uzr d-flex mm" style="border-bottom:1px solid lavender;margin:0;width:100%;padding:0;background-color:#fafafa;padding-left:2px;">
+    <div style="min-width:52px;width:52px;height:46px;background-color:#f3f3f3;" class="fitimg u-pic borderg"></div>
+    <div class="uzr flex-fill break" style="padding-top:1px;padding-left:1px;">
+      <div style="width:100%;display:flex;height:21px;" class="d-flex">
+        <div class="d-flex flex-grow-1" style="overflow:hidden;"><img class="u-ico" style="min-height:14px;" alt="">
+          <span style="padding:1px 4px;display:block;margin-left:1px;border-radius:2px;" class="nosel u-topic dots hand"></span>
+        </div>
+        <div class="flex-grow-1 d-flex" style="height:21px;overflow-y:visible;">
+          <span class="flex-grow-1"></span>
+          <span style="padding:0 2px;margin-right:4px;color:grey;text-align:end;" class="minix tago">..</span>
+        </div>
+      </div>
+      <div style="padding:0 5px;width:100%;padding-right:1px;padding-bottom:1px;" class="u-msg break"></div>
+      <div class="reply break" style="max-height:0;"></div>
+    </div>
+  </div>
+</x>
+
+<x id="mbtns" style="display:none;">
+  <div class="d-flex fr mbtns" style="max-width:92px;height:21px;">
+    <button style="padding:3px;width:28px;" class="blike corner btn minix btn-danger fa fa-heart"></button>
+    <button style="padding:3px;width:28px;" class="breply corner btn minix btn-primary fa fa-comments"></button>
+    <button style="padding:3px;width:26px;" class="bdel corner btn minix btn-primary fa fa-times"></button>
+  </div>
+</x>
+
+<x id="rhtml" style="display:none;">
+  <div class="nosel d-flex room hand" style="text-align:left;width:100%;border-bottom:1px solid lavender;padding:0;padding-left:1px;background-color:#fafafa;">
+    <div class="d-flex flex-grow-1" style="overflow:hidden;padding:1px;">
+      <div style="min-width:52px;width:52px;min-height:50px;max-height:50px;background-color:#f3f3f3;" class="fitimg u-pic borderg"></div>
+      <div style="padding:0 2px;overflow:hidden;" class="flex-grow-1 break">
+        <div style="width:100%;display:flex;overflow:hidden;line-height:normal;margin-top:1px;" class="d-flex">
+          <div class="flex-grow-1"><span style="padding:0 4px;max-width:100%;border-radius:2px;" class="u-topic dots"></span></div>
+        </div>
+        <div style="color:#888;margin-top:-1px;" class="dots mini u-msg"></div>
+      </div>
+    </div>
+    <div class="c-flex">
+      <span class="corner fa fa-user label label-primary uc" style="padding:3px;margin:1px;border-radius:2px;min-width:60px;text-align:center;"></span>
+    </div>
+  </div>
+</x>
+
+<x id="uhead" style="display:none;">
+  <div class="fl d-flex uzr flex-grow-1 dots" style="margin:3px;">
+    <img class="fl ustat" style="width:4px;height:22px;" src="imgs/s1.png" alt="">
+    <div style="width:36px;height:36px;" class="fitimg fl hand u-pic"></div>
+    <div style="width:100%;margin-top:0;" class="fl dots d-flex flex-grow-1">
+      <img class="fl u-ico" alt="">
+      <span style="max-width:100%;padding:0 4px;border-radius:0;margin-left:1px;" class="nosel flex-grow-1 u-topic dots"></span>
+    </div>
+  </div>
+</x>
+
+<x id="cw" style="display:none;">
+  <div class="c-flex bgg border cw" style="border-radius:2px;position:absolute;top:1px;min-height:190px;max-height:500px;bottom:46%;width:99.8%;max-width:500px;z-index:6;">
+    <div style="width:100%;height:30px;flex:0 0 auto;" class="head d-flex nosel bg fl">
+      <label class="label fl hand fa border fa-user cwpro" style="margin:2px;margin-right:2px;">&nbsp;</label>
+      <div class="cwhead flex-grow-1 d-flex dots" style="overflow:hidden;"></div>
+      <label style="padding:8px;" class="btn btn-info fr border fa fa-expand cwexp">&nbsp;&nbsp;</label>
+      <label style="padding:8px;" class="btn minix btn-danger phide fr border fa fa-minus">&nbsp;&nbsp;</label>
+    </div>
+    <div class="cont break fr c-flex flex-grow-1" style="width:100%;">
+      <div class="d2 flex-grow-1 break light"></div>
+      <div class="tablebox footer d-flex light fl" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
+        <div class="typ" style="display:none;position:absolute;right:20px;margin-top:-12px;">
+          <div class="typingIndicatorBubbleDot"></div><div class="typingIndicatorBubbleDot"></div><div class="typingIndicatorBubbleDot"></div>
+        </div>
+        <span class="btn btn-success fa fa-phone callx" style="margin-right:3px;margin-top:2px;border-radius:2px;display:none;"></span>
+        <button style="margin-right:3px;margin-top:2px;border-radius:2px;" class="fr fa fa-share-alt sndfile fl btn btn-primary">&nbsp;&nbsp;&nbsp;&nbsp;</button>
+        <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
+        <textarea placeholder="اكتب رسالتك هنا" class="fl flex-fill tbox"></textarea>
+        <button style="margin-left:2px;" class="fa fa-send sndpm fl btn btn-primary">&nbsp;&nbsp;&nbsp;</button>
+      </div>
+    </div>
+  </div>
+</x>
+
+<x id="pop" style="display:none;">
+  <div class="bgg corner c-flex" style="outline:1px solid gray;overflow-y:hidden;position:absolute;top:1px;min-height:180px;max-height:70%;max-width:400px;width:98%;left:1%;z-index:10;">
+    <div style="width:100%;height:30px;flex:0 0 auto;" class="head nosel bg fl">
+      <label class="label fl hand title" style="margin:2px;margin-right:2px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">&nbsp;</label>
+      <label style="padding:8px;" class="btn minix btn-danger pphide fr border fa fa-close">&nbsp;&nbsp;</label>
+    </div>
+    <div class="body fl flex-grow-1 break" style="width:100%;overflow:auto;"></div>
+  </div>
+</x>
+
+<x id="not" style="display:none;">
+  <div style="min-width:180px;max-width:260px;border:1px solid black;z-index:2110;background-color:#efefef;position:absolute;top:30%;margin-left:30px;padding:5px;" class="hand corner nosel notbox">
+    <center><div class="corner border label label-primary nottitle" style="padding-top:6px;padding-left:15px;width:50%;padding-right:15px;">تنبيه</div></center>
+    <div class="nothead d-flex" style="width:100%;"></div>
+    <div style="width:100%;display:block;padding:0 5px;overflow:hidden;" class="break m fl notmsg"></div>
+  </div>
+</x>
+
+<!-- ===== التنبيه ===== -->
+<div class="modal" id="mmnot" role="dialog" style="z-index:99999;">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:310px;">
+      <div style="color:white;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-comments modal-title">تنبيه</label>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+        <div class="break" style="background-color:#efefef;padding:5px;">
+          <textarea placeholder="اكتب رسالتك هنا" class="fl" style="width:100%;resize:none;" maxlength="300"></textarea>
+          <button class="rsave btn btn-primary fr"><span class="fa fa-send">إرسال</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== إعلان (publicmsg / ppmsg) ===== -->
+<div class="modal" id="mnot" role="dialog" style="z-index:99999;">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:310px;">
+      <div style="color:white;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-comments modal-title">إعلان</label>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+        <div class="break" style="background-color:#efefef;padding:5px;">
+          <textarea placeholder="اكتب رسالتك هنا" class="fl" style="width:100%;resize:none;" maxlength="300"></textarea>
+          <label class="checkbox-inline ppbox"><input type="checkbox" class="ppmsg ispp" disabled="disabled">إعلان خاص للسوابر؟</label>
+          <button class="rsave btn btn-primary fr"><span class="fa fa-send">إرسال</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== إنشاء / تعديل غرفة ===== -->
+<div class="modal" id="mkr" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content mkr-box">
+      <div style="color:white;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-comments modal-title">إنشاء غرفه جديدة</label>
+      </div>
+      <div class="modal-body mkr-modal-body">
+        <div class="mkr-break">
+        <div class="mkr-top-row">
+          <div class="mkr-side">
+            <div class="rpic border hand"><img src="room.png" alt=""></div>
+            <div class="border btn rnopic">بدون صوره</div>
+            <div class="cpick border btn rcolor"></div>
+          </div>
+          <div class="mkr-form">
+            <input class="form-control rtopic" type="text" placeholder="عنوان الغرفه" maxlength="40">
+            <input class="form-control rabout" type="text" placeholder="الوصف" maxlength="200">
+            <input class="form-control rwelcome" type="text" placeholder="رساله الترحيب" maxlength="300">
+            <input autocomplete="off" class="form-control rpwd" type="text" placeholder="كلمه المرور" maxlength="30">
+            <input class="form-control rmax" type="number" placeholder="حجم الغرفه من 2 ألى 40" min="2" max="40">
+            <input class="form-control rl" type="number" placeholder="عدد الايكات للدخول" min="0">
+            <input class="form-control rvl" type="number" placeholder="عدد الايكات للصوتيه" min="0">
+            <div class="mkr-chks">
+              <label class="checkbox-inline mkr-chk"><input class="rdel" type="checkbox">تثبيت الغرفه</label>
+              <label class="checkbox-inline mkr-chk"><input class="rv" type="checkbox">تفعيل الصوتيه</label>
+            </div>
+          </div>
+        </div>
+        <div class="mkr-members" style="display:none;"></div>
+        <div class="mkr-actions">
+          <button class="rmake btn btn-primary"><span class="fa fa-plus"></span> إنشاء الغرفه</button>
+          <button class="rsave btn btn-primary"><span class="fa fa-edit"></span> حفظ التعديلات</button>
+          <button class="rdelete btn btn-danger"><span class="fa fa-times"></span> حذف</button>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== التعليقات ===== -->
+<div class="modal break" id="rpl" role="dialog" style="margin:5px;">
+  <div class="modal-dialog fr break" style="height:50%;min-height:300px;overflow:visible;margin-top:2px;">
+    <div class="modal-content c-flex break" style="width:306px;height:100%;">
+      <div style="color:white;flex:0 0 auto;" class="modal-header label-primary mclose">
+        <span class="pull-right clickable badge"><i class="fa fa-times"></i></span>
+        <label style="margin:1px;" class="mini fa fa-comments modal-title">التعليقات</label>
+      </div>
+      <div class="modal-body break flex-grow-1 c-flex" style="padding:0;">
+        <div style="width:100%;border-bottom:1px solid black;flex:0 0 auto;" class="rmsg"></div>
+        <div class="break flex-grow-1 r" style="background-color:#efefef;border-left:4px solid grey;"></div>
+        <div class="tablebox footer d-flex light fl" style="width:100%;height:42px;padding:4px;flex:0 0 auto;">
+          <img role="button" class="fl nosel emobox" style="padding:5px;width:34px;height:34px;" src="imgs/emoii.gif" alt="">
+          <textarea placeholder="اكتب رسالتك هنا" class="fl flex-fill tbox"></textarea>
+          <button style="margin-left:2px;" class="fa fa-send sndrpl fl btn btn-primary">&nbsp;&nbsp;&nbsp;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="filepick" accept="image/*" style="display:none;">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
