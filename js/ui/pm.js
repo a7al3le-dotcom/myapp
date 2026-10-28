@@ -157,14 +157,15 @@ async function sendPm(uid, $t, extra) {
   const cid = cidOf(S.uid, uid);
   const last = text || "📷";
   try {
-    await push(r("pm/" + cid), { uid: S.uid, m: text, ts: serverTimestamp(), u: snap(), ...extra });
+    const pk = push(r("pm/" + cid)).key;
+    await update(r(), { [`pm/${cid}/${pk}`]: { uid: S.uid, m: text, ts: serverTimestamp(), u: snap(), ...extra }, [`lastmsg/${S.uid}`]: { ts: serverTimestamp() } });
     touch();
     await update(r(), {
       [`pmidx/${uid}/${S.uid}`]: { last, ts: serverTimestamp(), un: true, u: snap() },
       [`pmidx/${S.uid}/${uid}`]: { last, ts: serverTimestamp(), un: false, u: snapOf(other) }
     });
     set(r(`typing/${cid}/${S.uid}`), null).catch(() => {});
-  } catch (e) { console.error(e); toast("غير متصل"); $t.val(text); }
+  } catch (e) { console.error(e); toast(e && e.code === "PERMISSION_DENIED" ? "أرسل ببطء" : "غير متصل"); $t.val(text); }
 }
 
 const snapOf = (u) => ({ topic: u.topic || "", pic: u.pic || "pic.png", ucol: u.ucol || "#000000", mcol: u.mcol || "#000000", bg: u.bg || "#ffffff", ico: u.ico || "" });

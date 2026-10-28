@@ -3,7 +3,7 @@ import { r, now } from "../firebase.js";
 import { S, on, emit } from "../state.js";
 import { SITE } from "../config.js";
 import {
-  query, limitToLast, limitToFirst, orderByKey, startAt, push, set, get, remove, onChildAdded, onChildChanged, onChildRemoved, off, serverTimestamp
+  query, limitToLast, limitToFirst, orderByKey, startAt, push, set, update, get, remove, onChildAdded, onChildChanged, onChildRemoved, off, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { perform } from "../api/actions.js";
 import { renderMsg, setLikes, localMsg } from "./msg.js";
@@ -85,10 +85,11 @@ async function send() {
     return toBottom();
   }
   try {
-    await push(r("msgs/" + S.room), { t: "m", uid: S.uid, m: text, ts: serverTimestamp(), u: snap() });
+    const mk = push(r("msgs/" + S.room)).key;
+    await update(r(), { [`msgs/${S.room}/${mk}`]: { t: "m", uid: S.uid, m: text, ts: serverTimestamp(), u: snap() }, [`lastmsg/${S.uid}`]: { ts: serverTimestamp() } });
     touch();
     if (Math.random() < 0.1) prune(S.room);
-  } catch (e) { console.error(e); toast("غير متصل"); $t.val(text); }
+  } catch (e) { console.error(e); toast(e && e.code === "PERMISSION_DENIED" ? "أرسل ببطء" : "غير متصل"); $t.val(text); }
 }
 
 export function initChat() {

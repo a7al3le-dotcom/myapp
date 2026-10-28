@@ -175,7 +175,7 @@ let fpCache = null;
 export function deviceFp() {
   if (fpCache) return fpCache;
   const seg = [];
-  seg.push(String(navigator.platform || "x").replace(/[\s|]/g, "").slice(0, 12) || "x");
+  seg.push(String(navigator.platform || "x").replace(/[^A-Za-z0-9._+-]/g, "").slice(0, 12) || "x");
   seg.push(b36(navigator.hardwareConcurrency) + b36((navigator.deviceMemory || 0) * 10));
   // الشاشة: الأكبر ثم الأصغر (ما تتغير لما يتدوّر الجوال)
   const sw = screen.width || 0, sh = screen.height || 0;

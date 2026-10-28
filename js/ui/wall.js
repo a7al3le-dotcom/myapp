@@ -3,7 +3,7 @@ import { r, now } from "../firebase.js";
 import { S, on } from "../state.js";
 import { SITE } from "../config.js";
 import {
-  query, limitToLast, limitToFirst, orderByKey, get, remove, push, onChildAdded, onChildChanged, onChildRemoved, serverTimestamp
+  query, limitToLast, limitToFirst, orderByKey, get, remove, push, update, onChildAdded, onChildChanged, onChildRemoved, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { perform } from "../api/actions.js";
 import { upload } from "../api/images.js";
@@ -73,11 +73,12 @@ async function send(extra = {}) {
   if (blocked) return $(renderMsg({ uid: S.uid, m: text, ts: now(), u: snap() }, {})).insertAfter("#bcmore");
   lastWall = Date.now();
   try {
-    await push(r("wall"), { uid: S.uid, m: text, ts: serverTimestamp(), u: snap(), ...extra });
+    const bk = push(r("wall")).key;
+    await update(r(), { [`wall/${bk}`]: { uid: S.uid, m: text, ts: serverTimestamp(), u: snap(), ...extra }, [`lastmsg/${S.uid}`]: { ts: serverTimestamp() } });
     touch();
     $("#d2bc").scrollTop(0);
     if (Math.random() < 0.1) prune();
-  } catch (e) { console.error(e); toast("غير متصل"); $t.val(text); }
+  } catch (e) { console.error(e); toast(e && e.code === "PERMISSION_DENIED" ? "أرسل ببطء" : "غير متصل"); $t.val(text); }
 }
 
 // رسائل الحائط الأقدم من أسبوع تنحذف (القواعد تسمح لأي أحد يحذف القديم)
@@ -144,8 +145,11 @@ async function sendReply() {
   $t.val("");
   const { text, blocked } = prep(raw);
   if (blocked) return $("#rpl .r").append(renderMsg({ uid: S.uid, m: text, ts: now(), u: snap() }, {}));
-  try { await push(r(`wall/${rplBid}/rep`), { uid: S.uid, m: text, ts: serverTimestamp(), u: snap() }); touch(); }
-  catch (e) { toast("غير متصل"); $t.val(text); }
+  try {
+    const rk = push(r(`wall/${rplBid}/rep`)).key;
+    await update(r(), { [`wall/${rplBid}/rep/${rk}`]: { uid: S.uid, m: text, ts: serverTimestamp(), u: snap() }, [`lastmsg/${S.uid}`]: { ts: serverTimestamp() } });
+    touch();
+  } catch (e) { toast(e && e.code === "PERMISSION_DENIED" ? "أرسل ببطء" : "غير متصل"); $t.val(text); }
 }
 
 // ===== يوتيوب: بحث (أو لصق رابط) ثم إرسال للحائط =====

@@ -7,7 +7,7 @@ import { S } from "../state.js";
 import { touch } from "../session.js";
 import { detectNet, ipHash, fpKey, fpParse, fpShow, nameKey } from "../util.js";
 import { SITE } from "../config.js";
-import { update, set, remove, push, get, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { update, set, remove, push, get, increment, serverTimestamp, query, orderByChild, equalTo, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 export const BACKEND = "rules";
 
@@ -207,12 +207,13 @@ const local = {
     const rm = S.rooms[rid] || {};
     await update(r(), { [`online/${uid}/room`]: rid, ...(await act("نقل", u, rm.topic)) });
   },
-  // كشف النكات: الأسماء اللي استخدمها نفس الجهاز
+  // كشف النكات: كل دخول من نفس بصمة الجهاز (سجل fps)، الأحدث أولاً
   async history({ uid }) {
     const u = target(uid);
-    if (!okId(u.fp)) return [];
-    const v = (await get(r("hist/" + u.fp))).val() || {};
-    return Object.values(v).sort((a, b) => (b.ts || 0) - (a.ts || 0)).map((x) => x.t);
+    if (!u.fp) return [];
+    const v = (await get(query(r("fps"), orderByChild("fp"), equalTo(u.fp), limitToLast(100)))).val() || {};
+    return Object.values(v).sort((a, b) => (b.ts || 0) - (a.ts || 0))
+      .map((x) => ({ ts: x.ts, ip: x.ip || "", t: x.t || "", un: x.un || "", fp: x.fp || "" }));
   },
   // حذف العضويه (إدارة العضويات): الاسم يرجع متاح، وبياناته واشتراكه ينشالون، ويطلع لو متصل.
   // حساب الدخول نفسه في Firebase ينحذف عند Blaze (Admin SDK).
@@ -518,7 +519,8 @@ async function viaFunctions(type, payload) {
 }
 
 export async function perform(type, payload = {}) {
-  if (type !== "rjoin" && type !== "report") touch();
+  // الأخضر بس بعد إرسال/إعجاب/حذف رسالة (طلب المالك) — باقي الأوامر ما تغيّر اللون
+  if (/^(like|del)/.test(type) || type === "announce") touch();
   if (BACKEND === "functions") return viaFunctions(type, payload);
   const fn = local[type];
   if (!fn) throw new Error("unknown action: " + type);
