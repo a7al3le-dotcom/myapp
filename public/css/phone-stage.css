@@ -1,0 +1,10 @@
+/* PHONE STAGE (isolated copy). Below 600px wide the whole legacy page is drawn as one 400px column and scaled to the screen width by components/PhoneStage.tsx,
+   so it fills the screen even where <meta name="viewport"> is not honoured (previews, iframes). 600px and wider: nothing here applies (#stage / #app are display:contents). */
+#stage, #app { display: contents; }
+html.phone, html.phone body { height: 100%; overflow: hidden; }
+/* absolute, not fixed: iOS Safari tints its top bar from a position:fixed element at the top edge (here the maroon header), which made the bar the menu colour a few seconds after load; with no fixed element it uses the page ground colour, as on the original site. */
+html.phone #stage { display: block; position: absolute; top: calc(env(safe-area-inset-top, 0px) + 3px); bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0; overflow: hidden; }
+html.phone #app { display: flex; flex-direction: column; position: absolute; top: 0; left: 50%; width: 400px; transform-origin: top center; }
+html.phone #app > * { flex: none; }
+/* A 3px band of the page ground colour fixed at the very top edge. iOS Safari tints its top bar from what it finds at that edge; without this it found the maroon header and switched the bar to the menu colour a few seconds after load. The stage starts 3px lower (the original also has a dark strip there). */
+html.phone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top, 0px) + 3px); background: #40404f; z-index: 2; pointer-events: none; }

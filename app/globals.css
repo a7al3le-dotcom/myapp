@@ -1,0 +1,3 @@
+/* The reference UI ships its own Bootstrap-3-based CSS (public/css/legacy-*.css).
+   Tailwind's preflight is intentionally NOT imported here so it cannot alter that look.
+   The admin panel (/cp) will use Tailwind through its own layout. */

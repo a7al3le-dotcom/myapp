@@ -1,0 +1,1 @@
+{ "config": { "perms": { "setPower": 10000, "ban": 400, "kickRoom": 200, "roomManage": 300, "deleteMsg": 200, "viewReports": 300, "ad": 170 } } }

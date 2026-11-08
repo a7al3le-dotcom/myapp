@@ -1,0 +1,184 @@
+
+                .fr {
+                  float: right;
+                }
+
+                .fl {
+                  float: left;
+                }
+
+                .tbox {
+                  overflow: scroll;
+                  border-radius: 2px;
+                  border: 1px solid lightgrey;
+                  padding: 6px;
+                  max-height: 32px;
+                  min-height: 32px;
+                  height: 32px;
+                  font-weight: bold;
+                  overflow: hidden;
+                  resize: none;
+                }
+
+                .hid {
+                  display: none;
+                }
+
+                .noflow {
+                  overflow: hidden;
+                }
+
+                .hand {
+                  cursor: hand;
+                }
+
+                img {
+                  vertical-align: middle;
+                }
+
+                .break {
+                  overflow: auto;
+                  word-wrap: break-word;
+                  /* IE 5+ */
+                  overflow-x: hidden;
+                  overflow-wrap: break-word;
+                }
+
+                #cp .tab-content .tab-pane {
+                  min-width: 400px !important;
+                }
+
+                .u-ico {
+                  margin-top: 1px;
+                  max-height: 18px;
+                  object-fit: scale-down;
+                }
+
+                .emoi {
+                  max-width: 240px;
+                  max-height: 20px;
+                }
+
+                /* mychat (Open 4, 2026-11-07): the smiley box images are lazy (x3 loading="lazy"), so x3 measured the box with 0-height images
+                   and placed it too low. A fixed 20px height, square until loaded (then the image's own ratio), gives the final size at once. */
+                .ppop img.emoi {
+                  height: 20px;
+                  width: auto;
+                  aspect-ratio: auto 1 / 1;
+                }
+
+                .unread {
+                  background-color: #ffc89d !important;
+                }
+
+                .object-fit {
+                  object-fit: contain;
+                  object-position: center right;
+                }
+
+                table,
+                th,
+                td {
+                  border: 0;
+                }
+
+                th,
+                td {
+                  padding: 0px;
+                }
+
+                table {
+                  border-spacing: 0;
+                  border-collapse: collapse;
+                }
+
+                .mini {
+                  font-size: 90% !important;
+                }
+
+                .corner {
+                  border-radius: 5px;
+                }
+
+                .minix {
+                  font-size: 80% !important;
+                }
+
+                .nosel,
+                .u-ico,
+                .u-pic,
+                .tago {
+                  -webkit-touch-callout: none;
+                  -webkit-user-select: none;
+                  -khtml-user-select: none;
+                  -moz-user-select: none;
+                  -ms-user-select: none;
+                  user-select: none;
+                  cursor: default;
+                }
+
+                .center {
+                  margin: 0 auto;
+                }
+
+                .dots {
+                  display: inline-block;
+                  white-space: nowrap;
+                  overflow: hidden !important;
+                  text-overflow: ellipsis;
+                  max-width: 100%;
+                }
+
+                .borderg {
+                  border: 1px solid #f4f4f4;
+                }
+
+                .border {
+                  border: 1px solid black;
+                }
+
+                .fitimg {
+                  background-size: contain;
+                  background-repeat: no-repeat;
+                  background-position: 50% 50%;
+                }
+
+                .bord {
+                  border-inline: 4px solid dodgerblue !important;
+                }
+
+                html {
+                  height: 100vh;
+                  width: 100vw;
+                }
+
+                .fa {
+                  text-align: left;
+                }
+
+                .modal-header {
+                  padding: 5px;
+                }
+
+                .badge {
+                  padding: 0px 3px;
+                }
+
+                button.btn {
+                  padding: 5px 5px;
+                }
+
+                .d2 {
+                  padding-bottom: 2px;
+                }
+
+                .d2,
+                #rooms,
+                #users {
+                  background-color: #FAFAFA !important;
+                }
+
+                .popover-content {
+                  padding: 1px;
+                }
+              

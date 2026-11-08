@@ -1,0 +1,14 @@
+/emo/*
+  Cache-Control: public, max-age=2592000
+/sico/*
+  Cache-Control: public, max-age=2592000
+/dro3/*
+  Cache-Control: public, max-age=2592000
+/flags/*
+  Cache-Control: public, max-age=2592000
+/imgs/*
+  Cache-Control: public, max-age=2592000
+/css/*
+  Cache-Control: public, max-age=86400
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

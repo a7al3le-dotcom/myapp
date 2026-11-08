@@ -1,0 +1,495 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "config": {
+      ".read": "auth != null",
+      "bootstrap": {
+        ".write": false
+      },
+      "site": {
+        ".read": true,
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || (auth != null && !root.child('bans/' + auth.uid).exists() && ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)))",
+        "name": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        "title": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        "description": { ".validate": "newData.isString() && newData.val().length <= 1000" },
+        "keywords": { ".validate": "newData.isString() && newData.val().length <= 1000" },
+        "script": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+        "html": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+        "customHead": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+        "bg": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "buttons": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "background": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "callsLike": { ".validate": "(newData.isString() && newData.val().length <= 12) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000)" },
+        "maxIP": { ".validate": "(newData.isString() && newData.val().length <= 12) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000)" },
+        "maxshrt": { ".validate": "(newData.isString() && newData.val().length <= 12) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000)" },
+        "wall_likes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "wall_minutes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "msgst": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "roomMsgLikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "pmlikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "notlikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "fileslikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "piclikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "proflikes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "guestNameMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "registerNameMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "stay": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
+        "allowg": { ".validate": "newData.isBoolean()" },
+        "allowreg": { ".validate": "newData.isBoolean()" },
+        "bclikes": { ".validate": "newData.isBoolean()" },
+        "bcreply": { ".validate": "newData.isBoolean()" },
+        "calls": { ".validate": "newData.isBoolean()" },
+        "mlikes": { ".validate": "newData.isBoolean()" },
+        "mreply": { ".validate": "newData.isBoolean()" },
+        "rc": { ".validate": "newData.isBoolean()" },
+        "vpnBlock": { ".validate": "newData.isBoolean()" },
+        "$other": { ".validate": false }
+      },
+      "perms": {
+        ".write": "(auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() > 0))) || (auth != null && root.child('config/bootstrap').val() === auth.uid)"
+      },
+      "entryRoom": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cprooms').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cprooms').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cprooms').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cprooms').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "msgs": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpmsgs').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpmsgs').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpmsgs').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpmsgs').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "shrt": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpshrt').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpshrt').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpshrt').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpshrt').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "fltr": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "wroomsOwr": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "wroomsList": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))"
+      },
+      "files": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+        "$k": {
+          ".validate": "($k === 'favicon' || $k === 'prv1' || $k === 'pic' || $k === 'room') && newData.isString() && newData.val().matches(/^uploads\\/db-[A-Za-z0-9_-]{1,40}\\.(png|gif|webp|jpg|ico)$/)"
+        }
+      },
+      "domains": {
+        ".read": true,
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+        "$k": {
+          ".validate": "newData.child('domain').isString() && newData.child('domain').val().length <= 100",
+          "$f": { ".validate": "newData.isString() ? newData.val().length <= 20000 : newData.isBoolean()" }
+        }
+      },
+      "banner": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpdomains').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+        "$d": {
+          ".validate": "newData.hasChildren() || !newData.exists()",
+          "enabled": { ".validate": "newData.isBoolean()" },
+          "image": { ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().beginsWith('uploads/db-')" },
+          "$o": { ".validate": false }
+        }
+      },
+      "bots": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() > 8998)"
+      },
+      "botsCfg": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() > 8998)"
+      },
+      "ico": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpsite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+        "$tar": {
+          ".validate": "$tar === 'sico' || $tar === 'dro3' || $tar === 'emo'",
+          "$i": { ".validate": "newData.isString() && newData.val().length <= 140 && newData.val().matches(/^[A-Za-z0-9_. -]+$/)" }
+        }
+      }
+    },
+    "powers": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && root.child('config/bootstrap').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))) && (!newData.exists() || (newData.child('name').isString() && (newData.child('name').val() === '' || (root.child('powerTable/' + newData.child('name').val() + '/rank').isNumber() && root.child('powerTable/' + newData.child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))))",
+        ".validate": "newData.hasChildren(['level','name'])",
+        "level": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000 && ((newData.parent().child('name').val() === '' && newData.val() === 0) || newData.val() === root.child('powerTable/' + newData.parent().child('name').val() + '/rank').val())" },
+        "name": { ".validate": "newData.isString() && newData.val().length <= 60 && (newData.val() === '' || (!newData.val().contains('/') && root.child('powerTable/' + newData.val()).exists()))" },
+        "until": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "profiles": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ((auth.uid === $uid && newData.exists() && newData.child('b').val() === data.child('b').val() && newData.child('gift').val() === data.child('gift').val() && (data.exists() ? (newData.child('registered').val() === data.child('registered').val() && newData.child('createdAt').val() === data.child('createdAt').val()) : (newData.child('registered').val() !== true || auth.token.firebase.sign_in_provider !== 'anonymous'))) || (auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))) && newData.exists() && newData.child('msg').val() === data.child('msg').val() && newData.child('ucol').val() === data.child('ucol').val() && newData.child('mcol').val() === data.child('mcol').val() && newData.child('bg').val() === data.child('bg').val() && newData.child('co').val() === data.child('co').val() && newData.child('registered').val() === data.child('registered').val() && newData.child('gift').val() === data.child('gift').val() && newData.child('b').val() === data.child('b').val() && newData.child('busy').val() === data.child('busy').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('pic').val() === data.child('pic').val()) || (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))) && newData.exists() && newData.child('topic').val() === data.child('topic').val() && newData.child('msg').val() === data.child('msg').val() && newData.child('ucol').val() === data.child('ucol').val() && newData.child('mcol').val() === data.child('mcol').val() && newData.child('bg').val() === data.child('bg').val() && newData.child('co').val() === data.child('co').val() && newData.child('registered').val() === data.child('registered').val() && newData.child('gift').val() === data.child('gift').val() && newData.child('b').val() === data.child('b').val() && newData.child('busy').val() === data.child('busy').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('pic').val() === ''))",
+        ".validate": "newData.hasChildren(['topic'])",
+        "topic": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "name": { ".validate": "newData.isString() && newData.val().length <= 50 && (!data.exists() || newData.val() === data.val())" },
+        "msg": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        "pic": { ".validate": "newData.isString() && newData.val().length <= 300 && (newData.val() === '' || newData.val().matches(/^uploads\\/db-[A-Za-z0-9_-]+\\.[A-Za-z0-9]{2,4}$/))" },
+        "ucol": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+        "mcol": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+        "bg": { ".validate": "newData.isString() && (newData.val() === '' || newData.val().matches(/^#[0-9a-fA-F]{6}$/))" },
+        "co": { ".validate": "newData.isString() && newData.val().length <= 4" },
+        "registered": { ".validate": "newData.isBoolean()" },
+        "gift": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "b": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
+        "busy": { ".validate": "newData.isBoolean()" },
+        "createdAt": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+        "$other": { ".validate": false }
+      }
+    },
+    "likes": {
+      ".read": "auth != null",
+      "$target": {
+        "$from": {
+          ".write": "auth != null && auth.uid === $from && $target !== auth.uid",
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    },
+    "rep": {
+      ".read": "auth != null",
+      "$target": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || ( newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().parent().child('lastLike').child(auth.uid).val() === now ) )",
+        ".validate": "newData.isNumber() && newData.val() >= 0"
+      }
+    },
+    "lastLike": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !root.child('bans/' + auth.uid).exists() && (!data.exists() || now - data.val() >= 60000)",
+        ".validate": "newData.isNumber() && newData.val() <= now"
+      }
+    },
+    "powerTable": {
+      ".read": "auth != null",
+      "$name": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && (auth != null && root.child('config/bootstrap').val() === auth.uid || (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/editpower').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/editpower').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/editpower').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/editpower').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && (!data.exists() || (data.child('rank').isNumber() && data.child('rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())) && (!newData.exists() || (newData.child('rank').isNumber() && newData.child('rank').val() >= 0 && newData.child('rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))))"
+      }
+    },
+    "typing": {
+      "$to": {
+        ".read": "auth != null && auth.uid === $to",
+        "$from": {
+          ".write": "auth != null && auth.uid === $from && !root.child('bans/' + auth.uid).exists()",
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1)"
+        }
+      }
+    },
+    "waitRoom": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "presence": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['online'])",
+        "online": { ".validate": "newData.isBoolean()" },
+        "lastSeen": { ".validate": "newData.isNumber()" },
+        "act": { ".validate": "newData.isNumber()" },
+        "drop": { ".validate": "newData.isBoolean()" },
+        "in": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+        "room": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        "stealth": { ".validate": "newData.isBoolean() && (newData.val() === false || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/stealth').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/stealth').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/stealth').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/stealth').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)" },
+        "$other": { ".validate": false }
+      }
+    },
+    "rooms": {
+      ".read": "auth != null",
+      "$rid": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( (!data.exists() && newData.child('owner').val() === auth.uid) || (data.exists() && (data.child('owner').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))))) || (data.exists() && !newData.exists() && (data.child('pub').val() === true || data.child('del').val() === true) && !root.child('members/' + $rid).exists()) )",
+        ".validate": "newData.hasChildren(['topic','owner','max'])",
+        "topic": { ".validate": "newData.isString() && newData.val().length <= 80" },
+        "about": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        "welcome": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "pic": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "owner": { ".validate": "newData.isString()" },
+        "max": { ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 40" },
+        "likesReq": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "voiceLikesReq": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "voice": { ".validate": "newData.isBoolean()" },
+        "pinned": { ".validate": "newData.isBoolean()" },
+        "pub": { ".validate": "newData.isBoolean()" },
+        "wroom": { ".validate": "newData.isBoolean() && newData.val() === true && $rid === 'wroom'" },
+        "ops": { "$u": { ".validate": "newData.isBoolean()" } },
+        "c": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+        "del": { ".validate": "newData.isBoolean()" },
+        "hasPass": { ".validate": "newData.isBoolean()" },
+        "createdAt": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "roomSecrets": {
+      "$rid": {
+        ".read": "auth != null && (root.child('rooms/' + $rid + '/owner').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))))",
+        ".write": "auth != null && (root.child('rooms/' + $rid + '/owner').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))))",
+        ".validate": "newData.isString() && newData.val().length <= 128"
+      }
+    },
+    "members": {
+      ".read": "auth != null",
+      "$rid": {
+        "$uid": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( ( auth.uid === $uid && root.child('rooms/' + $rid).exists() && ( !root.child('roomSecrets/' + $rid).exists() || newData.child('ph').val() === root.child('roomSecrets/' + $rid).val() || !newData.exists() ) ) || ( auth.uid === $uid && ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) || auth != null && root.child('config/bootstrap').val() === auth.uid) ) || ( root.child('rooms/' + $rid + '/owner').val() === auth.uid && ($uid === auth.uid || !newData.exists()) ) || ( root.child('rooms/' + $rid + '/ops/' + auth.uid).exists() && ($uid === auth.uid || (!newData.exists() && $uid !== root.child('rooms/' + $rid + '/owner').val())) ) || ( !newData.exists() && ( (auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))) ) ) )",
+          ".validate": "newData.hasChildren(['joinedAt'])",
+          "joinedAt": { ".validate": "newData.isNumber()" },
+          "ph": { ".validate": "newData.isString() && newData.val().length <= 128" },
+          "online": { ".validate": "newData.isBoolean()" },
+          "lastSeen": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "messages": {
+      "$rid": {
+        ".indexOn": "t",
+        ".read": "auth != null && root.child('members/' + $rid + '/' + auth.uid).exists()",
+        "$mid": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( ( !data.exists() && root.child('members/' + $rid + '/' + auth.uid).exists() && newData.child('uid').val() === auth.uid && !( newData.child('cls').val() === 'leave' && newData.child('msg').val() === 'kicked' ) ) || ( !data.exists() && newData.child('cls').val() === 'leave' && newData.child('msg').val() === 'kicked' && newData.child('uid').val() !== auth.uid && newData.child('uid').val() !== root.child('config/bootstrap').val() && root.child('members/' + $rid + '/' + newData.child('uid').val()).exists() && (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && ( (!root.child('powers/' + newData.child('uid').val()).exists() || (root.child('powers/' + newData.child('uid').val()).child('until').isNumber() && root.child('powers/' + newData.child('uid').val()).child('until').val() < now) || (root.child('powers/' + newData.child('uid').val()).child('name').val() === '' && root.child('powers/' + newData.child('uid').val()).child('level').val() === 0) ) || ( (root.child('powers/' + newData.child('uid').val()).child('name').isString() && root.child('powerTable/' + root.child('powers/' + newData.child('uid').val()).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + newData.child('uid').val()).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + newData.child('uid').val()).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + newData.child('uid').val()).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() ) ) ) || ( data.exists() && !newData.exists() && ( data.child('uid').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() > 0))) ) ) )",
+          ".validate": "newData.hasChildren(['uid','msg','t'])",
+          "uid": { ".validate": "newData.isString()" },
+          "topic": { ".validate": "newData.isString() && newData.val().length <= 120" },
+          "pic": { ".validate": "newData.isString() && newData.val().length <= 300" },
+          "msg": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "cls": { ".validate": "newData.isString() && (newData.val() === 'join' || newData.val() === 'leave')" },
+          "ucol": { ".validate": "newData.isString() && newData.val().length <= 7" },
+          "mcol": { ".validate": "newData.isString() && newData.val().length <= 7" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "replies": {
+      "$rid": {
+        ".read": "auth != null && root.child('members/' + $rid + '/' + auth.uid).exists()",
+        "$pid": {
+          "$mid": {
+            ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( ( !data.exists() && root.child('members/' + $rid + '/' + auth.uid).exists() && newData.child('uid').val() === auth.uid && root.child('messages/' + $rid + '/' + $pid).exists() ) || ( data.exists() && !newData.exists() && ( data.child('uid').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() > 0))) ) ) )",
+            ".validate": "newData.hasChildren(['uid','msg','t'])",
+            "uid": { ".validate": "newData.isString()" },
+            "topic": { ".validate": "newData.isString() && newData.val().length <= 120" },
+            "pic": { ".validate": "newData.isString() && newData.val().length <= 300" },
+            "msg": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+            "ucol": { ".validate": "newData.isString() && newData.val().length <= 7" },
+            "mcol": { ".validate": "newData.isString() && newData.val().length <= 7" },
+            "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+            "pid": { ".validate": "newData.val() === $pid" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
+    "pm": {
+      "$pair": {
+        ".read": "auth != null && $pair.contains(auth.uid)",
+        "$mid": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && $pair.contains(auth.uid) && !data.exists() && newData.child('uid').val() === auth.uid && (!root.child('config/site/pmlikes').exists() || !(root.child('config/site/pmlikes').val() > 0) || (root.child('rep/' + auth.uid).exists() && root.child('rep/' + auth.uid).val() >= root.child('config/site/pmlikes').val()))",
+          ".validate": "newData.hasChildren(['uid','msg','t'])",
+          "uid": { ".validate": "newData.isString()" },
+          "msg": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "wall": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( (!data.exists() && newData.child('uid').val() === auth.uid && (!root.child('config/site/wall_likes').exists() || !(root.child('config/site/wall_likes').val() > 0) || (root.child('rep/' + auth.uid).exists() && root.child('rep/' + auth.uid).val() >= root.child('config/site/wall_likes').val()))) || (data.exists() && !newData.exists() && (data.child('uid').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() > 0))))) )",
+        ".validate": "newData.hasChildren(['uid','t'])",
+        "uid": { ".validate": "newData.isString()" },
+        "topic": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "pic": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "msg": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+        "link": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+        "likes": {
+          "$u": {
+            ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && auth.uid === $u",
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "replies": {
+          "$rid": {
+            ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( (!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('uid').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() > 0))))) )",
+            ".validate": "newData.hasChildren(['uid','msg','t'])",
+            "uid": { ".validate": "newData.isString()" },
+            "msg": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+            "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+            "topic": { ".validate": "newData.isString() && newData.val().length <= 120" },
+            "pic": { ".validate": "newData.isString() && newData.val().length <= 300" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    },
+    "pmIndex": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$peer": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && (auth.uid === $uid || auth.uid === $peer)",
+          ".validate": "newData.hasChildren(['t'])",
+          "t": { ".validate": "newData.isNumber()" },
+          "last": { ".validate": "newData.isString() && newData.val().length <= 200" },
+          "unread": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "alerts": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( (!data.exists() && newData.child('from').val() === auth.uid && ( ( !newData.child('kind').exists() && (!root.child('config/site/notlikes').exists() || !(root.child('config/site/notlikes').val() > 0) || (root.child('rep/' + auth.uid).exists() && root.child('rep/' + auth.uid).val() >= root.child('config/site/notlikes').val())) ) || ( newData.child('kind').val() === 'like' && newData.child('msg').val() === '' && root.child('lastLike/' + auth.uid).val() > now - 60000 ) || ( newData.child('kind').val() === 'gift' && newData.child('msg').val() === '' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/upgrades').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid) ) || ( newData.child('kind').val() === 'nopm' && newData.child('msg').val() === '' && root.child('pmIndex/' + auth.uid + '/' + $uid).exists() ) || ( newData.child('kind').val() === 'nonot' && newData.child('msg').val() === '' ) || ( newData.child('kind').val() === 'op' && (root.child('rooms/' + newData.child('msg').val() + '/owner').val() === auth.uid || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))) ) ) ) || auth.uid === $uid )",
+          ".validate": "newData.hasChildren(['from','msg','t'])",
+          "from": { ".validate": "newData.isString()" },
+          "msg": { ".validate": "newData.isString() && newData.val().length <= 500" },
+          "kind": { ".validate": "newData.isString() && (newData.val() === 'like' || newData.val() === 'gift' || newData.val() === 'op' || newData.val() === 'nopm' || newData.val() === 'nonot')" },
+          "gift": { ".validate": "newData.isString() && newData.val().length <= 120" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "moves": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))))",
+        ".validate": "!newData.exists() || newData.hasChildren(['by','rid','t'])",
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "rid": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        "pwd": { ".validate": "newData.isString() && newData.val().length <= 100" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "kicks": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || (auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))))",
+        ".validate": "!newData.exists() || newData.hasChildren(['by','t'])",
+        "by": { ".validate": "newData.isString()" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "images": {
+      "$id": {
+        ".read": true,
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && ( (!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('uid').val() === auth.uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() > 0))))) )",
+        ".validate": "newData.hasChildren(['uid','d','ct','t'])",
+        "uid": { ".validate": "newData.isString()" },
+        "ct": { ".validate": "newData.isString() && newData.val().matches(/^image\\/(jpeg|png|webp|gif)$/)" },
+        "d": { ".validate": "newData.isString() && newData.val().length <= 900000" },
+        "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+        "$other": { ".validate": false }
+      }
+    },
+    "loginLog": {
+      ".read": "(auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() > 0)))",
+      ".indexOn": ["uid"],
+      "$id": {
+        ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['uid','created'])",
+        "uid": { ".validate": "newData.isString()" },
+        "topic": { ".validate": "newData.isString() && newData.val().length <= 120 && newData.val() === root.child('profiles/' + newData.parent().child('uid').val() + '/topic').val()" },
+        "co": { ".validate": "newData.isString() && newData.val().length <= 4" },
+        "isreg": { ".validate": "newData.isBoolean()" },
+        "created": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "memberConn": {
+      ".read": "((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+      ".write": false
+    },
+    "loginConn": {
+      ".read": "((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cplogins').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+      ".write": false
+    },
+    "nameLog": {
+      ".read": "((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/history').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/history').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/history').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/history').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now))",
+      "$uid": {
+        "$id": {
+          ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && !data.exists() && newData.exists() && newData.child('by').val() === auth.uid && (auth.uid === $uid || (auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))))) && newData.child('old').val() === root.child('profiles/' + $uid + '/topic').val() && newData.child('new').val() === newData.parent().parent().parent().child('profiles').child($uid).child('topic').val() && newData.child('old').val() !== newData.child('new').val()",
+          ".validate": "newData.hasChildren(['old','new','by','at','src'])",
+          "old": { ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length > 0" },
+          "new": { ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length > 0" },
+          "by": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "at": { ".validate": "newData.isNumber() && newData.val() === now" },
+          "src": { ".validate": "newData.isString() && ((newData.val() === 'mod' && newData.parent().child('by').val() !== $uid) || ((newData.val() === 'self' || newData.val() === 'login') && newData.parent().child('by').val() === $uid))" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "actionLog": {
+      ".read": "(auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() > 0)))",
+      "$id": {
+        ".write": "auth != null && !root.child('bans/' + auth.uid).exists() && !data.exists() && newData.child('u1').val() === auth.uid && ( (newData.child('type').val() === 'roomkick' && newData.child('rid').isString() && root.child('rooms/' + newData.child('rid').val()).exists() && root.child('members/' + newData.child('rid').val() + '/' + newData.child('u2').val()).exists() && newData.child('u2').val() !== auth.uid && ( root.child('rooms/' + newData.child('rid').val() + '/owner').val() === auth.uid || ( root.child('rooms/' + newData.child('rid').val() + '/ops/' + auth.uid).exists() && newData.child('u2').val() !== root.child('rooms/' + newData.child('rid').val() + '/owner').val() ) ) ) || (newData.child('type').val() === 'kick' && (newData.child('u2').val() === auth.uid || (auth != null && root.child('config/bootstrap').val() === auth.uid && newData.child('u2').val() !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && newData.child('u2').val() !== auth.uid && (newData.child('u2').val() !== root.child('config/bootstrap').val() && ((!root.child('powers/' + newData.child('u2').val()).exists() || (root.child('powers/' + newData.child('u2').val()).child('until').isNumber() && root.child('powers/' + newData.child('u2').val()).child('until').val() < now) || (root.child('powers/' + newData.child('u2').val()).child('name').val() === '' && root.child('powers/' + newData.child('u2').val()).child('level').val() === 0)) || ((root.child('powers/' + newData.child('u2').val()).child('name').isString() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))))) || (newData.child('type').val() === 'ban' && ((auth != null && root.child('config/bootstrap').val() === auth.uid && newData.child('u2').val() !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && newData.child('u2').val() !== auth.uid && (newData.child('u2').val() !== root.child('config/bootstrap').val() && ((!root.child('powers/' + newData.child('u2').val()).exists() || (root.child('powers/' + newData.child('u2').val()).child('until').isNumber() && root.child('powers/' + newData.child('u2').val()).child('until').val() < now) || (root.child('powers/' + newData.child('u2').val()).child('name').val() === '' && root.child('powers/' + newData.child('u2').val()).child('level').val() === 0)) || ((root.child('powers/' + newData.child('u2').val()).child('name').isString() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))))) || (newData.child('type').val() === 'delpic' && (newData.child('u2').val() === auth.uid || (auth != null && root.child('config/bootstrap').val() === auth.uid && newData.child('u2').val() !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/kick').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && newData.child('u2').val() !== auth.uid && (newData.child('u2').val() !== root.child('config/bootstrap').val() && ((!root.child('powers/' + newData.child('u2').val()).exists() || (root.child('powers/' + newData.child('u2').val()).child('until').isNumber() && root.child('powers/' + newData.child('u2').val()).child('until').val() < now) || (root.child('powers/' + newData.child('u2').val()).child('name').val() === '' && root.child('powers/' + newData.child('u2').val()).child('level').val() === 0)) || ((root.child('powers/' + newData.child('u2').val()).child('name').isString() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + newData.child('u2').val()).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val()))))) || ((newData.child('type').val() === 'op' || newData.child('type').val() === 'deop' || newData.child('type').val() === 'mkroom' || newData.child('type').val() === 'rdel') && newData.child('rid').isString() && (root.child('rooms/' + newData.child('rid').val() + '/owner').val() === auth.uid || root.child('rooms/' + newData.child('rid').val() + '/ops/' + auth.uid).exists() || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || ((newData.child('type').val() === 'setpower' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setpower').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'setlikes' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/setLikes').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'nick' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unick').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'delbc' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/delbc').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid || newData.child('u2').val() === auth.uid)) || (newData.child('type').val() === 'bnr' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/bnr').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'editroom' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/roomowner').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'dmsg' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/dmsg').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'unban' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'wroom' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cpwrooms').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'cpx' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid)) || (newData.child('type').val() === 'move' && (((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/rinvite').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) || auth != null && root.child('config/bootstrap').val() === auth.uid))) ) )",
+        ".validate": "newData.hasChildren(['type','u1','u2','created'])",
+        "type": { ".validate": "newData.isString() && (newData.val() === 'kick' || newData.val() === 'ban' || newData.val() === 'delpic' || newData.val() === 'roomkick' || newData.val() === 'setpower' || newData.val() === 'setlikes' || newData.val() === 'nick' || newData.val() === 'delbc' || newData.val() === 'bnr' || newData.val() === 'editroom' || newData.val() === 'dmsg' || newData.val() === 'unban' || newData.val() === 'wroom' || newData.val() === 'cpx' || newData.val() === 'move' || newData.val() === 'op' || newData.val() === 'deop' || newData.val() === 'mkroom' || newData.val() === 'rdel' || newData.val() === 'delu')" },
+        "u1": { ".validate": "newData.isString() && newData.val().length <= 60" },
+        "u2": { ".validate": "newData.isString() && newData.val().length <= 320" },
+        "rid": { ".validate": "newData.isString() && newData.val().length <= 60" },
+        "room": { ".validate": "newData.isString() && newData.val().length <= 320" },
+        "d": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "created": { ".validate": "newData.isNumber() && newData.val() >= now - 300000 && newData.val() <= now + 300000" },
+        "$other": { ".validate": false }
+      }
+    },
+    "bans": {
+      ".read": "auth != null && (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() > 0)))",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() > 0))))",
+        ".write": "(auth != null && root.child('config/bootstrap').val() === auth.uid && $uid !== auth.uid) || ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ban').val() > 0))) && !(!root.child('powers/' + auth.uid).exists() || (root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now) || (root.child('powers/' + auth.uid).child('name').val() === '' && root.child('powers/' + auth.uid).child('level').val() === 0)) && (root.child('powers/' + auth.uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val() <= 10000) && $uid !== auth.uid && ($uid !== root.child('config/bootstrap').val() && ((!root.child('powers/' + $uid).exists() || (root.child('powers/' + $uid).child('until').isNumber() && root.child('powers/' + $uid).child('until').val() < now) || (root.child('powers/' + $uid).child('name').val() === '' && root.child('powers/' + $uid).child('level').val() === 0)) || ((root.child('powers/' + $uid).child('name').isString() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').isNumber() && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() >= 0 && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() <= 10000) && root.child('powerTable/' + root.child('powers/' + $uid).child('name').val() + '/rank').val() < root.child('powerTable/' + root.child('powers/' + auth.uid).child('name').val() + '/rank').val())))) || (auth != null && !root.child('bans/' + auth.uid).exists() && ((auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/unban').val() > 0))) && !(root.child('powers/' + auth.uid).child('until').isNumber() && root.child('powers/' + auth.uid).child('until').val() < now)) && (!newData.exists() || newData.child('allow').val() === true))",
+        ".validate": "newData.hasChildren(['by','t'])",
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "reason": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "t": { ".validate": "newData.isNumber()" },
+        "until": { ".validate": "newData.isNumber()" },
+        "key": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "allow": { ".validate": "newData.isBoolean()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "fltrLog": {
+      ".read": "(auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() > 0)))",
+      "$id": {
+        ".write": "!newData.exists() && (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/filter').val() > 0)))"
+      }
+    },
+    "reports": {
+      ".read": "(auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() > 0)))",
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/cp').val() > 0))))",
+        ".validate": "newData.hasChildren(['by','target','t'])",
+        "by": { ".validate": "newData.isString()" },
+        "target": { ".validate": "newData.isString()" },
+        "reason": { ".validate": "newData.isString() && newData.val().length <= 500" },
+        "t": { ".validate": "newData.isNumber()" },
+        "status": { ".validate": "newData.isString()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "ads": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "(newData.child('special').val() === true && (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ppmsg').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ppmsg').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ppmsg').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/ppmsg').val() > 0)))) || (newData.child('special').val() !== true && (auth != null && root.child('powers/' + auth.uid + '/name').exists() && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/publicmsg').exists() && (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/publicmsg').val() === true || (root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/publicmsg').val() !== false && root.child('powerTable/' + root.child('powers/' + auth.uid + '/name').val() + '/publicmsg').val() > 0))))",
+        ".validate": "newData.hasChildren(['msg','by','t'])",
+        "msg": { ".validate": "newData.isString() && newData.val().length <= 500" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "special": { ".validate": "newData.isBoolean()" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

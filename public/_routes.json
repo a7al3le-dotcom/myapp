@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/", "/cp", "/api/*", "/uploads/*", "/emo/db-*", "/sico/db-*", "/dro3/db-*"],
+  "exclude": []
+}

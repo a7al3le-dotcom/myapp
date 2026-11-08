@@ -1,0 +1,40 @@
+{
+  "name": "al3nood-chat",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=25.7.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "rules:build": "node firebase/build-rules.mjs",
+    "test:rules": "node firebase/build-rules.mjs && firebase emulators:exec --only database --project demo-al3nood \"node --test tests/rules.test.mjs\"",
+    "dev:emu": "firebase emulators:exec --only auth,database --project demo-al3nood \"node scripts/dev-emu.mjs\"",
+    "check:isolation": "firebase emulators:exec --only auth,database --project demo-al3nood \"node scripts/isolation-check.mjs\"",
+    "test:e2e": "firebase emulators:exec --only auth,database --project demo-al3nood \"playwright test\"",
+    "admin:emu": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/make-admin.mjs",
+    "test:unit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/escape.test.mjs tests/site.test.mjs tests/authz.test.mjs"
+  },
+  "dependencies": {
+    "firebase": "^13.1.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "firebase-tools": "^13.35.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
