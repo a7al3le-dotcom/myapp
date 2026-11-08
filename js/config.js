@@ -1,12 +1,12 @@
 // إعدادات المشروع — هذا الملف الوحيد اللي تعدّله لو غيّرت مشروع Firebase
 export const firebaseConfig = {
-  apiKey: "AIzaSyC-zyY5erMWU4z11Dp6I_F9M7Ckid5Tp1U",
-  authDomain: "copapp-ba4aa.firebaseapp.com",
-  databaseURL: "https://copapp-ba4aa-default-rtdb.firebaseio.com",
-  projectId: "copapp-ba4aa",
-  storageBucket: "copapp-ba4aa.firebasestorage.app",
-  messagingSenderId: "407195747473",
-  appId: "1:407195747473:web:ab56033e14f68b78b06b30"
+  apiKey: "AIzaSyB1AsEHXP05nQ8M66jYPusheLaE60q_JwU",
+  authDomain: "mychat-2d881.firebaseapp.com",
+  databaseURL: "https://mychat-2d881-default-rtdb.firebaseio.com",
+  projectId: "mychat-2d881",
+  storageBucket: "mychat-2d881.firebasestorage.app",
+  messagingSenderId: "532385733649",
+  appId: "1:532385733649:web:7bb6cce9add057acf1e5b0"
 };
 
 // كل بيانات الشات الجديد تحت هذا المسار (منفصلة عن بيانات chat123)
