@@ -81,6 +81,7 @@ async function register() {
   if (!SITE.allowreg) return danger("تسجيل العضويات مغلق");
   if (!validName(name, SITE.registerNameMax) || (await blockedName(name))) return warn("يرجى إختيار أسم آخر");
   if (!pass) return danger("كلمه المرور غير صحيحه");
+  if (pass.length < 8) return danger("كلمة المرور يجب أن تكون 8 أحرف على الأقل");
   const key = nameKey(name);
   if ((await get(r("names/" + key))).exists() || nameTakenOnline(name)) return danger("هذا الإسم مسجل من قبل");
   if (auth.currentUser) await signOut(auth);
