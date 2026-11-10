@@ -30,3 +30,14 @@
 - Post-change static assertions passed for the password write/read removal, legacy cleanup, 8-character registration guard, and preserved sign-in path.
 - Documented additional rules risks: public online fingerprints, public child reads for bans/wlist, public privilege maps, arbitrary history writes, premature ghost deletion, and authenticated deletion of active `mainN` rooms/messages.
 - Runtime/browser/Emulator tests remain blocked by missing repository test setup and unavailable network/CLI. No Firebase Rules or production data changed.
+
+
+## 2026-11-11 — Owner preference: preserve simple password flow
+- Owner requested keeping the existing password format/behavior for easy guest/member registration and login.
+- Removed the 8-character minimum guard from `js/ui/login.js`.
+- Preserved `authPass(p) => p + "@al3nood"`, the existing member sign-in path, and acceptance of any non-empty user-entered password (subject to Firebase Auth's resulting password validation).
+- Preserved the separate security hardening that avoids storing the plaintext password in localStorage, clears the old `al3_p1` key, and leaves the password field blank on page load.
+- Immediate source-level verification: confirmed the minimum-length guard is absent, the compatibility transform remains, registration still rejects an empty password, login still uses the same transform, and legacy password persistence remains removed.
+- Commit: `c047f4ca2c4db908c1213322ce4d32ce0151d1b9`.
+- Not yet run: real browser registration/login, Auth Emulator, and live-page tests. This is a draft branch change, not yet available on `main`.
+- Owner delivery preference recorded in `AGENTS.md`: report step-by-step, test after each isolated fix, record exact outcomes before moving on.
