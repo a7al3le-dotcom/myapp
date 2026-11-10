@@ -124,3 +124,14 @@ For every individual change, in this order:
 - Result: 14/14 PASS, 0 FAIL.
 - Assertions cover no minimum-length restriction, preserved `authPass()` transformation, registration/login use of the same transform, empty-password rejection, no plaintext localStorage write/read, legacy-key cleanup, blank password field, and required agent/log documentation.
 - These are source-level assertions only; no browser, Firebase Auth Emulator, or live-site test was run.
+
+
+## 2026-11-11 — Isolated test environment preparation
+- New branch: `test/isolated-emulator-preview`, based on the latest engineering baseline.
+- Added `firebase.json` for local Auth, Realtime Database, and Hosting emulators.
+- Local emulator mode in `js/firebase.js` uses the demo-only project ID `demo-myapp-local` and its dedicated RTDB namespace; activation remains restricted to localhost/127.0.0.1 with `?emu=1`.
+- Added `docs/LOCAL_TESTING.md` with PowerShell startup instructions and isolation warnings.
+- Verification: 8/8 source/configuration assertions passed after re-fetching the branch files.
+- Not yet performed: Firebase CLI startup, Java/runtime validation, browser test, Auth/Database flow tests.
+- The tracked `database.rules.json` remains an unverified repository snapshot; emulator results using it must not be represented as proof of deployed production rules.
+- Online preview is blocked pending connection to the Firebase integration and confirmation/creation of a separate test Firebase project. No hosting deployment has been made.
