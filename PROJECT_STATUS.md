@@ -117,3 +117,10 @@ For every individual change, in this order:
 - Kept the existing `authPass(p) => p + "@al3nood"` transformation and existing login behavior unchanged.
 - Kept removal of plaintext password persistence in localStorage and cleanup of legacy `al3_p1`.
 - This adjustment is committed on `docs/engineering-baseline`; it has not been merged to `main`.
+
+
+### Verification result — owner-directed password adjustment
+- Re-fetched the saved branch source after the change and ran 14 targeted source assertions.
+- Result: 14/14 PASS, 0 FAIL.
+- Assertions cover no minimum-length restriction, preserved `authPass()` transformation, registration/login use of the same transform, empty-password rejection, no plaintext localStorage write/read, legacy-key cleanup, blank password field, and required agent/log documentation.
+- These are source-level assertions only; no browser, Firebase Auth Emulator, or live-site test was run.
