@@ -54,7 +54,7 @@ The browser client is untrusted. All authorization for direct Firebase Realtime 
 - Rules JSON parsed successfully; root is `al3`.
 - 568 rule declarations and 443 validation declarations were traversed.
 - 21/21 pre-change source assertions passed.
-- 16/16 post-change assertions passed after correcting the test harness's escaped regex literal; the YouTube ID validator was already correctly constrained to 11 URL-safe characters.
+- 19/19 post-change assertions passed after correcting the test harness's escaped regex literal; the YouTube ID validator was already correctly constrained to 11 URL-safe characters.
 - `fmt()` escapes user text before HTML rendering; message YouTube IDs are validated before interpolation.
 - Main has no `firebase.json`, `package.json`, or automated test files. The Firebase client contains a localhost-only emulator connection hook, but no reproducible emulator setup is committed.
 - No real browser tests, Firebase Rules Emulator tests, Auth Emulator tests, or production deployment checks were performed. Git clone failed because the execution environment could not resolve GitHub; Firebase CLI is absent.
