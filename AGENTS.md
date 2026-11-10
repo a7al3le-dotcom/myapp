@@ -77,3 +77,14 @@ After each phase:
 - Update `PROJECT_STATUS.md` and `docs/IMPLEMENTATION_LOG.md` when project state changes.
 - List blockers and the next concrete engineering task.
 - Communicate with the owner in Arabic; retain filenames, identifiers, and commands verbatim.
+
+
+## Owner-specific authentication and delivery requirements (2026-11-11)
+- Preserve the existing simple password experience for guests and members. Do not add a minimum password length or change the current `authPass()` transformation unless the owner explicitly asks for that change.
+- Preserve compatibility with existing member accounts and the current registration/login flow.
+- This preference does not authorize storing plaintext passwords in localStorage/sessionStorage. Keep password fields blank on page load and do not persist the password in browser storage.
+- Send progress reports in Arabic as work proceeds. Do not wait until the entire project is finished to report meaningful findings.
+- Maintain a chronological, step-by-step implementation log: before change (evidence and baseline), exact change, immediate test, test result, any regression/follow-up, commit SHA, and next step.
+- After each individual code/rules change: inspect the exact diff, run the narrowest relevant test, then run related regression checks before starting another fix. If a runtime test is unavailable, say so explicitly and do not label static inspection as a runtime test.
+- Give the owner a concise test report after each meaningful fix so they can try the updated page. Clearly identify the branch/PR and whether the fix is already available on the live/default branch.
+- Do not batch multiple unrelated fixes before testing the first one. Stop and diagnose a failed test before proceeding.
