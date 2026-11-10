@@ -38,6 +38,9 @@ This is an execution instruction, not a substitute for inspecting and changing t
 - Do not introduce paid services, Blaze billing, external hosting, TURN, LiveKit, or a new backend without approval.
 
 ## Security and production safety
+- A 1,611-line owner-supplied `database.rules.json` snapshot with root `al3` is tracked on the engineering branch. Its presence does not confirm that it is deployed.
+- The current `main` branch does not yet track this rules file.
+- Review the known public-read exposure on `al3/online` and `al3/bans/$k`, and the broad authenticated write on `al3/hist/$fp/$k`, before any rules change. Preserve guest-login and moderation behavior through Emulator tests.
 - The client currently selects `BACKEND = "rules"`; Firebase Realtime Database Security Rules are therefore the actual authorization boundary for direct client writes.
 - Never infer authorization from hidden buttons, `S.owner`, client-side role checks, or comments.
 - Never create or publish replacement production rules from an old rules file. Rules must match the current `al3` schema and be tested in an isolated Emulator first.
