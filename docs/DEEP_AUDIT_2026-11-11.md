@@ -104,3 +104,7 @@ Reason: main has no `firebase.json`, `package.json`, or test suite; Firebase CLI
 
 ## Release decision
 **Do not merge or deploy the rules snapshot or security-rule changes yet.** First create an isolated Emulator harness and reproduce the permission behaviors above. Password hardening can be considered for merge after browser/Auth Emulator regression tests verify login, registration, and legacy-account compatibility.
+
+
+## Owner-directed correction — simple password flow
+The owner prefers the current simple password experience for visitor/member registration and login. The previously added 8-character minimum was therefore removed from the engineering branch in commit `c047f4ca2c4db908c1213322ce4d32ce0151d1b9`. The existing `authPass()` transformation and sign-in compatibility remain unchanged. This does not make short passwords cryptographically strong; it preserves the owner's usability requirement. Plaintext password persistence in browser storage remains removed as a separate security measure.
