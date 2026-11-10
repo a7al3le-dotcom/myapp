@@ -1,0 +1,1611 @@
+{
+  "rules": {
+    "al3": {
+      "owners": {
+        ".read": true,
+        "$uid": {
+          ".write": false
+        }
+      },
+      "powers": {
+        ".read": true,
+        "$pid": {
+          ".validate": "newData.hasChildren(['rank', 'name'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+          },
+          "ico": {
+            ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+          },
+          "$o": {
+            ".validate": "false"
+          },
+          "rank": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999"
+          },
+          "kick": {
+            ".validate": "newData.isNumber() && newData.val() >= -1000000 && newData.val() <= 1000000"
+          },
+          "publicmsg": {
+            ".validate": "newData.isNumber() && newData.val() >= -1000000 && newData.val() <= 1000000"
+          },
+          "rooms": {
+            ".validate": "newData.isNumber() && newData.val() >= -1000000 && newData.val() <= 1000000"
+          },
+          "upgrades": {
+            ".validate": "newData.isNumber() && newData.val() >= -1000000 && newData.val() <= 1000000"
+          },
+          "delbc": {
+            ".validate": "newData.isBoolean()"
+          },
+          "alert": {
+            ".validate": "newData.isBoolean()"
+          },
+          "mynick": {
+            ".validate": "newData.isBoolean()"
+          },
+          "unick": {
+            ".validate": "newData.isBoolean()"
+          },
+          "ban": {
+            ".validate": "newData.isBoolean()"
+          },
+          "bnr": {
+            ".validate": "newData.isBoolean()"
+          },
+          "ppmsg": {
+            ".validate": "newData.isBoolean()"
+          },
+          "forcepm": {
+            ".validate": "newData.isBoolean()"
+          },
+          "roomowner": {
+            ".validate": "newData.isBoolean()"
+          },
+          "createroom": {
+            ".validate": "newData.isBoolean()"
+          },
+          "edituser": {
+            ".validate": "newData.isBoolean()"
+          },
+          "setpower": {
+            ".validate": "newData.isBoolean()"
+          },
+          "history": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cp": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cprooms": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpshrt": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpsubs": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpmsgs": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpwrooms": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpsite": {
+            ".validate": "newData.isBoolean()"
+          },
+          "cpdomains": {
+            ".validate": "newData.isBoolean()"
+          },
+          "rjoin": {
+            ".validate": "newData.isBoolean()"
+          },
+          "stealth": {
+            ".validate": "newData.isBoolean()"
+          },
+          "setLikes": {
+            ".validate": "newData.isBoolean()"
+          },
+          "dmsg": {
+            ".validate": "newData.isBoolean()"
+          },
+          "rinvite": {
+            ".validate": "newData.isBoolean()"
+          },
+          "mic": {
+            ".validate": "newData.isBoolean()"
+          },
+          "editpower": {
+            ".validate": "newData.isBoolean()"
+          },
+          "filter": {
+            ".validate": "newData.isBoolean()"
+          },
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('editpower').val() == true)) && (root.child('al3').child('owners/' + auth.uid).val() == true || ((!data.exists() || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && data.child('rank').val() < root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val())) && (!newData.exists() || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && newData.child('rank').val() < root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val()))))"
+        }
+      },
+      "upow": {
+        ".read": true,
+        "$uid": {
+          ".write": "auth != null && (((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('setpower').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val())))) && (!newData.exists() || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + newData.child('p').val()).child('rank').isNumber() && root.child('al3').child('powers/' + newData.child('p').val()).child('rank').val() <= root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val()))) && ($uid != auth.uid || root.child('al3').child('owners/' + auth.uid).val() == true || !newData.exists() || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + newData.child('p').val()).child('rank').isNumber() && root.child('al3').child('powers/' + newData.child('p').val()).child('rank').val() < root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val()))) || (!newData.exists() && data.child('until').isNumber() && data.child('until').val() != 0 && data.child('until').val() < now) || (!newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))))",
+          ".validate": "newData.hasChildren(['p', 'until', 'ts']) && root.child('al3').child('powers/' + newData.child('p').val()).exists()",
+          "p": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+          },
+          "until": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "by": {
+            ".validate": "newData.val() == auth.uid"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "t": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "kicks": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          "$id": {
+            ".write": "auth != null && ((auth.uid == $uid && !newData.exists()) || (!data.exists() && newData.child('by').val() == auth.uid && ((newData.child('k').val() == 'kick' && (((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').val() >= 1)) && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().child('quota/' + auth.uid + '/kick/ts').val() == now)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true))) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))) || (newData.child('k').val() == 'ban' && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ban').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))) || (newData.child('k').val() == 'move' && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rinvite').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))) || (newData.child('k').val() == 'rkick' && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('rooms/' + newData.child('rid').val() + '/owner').val() == auth.uid || root.child('al3').child('rooms/' + newData.child('rid').val() + '/ops/' + auth.uid).val() == true)))))",
+            ".validate": "newData.hasChildren(['k', 'by', 'ts'])",
+            "k": {
+              ".validate": "newData.val() == 'kick' || newData.val() == 'ban' || newData.val() == 'rkick' || newData.val() == 'move'"
+            },
+            "by": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "t": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "rid": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "bans": {
+        ".read": "auth != null && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ban').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true)))",
+        "$k": {
+          ".read": true,
+          ".write": "auth != null && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true)) || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ban').val() == true)) && (!newData.exists() || (newData.exists() && (newData.child('k').val() == 'f0' || newData.child('k').val() == 'i') && newData.child('by').val() == auth.uid && !newData.child('a').exists() && data.child('a').val() != true && newData.child('until').isNumber() && newData.child('until').val() <= now + 3600000))) || (!newData.exists() && data.child('until').isNumber() && data.child('until').val() < now))",
+          ".validate": "newData.hasChildren(['k', 'v', 'by', 'ts']) && $k.beginsWith(newData.child('k').val() + '_')",
+          "k": {
+            ".validate": "newData.isString() && newData.val().matches(/^(f[0-4]|i|c)$/)"
+          },
+          "v": {
+            ".validate": "newData.isString() && newData.val().length <= 220 && newData.val().length >= 1"
+          },
+          "u": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "byt": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "a": {
+            ".validate": "newData.isBoolean()"
+          },
+          "until": {
+            ".validate": "newData.isNumber()"
+          },
+          "n": {
+            ".write": "auth != null && data.parent().exists() && newData.exists()",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || newData.val() == data.val() + 1)"
+          },
+          "la": {
+            ".write": "auth != null && data.parent().exists() && newData.exists()",
+            ".validate": "newData.val() == now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "names": {
+        "$k": {
+          ".read": true,
+          ".write": "auth != null && ((auth.token.firebase.sign_in_provider == 'password' && !data.exists() && newData.val() == auth.uid && root.child('al3/site/allowreg').val() != false) || (!newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true)) && (data.val() == auth.uid || (root.child('al3').child('owners/' + data.val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.val()).child('p').isString() && (root.child('al3').child('upow/' + data.val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.val()).child('p').val()).child('rank').val()))))))",
+          ".validate": "newData.isString() && $k.length <= 120"
+        }
+      },
+      "users": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true))",
+        "$uid": {
+          ".read": true,
+          ".write": "auth != null && ((auth.uid == $uid && auth.token.firebase.sign_in_provider == 'password') || (!newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))))",
+          ".validate": "newData.hasChildren(['topic', 'name'])",
+          "name": {
+            ".validate": "newData.isString() && (!data.exists() || newData.val() == data.val())"
+          },
+          "topic": {
+            ".write": "auth != null && auth.uid != $uid && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('unick').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))",
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40 && (!root.child('al3').child('names/' + newData.val().toLowerCase().replace('.', '_').replace('#', '_').replace('$', '_').replace('[', '_').replace(']', '_').replace('/', '_').replace(' ', '_')).exists() || root.child('al3').child('names/' + newData.val().toLowerCase().replace('.', '_').replace('#', '_').replace('$', '_').replace('[', '_').replace(']', '_').replace('/', '_').replace(' ', '_')).val() == $uid)"
+          },
+          "pic": {
+            ".write": "auth != null && auth.uid != $uid && newData.val() == 'pic.png' && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').val() >= 1)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))",
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "msg": {
+            ".validate": "newData.isString() && newData.val().length <= 150"
+          },
+          "ucol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "mcol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "bg": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "reg": {
+            ".validate": "newData.isNumber()"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "uprv": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true))",
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": "auth != null && auth.uid == $uid",
+          "ip": {
+            ".validate": "newData.isString() && newData.val().length <= 60 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "fp": {
+            ".validate": "newData.isString() && newData.val().length <= 200 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "co": {
+            ".validate": "newData.isString() && newData.val().length <= 3"
+          },
+          "ls": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "online": {
+        ".read": true,
+        "$uid": {
+          ".write": "auth != null && (auth.uid == $uid || (!newData.exists() && data.child('off').val() == true) || (!newData.exists() && data.exists() && (((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').val() >= 1)) && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().child('quota/' + auth.uid + '/kick/ts').val() == now)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ban').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true))) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))))",
+          ".validate": "newData.hasChildren(['topic', 'ts', 'fp', 'f1', 'f2', 'f3', 'f4', 'co']) && (data.exists() || root.child('al3').child('owners/' + auth.uid).val() == true || root.child('al3').child('bans/f0_' + newData.child('fp').val()).child('a').val() == true || root.child('al3').child('bans/f1_' + newData.child('f1').val()).child('a').val() == true || root.child('al3').child('bans/f2_' + newData.child('f2').val()).child('a').val() == true || root.child('al3').child('bans/f3_' + newData.child('f3').val()).child('a').val() == true || root.child('al3').child('bans/f4_' + newData.child('f4').val()).child('a').val() == true || root.child('al3').child('bans/c_' + newData.child('co').val()).child('a').val() == true || (newData.child('ih').exists() && root.child('al3').child('bans/i_' + newData.child('ih').val()).child('a').val() == true) || !((root.child('al3').child('bans/f0_' + newData.child('fp').val()).exists() && root.child('al3').child('bans/f0_' + newData.child('fp').val()).child('a').val() != true && (!root.child('al3').child('bans/f0_' + newData.child('fp').val()).child('until').exists() || root.child('al3').child('bans/f0_' + newData.child('fp').val()).child('until').val() > now)) || (root.child('al3').child('bans/f1_' + newData.child('f1').val()).exists() && root.child('al3').child('bans/f1_' + newData.child('f1').val()).child('a').val() != true && (!root.child('al3').child('bans/f1_' + newData.child('f1').val()).child('until').exists() || root.child('al3').child('bans/f1_' + newData.child('f1').val()).child('until').val() > now)) || (root.child('al3').child('bans/f2_' + newData.child('f2').val()).exists() && root.child('al3').child('bans/f2_' + newData.child('f2').val()).child('a').val() != true && (!root.child('al3').child('bans/f2_' + newData.child('f2').val()).child('until').exists() || root.child('al3').child('bans/f2_' + newData.child('f2').val()).child('until').val() > now)) || (root.child('al3').child('bans/f3_' + newData.child('f3').val()).exists() && root.child('al3').child('bans/f3_' + newData.child('f3').val()).child('a').val() != true && (!root.child('al3').child('bans/f3_' + newData.child('f3').val()).child('until').exists() || root.child('al3').child('bans/f3_' + newData.child('f3').val()).child('until').val() > now)) || (root.child('al3').child('bans/f4_' + newData.child('f4').val()).exists() && root.child('al3').child('bans/f4_' + newData.child('f4').val()).child('a').val() != true && (!root.child('al3').child('bans/f4_' + newData.child('f4').val()).child('until').exists() || root.child('al3').child('bans/f4_' + newData.child('f4').val()).child('until').val() > now)) || (root.child('al3').child('bans/c_' + newData.child('co').val()).exists() && root.child('al3').child('bans/c_' + newData.child('co').val()).child('a').val() != true && (!root.child('al3').child('bans/c_' + newData.child('co').val()).child('until').exists() || root.child('al3').child('bans/c_' + newData.child('co').val()).child('until').val() > now)) || (newData.child('ih').exists() && (root.child('al3').child('bans/i_' + newData.child('ih').val()).exists() && root.child('al3').child('bans/i_' + newData.child('ih').val()).child('a').val() != true && (!root.child('al3').child('bans/i_' + newData.child('ih').val()).child('until').exists() || root.child('al3').child('bans/i_' + newData.child('ih').val()).child('until').val() > now))))) && (data.exists() || newData.child('g').val() != true || root.child('al3').child('site/allowg').val() != false)",
+          "topic": {
+            ".write": "auth != null && auth.uid != $uid && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('unick').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))",
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40 && (!root.child('al3').child('names/' + newData.val().toLowerCase().replace('.', '_').replace('#', '_').replace('$', '_').replace('[', '_').replace(']', '_').replace('/', '_').replace(' ', '_')).exists() || root.child('al3').child('names/' + newData.val().toLowerCase().replace('.', '_').replace('#', '_').replace('$', '_').replace('[', '_').replace(']', '_').replace('/', '_').replace(' ', '_')).val() == $uid)"
+          },
+          "pic": {
+            ".write": "auth != null && auth.uid != $uid && newData.val() == 'pic.png' && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').val() >= 1)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))",
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "msg": {
+            ".validate": "newData.isString() && newData.val().length <= 150"
+          },
+          "ucol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "mcol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "bg": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "co": {
+            ".validate": "newData.isString() && newData.val().length <= 3"
+          },
+          "g": {
+            ".validate": "newData.isBoolean()"
+          },
+          "h": {
+            ".validate": "newData.isNumber()"
+          },
+          "busy": {
+            ".validate": "newData.isBoolean()"
+          },
+          "off": {
+            ".validate": "newData.isBoolean()"
+          },
+          "offAt": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "la": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "ih": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "fp": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "f1": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "f2": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "f3": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "f4": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "fd": {
+            ".validate": "newData.isString() && newData.val().length <= 200 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "s": {
+            ".validate": "newData.val() == true && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('stealth').val() == true))"
+          },
+          "sid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "nn": {
+            ".validate": "newData.isBoolean()"
+          },
+          "stat": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4"
+          },
+          "room": {
+            ".write": "auth != null && auth.uid != $uid && data.parent().exists() && ((!newData.exists() && data.exists() && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('rooms/' + data.val() + '/owner').val() == auth.uid || root.child('al3').child('rooms/' + data.val() + '/ops/' + auth.uid).val() == true) && (($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val())))) || root.child('al3').child('rooms/' + data.val() + '/owner').val() == auth.uid) && root.child('al3').child('owners/' + $uid).val() != true && root.child('al3').child('rooms/' + data.val() + '/owner').val() != $uid) || (newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rinvite').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))))",
+            ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,40}$/) && newData.parent().parent().parent().child('rooms/' + newData.val()).exists() && (auth.uid != $uid || ((newData.val() == 'wait' || !(root.child('al3').child('wroom').child('active').val() == true && !(root.child('al3').child('owners/' + auth.uid).val() == true) && !(root.child('al3').child('wlist/f0_' + newData.parent().child('fp').val()).child('a').val() == true || root.child('al3').child('wlist/f1_' + newData.parent().child('f1').val()).child('a').val() == true || root.child('al3').child('wlist/f2_' + newData.parent().child('f2').val()).child('a').val() == true || root.child('al3').child('wlist/f3_' + newData.parent().child('f3').val()).child('a').val() == true || root.child('al3').child('wlist/f4_' + newData.parent().child('f4').val()).child('a').val() == true || root.child('al3').child('wlist/c_' + newData.parent().child('co').val()).child('a').val() == true || (newData.parent().child('ih').exists() && root.child('al3').child('wlist/i_' + newData.parent().child('ih').val()).child('a').val() == true)) && (((root.child('al3').child('wlist/f0_' + newData.parent().child('fp').val()).exists() && root.child('al3').child('wlist/f0_' + newData.parent().child('fp').val()).child('a').val() != true) || (root.child('al3').child('wlist/f1_' + newData.parent().child('f1').val()).exists() && root.child('al3').child('wlist/f1_' + newData.parent().child('f1').val()).child('a').val() != true) || (root.child('al3').child('wlist/f2_' + newData.parent().child('f2').val()).exists() && root.child('al3').child('wlist/f2_' + newData.parent().child('f2').val()).child('a').val() != true) || (root.child('al3').child('wlist/f3_' + newData.parent().child('f3').val()).exists() && root.child('al3').child('wlist/f3_' + newData.parent().child('f3').val()).child('a').val() != true) || (root.child('al3').child('wlist/f4_' + newData.parent().child('f4').val()).exists() && root.child('al3').child('wlist/f4_' + newData.parent().child('f4').val()).child('a').val() != true) || (root.child('al3').child('wlist/c_' + newData.parent().child('co').val()).exists() && root.child('al3').child('wlist/c_' + newData.parent().child('co').val()).child('a').val() != true) || (newData.parent().child('ih').exists() && root.child('al3').child('wlist/i_' + newData.parent().child('ih').val()).exists() && root.child('al3').child('wlist/i_' + newData.parent().child('ih').val()).child('a').val() != true)) || (root.child('al3').child('wroom').child('likes').isNumber() && root.child('al3').child('wroom').child('likes').val() > 0 && !(root.child('al3').child('ucount/' + $uid).isNumber() && root.child('al3').child('ucount/' + $uid).val() >= root.child('al3').child('wroom').child('likes').val()))))) && (!newData.parent().parent().parent().child('rkick/' + newData.val() + '/' + $uid).exists() || newData.parent().parent().parent().child('rkick/' + newData.val() + '/' + $uid).val() < now - 300000) && (newData.parent().parent().parent().child('rooms/' + newData.val() + '/hasPass').val() != true || newData.parent().parent().parent().child('rooms/' + newData.val() + '/owner').val() == auth.uid || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rjoin').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || newData.parent().parent().parent().child('roomkeys/' + newData.val() + '/' + auth.uid).val() == newData.parent().parent().parent().child('roompass/' + newData.val()).val())))"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "rkick": {
+        ".read": "auth != null",
+        "$rid": {
+          "$uid": {
+            ".write": "auth != null && ((((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || root.child('al3').child('rooms/' + $rid + '/ops/' + auth.uid).val() == true) && (($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val())))) || root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid)) || (auth.uid == $uid && !newData.exists()))",
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          }
+        }
+      },
+      "rooms": {
+        ".read": true,
+        "$rid": {
+          ".write": "auth != null && ((!data.exists() && $rid == 'main' && newData.child('owner').val() == '') || ($rid.matches(/^main[0-9]+$/) && ((!data.exists() && newData.child('owner').val() == '' && newData.child('sticky').val() == false) || (data.exists() && !newData.exists()))) || (!data.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('createroom').val() == true)) && newData.child('owner').val() == auth.uid) || (data.exists() && data.child('owner').val() == auth.uid && $rid != 'main') || (data.exists() && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cprooms').val() == true))) && ($rid != 'main' || newData.exists())) || ($rid == 'wait' && newData.child('owner').val() == '' && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpwrooms').val() == true))) || ($rid == 'wait' && !newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpwrooms').val() == true))))",
+          ".validate": "newData.hasChildren(['topic', 'owner', 'max'])",
+          "topic": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+          },
+          "about": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "welcome": {
+            ".validate": "newData.isString() && newData.val().length <= 300"
+          },
+          "pic": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "max": {
+            ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 40"
+          },
+          "rl": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "rvl": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "sticky": {
+            ".validate": "newData.isBoolean() && (newData.val() == false || data.val() == true || $rid == 'main' || $rid == 'wait' || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rooms').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rooms').val() >= 1)) && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().child('quota/' + auth.uid + '/rooms/ts').val() == now)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cprooms').val() == true)))"
+          },
+          "voice": {
+            ".validate": "newData.isBoolean()"
+          },
+          "hasPass": {
+            ".validate": "newData.isBoolean()"
+          },
+          "color": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "no": {
+            ".validate": "newData.isNumber()"
+          },
+          "owner": {
+            ".validate": "newData.isString() && (!data.exists() || newData.val() == data.val())"
+          },
+          "ops": {
+            "$u": {
+              ".write": "auth != null && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || root.child('al3').child('rooms/' + $rid + '/ops/' + auth.uid).val() == true)",
+              ".validate": "newData.val() == true"
+            }
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "roompass": {
+        "$rid": {
+          ".write": "auth != null && (root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || newData.parent().parent().child('rooms/' + $rid + '/owner').val() == auth.uid || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cprooms').val() == true)))",
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
+        }
+      },
+      "roomkeys": {
+        "$rid": {
+          ".write": "auth != null && !newData.exists() && (root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)))",
+          "$uid": {
+            ".write": "auth != null && auth.uid == $uid",
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          }
+        }
+      },
+      "msgs": {
+        "$rid": {
+          ".read": "auth != null && (root.child('al3').child('rooms/' + $rid + '/hasPass').val() != true || root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rjoin').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('roomkeys/' + $rid + '/' + auth.uid).val() == root.child('al3').child('roompass/' + $rid).val())",
+          ".write": "auth != null && !newData.exists() && (root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || $rid.matches(/^main[0-9]+$/) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)))",
+          ".indexOn": [
+            "ts"
+          ],
+          "$mid": {
+            ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid && root.child('al3').child('online/' + auth.uid + '/room').val() == $rid && ((newData.child('t').val() == 'm' && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().child('lastmsg/' + auth.uid + '/ts').val() == now)) || ((newData.child('t').val() == 'j' || newData.child('t').val() == 'x') && !newData.child('m').exists() && !newData.child('by').exists() && !newData.child('n').exists() && !newData.child('no').exists() && !newData.child('img').exists() && !newData.child('yt').exists() && newData.child('room').val() == $rid && (newData.child('t').val() == 'v' ? newData.child('to').exists() : !newData.child('to').exists())) || ((newData.child('t').val() == 'l' || newData.child('t').val() == 'v') && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().child('lastsys/' + auth.uid + '/ts').val() == now) && !newData.child('m').exists() && !newData.child('by').exists() && !newData.child('n').exists() && !newData.child('no').exists() && !newData.child('img').exists() && !newData.child('yt').exists() && newData.child('room').val() == $rid && (newData.child('t').val() == 'v' ? newData.child('to').exists() : !newData.child('to').exists())))) || (!data.exists() && newData.child('t').val() == 'k' && newData.child('by').val() == auth.uid && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('kick').val() >= 1)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ban').val() == true)) || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('roomowner').val() == true)) || root.child('al3').child('rooms/' + $rid + '/owner').val() == auth.uid || root.child('al3').child('rooms/' + $rid + '/ops/' + auth.uid).val() == true))) || (!data.exists() && newData.child('t').val() == 'x' && newData.child('uid').val() == auth.uid && !newData.child('m').exists() && !newData.child('by').exists() && !newData.child('n').exists() && !newData.child('no').exists() && !newData.child('img').exists() && !newData.child('yt').exists() && newData.child('room').val() == $rid && (newData.child('t').val() == 'v' ? newData.child('to').exists() : !newData.child('to').exists())) || (data.exists() && !newData.exists() && (data.child('ts').val() < now - 86400000 || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('dmsg').val() == true)) && (data.child('uid').val() == auth.uid || (root.child('al3').child('owners/' + data.child('uid').val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.child('uid').val()).child('p').isString() && (root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').val()))))))))",
+            ".validate": "newData.hasChildren(['uid', 'ts', 't'])",
+            "t": {
+              ".validate": "newData.val() == 'm' || newData.val() == 'j' || newData.val() == 'k' || newData.val() == 'l' || newData.val() == 'v' || newData.val() == 'x'"
+            },
+            "by": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "uid": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "m": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "u": {
+              ".validate": "newData.hasChildren(['topic'])",
+              "topic": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "pic": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "ucol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "mcol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "bg": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "ico": {
+                ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+              },
+              "$o": {
+                ".validate": "false"
+              }
+            },
+            "likes": {
+              "$u": {
+                ".write": "auth != null && auth.uid == $u",
+                ".validate": "newData.val() == true"
+              }
+            },
+            "room": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "rt": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "to": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "n": {
+              ".validate": "newData.isNumber()"
+            },
+            "no": {
+              ".validate": "newData.isNumber()"
+            },
+            "img": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "yt": {
+              ".validate": "newData.isString() && newData.val().length <= 11"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "wall": {
+        ".read": "auth != null",
+        "$bid": {
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().child('lastmsg/' + auth.uid + '/ts').val() == now)) || (data.exists() && !newData.exists() && (data.child('uid').val() == auth.uid || data.child('ts').val() < now - 604800000 || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('delbc').val() == true)) && (data.child('uid').val() == auth.uid || (root.child('al3').child('owners/' + data.child('uid').val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.child('uid').val()).child('p').isString() && (root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').val()))))))))",
+          ".validate": "newData.hasChildren(['uid', 'ts'])",
+          "uid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "m": {
+            ".validate": "newData.isString() && newData.val().length <= 500"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "u": {
+            ".validate": "newData.hasChildren(['topic'])",
+            "topic": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "pic": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "ucol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "mcol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "bg": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "ico": {
+              ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          },
+          "likes": {
+            "$u": {
+              ".write": "auth != null && auth.uid == $u",
+              ".validate": "newData.val() == true"
+            }
+          },
+          "img": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "yt": {
+            ".validate": "newData.isString() && newData.val().length <= 11"
+          },
+          "rep": {
+            "$rid": {
+              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().parent().child('lastmsg/' + auth.uid + '/ts').val() == now)) || (data.exists() && !newData.exists() && (data.child('uid').val() == auth.uid || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('delbc').val() == true)) && (data.child('uid').val() == auth.uid || (root.child('al3').child('owners/' + data.child('uid').val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.child('uid').val()).child('p').isString() && (root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.child('uid').val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('uid').val()).child('p').val()).child('rank').val()))))))))",
+              ".validate": "newData.hasChildren(['uid', 'ts', 'm'])",
+              "uid": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "m": {
+                ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().length >= 1"
+              },
+              "ts": {
+                ".validate": "newData.isNumber() && newData.val() <= now"
+              },
+              "u": {
+                ".validate": "newData.hasChildren(['topic'])",
+                "topic": {
+                  ".validate": "newData.isString() && newData.val().length <= 40"
+                },
+                "pic": {
+                  ".validate": "newData.isString() && newData.val().length <= 60"
+                },
+                "ucol": {
+                  ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+                },
+                "mcol": {
+                  ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+                },
+                "bg": {
+                  ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+                },
+                "ico": {
+                  ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+                },
+                "$o": {
+                  ".validate": "false"
+                }
+              },
+              "likes": {
+                "$u": {
+                  ".write": "auth != null && auth.uid == $u",
+                  ".validate": "newData.val() == true"
+                }
+              },
+              "$o": {
+                ".validate": "false"
+              }
+            }
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "pm": {
+        "$cid": {
+          ".read": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid))",
+          "$mid": {
+            ".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ((!data.exists() && newData.child('uid').val() == auth.uid && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().parent().child('lastmsg/' + auth.uid + '/ts').val() == now)) || (data.exists() && !newData.exists() && data.child('ts').val() < now - 604800000))",
+            ".validate": "newData.hasChildren(['uid', 'ts'])",
+            "uid": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "m": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "u": {
+              ".validate": "newData.hasChildren(['topic'])",
+              "topic": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "pic": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "ucol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "mcol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "bg": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "ico": {
+                ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+              },
+              "$o": {
+                ".validate": "false"
+              }
+            },
+            "img": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "pmidx": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          "$other": {
+            ".write": "auth != null && (auth.uid == $uid || auth.uid == $other)",
+            ".validate": "newData.hasChildren(['ts'])",
+            "last": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "un": {
+              ".validate": "newData.isBoolean()"
+            },
+            "u": {
+              ".validate": "newData.hasChildren(['topic'])",
+              "topic": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "pic": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "ucol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "mcol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "bg": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "ico": {
+                ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+              },
+              "$o": {
+                ".validate": "false"
+              }
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "typing": {
+        "$cid": {
+          ".read": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid))",
+          "$u": {
+            ".write": "auth != null && auth.uid == $u && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid))",
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          }
+        }
+      },
+      "notif": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          "$nid": {
+            ".write": "auth != null && ((!data.exists() && newData.child('from').val() == auth.uid) || (data.exists() && !newData.exists() && auth.uid == $uid))",
+            ".validate": "newData.hasChildren(['from', 'k', 'ts'])",
+            "from": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "k": {
+              ".validate": "newData.val() == 'alert' || newData.val() == 'like'"
+            },
+            "m": {
+              ".validate": "newData.isString() && newData.val().length <= 300"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "u": {
+              ".validate": "newData.hasChildren(['topic'])",
+              "topic": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "pic": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "ucol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "mcol": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "bg": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "ico": {
+                ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+              },
+              "$o": {
+                ".validate": "false"
+              }
+            },
+            "h": {
+              ".validate": "newData.isNumber()"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "ucount": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true))",
+        "$uid": {
+          ".read": true,
+          ".write": "auth != null && (newData.parent().parent().child('ulast/' + auth.uid + '/' + $uid).val() == now || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('setLikes').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))) || (!newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('edituser').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))))",
+          ".validate": "newData.isNumber() && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('setLikes').val() == true)) || (!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))"
+        }
+      },
+      "ulast": {
+        "$u": {
+          ".read": "auth != null && auth.uid == $u",
+          "$t": {
+            ".write": "auth != null && auth.uid == $u",
+            ".validate": "newData.isNumber() && newData.val() == now && (!data.exists() || data.val() < now - 86400000)"
+          }
+        }
+      },
+      "pics": {
+        "$pid": {
+          ".read": true,
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid) || (data.exists() && !newData.exists() && (data.child('uid').val() == auth.uid || (root.child('al3/picidx/' + $pid + '/k').val() == 'share' && data.child('ts').val() < now - 604800000))))",
+          ".validate": "newData.hasChildren(['uid', 'd', 'ts'])",
+          "uid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "d": {
+            ".validate": "newData.isString() && newData.val().matches(/^data:image\\/(jpeg|png|gif|webp);base64,/) && newData.val().length <= 200000"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "picidx": {
+        ".read": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true",
+        "$pid": {
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid) || (data.exists() && !newData.exists() && (data.child('uid').val() == auth.uid || (data.child('k').val() == 'share' && data.child('ts').val() < now - 604800000))))",
+          ".validate": "newData.hasChildren(['k', 'uid', 'ts'])",
+          "k": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "uid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "reports": {
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('from').val() == auth.uid",
+          ".validate": "newData.hasChildren(['from', 'to', 'ts'])",
+          "from": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "to": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "why": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "fps": {
+        ".read": "auth != null && ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true)) || (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('history').val() == true)))",
+        ".indexOn": [
+          "ts",
+          "fp"
+        ],
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('uid').val() == auth.uid",
+          ".validate": "newData.hasChildren(['uid', 'ts', 'st'])",
+          "uid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "st": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "un": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "t": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "ip": {
+            ".validate": "newData.isString() && newData.val().length <= 60 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "co": {
+            ".validate": "newData.isString() && newData.val().length <= 3"
+          },
+          "fp": {
+            ".validate": "newData.isString() && newData.val().length <= 200 && newData.val().matches(/^[A-Za-z0-9:._,|+ \\-]*$/)"
+          },
+          "refr": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "r": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "acts": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cp').val() == true))",
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.child('by').val() == auth.uid",
+          ".validate": "newData.hasChildren(['type', 'by', 'ts'])",
+          "type": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "u1": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "u2": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "room": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "ip": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "hist": {
+        "$fp": {
+          ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('history').val() == true))",
+          "$k": {
+            ".write": "auth != null",
+            ".validate": "newData.hasChildren(['t', 'ts'])",
+            "t": {
+              ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "quota": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          "$k": {
+            ".write": "auth != null && auth.uid == $uid && newData.exists() && ($k == 'kick' || $k == 'publicmsg' || $k == 'upgrades' || $k == 'rooms')",
+            ".validate": "newData.hasChildren(['n', 's', 'ts']) && newData.child('ts').val() == now && newData.child('n').isNumber() && ((data.child('s').isNumber() && data.child('s').val() > now - 86400000 && newData.child('s').val() == data.child('s').val() && newData.child('n').val() == data.child('n').val() + 1) || (!(data.child('s').isNumber() && data.child('s').val() > now - 86400000) && newData.child('s').val() == now && newData.child('n').val() == 1)) && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child($k).isNumber() && newData.child('n').val() <= root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child($k).val()))",
+            "n": {
+              ".validate": "newData.isNumber()"
+            },
+            "s": {
+              ".validate": "newData.isNumber()"
+            },
+            "ts": {
+              ".validate": "newData.isNumber()"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "lastmsg": {
+        "$uid": {
+          ".write": "auth != null && auth.uid == $uid && newData.child('ts').val() == now && (root.child('al3').child('owners/' + auth.uid).val() == true || !data.exists() || data.child('ts').val() < now - 700)",
+          ".validate": "newData.hasChildren(['ts'])",
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "lastsys": {
+        "$uid": {
+          ".write": "auth != null && auth.uid == $uid && newData.child('ts').val() == now && (root.child('al3').child('owners/' + auth.uid).val() == true || !data.exists() || data.child('ts').val() < now - 1500)",
+          ".validate": "newData.hasChildren(['ts'])",
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "site": {
+        ".read": true,
+        ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpsite').val() == true))",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "title": {
+          ".validate": "newData.isString() && newData.val().length <= 300"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "keywords": {
+          ".validate": "newData.isString() && newData.val().length <= 3000"
+        },
+        "sbg": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "sbackground": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "sbuttons": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "icons": {
+          "favicon": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "prv1": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "pic": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "room": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        "$o": {
+          ".validate": "false"
+        },
+        "allowg": {
+          ".validate": "newData.isBoolean()"
+        },
+        "allowreg": {
+          ".validate": "newData.isBoolean()"
+        },
+        "rc": {
+          ".validate": "newData.isBoolean()"
+        },
+        "bclikes": {
+          ".validate": "newData.isBoolean()"
+        },
+        "mlikes": {
+          ".validate": "newData.isBoolean()"
+        },
+        "mreply": {
+          ".validate": "newData.isBoolean()"
+        },
+        "bcreply": {
+          ".validate": "newData.isBoolean()"
+        },
+        "calls": {
+          ".validate": "newData.isBoolean()"
+        },
+        "vpnBlock": {
+          ".validate": "newData.isBoolean()"
+        },
+        "msgstt": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1440"
+        },
+        "wall_likes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "wall_minutes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+        },
+        "guestNameMax": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 50"
+        },
+        "registerNameMax": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 50"
+        },
+        "roomMsgLikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "pmLikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "alertLikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "fileslikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "proflikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "piclikes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "maxshrt": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+        },
+        "maxIP": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000"
+        },
+        "ghostMins": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "callsLike": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        }
+      },
+      "sitecode": {
+        ".read": true,
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true",
+        "scr": {
+          ".validate": "newData.isString() && newData.val().length <= 10240"
+        },
+        "head": {
+          ".validate": "newData.isString() && newData.val().length <= 5120"
+        },
+        "html": {
+          ".validate": "newData.isString() && newData.val().length <= 10240"
+        },
+        "$o": {
+          ".validate": "false"
+        }
+      },
+      "domains": {
+        ".read": true,
+        "$d": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpdomains').val() == true))",
+          ".validate": "newData.hasChildren(['domain'])",
+          "domain": {
+            ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length >= 1"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 120"
+          },
+          "title": {
+            ".validate": "newData.isString() && newData.val().length <= 300"
+          },
+          "description": {
+            ".validate": "newData.isString() && newData.val().length <= 1000"
+          },
+          "keywords": {
+            ".validate": "newData.isString() && newData.val().length <= 3000"
+          },
+          "sbg": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "sbackground": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "sbuttons": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "bnr": {
+            ".validate": "newData.isBoolean()"
+          },
+          "bimg": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "domcode": {
+        ".read": true,
+        "$d": {
+          ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true",
+          "scr": {
+            ".validate": "newData.isString() && newData.val().length <= 10240"
+          },
+          "head": {
+            ".validate": "newData.isString() && newData.val().length <= 5120"
+          },
+          "html": {
+            ".validate": "newData.isString() && newData.val().length <= 10240"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "assets": {
+        ".read": true,
+        "$kind": {
+          "$k": {
+            ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpsite').val() == true)) && ($kind == 'sico' || $kind == 'dro3' || $kind == 'emo')",
+            "src": {
+              ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().length >= 1"
+            },
+            "o": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+            },
+            "del": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          }
+        }
+      },
+      "entry": {
+        ".read": true,
+        ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cprooms').val() == true))",
+        "mode": {
+          ".validate": "newData.val() == 'auto' || newData.val() == 'fixed'"
+        },
+        "rid": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "$o": {
+          ".validate": "false"
+        }
+      },
+      "filter": {
+        ".read": true,
+        "$id": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('filter').val() == true))",
+          ".validate": "newData.hasChildren(['w', 't'])",
+          "w": {
+            ".validate": "newData.isString() && newData.val().length <= 100 && newData.val().length >= 1"
+          },
+          "t": {
+            ".validate": "newData.val() == 'a' || newData.val() == 'b' || newData.val() == 'm'"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "fltlog": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('filter').val() == true))",
+        ".indexOn": [
+          "ts"
+        ],
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() == auth.uid) || (!newData.exists() && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('filter').val() == true))))",
+          ".validate": "newData.hasChildren(['w', 'm', 'uid', 'k', 'ts'])",
+          "w": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "m": {
+            ".validate": "newData.isString() && newData.val().length <= 500"
+          },
+          "u": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "ip": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "fp": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "uid": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "k": {
+            ".validate": "newData.val() == 'b' || newData.val() == 'm'"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "shrt": {
+        ".read": "auth != null",
+        "$id": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpshrt').val() == true))",
+          ".validate": "newData.hasChildren(['k', 'v'])",
+          "k": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+          },
+          "v": {
+            ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().length >= 1"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "cmsgs": {
+        ".read": "auth != null",
+        "$id": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpmsgs').val() == true))",
+          ".validate": "newData.hasChildren(['m', 'k'])",
+          "t": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "m": {
+            ".validate": "newData.isString() && newData.val().length <= 250 && newData.val().length >= 1"
+          },
+          "k": {
+            ".validate": "newData.val() == 'w' || newData.val() == 'a'"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "wroom": {
+        ".read": true,
+        ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpwrooms').val() == true))",
+        "active": {
+          ".validate": "newData.isBoolean()"
+        },
+        "move": {
+          ".validate": "newData.isBoolean()"
+        },
+        "pm": {
+          ".validate": "newData.isBoolean()"
+        },
+        "allowlikes": {
+          ".validate": "newData.isBoolean()"
+        },
+        "nots": {
+          ".validate": "newData.isBoolean()"
+        },
+        "autoAllow": {
+          ".validate": "newData.isBoolean()"
+        },
+        "likes": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+        },
+        "$o": {
+          ".validate": "false"
+        }
+      },
+      "wlist": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpwrooms').val() == true))",
+        "$k": {
+          ".read": true,
+          ".write": "(auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('cpwrooms').val() == true))) || (auth != null && $k == 'f0_' + root.child('al3').child('online/' + auth.uid).child('fp').val() && newData.child('a').val() == true && newData.child('by').val() == auth.uid && root.child('al3').child('wroom').child('autoAllow').val() == true && root.child('al3').child('wroom').child('likes').isNumber() && root.child('al3').child('ucount/' + auth.uid).isNumber() && root.child('al3').child('ucount/' + auth.uid).val() >= root.child('al3').child('wroom').child('likes').val())",
+          ".validate": "newData.hasChildren(['k', 'v', 'by', 'ts']) && $k.beginsWith(newData.child('k').val() + '_')",
+          "k": {
+            ".validate": "newData.isString() && newData.val().matches(/^(f[0-4]|i|c)$/)"
+          },
+          "v": {
+            ".validate": "newData.isString() && newData.val().length <= 220 && newData.val().length >= 1"
+          },
+          "u": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "byt": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "a": {
+            ".validate": "newData.isBoolean()"
+          },
+          "n": {
+            ".write": "auth != null && data.parent().exists() && newData.exists()",
+            ".validate": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || newData.val() == data.val() + 1)"
+          },
+          "la": {
+            ".write": "auth != null && data.parent().exists() && newData.exists()",
+            ".validate": "newData.val() == now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "ann": {
+        ".read": "auth != null",
+        ".indexOn": [
+          "ts"
+        ],
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('by').val() == auth.uid && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('publicmsg').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('publicmsg').val() >= 1)) && (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().child('quota/' + auth.uid + '/publicmsg/ts').val() == now)) || (!newData.exists() && (data.child('ts').val() < now - 86400000 || data.child('by').val() == auth.uid || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('dmsg').val() == true)) && (data.child('by').val() == auth.uid || (root.child('al3').child('owners/' + data.child('by').val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.child('by').val()).child('p').isString() && (root.child('al3').child('upow/' + data.child('by').val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.child('by').val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('by').val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('by').val()).child('p').val()).child('rank').val()))))))))",
+          ".validate": "newData.hasChildren(['m', 'by', 'ts'])",
+          "m": {
+            ".validate": "newData.isString() && newData.val().length <= 300 && newData.val().length >= 1"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "u": {
+            ".validate": "newData.hasChildren(['topic'])",
+            "topic": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "pic": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "ucol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "mcol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "bg": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "ico": {
+              ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "pann": {
+        ".read": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || (root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()))",
+        ".indexOn": [
+          "ts"
+        ],
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('by').val() == auth.uid && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('ppmsg').val() == true))) || (!newData.exists() && (data.child('ts').val() < now - 86400000 || data.child('by').val() == auth.uid || ((root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('dmsg').val() == true)) && (data.child('by').val() == auth.uid || (root.child('al3').child('owners/' + data.child('by').val()).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + data.child('by').val()).child('p').isString() && (root.child('al3').child('upow/' + data.child('by').val()).child('until').val() == 0 || root.child('al3').child('upow/' + data.child('by').val()).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('by').val()).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + data.child('by').val()).child('p').val()).child('rank').val()))))))))",
+          ".validate": "newData.hasChildren(['m', 'by', 'ts'])",
+          "m": {
+            ".validate": "newData.isString() && newData.val().length <= 300 && newData.val().length >= 1"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "u": {
+            ".validate": "newData.hasChildren(['topic'])",
+            "topic": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "pic": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "ucol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "mcol": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "bg": {
+              ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+            },
+            "ico": {
+              ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+            },
+            "$o": {
+              ".validate": "false"
+            }
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        },
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true && !newData.exists()"
+      },
+      "ubnr": {
+        ".read": true,
+        "$uid": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('bnr').val() == true)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val()))))",
+          ".validate": "newData.hasChildren(['ico', 'by', 'ts'])",
+          "ico": {
+            ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().length >= 1 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+          },
+          "by": {
+            ".validate": "newData.val() == auth.uid"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "ugift": {
+        ".read": true,
+        "$uid": {
+          ".write": "auth != null && (root.child('al3').child('owners/' + auth.uid).val() == true || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('upgrades').isNumber() && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('upgrades').val() >= 1)) && ($uid == auth.uid || (root.child('al3').child('owners/' + $uid).val() != true && (root.child('al3').child('owners/' + auth.uid).val() == true || !(root.child('al3').child('upow/' + $uid).child('p').isString() && (root.child('al3').child('upow/' + $uid).child('until').val() == 0 || root.child('al3').child('upow/' + $uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').isNumber()) || ((root.child('al3').child('upow/' + auth.uid).child('p').isString() && (root.child('al3').child('upow/' + auth.uid).child('until').val() == 0 || root.child('al3').child('upow/' + auth.uid).child('until').val() > now) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').isNumber()) && root.child('al3').child('powers/' + root.child('al3').child('upow/' + auth.uid).child('p').val()).child('rank').val() > root.child('al3').child('powers/' + root.child('al3').child('upow/' + $uid).child('p').val()).child('rank').val())))) && (!newData.exists() || (root.child('al3').child('owners/' + auth.uid).val() == true || newData.parent().parent().child('quota/' + auth.uid + '/upgrades/ts').val() == now))",
+          ".validate": "newData.hasChildren(['ico', 'by', 'ts'])",
+          "ico": {
+            ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().length >= 1 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+          },
+          "by": {
+            ".validate": "newData.val() == auth.uid"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      },
+      "botcfg": {
+        ".read": true,
+        ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true",
+        "minStay": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "maxStay": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "minLeave": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "maxLeave": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "active": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$o": {
+          ".validate": "false"
+        }
+      },
+      "bots": {
+        ".read": true,
+        "$id": {
+          ".write": "auth != null && root.child('al3').child('owners/' + auth.uid).val() == true",
+          ".validate": "newData.hasChildren(['topic'])",
+          "topic": {
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 1"
+          },
+          "msg": {
+            ".validate": "newData.isString() && newData.val().length <= 150"
+          },
+          "pic": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "co": {
+            ".validate": "newData.isString() && newData.val().length <= 3"
+          },
+          "room": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "likes": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+          },
+          "ucol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "mcol": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "bg": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "ico": {
+            ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^((sico\\/|dro3\\/)?[^\\/:\\\\?#<>]*|db:[A-Za-z0-9_-]+)$/)"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$o": {
+            ".validate": "false"
+          }
+        }
+      }
+    }
+  }
+}
