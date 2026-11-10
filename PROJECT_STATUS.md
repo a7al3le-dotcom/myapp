@@ -92,3 +92,28 @@ No production rules changes, database migrations, data deletion, paid services, 
 - Any authenticated user can delete `mainN` auto-room metadata and the corresponding room message subtree through the current rules; occupancy is not checked in the rule. This can disrupt active rooms.
 - The client-only `cleanup()` routine is not an authorization boundary; each delete is governed by the rules. Several broad old-data cleanup permissions need emulator tests.
 - Custom site/domain scripts are intentionally executable. The supplied snapshot restricts writes to owners, but deployment and owner-account security remain unverified.
+
+
+## Owner preference update — 2026-11-11
+- Owner explicitly prefers the existing simple password experience for guest/member registration and login.
+- Do not enforce a minimum password length or change the `authPass()` suffix transformation without explicit approval.
+- Keep the password out of browser local/session storage; the password field remains blank on page load.
+- The earlier 8-character registration guard has been removed from this engineering branch in response to this preference.
+- The existing sign-in compatibility transform is preserved. This is a usability decision, not a claim that short passwords are strong.
+
+## Incremental delivery and test protocol
+For every individual change, in this order:
+1. Record the starting commit, files, observed behavior, and exact defect/evidence.
+2. Make one focused change only.
+3. Review the exact diff and verify no unrelated edits.
+4. Run an immediate targeted test for that change.
+5. Run affected regression checks (login, registration, guest access, session resume, or relevant Firebase rules paths).
+6. Record command/test method, exact pass/fail result, limitations, and commit SHA in `docs/IMPLEMENTATION_LOG.md`.
+7. Send an Arabic progress report before moving to the next fix, including whether the owner can test it on the live page or only in the draft branch.
+8. If a test fails, stop, diagnose, and report before further modifications.
+
+## Latest owner-requested adjustment
+- Removed the newly added 8-character minimum from `js/ui/login.js`.
+- Kept the existing `authPass(p) => p + "@al3nood"` transformation and existing login behavior unchanged.
+- Kept removal of plaintext password persistence in localStorage and cleanup of legacy `al3_p1`.
+- This adjustment is committed on `docs/engineering-baseline`; it has not been merged to `main`.
