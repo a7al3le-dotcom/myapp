@@ -4,7 +4,15 @@ import { initializeAuth, inMemoryPersistence, connectAuthEmulator } from "https:
 import { getDatabase, ref, onValue, connectDatabaseEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig, ROOT } from "./config.js";
 
-export const app = initializeApp(firebaseConfig);
+// Emulator mode uses a demo-only Firebase project ID and database namespace.
+// This prevents local test data from sharing the production project's identity.
+const useEmulator = /[?&]emu=1/.test(location.search) && /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname);
+export const app = initializeApp(useEmulator ? {
+  ...firebaseConfig,
+  projectId: "demo-myapp-local",
+  authDomain: "demo-myapp-local.firebaseapp.com",
+  databaseURL: "https://demo-myapp-local-default-rtdb.firebaseio.com"
+} : firebaseConfig);
 // الدخول ما ينحفظ في الجهاز (كل مرة يدخل من صفحة الدخول مثل العنود).
 // هذا يمنع تعليق "يتم الاتصال .." لو كانت جلسة قديمة محفوظة وصارت غير صالحة.
 // الدخول ما ينحفظ: بعد تحديث الصفحة لازم تدخل بنفسك من صفحة الدخول (طلب المالك)
