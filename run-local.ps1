@@ -1,5 +1,5 @@
-# تشغيل معاينة واختبار محلي على Windows PowerShell
-# هذا الملف يشغّل Firebase Emulator Suite محلياً فقط، ولا ينشر إلى Firebase.
+# Start the local preview and Firebase Emulator Suite from Windows PowerShell.
+# This script is local only. It does not deploy or connect to production Firebase.
 
 $ErrorActionPreference = "Stop"
 $projectId = "demo-myapp-local"
@@ -9,22 +9,22 @@ Set-Location -LiteralPath $root
 
 try {
     if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-        throw "Node.js غير موجود. ثبّت إصدار LTS ثم افتح PowerShell من جديد."
+        throw "Node.js is missing. Install an LTS release, then reopen PowerShell."
     }
     if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
-        throw "npx غير موجود. أعد تثبيت Node.js LTS مع npm."
+        throw "npx is missing. Reinstall Node.js LTS with npm."
     }
     if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-        throw "Java غير موجود في PATH. ثبّت Java مدعوماً من Firebase Emulator Suite ثم افتح PowerShell من جديد."
+        throw "Java is missing from PATH. Install a Java version supported by Firebase Emulator Suite, then reopen PowerShell."
     }
     if (-not (Test-Path -LiteralPath (Join-Path $root "firebase.json") -PathType Leaf)) {
-        throw "لم يُعثر على firebase.json في جذر المشروع."
+        throw "firebase.json was not found in the project root."
     }
 
-    Write-Host "تشغيل محاكيات Auth وRealtime Database وHosting للمشروع المحلي $projectId فقط."
-    Write-Host "هذا تشغيل محلي؛ لا يوجد نشر ولا اتصال بمشروع Firebase الإنتاجي."
-    Write-Host "الرابط: $previewUrl"
-    Write-Host "أوقف المحاكيات في أي وقت بالضغط على Ctrl+C."
+    Write-Host "Starting local Auth, Realtime Database, and Hosting emulators for $projectId only."
+    Write-Host "Local only: this does not deploy or connect to production Firebase."
+    Write-Host "Preview URL: $previewUrl"
+    Write-Host "Stop the emulators at any time with Ctrl+C."
 
     $edge = Get-Command msedge -ErrorAction SilentlyContinue
     if ($edge) {
@@ -37,13 +37,13 @@ try {
         if ($edgePaths) {
             Start-Process -FilePath $edgePaths[0] -ArgumentList $previewUrl
         } else {
-            Write-Warning "لم يُعثر على Microsoft Edge. افتح الرابط يدوياً بعد بدء المحاكيات: $previewUrl"
+            Write-Warning "Microsoft Edge was not found. Open this URL manually after the emulators start: $previewUrl"
         }
     }
 
     & npx --yes firebase-tools emulators:start --project $projectId --only auth,database,hosting
     if ($LASTEXITCODE -ne 0) {
-        throw "توقفت Firebase Emulator Suite برمز خطأ $LASTEXITCODE. راجع الرسالة أعلاه وتحقق من اتصال الإنترنت لأول تنزيل."
+        throw "Firebase Emulator Suite exited with code $LASTEXITCODE. Check the message above and your Internet connection for the initial download."
     }
 } catch {
     Write-Error $_
