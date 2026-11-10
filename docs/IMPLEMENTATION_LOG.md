@@ -50,3 +50,16 @@
 - Confirmed: no minimum-length guard; existing `authPass()` transformation preserved for registration and login; empty password still rejected; no plaintext password storage/restoration; legacy key cleanup remains; password field blank on page load; owner preference and per-change testing workflow recorded.
 - Test class: source-level assertions only. No browser, Auth Emulator, Realtime Database Emulator, or live-page tests were run.
 - The change is in the draft engineering branch, not `main`.
+
+
+## 2026-11-11 — Isolated local emulator setup
+- Baseline: branch `docs/engineering-baseline`, commit `d4a395e98254f2fc61e8925f09fc3b9aff85bffe`; no `firebase.json`, package manifest, or test harness was present at repository root.
+- Created dedicated branch `test/isolated-emulator-preview`.
+- Added `firebase.json`: local Auth (9099), Realtime Database (9000), Hosting (5000), Emulator UI (4000); database rules point to the tracked snapshot.
+- Updated `js/firebase.js`: local mode is limited to localhost/127.0.0.1 and `?emu=1`; app identity/database namespace switch to `demo-myapp-local`; Auth and RTDB emulator endpoints remain local.
+- Added `docs/LOCAL_TESTING.md` with the PowerShell command: `npx firebase-tools emulators:start --project demo-myapp-local --only auth,database,hosting`.
+- Immediate post-change verification after re-fetching files: 8/8 source/config assertions PASS, 0 FAIL (valid JSON/config ports, rules path, demo project ID, localhost guard, local Auth/RTDB endpoints, snapshot caveat, rules file presence).
+- Test class: static/source configuration checks only. Firebase CLI was not started; no browser or Auth/RTDB behavior was tested.
+- Important limitation: the tracked rules file is an unverified snapshot and may not match deployed production rules.
+- Online preview: not deployed. Firebase integration connection and a separate test Firebase project are still required.
+- Latest implementation commit before this documentation append: `b8ab4d1e24579b509c37f660fe013f2c12e27cb1`.
