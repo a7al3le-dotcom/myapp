@@ -70,3 +70,25 @@ Latest inspected main commit: `01de78951c5f784b379d08f953e8972cdf641a57`
 
 ## Non-negotiable limits
 No production rules changes, database migrations, data deletion, paid services, or deployment without explicit owner approval.
+
+
+## Deep audit update — 2026-11-11
+- Audited all 34 application HTML/CSS/JavaScript source files listed in the current main tree, including authentication, session/presence, permissions, actions, chat, private messages, rooms, wall, images, site customization, and control panel.
+- Parsed the 1,611-line rules snapshot (568 rule declarations; 443 validation declarations). Its root matches the current client root `al3`.
+- The snapshot is still not confirmed as the deployed rules for Firebase project `mychat-2d881`.
+- Confirmed static findings are recorded in `docs/DEEP_AUDIT_2026-11-11.md`.
+- Pre-change static test set: 21/21 assertions passed, including detection of the existing password-storage behavior in main and verification of the previously prepared password-removal branch.
+- Password hardening updated on this branch: new registrations now require at least 8 characters; existing login transformation is preserved to avoid breaking current accounts. Legacy localStorage password storage is removed and old key cleared.
+- Post-change static test set: 16 assertions passed after correcting one test assertion's escaping (the YouTube ID validator itself was already present and valid). These are source-level assertions, not browser or Firebase runtime tests.
+- No Firebase Emulator tests or browser end-to-end tests were run. The repository has no `firebase.json`, `package.json`, or test suite, Firebase CLI is not installed in the execution environment, and GitHub clone/network access failed due DNS resolution.
+- No rules, production data, Firebase settings, or deployment were changed.
+
+### Additional confirmed risks requiring Emulator validation
+- `al3/online/.read = true` exposes current presence records, including device fingerprint fields.
+- `al3/bans/$k/.read = true` and `al3/wlist/$k/.read = true` grant public reads to individual records despite restricted parent reads.
+- `al3/owners`, `al3/upow`, and `al3/powers` are publicly readable, exposing owner UIDs and privilege assignments.
+- `al3/hist/$fp/$k` allows any authenticated user to write under any fingerprint.
+- Any authenticated user can delete an offline presence record via `online/$uid` whenever `off == true`, without waiting for configured `ghostMins`.
+- Any authenticated user can delete `mainN` auto-room metadata and the corresponding room message subtree through the current rules; occupancy is not checked in the rule. This can disrupt active rooms.
+- The client-only `cleanup()` routine is not an authorization boundary; each delete is governed by the rules. Several broad old-data cleanup permissions need emulator tests.
+- Custom site/domain scripts are intentionally executable. The supplied snapshot restricts writes to owners, but deployment and owner-account security remain unverified.
