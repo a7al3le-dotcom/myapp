@@ -1,0 +1,25 @@
+{
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "database.rules.json",
+      "AGENTS.md",
+      "PROJECT_STATUS.md",
+      "docs/**",
+      "node_modules/**",
+      ".git/**"
+    ]
+  },
+  "emulators": {
+    "auth": { "port": 9099 },
+    "database": { "port": 9000 },
+    "hosting": { "port": 5000 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
+  }
+}
