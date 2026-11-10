@@ -85,7 +85,7 @@ Status: confirmed client behavior; policy/consent requirements not assessed.
 
 ### Static checks
 - 21/21 pre-change source assertions passed.
-- 16/16 post-change assertions passed after correcting one test-harness regex-escaping assertion (the existing YouTube ID validation was valid).
+- 19/19 post-change assertions passed after correcting one test-harness regex-escaping assertion (the existing YouTube ID validation was valid).
 - Verified the main branch still contained the old password persistence behavior.
 - Verified the engineering branch no longer writes or restores the password and clears the legacy key.
 - Verified the new registration minimum guard exists and sign-in compatibility remains.
