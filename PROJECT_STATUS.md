@@ -79,7 +79,7 @@ No production rules changes, database migrations, data deletion, paid services, 
 - Confirmed static findings are recorded in `docs/DEEP_AUDIT_2026-11-11.md`.
 - Pre-change static test set: 21/21 assertions passed, including detection of the existing password-storage behavior in main and verification of the previously prepared password-removal branch.
 - Password hardening updated on this branch: new registrations now require at least 8 characters; existing login transformation is preserved to avoid breaking current accounts. Legacy localStorage password storage is removed and old key cleared.
-- Post-change static test set: 16 assertions passed after correcting one test assertion's escaping (the YouTube ID validator itself was already present and valid). These are source-level assertions, not browser or Firebase runtime tests.
+- Post-change static test set: 19 assertions passed after correcting one test assertion's escaping (the YouTube ID validator itself was already present and valid). These are source-level assertions, not browser or Firebase runtime tests.
 - No Firebase Emulator tests or browser end-to-end tests were run. The repository has no `firebase.json`, `package.json`, or test suite, Firebase CLI is not installed in the execution environment, and GitHub clone/network access failed due DNS resolution.
 - No rules, production data, Firebase settings, or deployment were changed.
 
