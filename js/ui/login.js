@@ -72,7 +72,6 @@ async function loginMember() {
   }
   setv("isl", "yes");
   setv("u2", name);
-  setv("p1", pass); // العنود يحفظ كلمة المرور عشان الرجوع أسهل (طلب صاحب الموقع)
   const p = (await get(r("users/" + auth.currentUser.uid))).val() || { topic: name };
   await enter(p, true);
 }
@@ -82,6 +81,7 @@ async function register() {
   if (!SITE.allowreg) return danger("تسجيل العضويات مغلق");
   if (!validName(name, SITE.registerNameMax) || (await blockedName(name))) return warn("يرجى إختيار أسم آخر");
   if (!pass) return danger("كلمه المرور غير صحيحه");
+
   const key = nameKey(name);
   if ((await get(r("names/" + key))).exists() || nameTakenOnline(name)) return danger("هذا الإسم مسجل من قبل");
   if (auth.currentUser) await signOut(auth);
@@ -102,7 +102,6 @@ async function register() {
   await set(r("users/" + uid), profile);
   setv("isl", "yes");
   setv("u2", name);
-  setv("p1", pass);
   await enter(profile, true);
 }
 
@@ -171,12 +170,14 @@ async function resume() {
 }
 
 export function initLogin() {
+  // إزالة كلمة المرور القديمة التي خزنتها الإصدارات السابقة في localStorage.
+  setv("p1", null);
   // الاسم والعنوان وطول الأسماء تنضبط من site.js (إداره الموقع)
   $("#u1").attr("maxlength", SITE.guestNameMax);
   $("#u3").attr("maxlength", SITE.registerNameMax);
   $("#u1").val(getv("u1", ""));
   $("#u2").val(getv("u2", ""));
-  $("#pass1").val(getv("p1", ""));
+  $("#pass1").val("");
   showTab(getv("isl") === "yes" ? 2 : 1);
   // الروابط تنحط بعد #loginstat بنفس ترتيب القائمة
   let $after = $("#loginstat");
