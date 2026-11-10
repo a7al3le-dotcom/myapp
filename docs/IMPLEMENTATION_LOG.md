@@ -41,3 +41,12 @@
 - Commit: `c047f4ca2c4db908c1213322ce4d32ce0151d1b9`.
 - Not yet run: real browser registration/login, Auth Emulator, and live-page tests. This is a draft branch change, not yet available on `main`.
 - Owner delivery preference recorded in `AGENTS.md`: report step-by-step, test after each isolated fix, record exact outcomes before moving on.
+
+
+## 2026-11-11 — Post-change verification
+- Re-fetched `js/ui/login.js`, `AGENTS.md`, `PROJECT_STATUS.md`, `docs/IMPLEMENTATION_LOG.md`, and `docs/DEEP_AUDIT_2026-11-11.md` from `docs/engineering-baseline`.
+- Ran 14 targeted source assertions after removing the 8-character registration guard.
+- Result: 14/14 PASS, 0 FAIL.
+- Confirmed: no minimum-length guard; existing `authPass()` transformation preserved for registration and login; empty password still rejected; no plaintext password storage/restoration; legacy key cleanup remains; password field blank on page load; owner preference and per-change testing workflow recorded.
+- Test class: source-level assertions only. No browser, Auth Emulator, Realtime Database Emulator, or live-page tests were run.
+- The change is in the draft engineering branch, not `main`.
