@@ -6,7 +6,7 @@ import { firebaseConfig, ROOT } from "./config.js";
 
 // Emulator mode uses a demo-only Firebase project ID and database namespace.
 // This prevents local test data from sharing the production project's identity.
-const useEmulator = /[?&]emu=1/.test(location.search) && /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname);
+const useEmulator = /[?&]emu=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 export const app = initializeApp(useEmulator ? {
   ...firebaseConfig,
   projectId: "demo-myapp-local",
@@ -20,7 +20,7 @@ export const auth = initializeAuth(app, { persistence: inMemoryPersistence });
 export const db = getDatabase(app);
 
 // للتجربة المحلية فقط: ?emu=1 يربط الصفحة بمحاكي Firebase بدل القاعدة الحقيقية
-if (/[?&]emu=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+if (useEmulator) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
   connectDatabaseEmulator(db, "127.0.0.1", 9000);
 }
