@@ -72,3 +72,12 @@
 - Verification: PowerShell parser accepted the complete script; targeted regex checks correctly extracted Java 17 and 21 majors. No Firebase CLI, package manager, Edge, or emulator was run; this avoids downloading dependencies and honors the user's report that their environment currently activates Java 17.
 - Commit: `2ed6d810fed618f40ae6af2c7255eaab08732376` (documentation) preceded this log update; launcher commit: `857572b5414ab5d275f711052fc2d2ee2b1901f9`.
 - No application code, Firebase settings/rules, deployment, production data, or PR merge changed.
+
+
+## 2026-11-11 — Resilient Microsoft Edge launch
+- Confirmed from the owner's PowerShell error and source review: a stale `msedge` command/alias or failed `Start-Process` could terminate `run-local.ps1` before Firebase Emulator Suite started.
+- Updated the launcher to use only an existing Edge executable path and catch launch failures as warnings with the local preview URL; emulator startup continues.
+- Updated `docs/LOCAL_TESTING.md` to explain this fallback.
+- Verification: re-fetched current script; PowerShell parser passed and targeted source checks confirmed the Edge warning fallback and Firebase CLI exit-code handling. Did not launch Edge or emulators in this check.
+- Launcher commit: `14827bb52a2c60bbabcb7a4eaad389f960c6acf9`; docs commit: `00a87e4439b83d4dec1166cdc60ff23c7d30e7cb`.
+- No app code, Firebase config/rules, production data, deployment, or merge changed.
