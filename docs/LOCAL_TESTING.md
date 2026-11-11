@@ -16,7 +16,7 @@ Set-Location .\myapp-emulator
 .\run-local.ps1
 ```
 
-The script checks Node.js, npx, Java 21+, and `firebase.json` before opening Microsoft Edge and starting Auth, Realtime Database, and Hosting emulators for `demo-myapp-local`.
+The script checks Node.js, npx, Java 21+, and `firebase.json`, then attempts to open Microsoft Edge and starts Auth, Realtime Database, and Hosting emulators for `demo-myapp-local`. If Edge is missing or Windows cannot launch it, the script prints the URL and continues with the emulators.
 
 Open the local Hosting Emulator at:
 
