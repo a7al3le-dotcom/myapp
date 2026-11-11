@@ -144,3 +144,11 @@ For every individual change, in this order:
 - Not tested: actual emulator startup, Firebase Auth/Realtime Database flows, or browser preview. The current shell's active Java is 17; JDK 21 exists locally but is not active. Package installation/download was intentionally not attempted.
 - Latest commits: launcher `857572b5414ab5d275f711052fc2d2ee2b1901f9`; local-testing docs `2ed6d810fed618f40ae6af2c7255eaab08732376`; implementation-log update `0504d07a889d35e7d50194075dce1fd61ac89aa4`.
 - No production settings, Firebase rules, application behavior, deployment, merge, or PR were changed.
+
+
+## Latest update — resilient local preview launch
+- `run-local.ps1` now rejects the stale/nonexistent Edge command path and treats Edge launch failures as warnings; the emulator command still proceeds and the URL is shown for manual use.
+- `docs/LOCAL_TESTING.md` records this fallback. This addresses the reported Windows error where the system could not find the file during browser launch.
+- Verification: PowerShell parser passed for the re-fetched script; targeted source checks passed for its Edge-failure warning and emulator exit-code handling. No real Edge process or Emulator Suite was started.
+- Commit sequence: launcher `14827bb52a2c60bbabcb7a4eaad389f960c6acf9`; docs `00a87e4439b83d4dec1166cdc60ff23c7d30e7cb`; log `0086de86c99016b7af1a7f7be2437c07f99b3abf`.
+- No production config, rules, deployment, merge, or application UI code changed.
