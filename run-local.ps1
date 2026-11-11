@@ -15,7 +15,15 @@ try {
         throw "npx is missing. Reinstall Node.js LTS with npm."
     }
     if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-        throw "Java is missing from PATH. Install a Java version supported by Firebase Emulator Suite, then reopen PowerShell."
+        throw "Java 21 or newer is required by Firebase Emulator Suite. Install a JDK 21+ and reopen PowerShell."
+    }
+    $javaVersionOutput = & java -version 2>&1 | Out-String
+    if ($LASTEXITCODE -ne 0 -or $javaVersionOutput -notmatch '(?im)\bversion\s+"(?<major>\d+)') {
+        throw "Could not determine the Java version. Install a JDK 21+ and confirm java -version works in PowerShell."
+    }
+    $javaMajor = [int]$Matches.major
+    if ($javaMajor -lt 21) {
+        throw "Firebase Emulator Suite requires Java 21 or newer. Java $javaMajor is active; update JAVA_HOME and PATH, then reopen PowerShell."
     }
     if (-not (Test-Path -LiteralPath (Join-Path $root "firebase.json") -PathType Leaf)) {
         throw "firebase.json was not found in the project root."
