@@ -63,3 +63,12 @@
 - Important limitation: the tracked rules file is an unverified snapshot and may not match deployed production rules.
 - Online preview: not deployed. Firebase integration connection and a separate test Firebase project are still required.
 - Latest implementation commit before this documentation append: `b8ab4d1e24579b509c37f660fe013f2c12e27cb1`.
+
+
+## 2026-11-11 — Java version preflight for local emulators
+- Branch: `test/isolated-emulator-preview`.
+- Updated `run-local.ps1` to require Java 21 or newer and parse the active `java -version` output before opening Edge or invoking Firebase Emulator Suite. Missing/unreadable/older Java now produces a direct remediation message.
+- Updated `docs/LOCAL_TESTING.md` to state the JDK 21+ requirement and use the launcher script in PowerShell.
+- Verification: PowerShell parser accepted the complete script; targeted regex checks correctly extracted Java 17 and 21 majors. No Firebase CLI, package manager, Edge, or emulator was run; this avoids downloading dependencies and honors the user's report that their environment currently activates Java 17.
+- Commit: `2ed6d810fed618f40ae6af2c7255eaab08732376` (documentation) preceded this log update; launcher commit: `857572b5414ab5d275f711052fc2d2ee2b1901f9`.
+- No application code, Firebase settings/rules, deployment, production data, or PR merge changed.
