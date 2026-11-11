@@ -17,8 +17,9 @@ try {
     if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
         throw "Java 21 or newer is required by Firebase Emulator Suite. Install a JDK 21+ and reopen PowerShell."
     }
-    $javaVersionOutput = & java -version 2>&1 | Out-String
-    if ($LASTEXITCODE -ne 0 -or $javaVersionOutput -notmatch '(?im)\bversion\s+"(?<major>\d+)') {
+    $javaVersionOutput = & $env:ComSpec /d /c "java -version 2>&1" | Out-String
+    $javaExitCode = $LASTEXITCODE
+    if ($javaExitCode -ne 0 -or $javaVersionOutput -notmatch '(?im)\bversion\s+"(?<major>\d+)') {
         throw "Could not determine the Java version. Install a JDK 21+ and confirm java -version works in PowerShell."
     }
     $javaMajor = [int]$Matches.major
