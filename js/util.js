@@ -1,7 +1,7 @@
 // أدوات مشتركة: تنظيف النص، الإيموجي، الألوان، الوقت، القوالب
 import { EMO } from "./data/emo.js";
 import { COUNTRIES } from "./data/countries.js";
-import { now } from "./firebase.js";
+import { now, useEmulator } from "./firebase.js";
 import { SITE } from "./config.js";
 import { setPic, syncUrl } from "./api/images.js";
 
@@ -211,6 +211,7 @@ export function deviceFp() {
 export function detectNet() {
   if (netCache) return netCache;
   netCache = (async () => {
+    if (useEmulator) return { co: "--", ip: "", ih: "" };
     let ip = "", co = "";
     const get = async (u, ms = 5000) => {
       const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
