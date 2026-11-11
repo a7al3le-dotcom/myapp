@@ -37,3 +37,8 @@ The Emulator UI is at `http://127.0.0.1:4000`.
 ## What this setup does not prove
 
 Starting the emulators and loading the page does not itself verify the complete login, registration, room, private-message, presence, image, or moderation flows. Those require explicit browser test cases and recorded results.
+
+
+## Emulator network isolation
+
+When `?emu=1` is active on localhost, the app does not call external IP/country lookup providers. Local records therefore keep IP and country blank (`--`); production behavior is unchanged. This does not block other site assets from their configured sources, such as Firebase SDK modules from Google's CDN.
