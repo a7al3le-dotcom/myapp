@@ -161,3 +161,12 @@ For every individual change, in this order:
 - Verification: extracted actual `detectNet()` body; Node syntax check passed; mocked-fetch behavior assertion passed with zero requests and blank network fields. No full browser or Auth/RTDB Emulator test run.
 - Commits: `ee17925f4f9ff804f38e541f200e3d63e159f463`, `6c900efaaeebbfcbba2f3510b5dda70b0a78adfe`, docs `1fd3d950b6dad597309877e22715727ef58e0422`, log `e68205c4243a5427fe22715eb1e311be695e384d`.
 - No production data/settings, Firebase rules, deployment, or merge changed.
+
+
+## Latest update — PowerShell Java 21 detection
+- Owner test exposed that PowerShell's stop-on-error setting treated stderr from `java -version` as fatal, although Java 21 was installed.
+- `run-local.ps1` now captures version output through `cmd.exe` redirection and validates the command exit code before parsing the major version.
+- Verification: full PowerShell parse passed; same version capture logic detected installed Java 21 from its explicit JDK path (exit code 0).
+- Not tested: full launcher, Edge launch, Firebase Emulator startup, or app flows.
+- Commits: launcher `e551f3572c5c61dcae3da90d5591fab9df53e052`; implementation log `2e63abf8d7dea287415afd3e32c4755a0b3682cb`.
+- No Firebase settings/rules or production data changed; no deploy or merge.
