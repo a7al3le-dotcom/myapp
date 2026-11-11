@@ -152,3 +152,12 @@ For every individual change, in this order:
 - Verification: PowerShell parser passed for the re-fetched script; targeted source checks passed for its Edge-failure warning and emulator exit-code handling. No real Edge process or Emulator Suite was started.
 - Commit sequence: launcher `14827bb52a2c60bbabcb7a4eaad389f960c6acf9`; docs `00a87e4439b83d4dec1166cdc60ff23c7d30e7cb`; log `0086de86c99016b7af1a7f7be2437c07f99b3abf`.
 - No production config, rules, deployment, merge, or application UI code changed.
+
+
+## Latest update — Emulator mode network privacy
+- Confirmed by live/local comparison and source trace: local sign-in/presence called external IP/country providers and stored the returned network-derived data in local emulator records.
+- `js/firebase.js` exports the existing localhost + `?emu=1` guard; `js/util.js` now returns empty IP/hash and country `--` before network lookup in that mode. Production mode retains the prior lookup flow.
+- `docs/LOCAL_TESTING.md` documents this behavior and notes that configured CDN assets still need network access.
+- Verification: extracted actual `detectNet()` body; Node syntax check passed; mocked-fetch behavior assertion passed with zero requests and blank network fields. No full browser or Auth/RTDB Emulator test run.
+- Commits: `ee17925f4f9ff804f38e541f200e3d63e159f463`, `6c900efaaeebbfcbba2f3510b5dda70b0a78adfe`, docs `1fd3d950b6dad597309877e22715727ef58e0422`, log `e68205c4243a5427fe22715eb1e311be695e384d`.
+- No production data/settings, Firebase rules, deployment, or merge changed.
