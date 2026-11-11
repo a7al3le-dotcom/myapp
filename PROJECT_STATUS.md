@@ -135,3 +135,12 @@ For every individual change, in this order:
 - Not yet performed: Firebase CLI startup, Java/runtime validation, browser test, Auth/Database flow tests.
 - The tracked `database.rules.json` remains an unverified repository snapshot; emulator results using it must not be represented as proof of deployed production rules.
 - Online preview is blocked pending connection to the Firebase integration and confirmation/creation of a separate test Firebase project. No hosting deployment has been made.
+
+
+## Latest update — local emulator Java preflight
+- Branch `test/isolated-emulator-preview` now checks for Java 21+ in `run-local.ps1` before launching Edge or Firebase emulators, with explicit guidance when Java is missing, unreadable, or below 21.
+- `docs/LOCAL_TESTING.md` now states the JDK 21+ prerequisite and launches through `run-local.ps1`.
+- Actual checks: full script PowerShell parsing passed; regex extraction tests for simulated Java 17 and 21 output passed.
+- Not tested: actual emulator startup, Firebase Auth/Realtime Database flows, or browser preview. The current shell's active Java is 17; JDK 21 exists locally but is not active. Package installation/download was intentionally not attempted.
+- Latest commits: launcher `857572b5414ab5d275f711052fc2d2ee2b1901f9`; local-testing docs `2ed6d810fed618f40ae6af2c7255eaab08732376`; implementation-log update `0504d07a889d35e7d50194075dce1fd61ac89aa4`.
+- No production settings, Firebase rules, application behavior, deployment, merge, or PR were changed.
