@@ -4,17 +4,19 @@ This branch adds a local-only Firebase Emulator setup. It is intentionally confi
 
 ## Requirements
 
-- Node.js (LTS)
-- Java runtime supported by the Firebase Database Emulator
+- Node.js (LTS), which provides `npx`
+- JDK 21 or newer, available as `java` in PowerShell's PATH
 - Internet access for the first Firebase CLI download
 
 ## Start the local test environment (PowerShell)
 
 ```powershell
 git clone --branch test/isolated-emulator-preview --single-branch https://github.com/a7al3le-dotcom/myapp.git myapp-emulator
-cd myapp-emulator
-npx firebase-tools emulators:start --project demo-myapp-local --only auth,database,hosting
+Set-Location .\myapp-emulator
+.\run-local.ps1
 ```
+
+The script checks Node.js, npx, Java 21+, and `firebase.json` before opening Microsoft Edge and starting Auth, Realtime Database, and Hosting emulators for `demo-myapp-local`.
 
 Open the local Hosting Emulator at:
 
