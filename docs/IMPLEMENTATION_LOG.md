@@ -81,3 +81,12 @@
 - Verification: re-fetched current script; PowerShell parser passed and targeted source checks confirmed the Edge warning fallback and Firebase CLI exit-code handling. Did not launch Edge or emulators in this check.
 - Launcher commit: `14827bb52a2c60bbabcb7a4eaad389f960c6acf9`; docs commit: `00a87e4439b83d4dec1166cdc60ff23c7d30e7cb`.
 - No app code, Firebase config/rules, production data, deployment, or merge changed.
+
+
+## 2026-11-11 — Block external IP/country lookups in Emulator mode
+- Live/local UI comparison confirmed that the local admin preview could show external network-derived IP/country data even while Firebase data was directed to local emulators. Source trace found `detectNet()` requests multiple public providers, and entry/presence logging consumes its result.
+- Updated `js/firebase.js` to export the existing localhost + `?emu=1` mode flag; updated `js/util.js` so `detectNet()` returns blank IP/hash and country `--` before any provider call when that flag is active. Production mode continues through the existing provider path unchanged.
+- Updated `docs/LOCAL_TESTING.md` with the isolation behavior and the fact that configured external assets (including the Firebase SDK CDN imports) still need network access.
+- Verification: extracted the actual `detectNet()` function into an isolated Node check with `fetch` replaced by a throwing counter; `node --check` passed and the behavior assertion passed (0 fetch calls, no IP/country returned). This was not a full browser or Firebase Emulator run.
+- Commits: Firebase mode export `ee17925f4f9ff804f38e541f200e3d63e159f463`; isolation behavior `6c900efaaeebbfcbba2f3510b5dda70b0a78adfe`; docs `1fd3d950b6dad597309877e22715727ef58e0422`.
+- No production config/rules/data, deployment, merge, or live site was changed.
