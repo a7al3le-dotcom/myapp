@@ -90,3 +90,12 @@
 - Verification: extracted the actual `detectNet()` function into an isolated Node check with `fetch` replaced by a throwing counter; `node --check` passed and the behavior assertion passed (0 fetch calls, no IP/country returned). This was not a full browser or Firebase Emulator run.
 - Commits: Firebase mode export `ee17925f4f9ff804f38e541f200e3d63e159f463`; isolation behavior `6c900efaaeebbfcbba2f3510b5dda70b0a78adfe`; docs `1fd3d950b6dad597309877e22715727ef58e0422`.
 - No production config/rules/data, deployment, merge, or live site was changed.
+
+
+## 2026-11-11 — Fix Java version detection under PowerShell ErrorActionPreference=Stop
+- Owner's run confirmed Java 21 is installed, but PowerShell treated `java -version` stderr output as a terminating native-command error before emulator startup.
+- Updated `run-local.ps1` to capture the command through `cmd.exe /d /c "java -version 2>&1"`, then check its exit code and parse the Java major version.
+- Verification: PowerShell parser passed for the updated script. Ran the same capture logic with the installed JDK 21 executable prepended to PATH; it detected Java 21 successfully and returned exit code 0.
+- Not run: Firebase Emulator Suite, Edge, or full launcher execution.
+- Launcher commit: `e551f3572c5c61dcae3da90d5591fab9df53e052`.
+- No application logic, Firebase configuration/rules, production data, deployment, or merge changed.
