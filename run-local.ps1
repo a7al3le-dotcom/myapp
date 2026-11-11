@@ -34,19 +34,24 @@ try {
     Write-Host "Preview URL: $previewUrl"
     Write-Host "Stop the emulators at any time with Ctrl+C."
 
-    $edge = Get-Command msedge -ErrorAction SilentlyContinue
-    if ($edge) {
-        Start-Process -FilePath $edge.Source -ArgumentList $previewUrl
-    } else {
-        $edgePaths = @(
-            (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
-            (Join-Path ${env:ProgramFiles(x86)} "Microsoft/Edge/Application/msedge.exe")
-        ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) }
-        if ($edgePaths) {
-            Start-Process -FilePath $edgePaths[0] -ArgumentList $previewUrl
-        } else {
-            Write-Warning "Microsoft Edge was not found. Open this URL manually after the emulators start: $previewUrl"
+    $edgeCandidates = @()
+    $edgeCommand = Get-Command msedge -ErrorAction SilentlyContinue
+    if ($edgeCommand -and $edgeCommand.Source -and (Test-Path -LiteralPath $edgeCommand.Source -PathType Leaf)) {
+        $edgeCandidates += $edgeCommand.Source
+    }
+    $edgeCandidates += @(
+        (Join-Path $env:ProgramFiles "Microsoft/Edge/Application/msedge.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "Microsoft/Edge/Application/msedge.exe")
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) }
+    $edgePath = $edgeCandidates | Select-Object -First 1
+    if ($edgePath) {
+        try {
+            Start-Process -FilePath $edgePath -ArgumentList $previewUrl -ErrorAction Stop
+        } catch {
+            Write-Warning "Microsoft Edge could not be opened ($($_.Exception.Message)). Open this URL manually after the emulators start: $previewUrl"
         }
+    } else {
+        Write-Warning "Microsoft Edge was not found. Open this URL manually after the emulators start: $previewUrl"
     }
 
     & npx --yes firebase-tools emulators:start --project $projectId --only auth,database,hosting
