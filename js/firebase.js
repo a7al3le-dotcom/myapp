@@ -6,7 +6,7 @@ import { firebaseConfig, ROOT } from "./config.js";
 
 // Emulator mode uses a demo-only Firebase project ID and database namespace.
 // This prevents local test data from sharing the production project's identity.
-const useEmulator = /[?&]emu=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+export const useEmulator = /[?&]emu=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 export const app = initializeApp(useEmulator ? {
   ...firebaseConfig,
   projectId: "demo-myapp-local",
